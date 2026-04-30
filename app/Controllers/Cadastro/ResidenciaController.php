@@ -126,7 +126,20 @@ final class ResidenciaController extends Controller
             'residencia' => $residencia,
             'errors' => $errors,
             'action' => '/acao/' . $acao['token_publico'] . '/residencias',
+            'offlineTokens' => $this->offlineTokens($acao['token_publico']),
         ]);
+    }
+
+    private function offlineTokens(string $token): array
+    {
+        $service = new IdempotenciaService();
+        $tokens = [];
+
+        for ($index = 0; $index < 20; $index++) {
+            $tokens[] = $service->generate('cadastro.residencia.store.' . $token);
+        }
+
+        return $tokens;
     }
 
     private function openAction(string $token): array

@@ -36,8 +36,12 @@ $menuItems = [
     <link rel="stylesheet" href="<?= h(asset('css/app.css')) ?>">
     <script src="<?= h(asset('js/forms.js')) ?>" defer></script>
     <script src="<?= h(asset('js/layout.js')) ?>" defer></script>
+    <script src="<?= h(asset('js/app-offline.js')) ?>" defer></script>
     <script src="<?= h(asset('js/geolocation.js')) ?>" defer></script>
     <script src="<?= h(asset('js/action-form.js')) ?>" defer></script>
+    <script src="<?= h(asset('js/offline-queue.js')) ?>" defer></script>
+    <script src="<?= h(asset('js/qrcode.bundle.js')) ?>" defer></script>
+    <script src="<?= h(asset('js/actions-index.js')) ?>" defer></script>
 </head>
 <body>
     <div class="app-shell" data-layout-shell>

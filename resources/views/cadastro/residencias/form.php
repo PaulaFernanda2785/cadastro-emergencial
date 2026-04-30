@@ -1,3 +1,7 @@
+<?php
+$offlineTokensJson = json_encode($offlineTokens ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+?>
+
 <section class="form-shell">
     <div class="section-heading">
         <span class="eyebrow">Cadastro de campo</span>
@@ -5,9 +9,15 @@
         <p><?= h($acao['municipio_nome']) ?> / <?= h($acao['uf']) ?> - <?= h($acao['localidade']) ?> - <?= h($acao['tipo_evento']) ?></p>
     </div>
 
-    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form js-prevent-double-submit" enctype="multipart/form-data" data-geolocation-form novalidate>
+    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form js-prevent-double-submit" enctype="multipart/form-data" data-geolocation-form data-offline-queue-form data-offline-tokens='<?= h($offlineTokensJson ?: '[]') ?>' novalidate>
         <?= csrf_field() ?>
         <?= idempotency_field($action) ?>
+
+        <div class="offline-sync-panel" data-offline-panel hidden>
+            <strong data-offline-title>Cadastro offline disponível</strong>
+            <span data-offline-message>Sem conexão com o servidor. O cadastro será salvo neste celular e enviado quando a conexão voltar.</span>
+            <button type="button" class="secondary-button" data-offline-sync>Sincronizar agora</button>
+        </div>
 
         <label class="field">
             <span>Bairro/comunidade</span>

@@ -128,6 +128,29 @@ final class AcaoEmergencialRepository
         $stmt->execute();
     }
 
+    public function updateStatus(int $id, string $status): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE acoes_emergenciais
+             SET status = :status
+             WHERE id = :id AND deleted_at IS NULL'
+        );
+        $stmt->bindValue(':status', $status);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    public function softDelete(int $id): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE acoes_emergenciais
+             SET deleted_at = NOW()
+             WHERE id = :id AND deleted_at IS NULL'
+        );
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
     public function countOpen(): int
     {
         return (int) Database::connection()

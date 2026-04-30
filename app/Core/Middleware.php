@@ -29,6 +29,12 @@ final class Middleware
     private static function auth(): void
     {
         if (!is_authenticated()) {
+            $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+
+            if ($method === 'GET') {
+                Session::put('intended_url', (string) ($_SERVER['REQUEST_URI'] ?? '/dashboard'));
+            }
+
             Session::flash('warning', 'Acesse sua conta para continuar.');
             header('Location: ' . url('/login'));
             exit;

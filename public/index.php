@@ -67,6 +67,10 @@ $router->get('/admin/acoes', [AcaoEmergencialController::class, 'index'], ['auth
 $router->get('/admin/acoes/novo', [AcaoEmergencialController::class, 'create'], ['auth', 'role:administrador']);
 $router->post('/admin/acoes', [AcaoEmergencialController::class, 'store'], ['auth', 'role:administrador']);
 $router->get('/admin/acoes/{id}/editar', [AcaoEmergencialController::class, 'edit'], ['auth', 'role:administrador']);
+$router->post('/admin/acoes/{id}/ativar', [AcaoEmergencialController::class, 'activate'], ['auth', 'role:administrador']);
+$router->post('/admin/acoes/{id}/encerrar', [AcaoEmergencialController::class, 'close'], ['auth', 'role:administrador']);
+$router->post('/admin/acoes/{id}/cancelar', [AcaoEmergencialController::class, 'cancel'], ['auth', 'role:administrador']);
+$router->post('/admin/acoes/{id}/excluir', [AcaoEmergencialController::class, 'delete'], ['auth', 'role:administrador']);
 $router->post('/admin/acoes/{id}', [AcaoEmergencialController::class, 'update'], ['auth', 'role:administrador']);
 $router->get('/gestor/familias', [FamiliaController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias', [ResidenciaController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);

@@ -14,9 +14,35 @@ function h(mixed $value): string
 function url(string $path = '/'): string
 {
     $app = require BASE_PATH . '/config/app.php';
-    $baseUrl = rtrim((string) $app['url'], '/');
+    $baseUrl = current_request_base_url($app) ?? rtrim((string) $app['url'], '/');
 
     return $baseUrl . '/' . ltrim($path, '/');
+}
+
+function public_url(string $path = '/'): string
+{
+    $app = require BASE_PATH . '/config/app.php';
+    $baseUrl = rtrim((string) ($app['public_url'] ?? $app['url']), '/');
+
+    return $baseUrl . '/' . ltrim($path, '/');
+}
+
+function current_request_base_url(array $app): ?string
+{
+    if (($app['env'] ?? null) !== 'local' || empty($_SERVER['HTTP_HOST'])) {
+        return null;
+    }
+
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['SERVER_PORT'] ?? null) === '443');
+    $scheme = $isHttps ? 'https' : 'http';
+    $scriptDir = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
+
+    if ($scriptDir === '/' || $scriptDir === '\\' || $scriptDir === '.') {
+        $scriptDir = '';
+    }
+
+    return $scheme . '://' . $_SERVER['HTTP_HOST'] . rtrim($scriptDir, '/');
 }
 
 function asset(string $path): string

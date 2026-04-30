@@ -72,6 +72,14 @@ final class AuthController extends Controller
 
         (new AuditLogService())->record('login_sucesso', 'usuarios', (int) $user['id'], 'Usuario autenticado.', (int) $user['id']);
 
+        $intendedUrl = Session::get('intended_url');
+        Session::forget('intended_url');
+
+        if (is_string($intendedUrl) && str_starts_with($intendedUrl, '/') && !str_starts_with($intendedUrl, '//')) {
+            header('Location: ' . $intendedUrl);
+            exit;
+        }
+
         $this->redirect('/dashboard');
     }
 

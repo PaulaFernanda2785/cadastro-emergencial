@@ -1,32 +1,42 @@
-<section class="public-action">
-    <div class="section-heading">
-        <span class="eyebrow">Acao emergencial</span>
-        <h1><?= h($acao['localidade']) ?></h1>
-        <p><?= h($acao['municipio_nome']) ?> / <?= h($acao['uf']) ?> - <?= h($acao['tipo_evento']) ?></p>
-    </div>
+<?php
+$isOpen = $acao['status'] === 'aberta';
+$cadastroUrl = '/acao/' . $acao['token_publico'] . '/residencias/novo';
+$statusLabels = [
+    'aberta' => 'Aberta',
+    'encerrada' => 'Encerrada',
+    'cancelada' => 'Cancelada',
+];
+?>
 
-    <div class="action-summary">
+<section class="registration-app">
+    <header class="registration-app-header">
+        <span class="eyebrow">Aplicativo de cadastro</span>
+        <h1><?= h($acao['localidade']) ?></h1>
+        <p><?= h($acao['municipio_nome']) ?> / <?= h($acao['uf']) ?></p>
+        <span class="status status-<?= h($acao['status']) ?>"><?= h($statusLabels[$acao['status']] ?? ucfirst((string) $acao['status'])) ?></span>
+    </header>
+
+    <section class="registration-app-summary" aria-label="Dados da ação">
         <div>
-            <span>Data do evento</span>
+            <span>Evento</span>
+            <strong><?= h($acao['tipo_evento']) ?></strong>
+        </div>
+        <div>
+            <span>Data</span>
             <strong><?= h(date('d/m/Y', strtotime((string) $acao['data_evento']))) ?></strong>
         </div>
-        <div>
-            <span>Status</span>
-            <strong><?= h(ucfirst($acao['status'])) ?></strong>
-        </div>
-    </div>
+    </section>
 
-    <?php if ($acao['status'] === 'aberta'): ?>
-        <div class="module-list">
-            <h2>Cadastro de campo</h2>
-            <p>Esta acao esta habilitada para cadastro de residencias e familias atingidas.</p>
-            <?php if (is_authenticated()): ?>
-                <a class="primary-link-button" href="<?= h(url('/acao/' . $acao['token_publico'] . '/residencias/novo')) ?>">Cadastrar residencia</a>
-            <?php else: ?>
-                <a class="primary-link-button" href="<?= h(url('/login')) ?>">Entrar para cadastrar</a>
-            <?php endif; ?>
-        </div>
+    <?php if ($isOpen): ?>
+        <section class="registration-app-panel">
+            <h2>Cadastro de residência atingida</h2>
+            <p>O cadastro será vinculado automaticamente a esta ação emergencial, mantendo município, localidade e evento no registro.</p>
+            <a class="primary-link-button registration-app-button" href="<?= h(url($cadastroUrl)) ?>">
+                <?= is_authenticated() ? 'Iniciar cadastro' : 'Entrar e iniciar cadastro' ?>
+            </a>
+            <small>O acesso exige usuário cadastrador, gestor ou administrador para manter a auditoria dos registros.</small>
+        </section>
     <?php else: ?>
-        <div class="alert alert-warning" role="alert">Esta acao nao esta aberta para novos cadastros.</div>
+        <div class="alert alert-warning" role="alert">Esta ação não está aberta para novos cadastros.</div>
     <?php endif; ?>
 </section>

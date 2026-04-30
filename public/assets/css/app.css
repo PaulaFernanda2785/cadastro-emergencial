@@ -619,6 +619,28 @@ button:disabled,
     text-decoration: none;
 }
 
+.danger-button {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #f3c0ba;
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--danger);
+    background: #fff4f2;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.danger-button:hover,
+.danger-button:focus {
+    border-color: var(--danger);
+    background: #fde4e0;
+    text-decoration: none;
+}
+
 .table-panel {
     overflow-x: auto;
 }
@@ -829,6 +851,174 @@ button:disabled,
     backdrop-filter: blur(10px);
 }
 
+.actions-page {
+    display: grid;
+    gap: 18px;
+}
+
+.action-empty-panel,
+.action-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: 0 12px 28px rgba(28, 39, 51, 0.06);
+}
+
+.action-empty-panel {
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+    padding: 22px;
+}
+
+.action-empty-panel h2,
+.action-empty-panel p {
+    margin-bottom: 0;
+}
+
+.action-card-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.action-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.34fr);
+    gap: 16px;
+    padding: 16px;
+}
+
+.action-card-main {
+    display: grid;
+    gap: 14px;
+}
+
+.action-card-title {
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+}
+
+.action-card-title h2 {
+    margin-bottom: 0;
+    font-size: 22px;
+}
+
+.action-card-title p {
+    margin-bottom: 0;
+}
+
+.action-card-meta {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) repeat(2, minmax(120px, 0.45fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.action-card-meta div {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 12px;
+    background: #fbfcfd;
+}
+
+.action-card-meta dt {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.action-card-meta dd {
+    margin: 4px 0 0;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.action-card-actions {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+}
+
+.action-card-button,
+.action-qr-button {
+    width: 100%;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.action-qr-button {
+    border-color: #b8c7d5;
+    background: #ffffff;
+}
+
+.qr-modal {
+    width: min(92vw, 460px);
+    border: 0;
+    border-radius: 8px;
+    padding: 0;
+    color: var(--text);
+    background: var(--surface);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.32);
+}
+
+.qr-modal::backdrop {
+    background: rgba(16, 35, 56, 0.58);
+}
+
+.qr-modal-close-form {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.qr-modal-close {
+    width: 38px;
+    min-height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0;
+    color: var(--text);
+    background: #ffffff;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.qr-modal-content {
+    display: grid;
+    gap: 14px;
+    padding: 24px;
+}
+
+.qr-modal-content h2,
+.qr-modal-content p {
+    margin-bottom: 0;
+}
+
+.qr-modal-image {
+    width: min(260px, 100%);
+    height: auto;
+    justify-self: center;
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: #ffffff;
+}
+
+.qr-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
 .panel-form {
     padding: 20px;
 }
@@ -852,6 +1042,36 @@ button:disabled,
 }
 
 .inline-action-panel span {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.offline-sync-panel {
+    display: grid;
+    gap: 8px;
+    border: 1px solid #b8c7d5;
+    border-left: 4px solid var(--primary);
+    border-radius: 8px;
+    padding: 12px;
+    background: #f5f9fb;
+}
+
+.offline-sync-panel[hidden] {
+    display: none;
+}
+
+.offline-sync-panel.is-warning {
+    border-color: #f0d0b2;
+    border-left-color: var(--warning);
+    background: #fff8f1;
+}
+
+.offline-sync-panel strong,
+.offline-sync-panel span {
+    display: block;
+}
+
+.offline-sync-panel span {
     color: var(--muted);
     font-size: 14px;
 }
@@ -967,6 +1187,77 @@ button:disabled,
 .action-summary strong {
     margin-top: 6px;
     font-size: 20px;
+}
+
+.registration-app {
+    width: min(520px, 100%);
+    display: grid;
+    gap: 14px;
+    margin: 0 auto;
+}
+
+.registration-app-header,
+.registration-app-panel,
+.registration-app-summary div {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: 0 12px 28px rgba(28, 39, 51, 0.06);
+}
+
+.registration-app-header {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+    padding: 22px;
+}
+
+.registration-app-header h1,
+.registration-app-header p,
+.registration-app-panel h2,
+.registration-app-panel p {
+    margin-bottom: 0;
+}
+
+.registration-app-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.registration-app-summary div {
+    padding: 16px;
+}
+
+.registration-app-summary span,
+.registration-app-summary strong {
+    display: block;
+}
+
+.registration-app-summary span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.registration-app-summary strong {
+    margin-top: 6px;
+    overflow-wrap: anywhere;
+}
+
+.registration-app-panel {
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+}
+
+.registration-app-button {
+    width: 100%;
+}
+
+.registration-app-panel small {
+    color: var(--muted);
 }
 
 .detail-grid {
@@ -1267,6 +1558,17 @@ button:disabled,
         position: static;
         margin: 0 -14px -14px;
         padding: 14px;
+    }
+
+    .action-card,
+    .action-card-meta,
+    .qr-modal-actions,
+    .registration-app-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .action-card-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .indicator-grid {

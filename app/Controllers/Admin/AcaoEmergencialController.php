@@ -112,6 +112,53 @@ final class AcaoEmergencialController extends Controller
         $this->redirect('/admin/acoes');
     }
 
+    public function activate(string $id): void
+    {
+        $this->changeStatus((int) $id, 'aberta', 'Ação emergencial ativada.');
+    }
+
+    public function close(string $id): void
+    {
+        $this->changeStatus((int) $id, 'encerrada', 'Ação emergencial encerrada.');
+    }
+
+    public function cancel(string $id): void
+    {
+        $this->changeStatus((int) $id, 'cancelada', 'Ação emergencial cancelada.');
+    }
+
+    public function delete(string $id): void
+    {
+        $acao = $this->acoes->find((int) $id);
+
+        if ($acao === null) {
+            $this->abort(404);
+        }
+
+        $this->guardPost('admin.acoes.delete.' . (int) $id, '/admin/acoes');
+        $this->acoes->softDelete((int) $id);
+        (new AuditLogService())->record('excluiu_acao_emergencial', 'acoes_emergenciais', (int) $id, $acao['localidade']);
+        Session::flash('success', 'Ação emergencial removida da listagem.');
+
+        $this->redirect('/admin/acoes');
+    }
+
+    private function changeStatus(int $id, string $status, string $message): void
+    {
+        $acao = $this->acoes->find($id);
+
+        if ($acao === null) {
+            $this->abort(404);
+        }
+
+        $this->guardPost('admin.acoes.status.' . $id . '.' . $status, '/admin/acoes');
+        $this->acoes->updateStatus($id, $status);
+        (new AuditLogService())->record('alterou_status_acao_emergencial', 'acoes_emergenciais', $id, $status);
+        Session::flash('success', $message);
+
+        $this->redirect('/admin/acoes');
+    }
+
     private function form(string $title, array $acao, array $errors, string $action): void
     {
         $this->view('admin.acoes.form', [
