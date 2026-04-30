@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "distrito_federal_municipios_com_geolocalizacao",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4674" } },
+"features": [
+{ "type": "Feature", "properties": { "CD_MUN": "5300108", "NM_MUN": "Brasília", "latitude": -15.781194310025207, "longitude": -47.796739625253196, "CD_UF": "53", "NM_UF": "Distrito Federal", "SIGLA_UF": "DF", "CD_REGIAO": "5", "NM_REGIAO": "Centro-oeste", "SIGLA_RG": "CO", "AREA_KM2": 5760.785 }, "geometry": { "type": "Point", "coordinates": [ -47.796739625253196, -15.781194310025207 ] } }
+]
+}
