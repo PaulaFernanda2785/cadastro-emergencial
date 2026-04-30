@@ -57,6 +57,24 @@ final class AcaoEmergencialRepository
         return is_array($acao) ? $acao : null;
     }
 
+    public function latestOpen(): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT a.*, m.codigo_ibge, m.nome AS municipio_nome, m.uf
+             FROM acoes_emergenciais a
+             INNER JOIN municipios m ON m.id = a.municipio_id
+             WHERE a.status = 'aberta'
+               AND a.deleted_at IS NULL
+             ORDER BY a.criado_em DESC, a.id DESC
+             LIMIT 1"
+        );
+        $stmt->execute();
+
+        $acao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($acao) ? $acao : null;
+    }
+
     public function localitiesByMunicipalityCode(): array
     {
         $rows = Database::connection()

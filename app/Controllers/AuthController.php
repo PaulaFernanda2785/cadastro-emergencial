@@ -72,6 +72,7 @@ final class AuthController extends Controller
 
         Session::regenerate();
         Session::put('user', $user);
+        $this->restoreActiveActionForUser($user);
 
         (new AuditLogService())->record('login_sucesso', 'usuarios', (int) $user['id'], 'Usuario autenticado.', (int) $user['id']);
 
@@ -137,6 +138,7 @@ final class AuthController extends Controller
         unset($user['senha_hash']);
         Session::regenerate();
         Session::put('user', $user);
+        $this->restoreActiveActionForUser($user);
         $repository->touchLastAccess($id);
 
         (new AuditLogService())->record('criou_usuario_qr', 'usuarios', $id, $data['email'], $id);
@@ -320,6 +322,7 @@ final class AuthController extends Controller
             return;
         }
 
+        $this->restoreActiveActionForUser($user);
         $token = Session::get('active_action_token');
 
         if (!is_string($token) || $token === '') {
@@ -334,5 +337,31 @@ final class AuthController extends Controller
         }
 
         $this->redirect('/acao/' . rawurlencode($token) . '/residencias/novo');
+    }
+
+    private function restoreActiveActionForUser(?array $user): void
+    {
+        if (($user['perfil'] ?? null) !== 'cadastrador') {
+            return;
+        }
+
+        $repository = new AcaoEmergencialRepository();
+        $token = Session::get('active_action_token');
+
+        if (is_string($token) && $token !== '') {
+            $acao = $repository->findByPublicToken($token);
+
+            if ($acao !== null && ($acao['status'] ?? null) === 'aberta') {
+                return;
+            }
+
+            Session::forget('active_action_token');
+        }
+
+        $acao = $repository->latestOpen();
+
+        if ($acao !== null && !empty($acao['token_publico'])) {
+            Session::put('active_action_token', (string) $acao['token_publico']);
+        }
     }
 }
