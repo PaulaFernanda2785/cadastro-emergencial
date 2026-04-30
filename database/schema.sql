@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS familias (
     deleted_at DATETIME NULL,
     CONSTRAINT fk_familias_residencia FOREIGN KEY (residencia_id) REFERENCES residencias(id),
     KEY idx_familias_cpf (responsavel_cpf),
+    KEY idx_familias_representante_cpf (representante_cpf),
     KEY idx_familias_residencia (residencia_id),
     KEY idx_familias_deleted (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

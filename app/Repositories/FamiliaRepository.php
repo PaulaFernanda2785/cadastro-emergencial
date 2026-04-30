@@ -92,6 +92,84 @@ final class FamiliaRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function countByResidencia(int $residenciaId): int
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*)
+             FROM familias f
+             WHERE f.residencia_id = :residencia_id
+               AND f.deleted_at IS NULL'
+        );
+        $stmt->bindValue(':residencia_id', $residenciaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function findCpfConflictInOpenAction(int $acaoId, array $cpfs, ?int $excludeFamiliaId = null): ?array
+    {
+        $normalizedCpfs = array_values(array_unique(array_filter(array_map(
+            static fn (mixed $cpf): string => preg_replace('/\D+/', '', (string) $cpf) ?? '',
+            $cpfs
+        ))));
+
+        if ($normalizedCpfs === []) {
+            return null;
+        }
+
+        $responsavelPlaceholders = [];
+        $representantePlaceholders = [];
+        $params = [
+            ':acao_id' => $acaoId,
+            ':status_aberta' => 'aberta',
+        ];
+
+        foreach ($normalizedCpfs as $index => $cpf) {
+            $responsavelKey = ':cpf_responsavel_' . $index;
+            $representanteKey = ':cpf_representante_' . $index;
+            $responsavelPlaceholders[] = $responsavelKey;
+            $representantePlaceholders[] = $representanteKey;
+            $params[$responsavelKey] = $cpf;
+            $params[$representanteKey] = $cpf;
+        }
+
+        $excludeSql = '';
+
+        if ($excludeFamiliaId !== null) {
+            $excludeSql = ' AND f.id <> :exclude_familia_id';
+            $params[':exclude_familia_id'] = $excludeFamiliaId;
+        }
+
+        $stmt = Database::connection()->prepare(
+            'SELECT f.id, f.residencia_id, f.responsavel_nome, f.responsavel_cpf, f.representante_cpf,
+                    r.protocolo
+             FROM familias f
+             INNER JOIN residencias r ON r.id = f.residencia_id
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             WHERE r.acao_id = :acao_id
+                AND a.status = :status_aberta
+                AND f.deleted_at IS NULL
+                AND r.deleted_at IS NULL
+                AND a.deleted_at IS NULL'
+                . $excludeSql .
+                ' AND (
+                    REPLACE(REPLACE(REPLACE(COALESCE(f.responsavel_cpf, \'\'), \'.\', \'\'), \'-\', \'\'), \' \', \'\') IN (' . implode(', ', $responsavelPlaceholders) . ')
+                    OR REPLACE(REPLACE(REPLACE(COALESCE(f.representante_cpf, \'\'), \'.\', \'\'), \'-\', \'\'), \' \', \'\') IN (' . implode(', ', $representantePlaceholders) . ')
+                )
+             ORDER BY f.id ASC
+             LIMIT 1'
+        );
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        $familia = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($familia) ? $familia : null;
+    }
+
     public function create(array $data): int
     {
         $stmt = Database::connection()->prepare(

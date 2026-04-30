@@ -55,6 +55,22 @@ final class DocumentoAnexoRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function byFamilia(int $familiaId): array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT d.id, d.tipo_documento, d.nome_original, d.mime_type, d.extensao, d.tamanho_bytes,
+                    d.criado_em, d.residencia_id, d.familia_id
+             FROM documentos_anexos d
+             WHERE d.familia_id = :familia_id
+               AND d.deleted_at IS NULL
+             ORDER BY d.criado_em DESC'
+        );
+        $stmt->bindValue(':familia_id', $familiaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function findForResidencia(int $documentoId, int $residenciaId): ?array
     {
         $stmt = Database::connection()->prepare(
@@ -78,5 +94,62 @@ final class DocumentoAnexoRepository
         $documento = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return is_array($documento) ? $documento : null;
+    }
+
+    public function findForFamilia(int $documentoId, int $familiaId): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT d.id, d.tipo_documento, d.nome_original, d.caminho_arquivo, d.mime_type,
+                    d.tamanho_bytes, d.criado_em, d.residencia_id, d.familia_id
+             FROM documentos_anexos d
+             WHERE d.id = :documento_id
+               AND d.familia_id = :familia_id
+               AND d.deleted_at IS NULL
+             LIMIT 1'
+        );
+        $stmt->bindValue(':documento_id', $documentoId, PDO::PARAM_INT);
+        $stmt->bindValue(':familia_id', $familiaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $documento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($documento) ? $documento : null;
+    }
+
+    public function softDeleteByFamiliaAndIds(int $familiaId, array $documentoIds): void
+    {
+        $ids = array_values(array_unique(array_filter(array_map(
+            static fn (mixed $id): int => (int) $id,
+            $documentoIds
+        ), static fn (int $id): bool => $id > 0)));
+
+        if ($ids === []) {
+            return;
+        }
+
+        $placeholders = [];
+        $params = [
+            ':familia_id' => $familiaId,
+        ];
+
+        foreach ($ids as $index => $id) {
+            $key = ':documento_id_' . $index;
+            $placeholders[] = $key;
+            $params[$key] = $id;
+        }
+
+        $stmt = Database::connection()->prepare(
+            'UPDATE documentos_anexos
+             SET deleted_at = NOW()
+             WHERE familia_id = :familia_id
+               AND id IN (' . implode(', ', $placeholders) . ')
+               AND deleted_at IS NULL'
+        );
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
     }
 }

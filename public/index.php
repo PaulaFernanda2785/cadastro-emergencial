@@ -83,6 +83,7 @@ $router->get('/cadastros/residencias/{id}', [ResidenciaController::class, 'show'
 $router->get('/cadastros/residencias/{id}/familias/novo', [FamiliaController::class, 'create'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias', [FamiliaController::class, 'store'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/{familiaId}', [FamiliaController::class, 'show'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->get('/cadastros/residencias/{id}/familias/{familiaId}/documentos/{documentoId}', [FamiliaController::class, 'viewDocument'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/{familiaId}/editar', [FamiliaController::class, 'edit'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias/{familiaId}', [FamiliaController::class, 'update'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias/{familiaId}/excluir', [FamiliaController::class, 'delete'], ['auth', 'role:cadastrador,gestor,administrador']);

@@ -241,9 +241,87 @@
         window.addEventListener('beforeunload', clearPreviewUrls);
     }
 
+    function setupExistingDocuments(form) {
+        form.querySelectorAll('[data-family-doc-remove]').forEach(function (input) {
+            var item = input.closest('.family-existing-doc-item');
+            var label = input.closest('.family-doc-remove-action');
+            var text = label ? label.querySelector('span') : null;
+
+            input.addEventListener('change', function () {
+                if (item) {
+                    item.classList.toggle('is-marked-for-removal', input.checked);
+                }
+
+                if (text) {
+                    text.textContent = input.checked ? 'Manter' : 'Remover';
+                }
+            });
+        });
+    }
+
+    function setupDocumentModal() {
+        var modal = document.querySelector('[data-family-doc-modal]');
+
+        if (!modal) {
+            return;
+        }
+
+        var title = modal.querySelector('[data-family-doc-modal-title]');
+        var image = modal.querySelector('[data-family-doc-modal-image]');
+        var frame = modal.querySelector('[data-family-doc-modal-frame]');
+
+        function clearContent() {
+            if (image) {
+                image.hidden = true;
+                image.removeAttribute('src');
+            }
+
+            if (frame) {
+                frame.hidden = true;
+                frame.removeAttribute('src');
+            }
+        }
+
+        document.querySelectorAll('[data-family-doc-open]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var src = button.getAttribute('data-doc-src') || '';
+                var kind = button.getAttribute('data-doc-kind') || 'document';
+
+                if (!src) {
+                    return;
+                }
+
+                clearContent();
+
+                if (title) {
+                    title.textContent = button.getAttribute('data-doc-title') || 'Documento';
+                }
+
+                if (kind === 'image' && image) {
+                    image.src = src;
+                    image.hidden = false;
+                } else if (frame) {
+                    frame.src = src;
+                    frame.hidden = false;
+                }
+
+                if (typeof modal.showModal === 'function') {
+                    modal.showModal();
+                } else {
+                    window.open(src, '_blank', 'noopener');
+                }
+            });
+        });
+
+        modal.addEventListener('close', clearContent);
+    }
+
     forms.forEach(function (form) {
         setupRepresentative(form);
         setupQuantityStepper(form);
         setupDocumentUpload(form);
+        setupExistingDocuments(form);
     });
+
+    setupDocumentModal();
 })();

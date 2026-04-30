@@ -36,6 +36,8 @@ final class FamiliaController extends Controller
     public function create(string $residenciaId): void
     {
         $residencia = $this->findResidenciaForCadastro((int) $residenciaId);
+        $this->ensureFamilyCapacity($residencia);
+
         $this->form('Nova familia', $residencia, $this->emptyInput(), [], '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar familia');
     }
 
@@ -51,6 +53,37 @@ final class FamiliaController extends Controller
         ]);
     }
 
+    public function viewDocument(string $residenciaId, string $familiaId, string $documentoId): void
+    {
+        $this->findResidencia((int) $residenciaId);
+        $this->findFamiliaForResidencia((int) $familiaId, (int) $residenciaId);
+        $documento = $this->documentos->findForFamilia((int) $documentoId, (int) $familiaId);
+
+        if ($documento === null) {
+            $this->abort(404);
+        }
+
+        $relativePath = str_replace('\\', '/', (string) $documento['caminho_arquivo']);
+        $baseDir = realpath(BASE_PATH . '/storage/private_uploads');
+        $filePath = realpath(BASE_PATH . '/' . ltrim($relativePath, '/'));
+
+        $normalizedBase = $baseDir === false ? '' : rtrim(str_replace('\\', '/', $baseDir), '/') . '/';
+        $normalizedFile = $filePath === false ? '' : str_replace('\\', '/', $filePath);
+
+        if ($baseDir === false || $filePath === false || !str_starts_with($normalizedFile, $normalizedBase) || !is_file($filePath)) {
+            $this->abort(404);
+        }
+
+        $filename = str_replace(['"', "\r", "\n"], '', basename((string) $documento['nome_original']));
+
+        header('Content-Type: ' . (string) $documento['mime_type']);
+        header('Content-Length: ' . (string) filesize($filePath));
+        header('Content-Disposition: inline; filename="' . $filename . '"');
+        header('X-Content-Type-Options: nosniff');
+        readfile($filePath);
+        exit;
+    }
+
     public function edit(string $residenciaId, string $familiaId): void
     {
         $residencia = $this->findResidenciaForCadastro((int) $residenciaId);
@@ -62,7 +95,8 @@ final class FamiliaController extends Controller
             $familia,
             [],
             '/cadastros/residencias/' . (int) $residenciaId . '/familias/' . (int) $familiaId,
-            'Salvar alteracoes'
+            'Salvar alteracoes',
+            $this->documentos->byFamilia((int) $familiaId)
         );
     }
 
@@ -73,6 +107,12 @@ final class FamiliaController extends Controller
 
         $data = $this->input();
         $validator = $this->validator($data);
+
+        $this->validateFamilyCapacity($validator, $residencia);
+
+        if (!$validator->fails()) {
+            $this->validateCpfUniquenessInOpenAction($validator, $residencia, $data);
+        }
 
         if ($validator->fails()) {
             $this->form('Nova familia', $residencia, $data, $validator->errors(), '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar familia');
@@ -126,14 +166,19 @@ final class FamiliaController extends Controller
         $validator = $this->validator($data);
         $action = '/cadastros/residencias/' . (int) $residenciaId . '/familias/' . (int) $familiaId;
 
+        if (!$validator->fails()) {
+            $this->validateCpfUniquenessInOpenAction($validator, $residencia, $data, (int) $familiaId);
+        }
+
         if ($validator->fails()) {
-            $this->form('Editar familia', $residencia, $data + ['id' => $familia['id']], $validator->errors(), $action, 'Salvar alteracoes');
+            $this->form('Editar familia', $residencia, $data + ['id' => $familia['id']], $validator->errors(), $action, 'Salvar alteracoes', $this->documentos->byFamilia((int) $familiaId));
             return;
         }
 
         $upload = new UploadService();
         $documentos = [];
         $files = is_array($_FILES['documentos'] ?? null) ? $upload->normalizeMultiple($_FILES['documentos']) : [];
+        $removeDocumentIds = is_array($_POST['remover_documentos'] ?? null) ? $_POST['remover_documentos'] : [];
 
         foreach ($files as $file) {
             if (!$upload->hasFile($file)) {
@@ -145,12 +190,16 @@ final class FamiliaController extends Controller
             } catch (RuntimeException $exception) {
                 $errors = $validator->errors();
                 $errors['documentos'][] = $exception->getMessage();
-                $this->form('Editar familia', $residencia, $data + ['id' => $familia['id']], $errors, $action, 'Salvar alteracoes');
+                $this->form('Editar familia', $residencia, $data + ['id' => $familia['id']], $errors, $action, 'Salvar alteracoes', $this->documentos->byFamilia((int) $familiaId));
                 return;
             }
         }
 
         $this->familias->update((int) $familiaId, $data);
+
+        if ($removeDocumentIds !== []) {
+            $this->documentos->softDeleteByFamiliaAndIds((int) $familiaId, $removeDocumentIds);
+        }
 
         foreach ($documentos as $metadata) {
             $this->documentos->create($metadata + [
@@ -218,7 +267,7 @@ final class FamiliaController extends Controller
         return $familia;
     }
 
-    private function form(string $title, array $residencia, array $familia, array $errors, string $action, string $submitLabel): void
+    private function form(string $title, array $residencia, array $familia, array $errors, string $action, string $submitLabel, array $documentos = []): void
     {
         $this->view('cadastro.familias.form', [
             'title' => $title,
@@ -227,6 +276,7 @@ final class FamiliaController extends Controller
             'errors' => $errors,
             'action' => $action,
             'submitLabel' => $submitLabel,
+            'documentos' => $documentos,
         ]);
     }
 
@@ -292,6 +342,70 @@ final class FamiliaController extends Controller
             ->max('representante_cpf', $data['representante_cpf'], 14, 'CPF do representante')
             ->max('representante_rg', $data['representante_rg'], 30, 'RG do representante')
             ->max('representante_telefone', $data['representante_telefone'], 30, 'Telefone do representante');
+    }
+
+    private function ensureFamilyCapacity(array $residencia): void
+    {
+        if (!$this->hasFamilyCapacity($residencia)) {
+            Session::flash('warning', 'A quantidade de familias definida para esta residencia ja foi atingida.');
+            $this->redirect('/cadastros/residencias/' . (int) $residencia['id']);
+        }
+    }
+
+    private function validateFamilyCapacity(Validator $validator, array $residencia): void
+    {
+        if (!$this->hasFamilyCapacity($residencia)) {
+            $validator->add('quantidade_integrantes', 'A quantidade de familias definida para esta residencia ja foi atingida.');
+        }
+    }
+
+    private function hasFamilyCapacity(array $residencia): bool
+    {
+        $limite = max(1, (int) ($residencia['quantidade_familias'] ?? 1));
+
+        return $this->familias->countByResidencia((int) $residencia['id']) < $limite;
+    }
+
+    private function validateCpfUniquenessInOpenAction(Validator $validator, array $residencia, array $data, ?int $excludeFamiliaId = null): void
+    {
+        if (($residencia['acao_status'] ?? null) !== 'aberta') {
+            return;
+        }
+
+        $cpfs = [
+            (string) $data['responsavel_cpf'],
+            (string) $data['representante_cpf'],
+        ];
+        $conflict = $this->familias->findCpfConflictInOpenAction((int) $residencia['acao_id'], $cpfs, $excludeFamiliaId);
+
+        if ($conflict === null) {
+            return;
+        }
+
+        $responsavelCpf = $this->normalizeCpf((string) $data['responsavel_cpf']);
+        $representanteCpf = $this->normalizeCpf((string) $data['representante_cpf']);
+        $conflictCpfs = array_filter([
+            $this->normalizeCpf((string) ($conflict['responsavel_cpf'] ?? '')),
+            $this->normalizeCpf((string) ($conflict['representante_cpf'] ?? '')),
+        ]);
+        $message = 'Este CPF ja esta vinculado a uma familia cadastrada nesta acao aberta.';
+
+        if ($responsavelCpf !== '' && in_array($responsavelCpf, $conflictCpfs, true)) {
+            $validator->add('responsavel_cpf', $message);
+        }
+
+        if ($representanteCpf !== '' && in_array($representanteCpf, $conflictCpfs, true)) {
+            $validator->add('representante_cpf', $message);
+        }
+
+        if ($responsavelCpf === '' && $representanteCpf === '') {
+            $validator->add('responsavel_cpf', $message);
+        }
+    }
+
+    private function normalizeCpf(string $cpf): string
+    {
+        return preg_replace('/\D+/', '', $cpf) ?? '';
     }
 
     private function guardPost(string $scope, string $failureRedirect): void

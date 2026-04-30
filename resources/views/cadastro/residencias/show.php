@@ -1,11 +1,23 @@
 <?php
-$imagemDocumentos = array_values(array_filter($documentos, static fn (array $documento): bool => str_starts_with((string) ($documento['mime_type'] ?? ''), 'image/')));
-$fotoPrincipal = $imagemDocumentos[0] ?? null;
+$fotoPrincipal = null;
+
+foreach ($documentos as $documento) {
+    $isResidencePhoto = (string) ($documento['tipo_documento'] ?? '') === 'foto_georreferenciada'
+        && (int) ($documento['residencia_id'] ?? 0) === (int) $residencia['id']
+        && str_starts_with((string) ($documento['mime_type'] ?? ''), 'image/');
+
+    if ($isResidencePhoto) {
+        $fotoPrincipal = $documento;
+        break;
+    }
+}
+
 $fotoPrincipalUrl = $fotoPrincipal !== null
     ? url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $fotoPrincipal['id'])
     : null;
 $familiasCadastradas = count($familias);
 $familiasPrevistas = (int) ($residencia['quantidade_familias'] ?? 0);
+$podeCadastrarFamilia = $familiasCadastradas < max(1, $familiasPrevistas);
 ?>
 
 <section class="dashboard-header">
@@ -17,7 +29,11 @@ $familiasPrevistas = (int) ($residencia['quantidade_familias'] ?? 0);
     <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
         <div class="header-actions">
             <a class="secondary-button residence-action-button" href="<?= h(url('/acao/' . $residencia['token_publico'] . '/residencias/novo')) ?>">Nova residencia</a>
-            <a class="primary-link-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/novo')) ?>">Nova familia</a>
+            <?php if ($podeCadastrarFamilia): ?>
+                <a class="primary-link-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/novo')) ?>">Nova familia</a>
+            <?php else: ?>
+                <span class="limit-reached-pill">Limite de familias atingido</span>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </section>

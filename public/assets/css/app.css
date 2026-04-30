@@ -1699,7 +1699,7 @@ button:disabled,
     display: none;
 }
 
-.family-doc-list div {
+.family-doc-list > div {
     display: grid;
     grid-template-columns: 96px minmax(0, 1fr) auto;
     align-items: center;
@@ -1708,6 +1708,98 @@ button:disabled,
     border-radius: 8px;
     padding: 10px;
     background: #ffffff;
+}
+
+.family-existing-docs {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #dbe6ee;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.family-existing-docs-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.family-existing-docs-heading span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.family-existing-docs-heading strong {
+    color: var(--text);
+    font-size: 14px;
+}
+
+.family-existing-doc-list > div {
+    border-color: #dbe6ee;
+}
+
+.family-existing-doc-item.is-marked-for-removal {
+    border-color: #f3c0ba;
+    background: #fff7f5;
+    opacity: 0.74;
+}
+
+.family-existing-doc-actions {
+    display: grid;
+    gap: 8px;
+    justify-items: stretch;
+}
+
+.family-doc-view-link {
+    min-height: 34px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(21, 94, 117, 0.25);
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: var(--primary);
+    background: #ecfeff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 900;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.family-doc-view-link:hover,
+.family-doc-view-link:focus {
+    border-color: var(--primary);
+    color: #0f4c5c;
+}
+
+.family-doc-remove-action {
+    min-height: 34px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid #f3c0ba;
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: var(--danger);
+    background: #fff4f2;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.family-doc-remove-action input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.family-doc-remove-action:has(input:checked) {
+    border-color: var(--danger);
+    color: #ffffff;
+    background: var(--danger);
 }
 
 .family-doc-preview {
@@ -1782,7 +1874,7 @@ button:disabled,
     font-weight: 700;
 }
 
-.family-doc-list button {
+.family-doc-list > div > button {
     min-height: 34px;
     border: 1px solid #f3c0ba;
     border-radius: 6px;
@@ -2226,6 +2318,20 @@ button:disabled,
     font-size: 13px;
 }
 
+.limit-reached-pill {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e8b26f;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #8a4f0a;
+    background: #fff7e8;
+    font-size: 13px;
+    font-weight: 900;
+}
+
 .residence-image-modal {
     width: min(1120px, calc(100% - 28px));
     max-width: none;
@@ -2289,6 +2395,82 @@ button:disabled,
 
 .residence-image-modal-close:hover,
 .residence-image-modal-close:focus {
+    border-color: rgba(21, 94, 117, 0.42);
+    background: #eef7f9;
+}
+
+.family-doc-modal {
+    width: min(1120px, calc(100% - 28px));
+    max-width: none;
+    max-height: calc(100vh - 28px);
+    border: 0;
+    border-radius: 8px;
+    padding: 0;
+    background: transparent;
+}
+
+.family-doc-modal::backdrop {
+    background: rgba(10, 22, 35, 0.86);
+}
+
+.family-doc-modal-content {
+    display: grid;
+    gap: 12px;
+    border-radius: 8px;
+    padding: 16px;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.family-doc-modal-content h2 {
+    margin-bottom: 0;
+    padding-right: 112px;
+    font-size: 18px;
+}
+
+.family-doc-modal-content img,
+.family-doc-modal-content iframe {
+    width: 100%;
+    max-height: calc(100vh - 140px);
+    border: 0;
+    border-radius: 6px;
+    background: #f8fafc;
+}
+
+.family-doc-modal-content img {
+    object-fit: contain;
+}
+
+.family-doc-modal-content iframe {
+    min-height: calc(100vh - 160px);
+}
+
+.family-doc-modal-close-form {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 1;
+}
+
+.family-doc-modal-close {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(21, 94, 117, 0.22);
+    border-radius: 8px;
+    padding: 8px 13px;
+    color: var(--primary-strong);
+    background: #ffffff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(28, 39, 51, 0.12);
+    cursor: pointer;
+}
+
+.family-doc-modal-close:hover,
+.family-doc-modal-close:focus {
     border-color: rgba(21, 94, 117, 0.42);
     background: #eef7f9;
 }
@@ -2547,7 +2729,8 @@ button:disabled,
     }
 
     .header-actions .primary-link-button,
-    .header-actions .secondary-button {
+    .header-actions .secondary-button,
+    .header-actions .limit-reached-pill {
         width: 100%;
     }
 
@@ -2598,7 +2781,12 @@ button:disabled,
         width: 66px;
     }
 
-    .family-doc-list div {
+    .family-existing-docs-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .family-doc-list > div {
         grid-template-columns: 82px minmax(0, 1fr);
     }
 
@@ -2607,8 +2795,18 @@ button:disabled,
         height: 64px;
     }
 
-    .family-doc-list button {
+    .family-existing-doc-actions {
         grid-column: 1 / -1;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .family-doc-list > div > button,
+    .family-doc-view-link {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .family-doc-remove-action {
         width: 100%;
     }
 
@@ -2768,6 +2966,39 @@ button:disabled,
     }
 
     .residence-image-modal-close {
+        min-height: 36px;
+        padding: 7px 11px;
+    }
+
+    .family-doc-modal {
+        width: min(100% - 20px, 1120px);
+        max-height: calc(100vh - 20px);
+    }
+
+    .family-doc-modal-content {
+        padding: 12px;
+    }
+
+    .family-doc-modal-content h2 {
+        padding-right: 96px;
+        font-size: 16px;
+    }
+
+    .family-doc-modal-content img,
+    .family-doc-modal-content iframe {
+        max-height: calc(100vh - 132px);
+    }
+
+    .family-doc-modal-content iframe {
+        min-height: calc(100vh - 148px);
+    }
+
+    .family-doc-modal-close-form {
+        top: 10px;
+        right: 10px;
+    }
+
+    .family-doc-modal-close {
         min-height: 36px;
         padding: 7px 11px;
     }

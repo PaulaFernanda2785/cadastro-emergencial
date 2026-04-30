@@ -4,6 +4,7 @@ $hasRepresentante = !empty($familia['registrar_representante'])
     || !empty($familia['representante_cpf'])
     || !empty($familia['representante_rg'])
     || !empty($familia['representante_telefone']);
+$documentos = $documentos ?? [];
 ?>
 
 <section class="form-shell family-form-shell">
@@ -131,6 +132,9 @@ $hasRepresentante = !empty($familia['registrar_representante'])
                     <label class="field">
                         <span>CPF do representante</span>
                         <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" data-representative-input>
+                        <?php if (!empty($errors['representante_cpf'])): ?>
+                            <small class="field-error"><?= h($errors['representante_cpf'][0]) ?></small>
+                        <?php endif; ?>
                     </label>
                     <label class="field">
                         <span>RG do representante</span>
@@ -150,6 +154,43 @@ $hasRepresentante = !empty($familia['registrar_representante'])
                 <span>Arquivos</span>
                 <strong>Anexar documentos</strong>
             </div>
+
+            <?php if ($documentos !== []): ?>
+                <div class="family-existing-docs">
+                    <div class="family-existing-docs-heading">
+                        <span>Anexos atuais</span>
+                        <strong><?= h(count($documentos)) ?> arquivo(s)</strong>
+                    </div>
+                    <div class="family-doc-list family-existing-doc-list">
+                        <?php foreach ($documentos as $documento): ?>
+                            <?php
+                            $documentoUrl = url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . ($familia['id'] ?? 0) . '/documentos/' . $documento['id']);
+                            $isImage = str_starts_with((string) ($documento['mime_type'] ?? ''), 'image/');
+                            ?>
+                            <div class="family-existing-doc-item">
+                                <div class="family-doc-preview">
+                                    <?php if ($isImage): ?>
+                                        <img src="<?= h($documentoUrl) ?>" alt="Anexo <?= h($documento['nome_original']) ?>">
+                                    <?php else: ?>
+                                        <span class="family-doc-preview-icon"><?= h(strtoupper((string) ($documento['extensao'] ?? 'PDF'))) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="family-doc-info">
+                                    <span><?= h($documento['nome_original']) ?></span>
+                                    <small><?= h(number_format(((int) $documento['tamanho_bytes']) / 1024, 1, ',', '.')) ?> KB - <?= h(date('d/m/Y H:i', strtotime((string) $documento['criado_em']))) ?></small>
+                                </div>
+                                <div class="family-existing-doc-actions">
+                                    <button class="family-doc-view-link" type="button" data-family-doc-open data-doc-src="<?= h($documentoUrl) ?>" data-doc-title="<?= h($documento['nome_original']) ?>" data-doc-kind="<?= $isImage ? 'image' : 'document' ?>">Visualizar</button>
+                                    <label class="family-doc-remove-action">
+                                        <input type="checkbox" name="remover_documentos[]" value="<?= h($documento['id']) ?>" data-family-doc-remove>
+                                        <span>Remover</span>
+                                    </label>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <div class="family-doc-upload photo-upload" data-family-doc-upload>
                 <input class="file-input-native" id="documentos-familia" type="file" name="documentos[]" accept="image/jpeg,image/png,application/pdf,image/*" capture="environment" multiple data-family-doc-input>
@@ -174,3 +215,14 @@ $hasRepresentante = !empty($familia['registrar_representante'])
         </div>
     </form>
 </section>
+
+<dialog class="family-doc-modal" data-family-doc-modal aria-labelledby="family-doc-modal-title">
+    <form method="dialog" class="family-doc-modal-close-form">
+        <button type="submit" class="family-doc-modal-close" aria-label="Fechar documento">Fechar</button>
+    </form>
+    <div class="family-doc-modal-content">
+        <h2 id="family-doc-modal-title" data-family-doc-modal-title>Documento</h2>
+        <img alt="Documento ampliado" data-family-doc-modal-image hidden>
+        <iframe title="Documento anexado" data-family-doc-modal-frame hidden></iframe>
+    </div>
+</dialog>
