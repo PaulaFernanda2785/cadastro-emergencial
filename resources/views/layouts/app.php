@@ -20,7 +20,7 @@ $menuItems = [
     ['label' => 'Cadastros', 'url' => '/cadastros/residencias', 'match' => ['/cadastros/residencias']],
     ['label' => 'Famílias', 'url' => '/cadastros/residencias', 'match' => ['/gestor/familias']],
     ['label' => 'Entregas', 'url' => '/gestor/entregas', 'match' => ['/gestor/entregas', '/gestor/familias'], 'roles' => ['gestor', 'administrador']],
-    ['label' => 'Prestação de contas', 'url' => '#', 'match' => ['/gestor/prestacao-contas'], 'soon' => true],
+    ['label' => 'Prestação de contas', 'url' => '/gestor/prestacao-contas', 'match' => ['/gestor/prestacao-contas'], 'roles' => ['gestor', 'administrador']],
     ['label' => 'Relatórios', 'url' => '#', 'match' => ['/gestor/relatorios'], 'soon' => true],
 ];
 ?>
