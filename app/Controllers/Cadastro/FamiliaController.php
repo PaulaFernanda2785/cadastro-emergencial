@@ -36,7 +36,34 @@ final class FamiliaController extends Controller
     public function create(string $residenciaId): void
     {
         $residencia = $this->findResidenciaForCadastro((int) $residenciaId);
-        $this->form($residencia, $this->emptyInput(), []);
+        $this->form('Nova familia', $residencia, $this->emptyInput(), [], '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar familia');
+    }
+
+    public function show(string $residenciaId, string $familiaId): void
+    {
+        $residencia = $this->findResidencia((int) $residenciaId);
+        $familia = $this->findFamiliaForResidencia((int) $familiaId, (int) $residenciaId);
+
+        $this->view('cadastro.familias.show', [
+            'title' => 'Familia ' . $familia['responsavel_nome'],
+            'residencia' => $residencia,
+            'familia' => $familia,
+        ]);
+    }
+
+    public function edit(string $residenciaId, string $familiaId): void
+    {
+        $residencia = $this->findResidenciaForCadastro((int) $residenciaId);
+        $familia = $this->findFamiliaForResidencia((int) $familiaId, (int) $residenciaId);
+
+        $this->form(
+            'Editar familia',
+            $residencia,
+            $familia,
+            [],
+            '/cadastros/residencias/' . (int) $residenciaId . '/familias/' . (int) $familiaId,
+            'Salvar alteracoes'
+        );
     }
 
     public function store(string $residenciaId): void
@@ -48,7 +75,7 @@ final class FamiliaController extends Controller
         $validator = $this->validator($data);
 
         if ($validator->fails()) {
-            $this->form($residencia, $data, $validator->errors());
+            $this->form('Nova familia', $residencia, $data, $validator->errors(), '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar familia');
             return;
         }
 
@@ -66,7 +93,7 @@ final class FamiliaController extends Controller
             } catch (RuntimeException $exception) {
                 $errors = $validator->errors();
                 $errors['documentos'][] = $exception->getMessage();
-                $this->form($residencia, $data, $errors);
+                $this->form('Nova familia', $residencia, $data, $errors, '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar familia');
                 return;
             }
         }
@@ -85,6 +112,70 @@ final class FamiliaController extends Controller
 
         (new AuditLogService())->record('criou_familia', 'familias', $id, $data['responsavel_nome']);
         Session::flash('success', 'Familia cadastrada.');
+
+        $this->redirect('/cadastros/residencias/' . (int) $residenciaId);
+    }
+
+    public function update(string $residenciaId, string $familiaId): void
+    {
+        $residencia = $this->findResidenciaForCadastro((int) $residenciaId);
+        $familia = $this->findFamiliaForResidencia((int) $familiaId, (int) $residenciaId);
+        $this->guardPost('cadastro.familia.update.' . (int) $familiaId, '/cadastros/residencias/' . (int) $residenciaId . '/familias/' . (int) $familiaId . '/editar');
+
+        $data = $this->input();
+        $validator = $this->validator($data);
+        $action = '/cadastros/residencias/' . (int) $residenciaId . '/familias/' . (int) $familiaId;
+
+        if ($validator->fails()) {
+            $this->form('Editar familia', $residencia, $data + ['id' => $familia['id']], $validator->errors(), $action, 'Salvar alteracoes');
+            return;
+        }
+
+        $upload = new UploadService();
+        $documentos = [];
+        $files = is_array($_FILES['documentos'] ?? null) ? $upload->normalizeMultiple($_FILES['documentos']) : [];
+
+        foreach ($files as $file) {
+            if (!$upload->hasFile($file)) {
+                continue;
+            }
+
+            try {
+                $documentos[] = $upload->storePrivate($file, 'familias');
+            } catch (RuntimeException $exception) {
+                $errors = $validator->errors();
+                $errors['documentos'][] = $exception->getMessage();
+                $this->form('Editar familia', $residencia, $data + ['id' => $familia['id']], $errors, $action, 'Salvar alteracoes');
+                return;
+            }
+        }
+
+        $this->familias->update((int) $familiaId, $data);
+
+        foreach ($documentos as $metadata) {
+            $this->documentos->create($metadata + [
+                'familia_id' => (int) $familiaId,
+                'residencia_id' => null,
+                'tipo_documento' => 'documento_familia',
+                'enviado_por' => (int) (current_user()['id'] ?? 0),
+            ]);
+        }
+
+        (new AuditLogService())->record('alterou_familia', 'familias', (int) $familiaId, $data['responsavel_nome']);
+        Session::flash('success', 'Familia atualizada.');
+
+        $this->redirect('/cadastros/residencias/' . (int) $residenciaId);
+    }
+
+    public function delete(string $residenciaId, string $familiaId): void
+    {
+        $this->findResidenciaForCadastro((int) $residenciaId);
+        $familia = $this->findFamiliaForResidencia((int) $familiaId, (int) $residenciaId);
+        $this->guardPost('cadastro.familia.delete.' . (int) $familiaId, '/cadastros/residencias/' . (int) $residenciaId);
+
+        $this->familias->softDelete((int) $familiaId);
+        (new AuditLogService())->record('excluiu_familia', 'familias', (int) $familiaId, $familia['responsavel_nome']);
+        Session::flash('success', 'Familia removida da listagem.');
 
         $this->redirect('/cadastros/residencias/' . (int) $residenciaId);
     }
@@ -116,14 +207,26 @@ final class FamiliaController extends Controller
         return $residencia;
     }
 
-    private function form(array $residencia, array $familia, array $errors): void
+    private function findFamiliaForResidencia(int $familiaId, int $residenciaId): array
+    {
+        $familia = $this->familias->findForResidencia($familiaId, $residenciaId);
+
+        if ($familia === null) {
+            $this->abort(404);
+        }
+
+        return $familia;
+    }
+
+    private function form(string $title, array $residencia, array $familia, array $errors, string $action, string $submitLabel): void
     {
         $this->view('cadastro.familias.form', [
-            'title' => 'Nova familia',
+            'title' => $title,
             'residencia' => $residencia,
             'familia' => $familia,
             'errors' => $errors,
-            'action' => '/cadastros/residencias/' . $residencia['id'] . '/familias',
+            'action' => $action,
+            'submitLabel' => $submitLabel,
         ]);
     }
 

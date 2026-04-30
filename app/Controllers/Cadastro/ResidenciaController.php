@@ -52,6 +52,41 @@ final class ResidenciaController extends Controller
         ]);
     }
 
+    public function viewDocument(string $id, string $documentoId): void
+    {
+        $residencia = $this->residencias->find((int) $id);
+
+        if ($residencia === null) {
+            $this->abort(404);
+        }
+
+        $documento = $this->documentos->findForResidencia((int) $documentoId, (int) $id);
+
+        if ($documento === null || !str_starts_with((string) $documento['mime_type'], 'image/')) {
+            $this->abort(404);
+        }
+
+        $relativePath = str_replace('\\', '/', (string) $documento['caminho_arquivo']);
+        $baseDir = realpath(BASE_PATH . '/storage/private_uploads');
+        $filePath = realpath(BASE_PATH . '/' . ltrim($relativePath, '/'));
+
+        $normalizedBase = $baseDir === false ? '' : rtrim(str_replace('\\', '/', $baseDir), '/') . '/';
+        $normalizedFile = $filePath === false ? '' : str_replace('\\', '/', $filePath);
+
+        if ($baseDir === false || $filePath === false || !str_starts_with($normalizedFile, $normalizedBase) || !is_file($filePath)) {
+            $this->abort(404);
+        }
+
+        $filename = str_replace(['"', "\r", "\n"], '', basename((string) $documento['nome_original']));
+
+        header('Content-Type: ' . (string) $documento['mime_type']);
+        header('Content-Length: ' . (string) filesize($filePath));
+        header('Content-Disposition: inline; filename="' . $filename . '"');
+        header('X-Content-Type-Options: nosniff');
+        readfile($filePath);
+        exit;
+    }
+
     public function createFromAction(string $token): void
     {
         $acao = $this->openAction($token);

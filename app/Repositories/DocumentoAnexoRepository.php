@@ -54,4 +54,29 @@ final class DocumentoAnexoRepository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function findForResidencia(int $documentoId, int $residenciaId): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT d.id, d.tipo_documento, d.nome_original, d.caminho_arquivo, d.mime_type,
+                    d.tamanho_bytes, d.criado_em, d.residencia_id, d.familia_id
+             FROM documentos_anexos d
+             LEFT JOIN familias f ON f.id = d.familia_id
+             WHERE d.id = :documento_id
+               AND d.deleted_at IS NULL
+               AND (
+                    d.residencia_id = :residencia_id_documento
+                    OR f.residencia_id = :residencia_id_familia
+               )
+             LIMIT 1'
+        );
+        $stmt->bindValue(':documento_id', $documentoId, PDO::PARAM_INT);
+        $stmt->bindValue(':residencia_id_documento', $residenciaId, PDO::PARAM_INT);
+        $stmt->bindValue(':residencia_id_familia', $residenciaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $documento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($documento) ? $documento : null;
+    }
 }

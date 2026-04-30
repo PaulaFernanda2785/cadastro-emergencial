@@ -38,8 +38,10 @@ final class FamiliaRepository
     public function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT f.id, f.residencia_id, f.responsavel_nome, f.responsavel_cpf, f.telefone,
+            'SELECT f.id, f.residencia_id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg,
+                    f.data_nascimento, f.telefone, f.email,
                     f.quantidade_integrantes, f.possui_criancas, f.possui_idosos, f.possui_pcd,
+                    f.representante_nome, f.representante_cpf, f.representante_rg, f.representante_telefone,
                     r.protocolo, r.bairro_comunidade, r.endereco,
                     a.localidade, a.tipo_evento, m.nome AS municipio_nome, m.uf
              FROM familias f
@@ -55,6 +57,17 @@ final class FamiliaRepository
         $familia = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return is_array($familia) ? $familia : null;
+    }
+
+    public function findForResidencia(int $id, int $residenciaId): ?array
+    {
+        $familia = $this->find($id);
+
+        if ($familia === null || (int) $familia['residencia_id'] !== $residenciaId) {
+            return null;
+        }
+
+        return $familia;
     }
 
     public function byResidencia(int $residenciaId): array
@@ -108,6 +121,53 @@ final class FamiliaRepository
         $stmt->execute();
 
         return (int) Database::connection()->lastInsertId();
+    }
+
+    public function update(int $id, array $data): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE familias
+             SET responsavel_nome = :responsavel_nome,
+                 responsavel_cpf = :responsavel_cpf,
+                 responsavel_rg = :responsavel_rg,
+                 data_nascimento = :data_nascimento,
+                 telefone = :telefone,
+                 email = :email,
+                 quantidade_integrantes = :quantidade_integrantes,
+                 possui_criancas = :possui_criancas,
+                 possui_idosos = :possui_idosos,
+                 possui_pcd = :possui_pcd,
+                 representante_nome = :representante_nome,
+                 representante_cpf = :representante_cpf,
+                 representante_rg = :representante_rg,
+                 representante_telefone = :representante_telefone
+             WHERE id = :id AND deleted_at IS NULL'
+        );
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':responsavel_nome', $data['responsavel_nome']);
+        $stmt->bindValue(':responsavel_cpf', $data['responsavel_cpf']);
+        $stmt->bindValue(':responsavel_rg', $data['responsavel_rg'] !== '' ? $data['responsavel_rg'] : null);
+        $stmt->bindValue(':data_nascimento', $data['data_nascimento'] !== '' ? $data['data_nascimento'] : null);
+        $stmt->bindValue(':telefone', $data['telefone'] !== '' ? $data['telefone'] : null);
+        $stmt->bindValue(':email', $data['email'] !== '' ? $data['email'] : null);
+        $stmt->bindValue(':quantidade_integrantes', (int) $data['quantidade_integrantes'], PDO::PARAM_INT);
+        $stmt->bindValue(':possui_criancas', !empty($data['possui_criancas']) ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':possui_idosos', !empty($data['possui_idosos']) ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':possui_pcd', !empty($data['possui_pcd']) ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':representante_nome', $data['representante_nome'] !== '' ? $data['representante_nome'] : null);
+        $stmt->bindValue(':representante_cpf', $data['representante_cpf'] !== '' ? $data['representante_cpf'] : null);
+        $stmt->bindValue(':representante_rg', $data['representante_rg'] !== '' ? $data['representante_rg'] : null);
+        $stmt->bindValue(':representante_telefone', $data['representante_telefone'] !== '' ? $data['representante_telefone'] : null);
+        $stmt->execute();
+    }
+
+    public function softDelete(int $id): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE familias SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL'
+        );
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
     }
 
     public function count(): int

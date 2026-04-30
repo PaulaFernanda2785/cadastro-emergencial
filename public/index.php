@@ -78,9 +78,14 @@ $router->post('/admin/acoes/{id}/excluir', [AcaoEmergencialController::class, 'd
 $router->post('/admin/acoes/{id}', [AcaoEmergencialController::class, 'update'], ['auth', 'role:administrador']);
 $router->get('/gestor/familias', [FamiliaController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias', [ResidenciaController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->get('/cadastros/residencias/{id}/documentos/{documentoId}', [ResidenciaController::class, 'viewDocument'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}', [ResidenciaController::class, 'show'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/novo', [FamiliaController::class, 'create'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias', [FamiliaController::class, 'store'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->get('/cadastros/residencias/{id}/familias/{familiaId}', [FamiliaController::class, 'show'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->get('/cadastros/residencias/{id}/familias/{familiaId}/editar', [FamiliaController::class, 'edit'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->post('/cadastros/residencias/{id}/familias/{familiaId}', [FamiliaController::class, 'update'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->post('/cadastros/residencias/{id}/familias/{familiaId}/excluir', [FamiliaController::class, 'delete'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/gestor/entregas', [EntregaAjudaController::class, 'index'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/entregas/{id}/comprovante', [EntregaAjudaController::class, 'receipt'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/familias/{id}/entregas/novo', [EntregaAjudaController::class, 'create'], ['auth', 'role:gestor,administrador']);

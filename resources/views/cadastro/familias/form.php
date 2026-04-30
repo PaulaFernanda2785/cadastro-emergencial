@@ -1,7 +1,7 @@
 <section class="form-shell">
     <div class="section-heading">
         <span class="eyebrow">Cadastro de familia</span>
-        <h1>Nova familia</h1>
+        <h1><?= h($title ?? 'Nova familia') ?></h1>
         <p>Residencia <?= h($residencia['protocolo']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
     </div>
 
@@ -108,7 +108,7 @@
 
         <div class="form-actions">
             <button type="submit" class="primary-button" data-loading-text="Processando...">
-                <span class="button-label">Salvar familia</span>
+                <span class="button-label"><?= h($submitLabel ?? 'Salvar familia') ?></span>
                 <span class="button-spinner" aria-hidden="true"></span>
             </button>
             <a class="secondary-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Cancelar</a>
