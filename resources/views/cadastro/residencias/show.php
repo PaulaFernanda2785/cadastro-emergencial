@@ -155,6 +155,7 @@ $familiasPrevistas = (int) ($residencia['quantidade_familias'] ?? 0);
                         <?= (int) $familia['possui_criancas'] === 1 ? 'Criancas ' : '' ?>
                         <?= (int) $familia['possui_idosos'] === 1 ? 'Idosos ' : '' ?>
                         <?= (int) $familia['possui_pcd'] === 1 ? 'PCD' : '' ?>
+                        <?= (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '' ?>
                     </td>
                     <td data-label="Entregas"><?= h($familia['entregas_registradas'] ?? 0) ?></td>
                     <td class="actions-column" data-label="Acoes">

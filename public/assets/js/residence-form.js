@@ -111,11 +111,15 @@
             input.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
-        decrement.addEventListener('click', function () {
+        decrement.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
             setValue(currentValue() - 1);
         });
 
-        increment.addEventListener('click', function () {
+        increment.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
             setValue(currentValue() + 1);
         });
 

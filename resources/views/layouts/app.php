@@ -46,6 +46,7 @@ $menuItems = [
     <script src="<?= h(asset('js/action-form.js')) ?>" defer></script>
     <script src="<?= h(asset('js/residence-form.js')) ?>" defer></script>
     <script src="<?= h(asset('js/residence-detail.js')) ?>" defer></script>
+    <script src="<?= h(asset('js/family-form.js')) ?>" defer></script>
     <script src="<?= h(asset('js/offline-queue.js')) ?>" defer></script>
     <script src="<?= h(asset('js/qrcode.bundle.js')) ?>" defer></script>
     <script src="<?= h(asset('js/actions-index.js')) ?>" defer></script>

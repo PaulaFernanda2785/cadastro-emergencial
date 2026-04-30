@@ -542,6 +542,7 @@ p {
 .field input,
 .field select,
 .field textarea {
+    min-width: 0;
     width: 100%;
     min-height: 44px;
     border: 1px solid var(--line);
@@ -551,6 +552,11 @@ p {
     font: inherit;
     font-weight: 400;
     background: #ffffff;
+}
+
+.field input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
 }
 
 .field input:focus,
@@ -774,6 +780,7 @@ p {
 
 .quantity-stepper {
     width: min(260px, 100%);
+    min-width: 0;
     display: grid;
     grid-template-columns: 48px minmax(76px, 1fr) 48px;
     overflow: hidden;
@@ -783,6 +790,7 @@ p {
 }
 
 .quantity-stepper input {
+    width: 100%;
     min-height: 48px;
     border: 0;
     border-inline: 1px solid var(--line);
@@ -801,7 +809,10 @@ p {
 }
 
 .quantity-stepper-button {
+    width: 48px;
     min-height: 48px;
+    display: inline-grid;
+    place-items: center;
     border: 0;
     border-radius: 0;
     padding: 0;
@@ -809,12 +820,6 @@ p {
     background: #f8fafc;
     font-size: 22px;
     font-weight: 900;
-}
-
-.quantity-stepper-button:hover,
-.quantity-stepper-button:focus {
-    color: #ffffff;
-    background: var(--primary);
 }
 
 button,
@@ -837,6 +842,58 @@ button,
 button:hover,
 .primary-button:hover {
     background: var(--primary-strong);
+}
+
+.quantity-stepper-button:hover {
+    width: 48px;
+    min-height: 48px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    color: var(--primary);
+    background: #f8fafc;
+}
+
+.quantity-stepper-button:active,
+.quantity-stepper-button:focus-visible {
+    width: 48px;
+    min-height: 48px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    color: #ffffff;
+    background: var(--primary);
+    outline: none;
+}
+
+.quantity-stepper [data-quantity-decrement] {
+    grid-column: 1;
+}
+
+.quantity-stepper [data-quantity-input] {
+    grid-column: 2;
+}
+
+.quantity-stepper [data-quantity-increment] {
+    grid-column: 3;
+}
+
+.quantity-stepper .quantity-stepper-button {
+    position: relative;
+    z-index: 1;
+    width: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    min-height: 48px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
 }
 
 .secondary-button {
@@ -1466,6 +1523,276 @@ button:disabled,
     align-items: center;
     gap: 8px;
     font-weight: 700;
+}
+
+.family-form-shell {
+    max-width: 920px;
+}
+
+.family-form-header p {
+    margin-bottom: 0;
+}
+
+.family-form {
+    gap: 16px;
+}
+
+.family-form-block {
+    min-width: 0;
+    overflow: hidden;
+    display: grid;
+    gap: 16px;
+    border: 1px solid rgba(216, 224, 232, 0.9);
+    border-radius: 8px;
+    padding: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+    box-shadow: 0 10px 24px rgba(28, 39, 51, 0.06);
+}
+
+.family-form-block .form-block-heading,
+.representative-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.family-form-block .form-block-heading {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eef3f7;
+}
+
+.family-form-block .form-block-heading > span,
+.representative-toggle span {
+    width: auto;
+    height: auto;
+    flex: initial;
+    display: block;
+    padding: 0;
+    color: var(--primary);
+    background: transparent;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.family-form-block .form-block-heading strong,
+.representative-toggle strong {
+    display: block;
+    margin-top: 2px;
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.vulnerability-picker {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.vulnerability-picker label {
+    min-height: 52px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.vulnerability-picker input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.vulnerability-picker span {
+    color: var(--text);
+    font-weight: 800;
+    text-align: center;
+}
+
+.vulnerability-picker label:has(input:checked) {
+    border-color: rgba(21, 94, 117, 0.38);
+    background: #eef7f9;
+    box-shadow: inset 0 0 0 1px rgba(21, 94, 117, 0.12);
+}
+
+.switch-control {
+    width: 66px;
+    min-width: 66px;
+    min-height: 42px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.switch-control input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.switch-control::before {
+    content: "";
+    position: absolute;
+    left: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: #b8c7d5;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.switch-control:has(input:checked) {
+    border-color: rgba(21, 94, 117, 0.35);
+    background: #eef7f9;
+}
+
+.switch-control:has(input:checked)::before {
+    background: var(--primary);
+    transform: translateX(24px);
+}
+
+.representative-fields {
+    display: grid;
+    gap: 16px;
+    padding-top: 2px;
+}
+
+.representative-fields[hidden] {
+    display: none;
+}
+
+.family-doc-upload {
+    display: grid;
+    gap: 10px;
+}
+
+.family-doc-dropzone {
+    min-height: 128px;
+}
+
+.family-doc-dropzone span {
+    max-width: 520px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.family-doc-list {
+    display: grid;
+    gap: 8px;
+}
+
+.family-doc-list[hidden] {
+    display: none;
+}
+
+.family-doc-list div {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background: #ffffff;
+}
+
+.family-doc-preview {
+    width: 96px;
+    height: 72px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid #d8e0e8;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.family-doc-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.family-doc-preview-icon {
+    width: 56px;
+    min-height: 38px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(21, 94, 117, 0.2);
+    border-radius: 6px;
+    color: var(--primary);
+    background: #ffffff;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.family-birth-grid {
+    min-width: 0;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+}
+
+.date-field {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.date-field input[type="date"] {
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+}
+
+.family-doc-info {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.family-doc-info span {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 800;
+}
+
+.family-doc-info small {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.family-doc-list button {
+    min-height: 34px;
+    border: 1px solid #f3c0ba;
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: var(--danger);
+    background: #fff4f2;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
 }
 
 .readonly-field {
@@ -2252,8 +2579,49 @@ button:disabled,
     }
 
     .action-form-card,
-    .form-block {
+    .form-block,
+    .family-form-block {
         padding: 14px;
+    }
+
+    .family-form-block .form-block-heading,
+    .representative-toggle {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .vulnerability-picker {
+        grid-template-columns: 1fr;
+    }
+
+    .switch-control {
+        width: 66px;
+    }
+
+    .family-doc-list div {
+        grid-template-columns: 82px minmax(0, 1fr);
+    }
+
+    .family-doc-preview {
+        width: 82px;
+        height: 64px;
+    }
+
+    .family-doc-list button {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .family-birth-grid {
+        width: 100%;
+        max-width: 100%;
+        grid-template-columns: 1fr;
+    }
+
+    .date-field,
+    .date-field input[type="date"] {
+        width: 100%;
+        max-width: 100%;
     }
 
     .action-form-actions {

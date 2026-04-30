@@ -14,7 +14,7 @@ final class FamiliaRepository
         return Database::connection()
             ->query(
                 'SELECT f.id, f.residencia_id, f.responsavel_nome, f.responsavel_cpf,
-                        f.telefone, f.email, f.quantidade_integrantes, f.criado_em,
+                        f.telefone, f.email, f.quantidade_integrantes, f.possui_gestantes, f.criado_em,
                         r.protocolo, r.bairro_comunidade,
                         a.localidade, a.tipo_evento,
                         m.nome AS municipio_nome, m.uf,
@@ -40,7 +40,7 @@ final class FamiliaRepository
         $stmt = Database::connection()->prepare(
             'SELECT f.id, f.residencia_id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg,
                     f.data_nascimento, f.telefone, f.email,
-                    f.quantidade_integrantes, f.possui_criancas, f.possui_idosos, f.possui_pcd,
+                    f.quantidade_integrantes, f.possui_criancas, f.possui_idosos, f.possui_pcd, f.possui_gestantes,
                     f.representante_nome, f.representante_cpf, f.representante_rg, f.representante_telefone,
                     r.protocolo, r.bairro_comunidade, r.endereco,
                     a.localidade, a.tipo_evento, m.nome AS municipio_nome, m.uf
@@ -75,7 +75,8 @@ final class FamiliaRepository
         $stmt = Database::connection()->prepare(
             'SELECT f.id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg, f.data_nascimento,
                     f.telefone, f.email, f.quantidade_integrantes, f.possui_criancas, f.possui_idosos,
-                    f.possui_pcd, f.representante_nome, f.representante_cpf, f.representante_telefone, f.criado_em,
+                    f.possui_pcd, f.possui_gestantes, f.representante_nome, f.representante_cpf,
+                    f.representante_telefone, f.criado_em,
                     (
                         SELECT COUNT(*)
                         FROM entregas_ajuda e
@@ -96,11 +97,11 @@ final class FamiliaRepository
         $stmt = Database::connection()->prepare(
             'INSERT INTO familias
                 (residencia_id, responsavel_nome, responsavel_cpf, responsavel_rg, data_nascimento,
-                 telefone, email, quantidade_integrantes, possui_criancas, possui_idosos, possui_pcd,
+                 telefone, email, quantidade_integrantes, possui_criancas, possui_idosos, possui_pcd, possui_gestantes,
                  representante_nome, representante_cpf, representante_rg, representante_telefone)
              VALUES
                 (:residencia_id, :responsavel_nome, :responsavel_cpf, :responsavel_rg, :data_nascimento,
-                 :telefone, :email, :quantidade_integrantes, :possui_criancas, :possui_idosos, :possui_pcd,
+                 :telefone, :email, :quantidade_integrantes, :possui_criancas, :possui_idosos, :possui_pcd, :possui_gestantes,
                  :representante_nome, :representante_cpf, :representante_rg, :representante_telefone)'
         );
         $stmt->bindValue(':residencia_id', (int) $data['residencia_id'], PDO::PARAM_INT);
@@ -114,6 +115,7 @@ final class FamiliaRepository
         $stmt->bindValue(':possui_criancas', !empty($data['possui_criancas']) ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':possui_idosos', !empty($data['possui_idosos']) ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':possui_pcd', !empty($data['possui_pcd']) ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':possui_gestantes', !empty($data['possui_gestantes']) ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':representante_nome', $data['representante_nome'] !== '' ? $data['representante_nome'] : null);
         $stmt->bindValue(':representante_cpf', $data['representante_cpf'] !== '' ? $data['representante_cpf'] : null);
         $stmt->bindValue(':representante_rg', $data['representante_rg'] !== '' ? $data['representante_rg'] : null);
@@ -137,6 +139,7 @@ final class FamiliaRepository
                  possui_criancas = :possui_criancas,
                  possui_idosos = :possui_idosos,
                  possui_pcd = :possui_pcd,
+                 possui_gestantes = :possui_gestantes,
                  representante_nome = :representante_nome,
                  representante_cpf = :representante_cpf,
                  representante_rg = :representante_rg,
@@ -154,6 +157,7 @@ final class FamiliaRepository
         $stmt->bindValue(':possui_criancas', !empty($data['possui_criancas']) ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':possui_idosos', !empty($data['possui_idosos']) ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':possui_pcd', !empty($data['possui_pcd']) ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':possui_gestantes', !empty($data['possui_gestantes']) ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':representante_nome', $data['representante_nome'] !== '' ? $data['representante_nome'] : null);
         $stmt->bindValue(':representante_cpf', $data['representante_cpf'] !== '' ? $data['representante_cpf'] : null);
         $stmt->bindValue(':representante_rg', $data['representante_rg'] !== '' ? $data['representante_rg'] : null);

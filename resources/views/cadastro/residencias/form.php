@@ -103,7 +103,7 @@ $bairroOptionsJson = json_encode(array_values($bairroOptions ?? []), JSON_HEX_TA
             <?php endif; ?>
         </div>
 
-        <label class="field">
+        <div class="field">
             <span>Quantidade de familias residentes</span>
             <div class="quantity-stepper" data-quantity-stepper>
                 <button type="button" class="quantity-stepper-button" data-quantity-decrement aria-label="Diminuir quantidade">-</button>
@@ -113,7 +113,7 @@ $bairroOptionsJson = json_encode(array_values($bairroOptions ?? []), JSON_HEX_TA
             <?php if (!empty($errors['quantidade_familias'])): ?>
                 <small class="field-error"><?= h($errors['quantidade_familias'][0]) ?></small>
             <?php endif; ?>
-        </label>
+        </div>
 
         <div class="form-actions">
             <button type="submit" class="primary-button" data-loading-text="Processando...">

@@ -243,6 +243,8 @@ final class FamiliaController extends Controller
             'possui_criancas' => '',
             'possui_idosos' => '',
             'possui_pcd' => '',
+            'possui_gestantes' => '',
+            'registrar_representante' => '',
             'representante_nome' => '',
             'representante_cpf' => '',
             'representante_rg' => '',
@@ -263,10 +265,12 @@ final class FamiliaController extends Controller
             'possui_criancas' => isset($_POST['possui_criancas']) ? '1' : '',
             'possui_idosos' => isset($_POST['possui_idosos']) ? '1' : '',
             'possui_pcd' => isset($_POST['possui_pcd']) ? '1' : '',
-            'representante_nome' => trim((string) ($_POST['representante_nome'] ?? '')),
-            'representante_cpf' => trim((string) ($_POST['representante_cpf'] ?? '')),
-            'representante_rg' => trim((string) ($_POST['representante_rg'] ?? '')),
-            'representante_telefone' => trim((string) ($_POST['representante_telefone'] ?? '')),
+            'possui_gestantes' => isset($_POST['possui_gestantes']) ? '1' : '',
+            'registrar_representante' => isset($_POST['registrar_representante']) ? '1' : '',
+            'representante_nome' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_nome'] ?? '')) : '',
+            'representante_cpf' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_cpf'] ?? '')) : '',
+            'representante_rg' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_rg'] ?? '')) : '',
+            'representante_telefone' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_telefone'] ?? '')) : '',
         ];
     }
 

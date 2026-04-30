@@ -32,7 +32,8 @@
             <?= (int) $familia['possui_criancas'] === 1 ? 'Criancas ' : '' ?>
             <?= (int) $familia['possui_idosos'] === 1 ? 'Idosos ' : '' ?>
             <?= (int) $familia['possui_pcd'] === 1 ? 'PCD' : '' ?>
-            <?= (int) $familia['possui_criancas'] !== 1 && (int) $familia['possui_idosos'] !== 1 && (int) $familia['possui_pcd'] !== 1 ? 'Sem vulnerabilidade marcada' : '' ?>
+            <?= (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '' ?>
+            <?= (int) $familia['possui_criancas'] !== 1 && (int) $familia['possui_idosos'] !== 1 && (int) $familia['possui_pcd'] !== 1 && (int) ($familia['possui_gestantes'] ?? 0) !== 1 ? 'Sem vulnerabilidade marcada' : '' ?>
         </p>
     </article>
 </section>

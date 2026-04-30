@@ -1,110 +1,169 @@
-<section class="form-shell">
-    <div class="section-heading">
+<?php
+$hasRepresentante = !empty($familia['registrar_representante'])
+    || !empty($familia['representante_nome'])
+    || !empty($familia['representante_cpf'])
+    || !empty($familia['representante_rg'])
+    || !empty($familia['representante_telefone']);
+?>
+
+<section class="form-shell family-form-shell">
+    <div class="section-heading family-form-header">
         <span class="eyebrow">Cadastro de familia</span>
         <h1><?= h($title ?? 'Nova familia') ?></h1>
         <p>Residencia <?= h($residencia['protocolo']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
     </div>
 
-    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form js-prevent-double-submit" enctype="multipart/form-data" novalidate>
+    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form family-form js-prevent-double-submit" enctype="multipart/form-data" data-family-form novalidate>
         <?= csrf_field() ?>
         <?= idempotency_field($action) ?>
 
-        <label class="field">
-            <span>Responsavel familiar</span>
-            <input type="text" name="responsavel_nome" value="<?= h($familia['responsavel_nome'] ?? '') ?>" maxlength="180" required>
-            <?php if (!empty($errors['responsavel_nome'])): ?>
-                <small class="field-error"><?= h($errors['responsavel_nome'][0]) ?></small>
-            <?php endif; ?>
-        </label>
+        <section class="form-block family-form-block">
+            <div class="form-block-heading">
+                <span>Dados do responsavel</span>
+                <strong>Identificacao familiar</strong>
+            </div>
 
-        <div class="form-grid two-columns">
             <label class="field">
-                <span>CPF</span>
-                <input type="text" name="responsavel_cpf" value="<?= h($familia['responsavel_cpf'] ?? '') ?>" maxlength="14" required>
-                <?php if (!empty($errors['responsavel_cpf'])): ?>
-                    <small class="field-error"><?= h($errors['responsavel_cpf'][0]) ?></small>
+                <span>Responsavel familiar</span>
+                <input type="text" name="responsavel_nome" value="<?= h($familia['responsavel_nome'] ?? '') ?>" maxlength="180" required>
+                <?php if (!empty($errors['responsavel_nome'])): ?>
+                    <small class="field-error"><?= h($errors['responsavel_nome'][0]) ?></small>
                 <?php endif; ?>
             </label>
-            <label class="field">
-                <span>RG</span>
-                <input type="text" name="responsavel_rg" value="<?= h($familia['responsavel_rg'] ?? '') ?>" maxlength="30">
-                <?php if (!empty($errors['responsavel_rg'])): ?>
-                    <small class="field-error"><?= h($errors['responsavel_rg'][0]) ?></small>
-                <?php endif; ?>
-            </label>
-        </div>
 
-        <div class="form-grid two-columns">
-            <label class="field">
-                <span>Data de nascimento</span>
-                <input type="date" name="data_nascimento" value="<?= h($familia['data_nascimento'] ?? '') ?>">
-                <?php if (!empty($errors['data_nascimento'])): ?>
-                    <small class="field-error"><?= h($errors['data_nascimento'][0]) ?></small>
-                <?php endif; ?>
-            </label>
-            <label class="field">
-                <span>Quantidade de integrantes</span>
-                <input type="number" name="quantidade_integrantes" value="<?= h($familia['quantidade_integrantes'] ?? '1') ?>" min="1" required>
-                <?php if (!empty($errors['quantidade_integrantes'])): ?>
-                    <small class="field-error"><?= h($errors['quantidade_integrantes'][0]) ?></small>
-                <?php endif; ?>
-            </label>
-        </div>
+            <div class="form-grid two-columns">
+                <label class="field">
+                    <span>CPF</span>
+                    <input type="text" name="responsavel_cpf" value="<?= h($familia['responsavel_cpf'] ?? '') ?>" maxlength="14" required>
+                    <?php if (!empty($errors['responsavel_cpf'])): ?>
+                        <small class="field-error"><?= h($errors['responsavel_cpf'][0]) ?></small>
+                    <?php endif; ?>
+                </label>
+                <label class="field">
+                    <span>RG</span>
+                    <input type="text" name="responsavel_rg" value="<?= h($familia['responsavel_rg'] ?? '') ?>" maxlength="30">
+                    <?php if (!empty($errors['responsavel_rg'])): ?>
+                        <small class="field-error"><?= h($errors['responsavel_rg'][0]) ?></small>
+                    <?php endif; ?>
+                </label>
+            </div>
 
-        <div class="form-grid two-columns">
-            <label class="field">
-                <span>Telefone</span>
-                <input type="text" name="telefone" value="<?= h($familia['telefone'] ?? '') ?>" maxlength="30">
-            </label>
-            <label class="field">
-                <span>E-mail</span>
-                <input type="email" name="email" value="<?= h($familia['email'] ?? '') ?>" maxlength="180">
-                <?php if (!empty($errors['email'])): ?>
-                    <small class="field-error"><?= h($errors['email'][0]) ?></small>
-                <?php endif; ?>
-            </label>
-        </div>
+            <div class="form-grid family-birth-grid">
+                <label class="field date-field">
+                    <span>Data de nascimento</span>
+                    <input type="date" name="data_nascimento" value="<?= h($familia['data_nascimento'] ?? '') ?>">
+                    <?php if (!empty($errors['data_nascimento'])): ?>
+                        <small class="field-error"><?= h($errors['data_nascimento'][0]) ?></small>
+                    <?php endif; ?>
+                </label>
+                <div class="field">
+                    <span>Quantidade de integrantes</span>
+                    <div class="quantity-stepper" data-quantity-stepper>
+                        <button type="button" class="quantity-stepper-button" data-quantity-decrement aria-label="Diminuir quantidade">-</button>
+                        <input type="number" name="quantidade_integrantes" value="<?= h($familia['quantidade_integrantes'] ?? '1') ?>" min="1" required data-quantity-input>
+                        <button type="button" class="quantity-stepper-button" data-quantity-increment aria-label="Aumentar quantidade">+</button>
+                    </div>
+                    <?php if (!empty($errors['quantidade_integrantes'])): ?>
+                        <small class="field-error"><?= h($errors['quantidade_integrantes'][0]) ?></small>
+                    <?php endif; ?>
+                </div>
+            </div>
 
-        <fieldset class="checkbox-panel">
-            <legend>Vulnerabilidades</legend>
-            <label><input type="checkbox" name="possui_criancas" value="1" <?= !empty($familia['possui_criancas']) ? 'checked' : '' ?>> Criancas</label>
-            <label><input type="checkbox" name="possui_idosos" value="1" <?= !empty($familia['possui_idosos']) ? 'checked' : '' ?>> Idosos</label>
-            <label><input type="checkbox" name="possui_pcd" value="1" <?= !empty($familia['possui_pcd']) ? 'checked' : '' ?>> Pessoa com deficiencia</label>
-        </fieldset>
+            <div class="form-grid two-columns">
+                <label class="field">
+                    <span>Telefone</span>
+                    <input type="text" name="telefone" value="<?= h($familia['telefone'] ?? '') ?>" maxlength="30">
+                </label>
+                <label class="field">
+                    <span>E-mail</span>
+                    <input type="email" name="email" value="<?= h($familia['email'] ?? '') ?>" maxlength="180">
+                    <?php if (!empty($errors['email'])): ?>
+                        <small class="field-error"><?= h($errors['email'][0]) ?></small>
+                    <?php endif; ?>
+                </label>
+            </div>
+        </section>
 
-        <div class="section-heading compact-heading">
-            <h2>Representante, se houver</h2>
-        </div>
+        <section class="form-block family-form-block">
+            <div class="form-block-heading">
+                <span>Selecao multipla</span>
+                <strong>Vulnerabilidades</strong>
+            </div>
 
-        <label class="field">
-            <span>Nome do representante</span>
-            <input type="text" name="representante_nome" value="<?= h($familia['representante_nome'] ?? '') ?>" maxlength="180">
-        </label>
+            <div class="vulnerability-picker">
+                <label>
+                    <input type="checkbox" name="possui_criancas" value="1" <?= !empty($familia['possui_criancas']) ? 'checked' : '' ?>>
+                    <span>Criancas</span>
+                </label>
+                <label>
+                    <input type="checkbox" name="possui_idosos" value="1" <?= !empty($familia['possui_idosos']) ? 'checked' : '' ?>>
+                    <span>Idosos</span>
+                </label>
+                <label>
+                    <input type="checkbox" name="possui_pcd" value="1" <?= !empty($familia['possui_pcd']) ? 'checked' : '' ?>>
+                    <span>PCD</span>
+                </label>
+                <label>
+                    <input type="checkbox" name="possui_gestantes" value="1" <?= !empty($familia['possui_gestantes']) ? 'checked' : '' ?>>
+                    <span>Gestantes</span>
+                </label>
+            </div>
+        </section>
 
-        <div class="form-grid two-columns">
-            <label class="field">
-                <span>CPF do representante</span>
-                <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14">
-            </label>
-            <label class="field">
-                <span>RG do representante</span>
-                <input type="text" name="representante_rg" value="<?= h($familia['representante_rg'] ?? '') ?>" maxlength="30">
-            </label>
-        </div>
+        <section class="form-block family-form-block">
+            <div class="representative-toggle">
+                <div>
+                    <span>Representante</span>
+                    <strong>Registrar representante, se houver</strong>
+                </div>
+                <label class="switch-control">
+                    <input type="checkbox" name="registrar_representante" value="1" data-representative-toggle <?= $hasRepresentante ? 'checked' : '' ?>>
+                </label>
+            </div>
 
-        <label class="field">
-            <span>Telefone do representante</span>
-            <input type="text" name="representante_telefone" value="<?= h($familia['representante_telefone'] ?? '') ?>" maxlength="30">
-        </label>
+            <div class="representative-fields" data-representative-fields <?= $hasRepresentante ? '' : 'hidden' ?>>
+                <label class="field">
+                    <span>Nome do representante</span>
+                    <input type="text" name="representante_nome" value="<?= h($familia['representante_nome'] ?? '') ?>" maxlength="180" data-representative-input>
+                </label>
 
-        <label class="field">
-            <span>Anexos da familia</span>
-            <input type="file" name="documentos[]" accept="image/jpeg,image/png,application/pdf" multiple>
-            <small class="field-hint">Formatos permitidos: JPG, PNG ou PDF. Tamanho maximo por arquivo: 5 MB.</small>
+                <div class="form-grid two-columns">
+                    <label class="field">
+                        <span>CPF do representante</span>
+                        <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" data-representative-input>
+                    </label>
+                    <label class="field">
+                        <span>RG do representante</span>
+                        <input type="text" name="representante_rg" value="<?= h($familia['representante_rg'] ?? '') ?>" maxlength="30" data-representative-input>
+                    </label>
+                </div>
+
+                <label class="field">
+                    <span>Telefone do representante</span>
+                    <input type="text" name="representante_telefone" value="<?= h($familia['representante_telefone'] ?? '') ?>" maxlength="30" data-representative-input>
+                </label>
+            </div>
+        </section>
+
+        <section class="form-block family-form-block">
+            <div class="form-block-heading">
+                <span>Arquivos</span>
+                <strong>Anexar documentos</strong>
+            </div>
+
+            <div class="family-doc-upload photo-upload" data-family-doc-upload>
+                <input class="file-input-native" id="documentos-familia" type="file" name="documentos[]" accept="image/jpeg,image/png,application/pdf,image/*" capture="environment" multiple data-family-doc-input>
+                <label class="photo-dropzone family-doc-dropzone" for="documentos-familia" tabindex="0" data-family-doc-dropzone>
+                    <strong>Adicionar documentos</strong>
+                    <span>Arraste, cole, selecione arquivos ou tire fotos pelo celular.</span>
+                </label>
+                <div class="family-doc-list" data-family-doc-list hidden></div>
+                <small class="field-hint" data-family-doc-status>JPG, PNG ou PDF. Tamanho maximo por arquivo: 5 MB.</small>
+            </div>
             <?php if (!empty($errors['documentos'])): ?>
                 <small class="field-error"><?= h($errors['documentos'][0]) ?></small>
             <?php endif; ?>
-        </label>
+        </section>
 
         <div class="form-actions">
             <button type="submit" class="primary-button" data-loading-text="Processando...">

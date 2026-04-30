@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS familias (
     possui_criancas TINYINT(1) NOT NULL DEFAULT 0,
     possui_idosos TINYINT(1) NOT NULL DEFAULT 0,
     possui_pcd TINYINT(1) NOT NULL DEFAULT 0,
+    possui_gestantes TINYINT(1) NOT NULL DEFAULT 0,
     representante_nome VARCHAR(180) NULL,
     representante_cpf VARCHAR(14) NULL,
     representante_rg VARCHAR(30) NULL,
