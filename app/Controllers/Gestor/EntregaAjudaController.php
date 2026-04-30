@@ -37,6 +37,21 @@ final class EntregaAjudaController extends Controller
         $this->form($familia, $this->emptyInput(), []);
     }
 
+    public function receipt(string $id): void
+    {
+        $entrega = $this->entregas->find((int) $id);
+
+        if ($entrega === null) {
+            $this->abort(404);
+        }
+
+        $this->view('gestor.entregas.receipt', [
+            'title' => 'Comprovante ' . $entrega['comprovante_codigo'],
+            'entrega' => $entrega,
+            'generatedAt' => new \DateTimeImmutable(),
+        ], 'receipt');
+    }
+
     public function store(string $familiaId): void
     {
         $familia = $this->findFamilia((int) $familiaId);
@@ -63,7 +78,7 @@ final class EntregaAjudaController extends Controller
         (new AuditLogService())->record('registrou_entrega', 'entregas_ajuda', $id, $data['comprovante_codigo']);
         Session::flash('success', 'Entrega registrada com comprovante ' . $data['comprovante_codigo'] . '.');
 
-        $this->redirect('/cadastros/residencias/' . (int) $familia['residencia_id']);
+        $this->redirect('/gestor/entregas/' . $id . '/comprovante');
     }
 
     private function findFamilia(int $id): array

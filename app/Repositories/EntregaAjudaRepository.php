@@ -9,6 +9,39 @@ use PDO;
 
 final class EntregaAjudaRepository
 {
+    public function find(int $id): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT e.id, e.quantidade, e.data_entrega, e.comprovante_codigo, e.observacao,
+                    f.id AS familia_id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg,
+                    f.telefone, f.quantidade_integrantes,
+                    t.nome AS tipo_ajuda_nome, t.unidade_medida,
+                    r.id AS residencia_id, r.protocolo, r.bairro_comunidade, r.endereco, r.complemento,
+                    a.localidade, a.tipo_evento, a.data_evento,
+                    m.nome AS municipio_nome, m.uf,
+                    u.nome AS entregue_por_nome, u.cpf AS entregue_por_cpf
+             FROM entregas_ajuda e
+             INNER JOIN familias f ON f.id = e.familia_id
+             INNER JOIN residencias r ON r.id = f.residencia_id
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             INNER JOIN municipios m ON m.id = r.municipio_id
+             INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
+             INNER JOIN usuarios u ON u.id = e.entregue_por
+             WHERE e.id = :id
+                AND e.deleted_at IS NULL
+                AND f.deleted_at IS NULL
+                AND r.deleted_at IS NULL
+                AND a.deleted_at IS NULL
+             LIMIT 1'
+        );
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $entrega = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($entrega) ? $entrega : null;
+    }
+
     public function all(): array
     {
         return Database::connection()

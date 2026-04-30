@@ -16,6 +16,7 @@
                 <th>Quantidade</th>
                 <th>Residencia</th>
                 <th>Entrega</th>
+                <th class="actions-column">Acoes</th>
             </tr>
         </thead>
         <tbody>
@@ -36,12 +37,15 @@
                         <?= h(date('d/m/Y H:i', strtotime((string) $entrega['data_entrega']))) ?><br>
                         <small><?= h($entrega['entregue_por_nome']) ?></small>
                     </td>
+                    <td class="actions-column">
+                        <a href="<?= h(url('/gestor/entregas/' . $entrega['id'] . '/comprovante')) ?>">Comprovante</a>
+                    </td>
                 </tr>
             <?php endforeach; ?>
 
             <?php if ($entregas === []): ?>
                 <tr>
-                    <td colspan="6" class="empty-state">Nenhuma entrega registrada.</td>
+                    <td colspan="7" class="empty-state">Nenhuma entrega registrada.</td>
                 </tr>
             <?php endif; ?>
         </tbody>

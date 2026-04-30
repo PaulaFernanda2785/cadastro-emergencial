@@ -11,8 +11,8 @@
     --success: #087443;
     --warning: #915930;
     --focus: #2563eb;
-    --sidebar-width: 318px;
-    --sidebar-collapsed-width: 86px;
+    --sidebar-width: 304px;
+    --sidebar-collapsed-width: 92px;
     --topbar-height: 74px;
 }
 
@@ -58,11 +58,9 @@ a:focus {
     align-self: flex-start;
     display: flex;
     flex-direction: column;
-    background:
-        linear-gradient(155deg, rgba(52, 105, 158, 0.24) 0%, rgba(9, 32, 61, 0) 38%),
-        linear-gradient(180deg, #0d2f57 0%, #08233f 48%, #06192f 100%);
-    border-right: 1px solid rgba(140, 184, 222, 0.18);
-    box-shadow: 14px 0 34px rgba(8, 35, 63, 0.18);
+    background: #102338;
+    border-right: 1px solid rgba(174, 205, 226, 0.18);
+    box-shadow: 12px 0 28px rgba(21, 37, 56, 0.18);
     color: #ffffff;
     transition: width 0.2s ease;
     z-index: 20;
@@ -132,34 +130,51 @@ a:focus {
 
 .sidebar-nav {
     display: grid;
-    gap: 6px;
-    padding: 16px 12px;
+    gap: 5px;
+    padding: 14px 12px 18px;
+    overflow-y: auto;
+}
+
+.sidebar-section-title {
+    margin: 14px 10px 5px;
+    color: rgba(232, 242, 251, 0.48);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.sidebar-section-title:first-child {
+    margin-top: 0;
 }
 
 .sidebar-link {
-    min-height: 46px;
+    min-height: 48px;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
-    border-radius: 8px;
-    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 8px 10px;
     color: rgba(232, 242, 251, 0.86);
     font-weight: 700;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .sidebar-link:hover,
 .sidebar-link:focus {
-    background: rgba(143, 190, 230, 0.16);
+    background: rgba(143, 190, 230, 0.13);
+    border-color: rgba(174, 205, 226, 0.16);
     color: #ffffff;
     text-decoration: none;
-    transform: translateX(2px);
+    transform: translateX(1px);
 }
 
 .sidebar-link.is-active {
-    background: linear-gradient(135deg, #e7f6ed 0%, #cce7f5 100%);
-    color: #06223e;
-    box-shadow: 0 10px 24px rgba(3, 18, 33, 0.2);
+    background: #ffffff;
+    border-color: rgba(255, 255, 255, 0.68);
+    color: #102338;
+    box-shadow: 0 10px 22px rgba(3, 18, 33, 0.22);
 }
 
 .sidebar-link.is-disabled {
@@ -167,14 +182,18 @@ a:focus {
     cursor: not-allowed;
 }
 
-.nav-dot {
-    width: 10px;
-    height: 10px;
-    flex: 0 0 10px;
-    border-radius: 999px;
-    background: currentColor;
-    opacity: 0.7;
-    margin-top: 7px;
+.nav-initial {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(232, 242, 251, 0.24);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+    font-size: 12px;
+    font-weight: 800;
 }
 
 .nav-label {
@@ -313,7 +332,8 @@ a:focus {
 
 .is-sidebar-collapsed .brand-text,
 .is-sidebar-collapsed .nav-label,
-.is-sidebar-collapsed .nav-badge {
+.is-sidebar-collapsed .nav-badge,
+.is-sidebar-collapsed .sidebar-section-title {
     display: none;
 }
 
@@ -324,7 +344,17 @@ a:focus {
 
 .is-sidebar-collapsed .sidebar-link {
     justify-content: center;
-    padding-inline: 10px;
+    padding: 8px;
+}
+
+.is-sidebar-collapsed .sidebar-nav {
+    padding-inline: 14px;
+}
+
+.is-sidebar-collapsed .nav-initial {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
 }
 
 .inline-form {
@@ -837,6 +867,14 @@ button:disabled,
     margin-bottom: 18px;
 }
 
+.report-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.compact-table {
+    min-width: 520px;
+}
+
 .signature-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -852,6 +890,120 @@ button:disabled,
 .signature-grid p {
     margin-top: 8px;
     text-align: center;
+}
+
+.receipt-page {
+    background: #eef3f7;
+}
+
+.receipt-main {
+    width: min(100% - 24px, 520px);
+    margin: 24px auto;
+}
+
+.receipt-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.receipt-ticket {
+    width: min(100%, 360px);
+    margin: 0 auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    background: #ffffff;
+    color: #111111;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.receipt-header,
+.receipt-footer {
+    display: grid;
+    gap: 3px;
+    text-align: center;
+}
+
+.receipt-header strong {
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.receipt-separator {
+    border-top: 1px dashed #555555;
+    margin: 12px 0;
+}
+
+.receipt-lines {
+    display: grid;
+    gap: 7px;
+    margin: 0;
+}
+
+.receipt-lines div {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 8px;
+}
+
+.receipt-lines dt {
+    color: #333333;
+    font-weight: 700;
+}
+
+.receipt-lines dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.receipt-items {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.receipt-items th,
+.receipt-items td {
+    border-bottom: 1px dashed #999999;
+    padding: 6px 0;
+    text-align: left;
+    vertical-align: top;
+}
+
+.receipt-items th:last-child,
+.receipt-items td:last-child {
+    text-align: right;
+}
+
+.receipt-note {
+    margin-bottom: 0;
+    color: #111111;
+    overflow-wrap: anywhere;
+}
+
+.receipt-signature {
+    margin-top: 38px;
+}
+
+.receipt-signature span {
+    display: block;
+    border-top: 1px solid #111111;
+}
+
+.receipt-signature p {
+    margin: 6px 0 0;
+    color: #111111;
+    text-align: center;
+}
+
+.receipt-footer {
+    margin-top: 16px;
+    font-size: 11px;
 }
 
 .error-page {
@@ -1019,6 +1171,23 @@ button:disabled,
     .data-table th,
     .data-table td {
         padding: 6px;
+    }
+
+    .receipt-page,
+    .receipt-main {
+        width: 100%;
+        margin: 0;
+        background: #ffffff;
+    }
+
+    .receipt-ticket {
+        width: 72mm;
+        max-width: 72mm;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        font-size: 10.5pt;
     }
 
     a {

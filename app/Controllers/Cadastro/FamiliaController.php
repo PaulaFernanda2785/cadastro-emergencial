@@ -25,6 +25,14 @@ final class FamiliaController extends Controller
     ) {
     }
 
+    public function index(): void
+    {
+        $this->view('cadastro.familias.index', [
+            'title' => 'Familias cadastradas',
+            'familias' => $this->familias->all(),
+        ]);
+    }
+
     public function create(string $residenciaId): void
     {
         $residencia = $this->findResidencia((int) $residenciaId);

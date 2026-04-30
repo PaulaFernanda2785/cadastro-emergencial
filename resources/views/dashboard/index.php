@@ -45,6 +45,7 @@
         <?php if (in_array((string) ($user['perfil'] ?? ''), ['gestor', 'administrador'], true)): ?>
             <li><a href="<?= h(url('/gestor/entregas')) ?>">Consultar entregas de ajuda humanitaria.</a></li>
             <li><a href="<?= h(url('/gestor/prestacao-contas')) ?>">Gerar prestacao de contas por tipo de ajuda.</a></li>
+            <li><a href="<?= h(url('/gestor/relatorios')) ?>">Acompanhar relatorios operacionais e pendencias.</a></li>
         <?php endif; ?>
     </ul>
 </section>

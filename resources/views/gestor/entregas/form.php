@@ -85,6 +85,7 @@
                 <th>Quantidade</th>
                 <th>Data</th>
                 <th>Responsavel</th>
+                <th class="actions-column">Acoes</th>
             </tr>
         </thead>
         <tbody>
@@ -95,12 +96,15 @@
                     <td><?= h(number_format((float) $item['quantidade'], 2, ',', '.')) ?> <?= h($item['unidade_medida']) ?></td>
                     <td><?= h(date('d/m/Y H:i', strtotime((string) $item['data_entrega']))) ?></td>
                     <td><?= h($item['entregue_por_nome']) ?></td>
+                    <td class="actions-column">
+                        <a href="<?= h(url('/gestor/entregas/' . $item['id'] . '/comprovante')) ?>">Comprovante</a>
+                    </td>
                 </tr>
             <?php endforeach; ?>
 
             <?php if ($historico === []): ?>
                 <tr>
-                    <td colspan="5" class="empty-state">Nenhuma entrega anterior para esta familia.</td>
+                    <td colspan="6" class="empty-state">Nenhuma entrega anterior para esta familia.</td>
                 </tr>
             <?php endif; ?>
         </tbody>

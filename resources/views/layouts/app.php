@@ -14,14 +14,16 @@ $profileLabel = [
 ][$user['perfil'] ?? ''] ?? 'Visitante';
 
 $menuItems = [
-    ['label' => 'Painel situacional', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
-    ['label' => 'Ações emergenciais', 'url' => '/admin/acoes', 'match' => ['/admin/acoes'], 'roles' => ['administrador']],
-    ['label' => 'Tipos de ajuda', 'url' => '/admin/ajudas', 'match' => ['/admin/ajudas'], 'roles' => ['administrador']],
-    ['label' => 'Cadastros', 'url' => '/cadastros/residencias', 'match' => ['/cadastros/residencias']],
-    ['label' => 'Famílias', 'url' => '/cadastros/residencias', 'match' => ['/gestor/familias']],
-    ['label' => 'Entregas', 'url' => '/gestor/entregas', 'match' => ['/gestor/entregas', '/gestor/familias'], 'roles' => ['gestor', 'administrador']],
-    ['label' => 'Prestação de contas', 'url' => '/gestor/prestacao-contas', 'match' => ['/gestor/prestacao-contas'], 'roles' => ['gestor', 'administrador']],
-    ['label' => 'Relatórios', 'url' => '#', 'match' => ['/gestor/relatorios'], 'soon' => true],
+    ['group' => 'Operacao', 'label' => 'Painel situacional', 'abbr' => 'PS', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
+    ['group' => 'Operacao', 'label' => 'Cadastros', 'abbr' => 'CD', 'url' => '/cadastros/residencias', 'match' => ['/cadastros/residencias']],
+    ['group' => 'Operacao', 'label' => 'Familias', 'abbr' => 'FM', 'url' => '/gestor/familias', 'match' => ['/gestor/familias']],
+    ['group' => 'Gestao', 'label' => 'Entregas', 'abbr' => 'EN', 'url' => '/gestor/entregas', 'match' => ['/gestor/entregas'], 'roles' => ['gestor', 'administrador']],
+    ['group' => 'Gestao', 'label' => 'Prestacao de contas', 'abbr' => 'PC', 'url' => '/gestor/prestacao-contas', 'match' => ['/gestor/prestacao-contas'], 'roles' => ['gestor', 'administrador']],
+    ['group' => 'Gestao', 'label' => 'Relatorios', 'abbr' => 'RL', 'url' => '/gestor/relatorios', 'match' => ['/gestor/relatorios'], 'roles' => ['gestor', 'administrador']],
+    ['group' => 'Administracao', 'label' => 'Acoes emergenciais', 'abbr' => 'AE', 'url' => '/admin/acoes', 'match' => ['/admin/acoes'], 'roles' => ['administrador']],
+    ['group' => 'Administracao', 'label' => 'Tipos de ajuda', 'abbr' => 'TA', 'url' => '/admin/ajudas', 'match' => ['/admin/ajudas'], 'roles' => ['administrador']],
+    ['group' => 'Administracao', 'label' => 'Usuarios', 'abbr' => 'US', 'url' => '/admin/usuarios', 'match' => ['/admin/usuarios'], 'roles' => ['administrador']],
+    ['group' => 'Conta', 'label' => 'Alterar senha', 'abbr' => 'AS', 'url' => '/alterar-senha', 'match' => ['/alterar-senha']],
 ];
 ?>
 <!doctype html>
@@ -51,12 +53,19 @@ $menuItems = [
                 </div>
 
                 <nav class="sidebar-nav" aria-label="Menu principal">
+                    <?php $currentGroup = null; ?>
                     <?php foreach ($menuItems as $item): ?>
                         <?php
                         $roles = $item['roles'] ?? null;
                         if (is_array($roles) && !in_array((string) ($user['perfil'] ?? ''), $roles, true)) {
                             continue;
                         }
+
+                        if (($item['group'] ?? '') !== $currentGroup) {
+                            $currentGroup = $item['group'] ?? '';
+                            echo '<span class="sidebar-section-title">' . h($currentGroup) . '</span>';
+                        }
+
                         $isActive = false;
                         foreach ($item['match'] as $match) {
                             if ($match === '/' ? $currentPath === '/' : str_starts_with($currentPath, $match)) {
@@ -65,18 +74,10 @@ $menuItems = [
                             }
                         }
                         ?>
-                        <?php if (!empty($item['soon'])): ?>
-                            <span class="sidebar-link is-disabled" aria-disabled="true">
-                                <span class="nav-dot"></span>
-                                <span class="nav-label"><?= h($item['label']) ?></span>
-                                <span class="nav-badge">Em breve</span>
-                            </span>
-                        <?php else: ?>
-                            <a class="sidebar-link <?= $isActive ? 'is-active' : '' ?>" href="<?= h(url($item['url'])) ?>">
-                                <span class="nav-dot"></span>
-                                <span class="nav-label"><?= h($item['label']) ?></span>
-                            </a>
-                        <?php endif; ?>
+                        <a class="sidebar-link <?= $isActive ? 'is-active' : '' ?>" href="<?= h(url($item['url'])) ?>" title="<?= h($item['label']) ?>">
+                            <span class="nav-initial"><?= h($item['abbr']) ?></span>
+                            <span class="nav-label"><?= h($item['label']) ?></span>
+                        </a>
                     <?php endforeach; ?>
                 </nav>
             </aside>
@@ -93,8 +94,8 @@ $menuItems = [
                         </button>
                     <?php endif; ?>
                     <div class="institution-title">
-                        <strong>Corpo de Bombeiros Militar do Pará</strong>
-                        <span>Coordenadoria Estadual de Proteção e Defesa Civil</span>
+                        <strong>Corpo de Bombeiros Militar do Para</strong>
+                        <span>Coordenadoria Estadual de Protecao e Defesa Civil</span>
                     </div>
                 </div>
 
@@ -131,9 +132,9 @@ $menuItems = [
             </main>
 
             <footer class="app-footer">
-                <span><?= h($app['name']) ?> - versão 1.0.0 produção</span>
-                <span>© 2026 todos os direitos reservados.</span>
-                <span>Desenvolvido pela Divisão de Gestão de Risco - DGR/CEDEC-PA</span>
+                <span><?= h($app['name']) ?> - versao 1.0.0 producao</span>
+                <span>2026 todos os direitos reservados.</span>
+                <span>Desenvolvido pela Divisao de Gestao de Risco - DGR/CEDEC-PA</span>
             </footer>
         </div>
     </div>

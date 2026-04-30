@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Core\Csrf;
 use App\Core\Session;
 use App\Core\Validator;
+use App\Repositories\UsuarioRepository;
 use App\Services\AuditLogService;
 use App\Services\AuthService;
 use App\Services\IdempotenciaService;
@@ -89,5 +90,70 @@ final class AuthController extends Controller
         Session::flash('success', 'Sessao encerrada com seguranca.');
 
         $this->redirect('/login');
+    }
+
+    public function showChangePassword(): void
+    {
+        $this->view('auth.change_password', [
+            'title' => 'Alterar senha',
+            'errors' => [],
+        ]);
+    }
+
+    public function changePassword(): void
+    {
+        $this->guardPost('auth.change_password', '/alterar-senha');
+
+        $currentPassword = (string) ($_POST['senha_atual'] ?? '');
+        $newPassword = (string) ($_POST['nova_senha'] ?? '');
+        $confirmation = (string) ($_POST['confirmar_senha'] ?? '');
+        $validator = (new Validator())
+            ->required('senha_atual', $currentPassword, 'Senha atual')
+            ->required('nova_senha', $newPassword, 'Nova senha')
+            ->required('confirmar_senha', $confirmation, 'Confirmacao de senha');
+
+        if ($newPassword !== '' && strlen($newPassword) < 8) {
+            $validator->add('nova_senha', 'Nova senha deve ter no minimo 8 caracteres.');
+        }
+
+        if ($newPassword !== $confirmation) {
+            $validator->add('confirmar_senha', 'Confirmacao nao confere com a nova senha.');
+        }
+
+        $userId = (int) (current_user()['id'] ?? 0);
+        $user = (new UsuarioRepository())->find($userId);
+
+        if ($user === null || !password_verify($currentPassword, (string) $user['senha_hash'])) {
+            $validator->add('senha_atual', 'Senha atual invalida.');
+        }
+
+        if ($validator->fails()) {
+            $this->view('auth.change_password', [
+                'title' => 'Alterar senha',
+                'errors' => $validator->errors(),
+            ]);
+            return;
+        }
+
+        (new UsuarioRepository())->updatePassword($userId, $newPassword);
+        (new AuditLogService())->record('alterou_senha', 'usuarios', $userId, 'Usuario alterou a propria senha.');
+        Session::flash('success', 'Senha alterada com seguranca.');
+
+        $this->redirect('/dashboard');
+    }
+
+    private function guardPost(string $scope, string $failureRedirect): void
+    {
+        if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
+            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            $this->redirect($failureRedirect);
+        }
+
+        $idempotency = (new IdempotenciaService())->validateAndReserve($_POST['_idempotency_token'] ?? null, $scope);
+
+        if (!$idempotency['ok']) {
+            Session::flash('warning', $idempotency['message']);
+            $this->redirect($failureRedirect);
+        }
     }
 }
