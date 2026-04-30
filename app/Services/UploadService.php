@@ -16,7 +16,7 @@ final class UploadService
         'application/pdf' => 'pdf',
     ];
 
-    public function storePrivate(array $file, string $subdirectory = 'documentos'): array
+    public function storePrivate(array $file, string $subdirectory = 'documentos', ?array $allowedMimeTypes = null): array
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             throw new RuntimeException('Falha ao receber o arquivo enviado.');
@@ -34,12 +34,15 @@ final class UploadService
 
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mimeType = (string) $finfo->file($tmpPath);
+        $allowed = $allowedMimeTypes === null
+            ? self::ALLOWED
+            : array_intersect_key(self::ALLOWED, array_flip($allowedMimeTypes));
 
-        if (!array_key_exists($mimeType, self::ALLOWED)) {
+        if (!array_key_exists($mimeType, $allowed)) {
             throw new RuntimeException('Tipo de arquivo nao permitido.');
         }
 
-        $extension = self::ALLOWED[$mimeType];
+        $extension = $allowed[$mimeType];
         $baseDir = BASE_PATH . '/storage/private_uploads/' . trim($subdirectory, '/');
 
         if (!is_dir($baseDir) && !mkdir($baseDir, 0750, true)) {
@@ -63,5 +66,32 @@ final class UploadService
             'tamanho_bytes' => $size,
             'hash_arquivo' => hash_file('sha256', $destination),
         ];
+    }
+
+    public function hasFile(array $file): bool
+    {
+        return ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    }
+
+    public function normalizeMultiple(array $files): array
+    {
+        $normalized = [];
+        $names = $files['name'] ?? [];
+
+        if (!is_array($names)) {
+            return [$files];
+        }
+
+        foreach ($names as $index => $name) {
+            $normalized[] = [
+                'name' => $name,
+                'type' => $files['type'][$index] ?? null,
+                'tmp_name' => $files['tmp_name'][$index] ?? null,
+                'error' => $files['error'][$index] ?? UPLOAD_ERR_NO_FILE,
+                'size' => $files['size'][$index] ?? 0,
+            ];
+        }
+
+        return $normalized;
     }
 }

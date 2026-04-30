@@ -5,7 +5,7 @@
         <p><?= h($acao['municipio_nome']) ?> / <?= h($acao['uf']) ?> - <?= h($acao['localidade']) ?> - <?= h($acao['tipo_evento']) ?></p>
     </div>
 
-    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form js-prevent-double-submit" novalidate>
+    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form js-prevent-double-submit" enctype="multipart/form-data" data-geolocation-form novalidate>
         <?= csrf_field() ?>
         <?= idempotency_field($action) ?>
 
@@ -36,7 +36,7 @@
         <div class="form-grid two-columns">
             <label class="field">
                 <span>Latitude</span>
-                <input type="text" name="latitude" value="<?= h($residencia['latitude'] ?? '') ?>" inputmode="decimal" placeholder="-1.455833">
+                <input type="text" name="latitude" value="<?= h($residencia['latitude'] ?? '') ?>" inputmode="decimal" placeholder="-1.455833" data-latitude>
                 <?php if (!empty($errors['latitude'])): ?>
                     <small class="field-error"><?= h($errors['latitude'][0]) ?></small>
                 <?php endif; ?>
@@ -44,12 +44,26 @@
 
             <label class="field">
                 <span>Longitude</span>
-                <input type="text" name="longitude" value="<?= h($residencia['longitude'] ?? '') ?>" inputmode="decimal" placeholder="-48.503887">
+                <input type="text" name="longitude" value="<?= h($residencia['longitude'] ?? '') ?>" inputmode="decimal" placeholder="-48.503887" data-longitude>
                 <?php if (!empty($errors['longitude'])): ?>
                     <small class="field-error"><?= h($errors['longitude'][0]) ?></small>
                 <?php endif; ?>
             </label>
         </div>
+
+        <div class="inline-action-panel">
+            <button type="button" class="secondary-button" data-geolocation-button>Capturar localizacao atual</button>
+            <span data-geolocation-status>Latitude e longitude tambem podem ser preenchidas manualmente.</span>
+        </div>
+
+        <label class="field">
+            <span>Foto georreferenciada da residencia</span>
+            <input type="file" name="foto_georreferenciada" accept="image/jpeg,image/png">
+            <small class="field-hint">Formatos permitidos: JPG ou PNG. Tamanho maximo: 5 MB.</small>
+            <?php if (!empty($errors['foto_georreferenciada'])): ?>
+                <small class="field-error"><?= h($errors['foto_georreferenciada'][0]) ?></small>
+            <?php endif; ?>
+        </label>
 
         <label class="field">
             <span>Quantidade de familias residentes</span>

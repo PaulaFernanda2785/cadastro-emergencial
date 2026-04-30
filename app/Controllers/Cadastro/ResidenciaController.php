@@ -9,18 +9,22 @@ use App\Core\Csrf;
 use App\Core\Session;
 use App\Core\Validator;
 use App\Repositories\AcaoEmergencialRepository;
+use App\Repositories\DocumentoAnexoRepository;
 use App\Repositories\FamiliaRepository;
 use App\Repositories\ResidenciaRepository;
 use App\Services\AuditLogService;
 use App\Services\IdempotenciaService;
 use App\Services\ProtocoloService;
+use App\Services\UploadService;
+use RuntimeException;
 
 final class ResidenciaController extends Controller
 {
     public function __construct(
         private readonly ResidenciaRepository $residencias = new ResidenciaRepository(),
         private readonly FamiliaRepository $familias = new FamiliaRepository(),
-        private readonly AcaoEmergencialRepository $acoes = new AcaoEmergencialRepository()
+        private readonly AcaoEmergencialRepository $acoes = new AcaoEmergencialRepository(),
+        private readonly DocumentoAnexoRepository $documentos = new DocumentoAnexoRepository()
     ) {
     }
 
@@ -44,6 +48,7 @@ final class ResidenciaController extends Controller
             'title' => 'Residencia ' . $residencia['protocolo'],
             'residencia' => $residencia,
             'familias' => $this->familias->byResidencia((int) $id),
+            'documentos' => $this->documentos->byResidencia((int) $id),
         ]);
     }
 
@@ -78,8 +83,35 @@ final class ResidenciaController extends Controller
         $data['municipio_id'] = (int) $acao['municipio_id'];
         $data['protocolo'] = (new ProtocoloService())->generate($acao);
         $data['cadastrado_por'] = (int) (current_user()['id'] ?? 0);
+        $data['foto_georreferenciada'] = null;
+
+        $upload = new UploadService();
+        $foto = $_FILES['foto_georreferenciada'] ?? null;
+        $fotoMetadata = null;
+
+        if (is_array($foto) && $upload->hasFile($foto)) {
+            try {
+                $fotoMetadata = $upload->storePrivate($foto, 'residencias', ['image/jpeg', 'image/png']);
+                $data['foto_georreferenciada'] = $fotoMetadata['caminho_arquivo'];
+            } catch (RuntimeException $exception) {
+                $errors = $validator->errors();
+                $errors['foto_georreferenciada'][] = $exception->getMessage();
+                $this->form($acao, $data, $errors);
+                return;
+            }
+        }
 
         $id = $this->residencias->create($data);
+
+        if ($fotoMetadata !== null) {
+            $this->documentos->create($fotoMetadata + [
+                'residencia_id' => $id,
+                'familia_id' => null,
+                'tipo_documento' => 'foto_georreferenciada',
+                'enviado_por' => (int) (current_user()['id'] ?? 0),
+            ]);
+        }
+
         (new AuditLogService())->record('criou_residencia', 'residencias', $id, $data['protocolo']);
         Session::flash('success', 'Residencia cadastrada. Agora cadastre as familias vinculadas.');
 

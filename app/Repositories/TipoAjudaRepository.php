@@ -16,6 +16,13 @@ final class TipoAjudaRepository
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function active(): array
+    {
+        return Database::connection()
+            ->query('SELECT id, nome, unidade_medida FROM tipos_ajuda WHERE ativo = 1 ORDER BY nome')
+            ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare(

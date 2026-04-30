@@ -56,10 +56,10 @@ final class ResidenciaRepository
         $stmt = Database::connection()->prepare(
             'INSERT INTO residencias
                 (acao_id, protocolo, municipio_id, bairro_comunidade, endereco, complemento,
-                 latitude, longitude, quantidade_familias, cadastrado_por)
+                 latitude, longitude, foto_georreferenciada, quantidade_familias, cadastrado_por)
              VALUES
                 (:acao_id, :protocolo, :municipio_id, :bairro_comunidade, :endereco, :complemento,
-                 :latitude, :longitude, :quantidade_familias, :cadastrado_por)'
+                 :latitude, :longitude, :foto_georreferenciada, :quantidade_familias, :cadastrado_por)'
         );
         $stmt->bindValue(':acao_id', (int) $data['acao_id'], PDO::PARAM_INT);
         $stmt->bindValue(':protocolo', $data['protocolo']);
@@ -69,6 +69,7 @@ final class ResidenciaRepository
         $stmt->bindValue(':complemento', $data['complemento'] !== '' ? $data['complemento'] : null);
         $stmt->bindValue(':latitude', $data['latitude'] !== '' ? $data['latitude'] : null);
         $stmt->bindValue(':longitude', $data['longitude'] !== '' ? $data['longitude'] : null);
+        $stmt->bindValue(':foto_georreferenciada', $data['foto_georreferenciada'] ?? null);
         $stmt->bindValue(':quantidade_familias', (int) $data['quantidade_familias'], PDO::PARAM_INT);
         $stmt->bindValue(':cadastrado_por', (int) $data['cadastrado_por'], PDO::PARAM_INT);
         $stmt->execute();

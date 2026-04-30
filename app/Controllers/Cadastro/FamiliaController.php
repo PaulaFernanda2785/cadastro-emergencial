@@ -8,16 +8,20 @@ use App\Core\Controller;
 use App\Core\Csrf;
 use App\Core\Session;
 use App\Core\Validator;
+use App\Repositories\DocumentoAnexoRepository;
 use App\Repositories\FamiliaRepository;
 use App\Repositories\ResidenciaRepository;
 use App\Services\AuditLogService;
 use App\Services\IdempotenciaService;
+use App\Services\UploadService;
+use RuntimeException;
 
 final class FamiliaController extends Controller
 {
     public function __construct(
         private readonly FamiliaRepository $familias = new FamiliaRepository(),
-        private readonly ResidenciaRepository $residencias = new ResidenciaRepository()
+        private readonly ResidenciaRepository $residencias = new ResidenciaRepository(),
+        private readonly DocumentoAnexoRepository $documentos = new DocumentoAnexoRepository()
     ) {
     }
 
@@ -40,8 +44,37 @@ final class FamiliaController extends Controller
             return;
         }
 
+        $upload = new UploadService();
+        $documentos = [];
+        $files = is_array($_FILES['documentos'] ?? null) ? $upload->normalizeMultiple($_FILES['documentos']) : [];
+
+        foreach ($files as $file) {
+            if (!$upload->hasFile($file)) {
+                continue;
+            }
+
+            try {
+                $documentos[] = $upload->storePrivate($file, 'familias');
+            } catch (RuntimeException $exception) {
+                $errors = $validator->errors();
+                $errors['documentos'][] = $exception->getMessage();
+                $this->form($residencia, $data, $errors);
+                return;
+            }
+        }
+
         $data['residencia_id'] = (int) $residenciaId;
         $id = $this->familias->create($data);
+
+        foreach ($documentos as $metadata) {
+            $this->documentos->create($metadata + [
+                'familia_id' => $id,
+                'residencia_id' => null,
+                'tipo_documento' => 'documento_familia',
+                'enviado_por' => (int) (current_user()['id'] ?? 0),
+            ]);
+        }
+
         (new AuditLogService())->record('criou_familia', 'familias', $id, $data['responsavel_nome']);
         Session::flash('success', 'Familia cadastrada.');
 

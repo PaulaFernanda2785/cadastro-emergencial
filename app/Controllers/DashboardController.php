@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Repositories\AcaoEmergencialRepository;
+use App\Repositories\EntregaAjudaRepository;
 use App\Repositories\FamiliaRepository;
 use App\Repositories\ResidenciaRepository;
 use App\Repositories\TipoAjudaRepository;
@@ -35,6 +36,7 @@ final class DashboardController extends Controller
         return [
             'residencias' => (new ResidenciaRepository())->count(),
             'familias' => (new FamiliaRepository())->count(),
+            'entregas' => (new EntregaAjudaRepository())->count(),
             'tipos_ajuda' => (new TipoAjudaRepository())->countActive(),
             'acoes_abertas' => (new AcaoEmergencialRepository())->countOpen(),
         ];

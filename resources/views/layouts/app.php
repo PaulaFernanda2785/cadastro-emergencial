@@ -19,7 +19,7 @@ $menuItems = [
     ['label' => 'Tipos de ajuda', 'url' => '/admin/ajudas', 'match' => ['/admin/ajudas'], 'roles' => ['administrador']],
     ['label' => 'Cadastros', 'url' => '/cadastros/residencias', 'match' => ['/cadastros/residencias']],
     ['label' => 'Famílias', 'url' => '/cadastros/residencias', 'match' => ['/gestor/familias']],
-    ['label' => 'Entregas', 'url' => '#', 'match' => ['/gestor/entregas'], 'soon' => true],
+    ['label' => 'Entregas', 'url' => '/gestor/entregas', 'match' => ['/gestor/entregas', '/gestor/familias'], 'roles' => ['gestor', 'administrador']],
     ['label' => 'Prestação de contas', 'url' => '#', 'match' => ['/gestor/prestacao-contas'], 'soon' => true],
     ['label' => 'Relatórios', 'url' => '#', 'match' => ['/gestor/relatorios'], 'soon' => true],
 ];
@@ -34,6 +34,7 @@ $menuItems = [
     <link rel="stylesheet" href="<?= h(asset('css/app.css')) ?>">
     <script src="<?= h(asset('js/forms.js')) ?>" defer></script>
     <script src="<?= h(asset('js/layout.js')) ?>" defer></script>
+    <script src="<?= h(asset('js/geolocation.js')) ?>" defer></script>
 </head>
 <body>
     <div class="app-shell" data-layout-shell>

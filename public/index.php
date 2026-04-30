@@ -27,6 +27,7 @@ use App\Controllers\Admin\AcaoEmergencialController;
 use App\Controllers\Admin\TipoAjudaController;
 use App\Controllers\Cadastro\FamiliaController;
 use App\Controllers\Cadastro\ResidenciaController;
+use App\Controllers\Gestor\EntregaAjudaController;
 use App\Controllers\PublicAcaoController;
 use App\Core\Env;
 use App\Core\Router;
@@ -61,6 +62,9 @@ $router->get('/cadastros/residencias', [ResidenciaController::class, 'index'], [
 $router->get('/cadastros/residencias/{id}', [ResidenciaController::class, 'show'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/novo', [FamiliaController::class, 'create'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias', [FamiliaController::class, 'store'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->get('/gestor/entregas', [EntregaAjudaController::class, 'index'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/familias/{id}/entregas/novo', [EntregaAjudaController::class, 'create'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/familias/{id}/entregas', [EntregaAjudaController::class, 'store'], ['auth', 'role:gestor,administrador']);
 $router->get('/acao/{token}/residencias/novo', [ResidenciaController::class, 'createFromAction'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/acao/{token}/residencias', [ResidenciaController::class, 'storeFromAction'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/acao/{token}', [PublicAcaoController::class, 'show']);

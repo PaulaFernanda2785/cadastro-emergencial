@@ -9,15 +9,42 @@ use PDO;
 
 final class FamiliaRepository
 {
+    public function find(int $id): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT f.id, f.residencia_id, f.responsavel_nome, f.responsavel_cpf, f.telefone,
+                    f.quantidade_integrantes, f.possui_criancas, f.possui_idosos, f.possui_pcd,
+                    r.protocolo, r.bairro_comunidade, r.endereco,
+                    a.localidade, a.tipo_evento, m.nome AS municipio_nome, m.uf
+             FROM familias f
+             INNER JOIN residencias r ON r.id = f.residencia_id
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             INNER JOIN municipios m ON m.id = r.municipio_id
+             WHERE f.id = :id AND f.deleted_at IS NULL
+             LIMIT 1'
+        );
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $familia = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($familia) ? $familia : null;
+    }
+
     public function byResidencia(int $residenciaId): array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT id, responsavel_nome, responsavel_cpf, responsavel_rg, data_nascimento,
-                    telefone, email, quantidade_integrantes, possui_criancas, possui_idosos,
-                    possui_pcd, representante_nome, representante_cpf, representante_telefone, criado_em
-             FROM familias
-             WHERE residencia_id = :residencia_id AND deleted_at IS NULL
-             ORDER BY criado_em DESC'
+            'SELECT f.id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg, f.data_nascimento,
+                    f.telefone, f.email, f.quantidade_integrantes, f.possui_criancas, f.possui_idosos,
+                    f.possui_pcd, f.representante_nome, f.representante_cpf, f.representante_telefone, f.criado_em,
+                    (
+                        SELECT COUNT(*)
+                        FROM entregas_ajuda e
+                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                    ) AS entregas_registradas
+             FROM familias f
+             WHERE f.residencia_id = :residencia_id AND f.deleted_at IS NULL
+             ORDER BY f.criado_em DESC'
         );
         $stmt->bindValue(':residencia_id', $residenciaId, PDO::PARAM_INT);
         $stmt->execute();

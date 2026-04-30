@@ -27,7 +27,43 @@
     </article>
 </section>
 
+<section class="table-panel attachments-panel">
+    <div class="table-heading">
+        <h2>Anexos privados</h2>
+        <span><?= h(count($documentos)) ?> arquivo(s)</span>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Arquivo</th>
+                <th>Vinculo</th>
+                <th>Tamanho</th>
+                <th>Enviado em</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($documentos as $documento): ?>
+                <tr>
+                    <td><?= h($documento['tipo_documento']) ?></td>
+                    <td><?= h($documento['nome_original']) ?></td>
+                    <td><?= $documento['familia_id'] ? h($documento['responsavel_nome']) : 'Residencia' ?></td>
+                    <td><?= h(number_format(((int) $documento['tamanho_bytes']) / 1024, 1, ',', '.')) ?> KB</td>
+                    <td><?= h(date('d/m/Y H:i', strtotime((string) $documento['criado_em']))) ?></td>
+                </tr>
+            <?php endforeach; ?>
+
+            <?php if ($documentos === []): ?>
+                <tr>
+                    <td colspan="5" class="empty-state">Nenhum anexo registrado.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</section>
+
 <section class="table-panel">
+    <?php $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['gestor', 'administrador'], true); ?>
     <div class="table-heading">
         <h2>Familias vinculadas</h2>
         <span><?= h(count($familias)) ?> cadastrada(s) de <?= h($residencia['quantidade_familias']) ?> informada(s)</span>
@@ -40,6 +76,10 @@
                 <th>Telefone</th>
                 <th>Integrantes</th>
                 <th>Vulnerabilidades</th>
+                <th>Entregas</th>
+                <?php if ($canRegisterDelivery): ?>
+                    <th class="actions-column">Acoes</th>
+                <?php endif; ?>
             </tr>
         </thead>
         <tbody>
@@ -54,12 +94,18 @@
                         <?= (int) $familia['possui_idosos'] === 1 ? 'Idosos ' : '' ?>
                         <?= (int) $familia['possui_pcd'] === 1 ? 'PCD' : '' ?>
                     </td>
+                    <td><?= h($familia['entregas_registradas'] ?? 0) ?></td>
+                    <?php if ($canRegisterDelivery): ?>
+                        <td class="actions-column">
+                            <a href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Registrar entrega</a>
+                        </td>
+                    <?php endif; ?>
                 </tr>
             <?php endforeach; ?>
 
             <?php if ($familias === []): ?>
                 <tr>
-                    <td colspan="5" class="empty-state">Nenhuma familia cadastrada para esta residencia.</td>
+                    <td colspan="<?= $canRegisterDelivery ? '7' : '6' ?>" class="empty-state">Nenhuma familia cadastrada para esta residencia.</td>
                 </tr>
             <?php endif; ?>
         </tbody>

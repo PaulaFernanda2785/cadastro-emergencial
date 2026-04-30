@@ -5,7 +5,7 @@
         <p>Residencia <?= h($residencia['protocolo']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
     </div>
 
-    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form js-prevent-double-submit" novalidate>
+    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form js-prevent-double-submit" enctype="multipart/form-data" novalidate>
         <?= csrf_field() ?>
         <?= idempotency_field($action) ?>
 
@@ -95,6 +95,15 @@
         <label class="field">
             <span>Telefone do representante</span>
             <input type="text" name="representante_telefone" value="<?= h($familia['representante_telefone'] ?? '') ?>" maxlength="30">
+        </label>
+
+        <label class="field">
+            <span>Anexos da familia</span>
+            <input type="file" name="documentos[]" accept="image/jpeg,image/png,application/pdf" multiple>
+            <small class="field-hint">Formatos permitidos: JPG, PNG ou PDF. Tamanho maximo por arquivo: 5 MB.</small>
+            <?php if (!empty($errors['documentos'])): ?>
+                <small class="field-error"><?= h($errors['documentos'][0]) ?></small>
+            <?php endif; ?>
         </label>
 
         <div class="form-actions">

@@ -412,7 +412,8 @@ p {
 }
 
 .field input,
-.field select {
+.field select,
+.field textarea {
     width: 100%;
     min-height: 44px;
     border: 1px solid var(--line);
@@ -425,13 +426,19 @@ p {
 }
 
 .field input:focus,
-.field select:focus {
+.field select:focus,
+.field textarea:focus {
     border-color: var(--focus);
     outline: 3px solid rgba(37, 99, 235, 0.14);
 }
 
 .field-error {
     color: var(--danger);
+    font-weight: 400;
+}
+
+.field-hint {
+    color: var(--muted);
     font-weight: 400;
 }
 
@@ -455,6 +462,18 @@ button,
 button:hover,
 .primary-button:hover {
     background: var(--primary-strong);
+}
+
+.secondary-button {
+    min-height: 40px;
+    border: 1px solid var(--line);
+    color: var(--text);
+    background: var(--surface-muted);
+}
+
+.secondary-button:hover,
+.secondary-button:focus {
+    background: #dfeaf1;
 }
 
 button:disabled,
@@ -511,7 +530,7 @@ button:disabled,
 
 .indicator-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 14px;
 }
 
@@ -621,6 +640,22 @@ button:disabled,
     align-items: center;
     gap: 14px;
     flex-wrap: wrap;
+}
+
+.inline-action-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--surface-muted);
+}
+
+.inline-action-panel span {
+    color: var(--muted);
+    font-size: 14px;
 }
 
 .form-grid {
@@ -774,6 +809,10 @@ button:disabled,
 .table-heading span {
     color: var(--muted);
     font-size: 14px;
+}
+
+.attachments-panel {
+    margin-bottom: 18px;
 }
 
 .error-page {
