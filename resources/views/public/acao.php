@@ -19,8 +19,12 @@
     <?php if ($acao['status'] === 'aberta'): ?>
         <div class="module-list">
             <h2>Cadastro de campo</h2>
-            <p>Esta acao esta habilitada para cadastro. O formulario de residencia e familias sera conectado na proxima etapa.</p>
-            <a class="primary-link-button" href="<?= h(url('/login')) ?>">Entrar para cadastrar</a>
+            <p>Esta acao esta habilitada para cadastro de residencias e familias atingidas.</p>
+            <?php if (is_authenticated()): ?>
+                <a class="primary-link-button" href="<?= h(url('/acao/' . $acao['token_publico'] . '/residencias/novo')) ?>">Cadastrar residencia</a>
+            <?php else: ?>
+                <a class="primary-link-button" href="<?= h(url('/login')) ?>">Entrar para cadastrar</a>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <div class="alert alert-warning" role="alert">Esta acao nao esta aberta para novos cadastros.</div>

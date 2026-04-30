@@ -9,22 +9,22 @@
 <section class="indicator-grid" aria-label="Indicadores iniciais">
     <article class="indicator">
         <span>Residencias</span>
-        <strong>0</strong>
-        <small>Modulo preparado para a proxima entrega.</small>
+        <strong><?= h($indicators['residencias'] ?? 0) ?></strong>
+        <small>Casas atingidas cadastradas.</small>
     </article>
     <article class="indicator">
         <span>Familias</span>
-        <strong>0</strong>
+        <strong><?= h($indicators['familias'] ?? 0) ?></strong>
         <small>Vinculadas as residencias cadastradas.</small>
     </article>
     <article class="indicator">
-        <span>Entregas</span>
-        <strong>0</strong>
-        <small>Controle por tipo de ajuda humanitaria.</small>
+        <span>Tipos de ajuda</span>
+        <strong><?= h($indicators['tipos_ajuda'] ?? 0) ?></strong>
+        <small>Materiais ativos para entregas.</small>
     </article>
     <article class="indicator">
         <span>Acoes abertas</span>
-        <strong>0</strong>
+        <strong><?= h($indicators['acoes_abertas'] ?? 0) ?></strong>
         <small>Com tokens publicos para QR Code.</small>
     </article>
 </section>
@@ -34,6 +34,6 @@
     <ul>
         <li><a href="<?= h(url('/admin/acoes')) ?>">Gerenciar acoes emergenciais e links publicos.</a></li>
         <li><a href="<?= h(url('/admin/ajudas')) ?>">Gerenciar tipos de ajuda humanitaria.</a></li>
-        <li>Cadastros de residencias e familias entram na proxima fatia.</li>
+        <li><a href="<?= h(url('/cadastros/residencias')) ?>">Consultar residencias e familias cadastradas.</a></li>
     </ul>
 </section>

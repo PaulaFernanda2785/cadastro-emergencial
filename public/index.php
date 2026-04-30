@@ -25,6 +25,8 @@ use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\Admin\AcaoEmergencialController;
 use App\Controllers\Admin\TipoAjudaController;
+use App\Controllers\Cadastro\FamiliaController;
+use App\Controllers\Cadastro\ResidenciaController;
 use App\Controllers\PublicAcaoController;
 use App\Core\Env;
 use App\Core\Router;
@@ -55,6 +57,12 @@ $router->get('/admin/acoes/novo', [AcaoEmergencialController::class, 'create'], 
 $router->post('/admin/acoes', [AcaoEmergencialController::class, 'store'], ['auth', 'role:administrador']);
 $router->get('/admin/acoes/{id}/editar', [AcaoEmergencialController::class, 'edit'], ['auth', 'role:administrador']);
 $router->post('/admin/acoes/{id}', [AcaoEmergencialController::class, 'update'], ['auth', 'role:administrador']);
+$router->get('/cadastros/residencias', [ResidenciaController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->get('/cadastros/residencias/{id}', [ResidenciaController::class, 'show'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->get('/cadastros/residencias/{id}/familias/novo', [FamiliaController::class, 'create'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->post('/cadastros/residencias/{id}/familias', [FamiliaController::class, 'store'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->get('/acao/{token}/residencias/novo', [ResidenciaController::class, 'createFromAction'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->post('/acao/{token}/residencias', [ResidenciaController::class, 'storeFromAction'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/acao/{token}', [PublicAcaoController::class, 'show']);
 
 $router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/');

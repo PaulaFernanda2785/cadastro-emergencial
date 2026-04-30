@@ -44,6 +44,28 @@ final class Validator
         return $this;
     }
 
+    public function minInt(string $field, mixed $value, int $min, string $label): self
+    {
+        if (filter_var($value, FILTER_VALIDATE_INT) !== false && (int) $value < $min) {
+            $this->errors[$field][] = "{$label} deve ser no minimo {$min}.";
+        }
+
+        return $this;
+    }
+
+    public function decimalRange(string $field, mixed $value, float $min, float $max, string $label): self
+    {
+        if ($value === null || $value === '') {
+            return $this;
+        }
+
+        if (!is_numeric($value) || (float) $value < $min || (float) $value > $max) {
+            $this->errors[$field][] = "{$label} esta fora do intervalo permitido.";
+        }
+
+        return $this;
+    }
+
     public function date(string $field, mixed $value, string $label): self
     {
         if (!is_string($value) || trim($value) === '') {
@@ -65,6 +87,13 @@ final class Validator
         if (!is_string($value) || !in_array($value, $allowed, true)) {
             $this->errors[$field][] = "{$label} possui valor invalido.";
         }
+
+        return $this;
+    }
+
+    public function add(string $field, string $message): self
+    {
+        $this->errors[$field][] = $message;
 
         return $this;
     }
