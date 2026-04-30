@@ -37,6 +37,7 @@ $menuItems = [
     <script src="<?= h(asset('js/forms.js')) ?>" defer></script>
     <script src="<?= h(asset('js/layout.js')) ?>" defer></script>
     <script src="<?= h(asset('js/geolocation.js')) ?>" defer></script>
+    <script src="<?= h(asset('js/action-form.js')) ?>" defer></script>
 </head>
 <body>
     <div class="app-shell" data-layout-shell>

@@ -13,6 +13,7 @@ use App\Repositories\MunicipioRepository;
 use App\Services\AcaoEmergencialService;
 use App\Services\AuditLogService;
 use App\Services\IdempotenciaService;
+use App\Services\TerritorioService;
 
 final class AcaoEmergencialController extends Controller
 {
@@ -20,22 +21,26 @@ final class AcaoEmergencialController extends Controller
 
     public function __construct(
         private readonly AcaoEmergencialRepository $acoes = new AcaoEmergencialRepository(),
-        private readonly MunicipioRepository $municipios = new MunicipioRepository()
+        private readonly MunicipioRepository $municipios = new MunicipioRepository(),
+        private readonly TerritorioService $territorios = new TerritorioService()
     ) {
     }
 
     public function index(): void
     {
         $this->view('admin.acoes.index', [
-            'title' => 'Acoes emergenciais',
+            'title' => 'Ações emergenciais',
             'acoes' => $this->acoes->all(),
         ]);
     }
 
     public function create(): void
     {
-        $this->form('Nova acao emergencial', [
+        $this->form('Nova ação emergencial', [
+            'estado' => '',
             'municipio_id' => '',
+            'municipio_codigo_ibge' => '',
+            'municipio_nome' => '',
             'localidade' => '',
             'tipo_evento' => '',
             'data_evento' => date('Y-m-d'),
@@ -49,19 +54,17 @@ final class AcaoEmergencialController extends Controller
 
         $data = $this->input();
         $validator = $this->validator($data);
+        $municipioId = $this->resolveMunicipioId($data, $validator);
 
-        if ($validator->fails() || $this->municipios->find((int) $data['municipio_id']) === null) {
-            $errors = $validator->errors();
-            if ($this->municipios->find((int) $data['municipio_id']) === null) {
-                $errors['municipio_id'][] = 'Municipio nao encontrado.';
-            }
-            $this->form('Nova acao emergencial', $data, $errors, '/admin/acoes');
+        if ($validator->fails() || $municipioId === null) {
+            $this->form('Nova ação emergencial', $data, $validator->errors(), '/admin/acoes');
             return;
         }
 
+        $data['municipio_id'] = $municipioId;
         $id = (new AcaoEmergencialService())->create($data);
         (new AuditLogService())->record('criou_acao_emergencial', 'acoes_emergenciais', $id, $data['localidade']);
-        Session::flash('success', 'Acao emergencial cadastrada.');
+        Session::flash('success', 'Ação emergencial cadastrada.');
 
         $this->redirect('/admin/acoes');
     }
@@ -74,7 +77,10 @@ final class AcaoEmergencialController extends Controller
             $this->abort(404);
         }
 
-        $this->form('Editar acao emergencial', $acao, [], '/admin/acoes/' . (int) $id);
+        $acao['estado'] = $acao['uf'] ?? '';
+        $acao['municipio_codigo_ibge'] = $acao['codigo_ibge'] ?? '';
+        $acao['municipio_nome'] = $acao['municipio_nome'] ?? '';
+        $this->form('Editar ação emergencial', $acao, [], '/admin/acoes/' . (int) $id);
     }
 
     public function update(string $id): void
@@ -89,21 +95,19 @@ final class AcaoEmergencialController extends Controller
 
         $data = $this->input();
         $validator = $this->validator($data);
+        $municipioId = $this->resolveMunicipioId($data, $validator);
 
-        if ($validator->fails() || $this->municipios->find((int) $data['municipio_id']) === null) {
-            $errors = $validator->errors();
-            if ($this->municipios->find((int) $data['municipio_id']) === null) {
-                $errors['municipio_id'][] = 'Municipio nao encontrado.';
-            }
+        if ($validator->fails() || $municipioId === null) {
             $data['id'] = (int) $id;
             $data['token_publico'] = $acao['token_publico'];
-            $this->form('Editar acao emergencial', $data, $errors, '/admin/acoes/' . (int) $id);
+            $this->form('Editar ação emergencial', $data, $validator->errors(), '/admin/acoes/' . (int) $id);
             return;
         }
 
+        $data['municipio_id'] = $municipioId;
         $this->acoes->update((int) $id, $data);
         (new AuditLogService())->record('atualizou_acao_emergencial', 'acoes_emergenciais', (int) $id, $data['localidade']);
-        Session::flash('success', 'Acao emergencial atualizada.');
+        Session::flash('success', 'Ação emergencial atualizada.');
 
         $this->redirect('/admin/acoes');
     }
@@ -113,7 +117,9 @@ final class AcaoEmergencialController extends Controller
         $this->view('admin.acoes.form', [
             'title' => $title,
             'acao' => $acao,
-            'municipios' => $this->municipios->all('PA'),
+            'estados' => $this->territorios->states(),
+            'municipiosTerritoriais' => $this->territorios->municipalities(),
+            'localidadesPorMunicipio' => $this->acoes->localitiesByMunicipalityCode(),
             'statuses' => self::STATUS,
             'errors' => $errors,
             'action' => $action,
@@ -123,7 +129,10 @@ final class AcaoEmergencialController extends Controller
     private function input(): array
     {
         return [
+            'estado' => trim((string) ($_POST['estado'] ?? '')),
             'municipio_id' => trim((string) ($_POST['municipio_id'] ?? '')),
+            'municipio_codigo_ibge' => trim((string) ($_POST['municipio_codigo_ibge'] ?? '')),
+            'municipio_nome' => trim((string) ($_POST['municipio_nome'] ?? '')),
             'localidade' => trim((string) ($_POST['localidade'] ?? '')),
             'tipo_evento' => trim((string) ($_POST['tipo_evento'] ?? '')),
             'data_evento' => trim((string) ($_POST['data_evento'] ?? '')),
@@ -134,8 +143,10 @@ final class AcaoEmergencialController extends Controller
     private function validator(array $data): Validator
     {
         return (new Validator())
-            ->required('municipio_id', $data['municipio_id'], 'Municipio')
-            ->integer('municipio_id', $data['municipio_id'], 'Municipio')
+            ->required('estado', $data['estado'], 'Estado')
+            ->max('estado', $data['estado'], 2, 'Estado')
+            ->required('municipio_codigo_ibge', $data['municipio_codigo_ibge'], 'Município')
+            ->max('municipio_codigo_ibge', $data['municipio_codigo_ibge'], 20, 'Município')
             ->required('localidade', $data['localidade'], 'Localidade')
             ->max('localidade', $data['localidade'], 180, 'Localidade')
             ->required('tipo_evento', $data['tipo_evento'], 'Tipo de evento')
@@ -143,6 +154,27 @@ final class AcaoEmergencialController extends Controller
             ->required('data_evento', $data['data_evento'], 'Data do evento')
             ->date('data_evento', $data['data_evento'], 'Data do evento')
             ->in('status', $data['status'], self::STATUS, 'Status');
+    }
+
+    private function resolveMunicipioId(array $data, Validator $validator): ?int
+    {
+        if ($data['municipio_codigo_ibge'] === '') {
+            return null;
+        }
+
+        $municipio = $this->territorios->findMunicipalityByCode($data['municipio_codigo_ibge']);
+
+        if ($municipio === null) {
+            $validator->add('municipio_codigo_ibge', 'Município não encontrado nos arquivos territoriais.');
+            return null;
+        }
+
+        if (strtoupper((string) $data['estado']) !== $municipio['uf']) {
+            $validator->add('estado', 'Estado não corresponde ao município selecionado.');
+            return null;
+        }
+
+        return $this->municipios->ensure($municipio);
     }
 
     private function guardPost(string $scope, string $failureRedirect): void

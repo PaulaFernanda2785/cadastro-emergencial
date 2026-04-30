@@ -14,7 +14,7 @@ final class AcaoEmergencialRepository
         return Database::connection()
             ->query(
                 'SELECT a.id, a.localidade, a.tipo_evento, a.data_evento, a.token_publico, a.status,
-                        a.criado_em, m.nome AS municipio_nome, m.uf
+                        a.criado_em, m.codigo_ibge, m.nome AS municipio_nome, m.uf
                  FROM acoes_emergenciais a
                  INNER JOIN municipios m ON m.id = a.municipio_id
                  WHERE a.deleted_at IS NULL
@@ -26,7 +26,7 @@ final class AcaoEmergencialRepository
     public function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT a.*, m.nome AS municipio_nome, m.uf
+            'SELECT a.*, m.codigo_ibge, m.nome AS municipio_nome, m.uf
              FROM acoes_emergenciais a
              INNER JOIN municipios m ON m.id = a.municipio_id
              WHERE a.id = :id AND a.deleted_at IS NULL
@@ -43,7 +43,7 @@ final class AcaoEmergencialRepository
     public function findByPublicToken(string $token): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT a.*, m.nome AS municipio_nome, m.uf
+            'SELECT a.*, m.codigo_ibge, m.nome AS municipio_nome, m.uf
              FROM acoes_emergenciais a
              INNER JOIN municipios m ON m.id = a.municipio_id
              WHERE a.token_publico = :token AND a.deleted_at IS NULL
@@ -55,6 +55,37 @@ final class AcaoEmergencialRepository
         $acao = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return is_array($acao) ? $acao : null;
+    }
+
+    public function localitiesByMunicipalityCode(): array
+    {
+        $rows = Database::connection()
+            ->query(
+                'SELECT m.codigo_ibge, a.localidade AS nome
+                 FROM acoes_emergenciais a
+                 INNER JOIN municipios m ON m.id = a.municipio_id
+                 WHERE a.deleted_at IS NULL
+                    AND a.localidade IS NOT NULL
+                    AND a.localidade <> ""
+                 UNION
+                 SELECT m.codigo_ibge, r.bairro_comunidade AS nome
+                 FROM residencias r
+                 INNER JOIN municipios m ON m.id = r.municipio_id
+                 WHERE r.deleted_at IS NULL
+                    AND r.bairro_comunidade IS NOT NULL
+                    AND r.bairro_comunidade <> ""
+                 ORDER BY codigo_ibge, nome'
+            )
+            ->fetchAll(PDO::FETCH_ASSOC);
+
+        $grouped = [];
+
+        foreach ($rows as $row) {
+            $code = (string) $row['codigo_ibge'];
+            $grouped[$code][] = (string) $row['nome'];
+        }
+
+        return $grouped;
     }
 
     public function create(array $data): int

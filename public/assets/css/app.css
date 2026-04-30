@@ -661,6 +661,174 @@ button:disabled,
     max-width: 760px;
 }
 
+.action-form-page {
+    width: min(960px, 100%);
+}
+
+.action-form-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.action-form-header h1 {
+    margin-bottom: 8px;
+}
+
+.action-form-header p {
+    max-width: 620px;
+    margin-bottom: 0;
+}
+
+.action-back-link {
+    min-width: 172px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-color: #b8c7d5;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #1c2733;
+    background: #ffffff;
+    font-weight: 800;
+    box-shadow: 0 6px 16px rgba(28, 39, 51, 0.07);
+}
+
+.action-back-link::before {
+    content: "←";
+    font-weight: 800;
+}
+
+.action-back-link:hover,
+.action-back-link:focus {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: #f7fbfd;
+    text-decoration: none;
+    transform: translateX(-1px);
+}
+
+.action-form-card {
+    gap: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    background: var(--surface);
+    box-shadow: 0 14px 32px rgba(28, 39, 51, 0.08);
+}
+
+.form-block {
+    display: grid;
+    gap: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    background: #fbfcfd;
+}
+
+.compact-form-block {
+    gap: 0;
+}
+
+.form-block-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.form-block-heading > span {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.form-block-heading h2 {
+    margin-bottom: 3px;
+    font-size: 18px;
+}
+
+.form-block-heading p {
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.action-location-grid {
+    grid-template-columns: minmax(180px, 0.45fr) minmax(260px, 1fr);
+}
+
+.styled-field {
+    gap: 8px;
+}
+
+.styled-field > span {
+    color: #2b3948;
+    font-size: 14px;
+}
+
+.styled-field input,
+.styled-field select,
+.styled-field textarea {
+    min-height: 48px;
+    border-color: #cbd7e3;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 0 rgba(28, 39, 51, 0.03);
+}
+
+.styled-field select {
+    padding-right: 40px;
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #546478 50%),
+        linear-gradient(135deg, #546478 50%, transparent 50%);
+    background-position:
+        calc(100% - 20px) 21px,
+        calc(100% - 14px) 21px;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+}
+
+.styled-field input:hover,
+.styled-field select:hover,
+.styled-field textarea:hover {
+    border-color: #aebdcc;
+}
+
+.styled-field input:focus,
+.styled-field select:focus,
+.styled-field textarea:focus {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    outline: 0;
+}
+
+.action-link-field {
+    border-style: dashed;
+    background: #f5f9fb;
+}
+
+.action-form-actions {
+    position: sticky;
+    bottom: 0;
+    margin: 0 -18px -18px;
+    border-top: 1px solid var(--line);
+    border-radius: 0 0 8px 8px;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+}
+
 .panel-form {
     padding: 20px;
 }
@@ -1085,6 +1253,22 @@ button:disabled,
         flex-direction: column;
     }
 
+    .action-form-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .action-form-card,
+    .form-block {
+        padding: 14px;
+    }
+
+    .action-form-actions {
+        position: static;
+        margin: 0 -14px -14px;
+        padding: 14px;
+    }
+
     .indicator-grid {
         grid-template-columns: 1fr;
     }
@@ -1094,6 +1278,7 @@ button:disabled,
     }
 
     .two-columns,
+    .action-location-grid,
     .detail-grid,
     .report-filter-grid,
     .signature-grid {

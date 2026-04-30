@@ -1,23 +1,23 @@
 <section class="dashboard-header">
     <div>
-        <span class="eyebrow">Administracao</span>
-        <h1>Acoes emergenciais</h1>
-        <p>Cadastre a acao que sera acessada por QR Code pelas equipes de campo.</p>
+        <span class="eyebrow">Administração</span>
+        <h1>Ações emergenciais</h1>
+        <p>Cadastre a ação que será acessada por QR Code pelas equipes de campo.</p>
     </div>
-    <a class="primary-link-button" href="<?= h(url('/admin/acoes/novo')) ?>">Nova acao</a>
+    <a class="primary-link-button" href="<?= h(url('/admin/acoes/novo')) ?>">Nova ação</a>
 </section>
 
 <section class="table-panel">
     <table class="data-table">
         <thead>
             <tr>
-                <th>Municipio</th>
+                <th>Município</th>
                 <th>Localidade</th>
                 <th>Evento</th>
                 <th>Data</th>
                 <th>Status</th>
-                <th>Link publico</th>
-                <th class="actions-column">Acoes</th>
+                <th>Link público</th>
+                <th class="actions-column">Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -35,7 +35,7 @@
 
             <?php if ($acoes === []): ?>
                 <tr>
-                    <td colspan="7" class="empty-state">Nenhuma acao emergencial cadastrada.</td>
+                    <td colspan="7" class="empty-state">Nenhuma ação emergencial cadastrada.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
