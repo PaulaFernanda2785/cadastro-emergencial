@@ -563,6 +563,253 @@ p {
     font-weight: 400;
 }
 
+.smart-field {
+    position: relative;
+}
+
+.smart-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    left: 0;
+    display: grid;
+    gap: 4px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px;
+    background: #ffffff;
+    box-shadow: 0 14px 30px rgba(28, 39, 51, 0.14);
+    z-index: 12;
+}
+
+.smart-suggestions[hidden],
+.photo-preview[hidden] {
+    display: none;
+}
+
+.smart-suggestions button {
+    min-height: 38px;
+    justify-content: flex-start;
+    border: 0;
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--text);
+    background: #ffffff;
+    font-weight: 700;
+    text-align: left;
+}
+
+.smart-suggestions button:hover,
+.smart-suggestions button:focus {
+    background: var(--surface-muted);
+}
+
+.file-input-native {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.photo-upload {
+    position: relative;
+}
+
+.photo-dropzone {
+    min-height: 136px;
+    display: grid;
+    place-items: center;
+    gap: 6px;
+    border: 2px dashed #b8c7d5;
+    border-radius: 8px;
+    padding: 18px;
+    color: var(--text);
+    background: #f8fafc;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.photo-dropzone::before {
+    content: "+";
+    width: 42px;
+    height: 42px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(21, 94, 117, 0.2);
+    border-radius: 999px;
+    color: var(--primary);
+    background: #ffffff;
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.photo-dropzone strong,
+.photo-dropzone span {
+    display: block;
+}
+
+.photo-dropzone span {
+    max-width: 460px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.photo-dropzone:hover,
+.photo-dropzone:focus,
+.photo-dropzone.is-dragging,
+.photo-dropzone.has-file {
+    border-color: var(--primary);
+    background: #eef7f9;
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.photo-dropzone.has-file::before {
+    content: "OK";
+    width: 46px;
+    color: #ffffff;
+    background: var(--success);
+    border-color: var(--success);
+    font-size: 14px;
+}
+
+.photo-preview {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    border: 1px solid rgba(21, 94, 117, 0.18);
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8fafc;
+    box-shadow: 0 8px 18px rgba(28, 39, 51, 0.08);
+}
+
+.photo-preview img {
+    width: 132px;
+    height: 96px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--surface-muted);
+}
+
+.photo-preview-info {
+    display: grid;
+    align-content: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.photo-preview-info span {
+    display: block;
+    overflow-wrap: anywhere;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.photo-preview-button {
+    width: fit-content;
+    min-height: 38px;
+    padding: 8px 12px;
+}
+
+.photo-preview-modal {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(10, 22, 35, 0.86);
+    z-index: 200;
+}
+
+.photo-preview-modal[hidden] {
+    display: none;
+}
+
+.photo-preview-modal img {
+    max-width: min(1080px, 100%);
+    max-height: min(82vh, 900px);
+    border-radius: 8px;
+    object-fit: contain;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.photo-preview-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    min-height: 42px;
+    border: 1px solid rgba(255, 255, 255, 0.44);
+    border-radius: 8px;
+    padding: 9px 13px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+    font-weight: 800;
+}
+
+.photo-preview-modal-close:hover,
+.photo-preview-modal-close:focus {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.is-photo-preview-open {
+    overflow: hidden;
+}
+
+.quantity-stepper {
+    width: min(260px, 100%);
+    display: grid;
+    grid-template-columns: 48px minmax(76px, 1fr) 48px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.quantity-stepper input {
+    min-height: 48px;
+    border: 0;
+    border-inline: 1px solid var(--line);
+    border-radius: 0;
+    padding: 8px;
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    appearance: textfield;
+}
+
+.quantity-stepper input::-webkit-outer-spin-button,
+.quantity-stepper input::-webkit-inner-spin-button {
+    margin: 0;
+    appearance: none;
+}
+
+.quantity-stepper-button {
+    min-height: 48px;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    color: var(--primary);
+    background: #f8fafc;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.quantity-stepper-button:hover,
+.quantity-stepper-button:focus {
+    color: #ffffff;
+    background: var(--primary);
+}
+
 button,
 .primary-button {
     min-height: 44px;
@@ -1660,6 +1907,28 @@ button:disabled,
     .header-actions .primary-link-button,
     .header-actions .secondary-button {
         width: 100%;
+    }
+
+    .photo-preview {
+        grid-template-columns: 1fr;
+    }
+
+    .photo-preview img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3;
+    }
+
+    .photo-preview-button {
+        width: 100%;
+    }
+
+    .photo-preview-modal {
+        padding: 14px;
+    }
+
+    .photo-preview-modal img {
+        max-height: 78vh;
     }
 
     .action-form-header {

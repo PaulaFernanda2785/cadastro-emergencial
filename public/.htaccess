@@ -4,6 +4,12 @@ Options -Indexes
     Require all granted
 </IfModule>
 
+<IfModule mod_headers.c>
+    Header unset Permissions-Policy
+    Header always unset Permissions-Policy
+    Header set Permissions-Policy "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()"
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f

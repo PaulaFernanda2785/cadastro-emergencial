@@ -21,6 +21,8 @@ spl_autoload_register(static function (string $class): void {
 
 require BASE_PATH . '/app/Helpers/functions.php';
 
+send_security_headers();
+
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\Admin\AcaoEmergencialController;

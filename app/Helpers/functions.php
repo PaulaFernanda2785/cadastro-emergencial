@@ -33,9 +33,7 @@ function current_request_base_url(array $app): ?string
         return null;
     }
 
-    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || (($_SERVER['SERVER_PORT'] ?? null) === '443');
-    $scheme = $isHttps ? 'https' : 'http';
+    $scheme = app_is_secure_request() ? 'https' : 'http';
     $scriptDir = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
 
     if ($scriptDir === '/' || $scriptDir === '\\' || $scriptDir === '.') {
@@ -43,6 +41,35 @@ function current_request_base_url(array $app): ?string
     }
 
     return $scheme . '://' . $_SERVER['HTTP_HOST'] . rtrim($scriptDir, '/');
+}
+
+function app_is_secure_request(): bool
+{
+    $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
+    $forwardedProto = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    $serverPort = (string) ($_SERVER['SERVER_PORT'] ?? '');
+
+    return $https === 'on'
+        || $https === '1'
+        || $forwardedProto === 'https'
+        || $serverPort === '443';
+}
+
+function send_security_headers(): void
+{
+    if (headers_sent()) {
+        return;
+    }
+
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()');
+    header('X-Robots-Tag: noindex, nofollow');
+
+    if (app_is_secure_request()) {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
 }
 
 function asset(string $path): string

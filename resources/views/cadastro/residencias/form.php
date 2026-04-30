@@ -1,5 +1,6 @@
 <?php
 $offlineTokensJson = json_encode($offlineTokens ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+$bairroOptionsJson = json_encode(array_values($bairroOptions ?? []), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 ?>
 
 <section class="form-shell">
@@ -9,7 +10,22 @@ $offlineTokensJson = json_encode($offlineTokens ?? [], JSON_HEX_TAG | JSON_HEX_A
         <p><?= h($acao['municipio_nome']) ?> / <?= h($acao['uf']) ?> - <?= h($acao['localidade']) ?> - <?= h($acao['tipo_evento']) ?></p>
     </div>
 
-    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form js-prevent-double-submit" enctype="multipart/form-data" data-geolocation-form data-offline-queue-form data-offline-tokens='<?= h($offlineTokensJson ?: '[]') ?>' novalidate>
+    <form
+        method="post"
+        action="<?= h(url($action)) ?>"
+        class="form panel-form js-prevent-double-submit"
+        enctype="multipart/form-data"
+        data-residence-form
+        data-geolocation-form
+        data-offline-queue-form
+        data-offline-tokens='<?= h($offlineTokensJson ?: '[]') ?>'
+        data-community-options='<?= h($bairroOptionsJson ?: '[]') ?>'
+        data-action-municipality="<?= h($acao['municipio_nome']) ?>"
+        data-action-state="<?= h($acao['uf']) ?>"
+        data-action-locality="<?= h($acao['localidade']) ?>"
+        data-action-event="<?= h($acao['tipo_evento']) ?>"
+        novalidate
+    >
         <?= csrf_field() ?>
         <?= idempotency_field($action) ?>
 
@@ -19,9 +35,10 @@ $offlineTokensJson = json_encode($offlineTokens ?? [], JSON_HEX_TAG | JSON_HEX_A
             <button type="button" class="secondary-button" data-offline-sync>Sincronizar agora</button>
         </div>
 
-        <label class="field">
+        <label class="field smart-field" data-community-field>
             <span>Bairro/comunidade</span>
-            <input type="text" name="bairro_comunidade" value="<?= h($residencia['bairro_comunidade'] ?? '') ?>" maxlength="180" required>
+            <input type="text" name="bairro_comunidade" value="<?= h($residencia['bairro_comunidade'] ?? '') ?>" maxlength="180" required autocomplete="off" data-community-input placeholder="Busque uma comunidade cadastrada ou informe uma nova">
+            <div class="smart-suggestions" data-community-suggestions hidden></div>
             <?php if (!empty($errors['bairro_comunidade'])): ?>
                 <small class="field-error"><?= h($errors['bairro_comunidade'][0]) ?></small>
             <?php endif; ?>
@@ -29,7 +46,7 @@ $offlineTokensJson = json_encode($offlineTokens ?? [], JSON_HEX_TAG | JSON_HEX_A
 
         <label class="field">
             <span>Endereco completo</span>
-            <input type="text" name="endereco" value="<?= h($residencia['endereco'] ?? '') ?>" maxlength="255" required>
+            <input type="text" name="endereco" value="<?= h($residencia['endereco'] ?? '') ?>" maxlength="255" required data-address>
             <?php if (!empty($errors['endereco'])): ?>
                 <small class="field-error"><?= h($errors['endereco'][0]) ?></small>
             <?php endif; ?>
@@ -66,18 +83,33 @@ $offlineTokensJson = json_encode($offlineTokens ?? [], JSON_HEX_TAG | JSON_HEX_A
             <span data-geolocation-status>Latitude e longitude tambem podem ser preenchidas manualmente.</span>
         </div>
 
-        <label class="field">
+        <div class="field photo-upload" data-photo-upload data-photo-logo-src="<?= h(asset('images/logo-cadastro-emergencial-app.png')) ?>">
             <span>Foto georreferenciada da residencia</span>
-            <input type="file" name="foto_georreferenciada" accept="image/jpeg,image/png">
-            <small class="field-hint">Formatos permitidos: JPG ou PNG. Tamanho maximo: 5 MB.</small>
+            <input class="file-input-native" id="foto-georreferenciada" type="file" name="foto_georreferenciada" accept="image/jpeg,image/png,image/*" capture="environment" data-photo-input>
+            <label class="photo-dropzone" for="foto-georreferenciada" data-photo-dropzone tabindex="0">
+                <strong data-photo-title>Selecionar foto</strong>
+                <span data-photo-description>Arraste, cole, busque nos arquivos ou tire uma foto pela camera do celular.</span>
+            </label>
+            <div class="photo-preview" data-photo-preview hidden>
+                <img alt="Previa da foto georreferenciada" data-photo-preview-image>
+                <div class="photo-preview-info">
+                    <span data-photo-preview-name></span>
+                    <button type="button" class="secondary-button photo-preview-button" data-photo-open-preview>Ampliar foto</button>
+                </div>
+            </div>
+            <small class="field-hint" data-photo-status>Ao enviar, a foto recebera localidade, endereco, latitude, longitude, data e hora.</small>
             <?php if (!empty($errors['foto_georreferenciada'])): ?>
                 <small class="field-error"><?= h($errors['foto_georreferenciada'][0]) ?></small>
             <?php endif; ?>
-        </label>
+        </div>
 
         <label class="field">
             <span>Quantidade de familias residentes</span>
-            <input type="number" name="quantidade_familias" value="<?= h($residencia['quantidade_familias'] ?? '1') ?>" min="1" required>
+            <div class="quantity-stepper" data-quantity-stepper>
+                <button type="button" class="quantity-stepper-button" data-quantity-decrement aria-label="Diminuir quantidade">-</button>
+                <input type="number" name="quantidade_familias" value="<?= h($residencia['quantidade_familias'] ?? '1') ?>" min="1" required data-quantity-input>
+                <button type="button" class="quantity-stepper-button" data-quantity-increment aria-label="Aumentar quantidade">+</button>
+            </div>
             <?php if (!empty($errors['quantidade_familias'])): ?>
                 <small class="field-error"><?= h($errors['quantidade_familias'][0]) ?></small>
             <?php endif; ?>

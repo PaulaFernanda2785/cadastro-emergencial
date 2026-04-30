@@ -13,8 +13,7 @@ final class Session
         }
 
         $config = require BASE_PATH . '/config/security.php';
-        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            || (($_SERVER['SERVER_PORT'] ?? null) === '443');
+        $isHttps = app_is_secure_request();
 
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');

@@ -88,6 +88,26 @@ final class ResidenciaRepository
         return (int) $stmt->fetchColumn();
     }
 
+    public function neighborhoodsByMunicipalityId(int $municipioId): array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT DISTINCT bairro_comunidade
+             FROM residencias
+             WHERE municipio_id = :municipio_id
+               AND deleted_at IS NULL
+               AND bairro_comunidade IS NOT NULL
+               AND bairro_comunidade <> ""
+             ORDER BY bairro_comunidade'
+        );
+        $stmt->bindValue(':municipio_id', $municipioId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return array_map(
+            static fn (array $row): string => (string) $row['bairro_comunidade'],
+            $stmt->fetchAll(PDO::FETCH_ASSOC)
+        );
+    }
+
     public function count(): int
     {
         return (int) Database::connection()

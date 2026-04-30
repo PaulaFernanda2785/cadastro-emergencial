@@ -36,6 +36,12 @@ final class Router
             $path = $this->normalizePath($path);
         }
 
+        $configuredBasePath = $this->configuredBasePath();
+        if ($configuredBasePath !== '' && str_starts_with($path, $configuredBasePath)) {
+            $path = substr($path, strlen($configuredBasePath)) ?: '/';
+            $path = $this->normalizePath($path);
+        }
+
         $route = $this->routes[$method][$path] ?? null;
         $params = [];
 
@@ -106,5 +112,28 @@ final class Router
         }
 
         return rtrim($scriptName, '/');
+    }
+
+    private function configuredBasePath(): string
+    {
+        $app = require BASE_PATH . '/config/app.php';
+        $paths = [];
+
+        foreach (['public_url', 'url'] as $key) {
+            $url = (string) ($app[$key] ?? '');
+            $path = parse_url($url, PHP_URL_PATH);
+
+            if (is_string($path) && $path !== '' && $path !== '/') {
+                $paths[] = $this->normalizePath($path);
+            }
+        }
+
+        if ($paths === []) {
+            return '';
+        }
+
+        usort($paths, static fn (string $left, string $right): int => strlen($right) <=> strlen($left));
+
+        return $paths[0];
     }
 }

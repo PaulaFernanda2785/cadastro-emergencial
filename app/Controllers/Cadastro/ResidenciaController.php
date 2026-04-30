@@ -129,7 +129,24 @@ final class ResidenciaController extends Controller
             'errors' => $errors,
             'action' => '/acao/' . $acao['token_publico'] . '/residencias',
             'offlineTokens' => $this->offlineTokens($acao['token_publico']),
+            'bairroOptions' => $this->bairroOptions($acao),
         ]);
+    }
+
+    private function bairroOptions(array $acao): array
+    {
+        $options = $this->residencias->neighborhoodsByMunicipalityId((int) $acao['municipio_id']);
+        $localidade = trim((string) ($acao['localidade'] ?? ''));
+        $lower = static fn (string $value): string => function_exists('mb_strtolower')
+            ? mb_strtolower($value, 'UTF-8')
+            : strtolower($value);
+        $normalized = array_map($lower, $options);
+
+        if ($localidade !== '' && !in_array($lower($localidade), $normalized, true)) {
+            array_unshift($options, $localidade);
+        }
+
+        return array_values(array_unique($options));
     }
 
     private function offlineTokens(string $token): array
