@@ -30,11 +30,10 @@
 </section>
 
 <section class="module-list">
-    <h2>Primeira entrega instalada</h2>
+    <h2>Modulos administrativos</h2>
     <ul>
-        <li>Arquitetura MVC customizada em PHP puro.</li>
-        <li>Autenticacao com senha hash, sessao segura e middleware de perfil.</li>
-        <li>Protecao CSRF e token de idempotencia com janela de 5 segundos.</li>
-        <li>Schema base para acoes, residencias, familias, entregas, anexos e logs.</li>
+        <li><a href="<?= h(url('/admin/acoes')) ?>">Gerenciar acoes emergenciais e links publicos.</a></li>
+        <li><a href="<?= h(url('/admin/ajudas')) ?>">Gerenciar tipos de ajuda humanitaria.</a></li>
+        <li>Cadastros de residencias e familias entram na proxima fatia.</li>
     </ul>
 </section>

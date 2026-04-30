@@ -37,6 +37,11 @@ final class Router
         }
 
         $route = $this->routes[$method][$path] ?? null;
+        $params = [];
+
+        if ($route === null) {
+            [$route, $params] = $this->matchDynamicRoute($method, $path);
+        }
 
         if ($route === null) {
             http_response_code(404);
@@ -48,7 +53,41 @@ final class Router
 
         [$controllerClass, $action] = $route['handler'];
         $controller = new $controllerClass();
-        $controller->{$action}();
+        $controller->{$action}(...array_values($params));
+    }
+
+    private function matchDynamicRoute(string $method, string $path): array
+    {
+        foreach ($this->routes[$method] ?? [] as $routePath => $route) {
+            if (!str_contains($routePath, '{')) {
+                continue;
+            }
+
+            $paramNames = [];
+            $pattern = preg_replace_callback('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', static function (array $matches) use (&$paramNames): string {
+                $paramNames[] = $matches[1];
+
+                return '__PARAM__';
+            }, $routePath);
+
+            $pattern = preg_quote($pattern, '#');
+            $pattern = str_replace('__PARAM__', '([^/]+)', $pattern);
+
+            if (preg_match('#^' . $pattern . '$#', $path, $matches) !== 1) {
+                continue;
+            }
+
+            array_shift($matches);
+            $params = [];
+
+            foreach ($paramNames as $index => $name) {
+                $params[$name] = urldecode($matches[$index] ?? '');
+            }
+
+            return [$route, $params];
+        }
+
+        return [null, []];
     }
 
     private function normalizePath(string $path): string

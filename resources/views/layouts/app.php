@@ -6,6 +6,23 @@ $user = current_user();
 $error = flash('error');
 $success = flash('success');
 $warning = flash('warning');
+$currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$profileLabel = [
+    'administrador' => 'Administrador',
+    'gestor' => 'Gestor',
+    'cadastrador' => 'Cadastrador',
+][$user['perfil'] ?? ''] ?? 'Visitante';
+
+$menuItems = [
+    ['label' => 'Painel situacional', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
+    ['label' => 'Ações emergenciais', 'url' => '/admin/acoes', 'match' => ['/admin/acoes'], 'roles' => ['administrador']],
+    ['label' => 'Tipos de ajuda', 'url' => '/admin/ajudas', 'match' => ['/admin/ajudas'], 'roles' => ['administrador']],
+    ['label' => 'Cadastros', 'url' => '#', 'match' => ['/gestor/cadastros'], 'soon' => true],
+    ['label' => 'Famílias', 'url' => '#', 'match' => ['/gestor/familias'], 'soon' => true],
+    ['label' => 'Entregas', 'url' => '#', 'match' => ['/gestor/entregas'], 'soon' => true],
+    ['label' => 'Prestação de contas', 'url' => '#', 'match' => ['/gestor/prestacao-contas'], 'soon' => true],
+    ['label' => 'Relatórios', 'url' => '#', 'match' => ['/gestor/relatorios'], 'soon' => true],
+];
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -16,42 +33,108 @@ $warning = flash('warning');
     <title><?= h($pageTitle) ?> | <?= h($app['name']) ?></title>
     <link rel="stylesheet" href="<?= h(asset('css/app.css')) ?>">
     <script src="<?= h(asset('js/forms.js')) ?>" defer></script>
+    <script src="<?= h(asset('js/layout.js')) ?>" defer></script>
 </head>
 <body>
-    <header class="topbar">
-        <a class="brand" href="<?= h(url('/dashboard')) ?>">
-            <span class="brand-mark">CE</span>
-            <span><?= h($app['name']) ?></span>
-        </a>
-
+    <div class="app-shell" data-layout-shell>
         <?php if ($user !== null): ?>
-            <nav class="topbar-actions" aria-label="Navegacao principal">
-                <a href="<?= h(url('/dashboard')) ?>">Painel</a>
-                <?php if (($user['perfil'] ?? '') === 'administrador'): ?>
-                    <a href="<?= h(url('/admin')) ?>">Admin</a>
+            <aside class="sidebar" data-sidebar>
+                <div class="sidebar-brand">
+                    <a class="brand" href="<?= h(url('/dashboard')) ?>" aria-label="<?= h($app['name']) ?>">
+                        <img src="<?= h(asset('images/logo-cedec.png')) ?>" alt="CEDEC-PA" class="brand-logo">
+                        <span class="brand-text">
+                            <strong><?= h($app['name']) ?></strong>
+                            <small>CEDEC-PA</small>
+                        </span>
+                    </a>
+                </div>
+
+                <nav class="sidebar-nav" aria-label="Menu principal">
+                    <?php foreach ($menuItems as $item): ?>
+                        <?php
+                        $roles = $item['roles'] ?? null;
+                        if (is_array($roles) && !in_array((string) ($user['perfil'] ?? ''), $roles, true)) {
+                            continue;
+                        }
+                        $isActive = false;
+                        foreach ($item['match'] as $match) {
+                            if ($match === '/' ? $currentPath === '/' : str_starts_with($currentPath, $match)) {
+                                $isActive = true;
+                                break;
+                            }
+                        }
+                        ?>
+                        <?php if (!empty($item['soon'])): ?>
+                            <span class="sidebar-link is-disabled" aria-disabled="true">
+                                <span class="nav-dot"></span>
+                                <span class="nav-label"><?= h($item['label']) ?></span>
+                                <span class="nav-badge">Em breve</span>
+                            </span>
+                        <?php else: ?>
+                            <a class="sidebar-link <?= $isActive ? 'is-active' : '' ?>" href="<?= h(url($item['url'])) ?>">
+                                <span class="nav-dot"></span>
+                                <span class="nav-label"><?= h($item['label']) ?></span>
+                            </a>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </nav>
+            </aside>
+        <?php endif; ?>
+
+        <div class="app-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <?php if ($user !== null): ?>
+                        <button class="menu-toggle" type="button" data-sidebar-toggle aria-label="Recolher menu" aria-expanded="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </button>
+                    <?php endif; ?>
+                    <div class="institution-title">
+                        <strong>Corpo de Bombeiros Militar do Pará</strong>
+                        <span>Coordenadoria Estadual de Proteção e Defesa Civil</span>
+                    </div>
+                </div>
+
+                <?php if ($user !== null): ?>
+                    <div class="user-area">
+                        <div class="user-summary">
+                            <strong><?= h($user['nome'] ?? 'Usuario') ?></strong>
+                            <span><?= h($profileLabel) ?></span>
+                        </div>
+                        <form method="post" action="<?= h(url('/logout')) ?>" class="inline-form js-prevent-double-submit">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="logout-button" data-loading-text="Saindo...">Sair</button>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <a class="public-brand" href="<?= h(url('/login')) ?>"><?= h($app['name']) ?></a>
                 <?php endif; ?>
-                <form method="post" action="<?= h(url('/logout')) ?>" class="inline-form js-prevent-double-submit">
-                    <?= csrf_field() ?>
-                    <button type="submit" data-loading-text="Saindo...">Sair</button>
-                </form>
-            </nav>
-        <?php endif; ?>
-    </header>
+            </header>
 
-    <main class="main">
-        <?php if ($error): ?>
-            <div class="alert alert-error" role="alert"><?= h($error) ?></div>
-        <?php endif; ?>
+            <main class="main">
+                <?php if ($error): ?>
+                    <div class="alert alert-error" role="alert"><?= h($error) ?></div>
+                <?php endif; ?>
 
-        <?php if ($success): ?>
-            <div class="alert alert-success" role="status"><?= h($success) ?></div>
-        <?php endif; ?>
+                <?php if ($success): ?>
+                    <div class="alert alert-success" role="status"><?= h($success) ?></div>
+                <?php endif; ?>
 
-        <?php if ($warning): ?>
-            <div class="alert alert-warning" role="alert"><?= h($warning) ?></div>
-        <?php endif; ?>
+                <?php if ($warning): ?>
+                    <div class="alert alert-warning" role="alert"><?= h($warning) ?></div>
+                <?php endif; ?>
 
-        <?= $content ?>
-    </main>
+                <?= $content ?>
+            </main>
+
+            <footer class="app-footer">
+                <span><?= h($app['name']) ?> - versão 1.0.0 produção</span>
+                <span>© 2026 todos os direitos reservados.</span>
+                <span>Desenvolvido pela Divisão de Gestão de Risco - DGR/CEDEC-PA</span>
+            </footer>
+        </div>
+    </div>
 </body>
 </html>
