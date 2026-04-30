@@ -12,9 +12,14 @@ $profileLabel = [
     'gestor' => 'Gestor',
     'cadastrador' => 'Cadastrador',
 ][$user['perfil'] ?? ''] ?? 'Visitante';
+$activeActionToken = App\Core\Session::get('active_action_token');
+$activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
+    ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
+    : null;
 
 $menuItems = [
     ['group' => 'Operacao', 'label' => 'Painel situacional', 'abbr' => 'PS', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
+    ['group' => 'Operacao', 'label' => 'Novo cadastro', 'abbr' => 'NC', 'url' => $activeActionUrl, 'match' => ['/acao/'], 'roles' => ['cadastrador', 'gestor', 'administrador'], 'requires_action' => true],
     ['group' => 'Operacao', 'label' => 'Cadastros', 'abbr' => 'CD', 'url' => '/cadastros/residencias', 'match' => ['/cadastros/residencias']],
     ['group' => 'Operacao', 'label' => 'Familias', 'abbr' => 'FM', 'url' => '/gestor/familias', 'match' => ['/gestor/familias']],
     ['group' => 'Gestao', 'label' => 'Entregas', 'abbr' => 'EN', 'url' => '/gestor/entregas', 'match' => ['/gestor/entregas'], 'roles' => ['gestor', 'administrador']],
@@ -66,6 +71,10 @@ $menuItems = [
                             continue;
                         }
 
+                        if (!empty($item['requires_action']) && $activeActionUrl === null) {
+                            continue;
+                        }
+
                         if (($item['group'] ?? '') !== $currentGroup) {
                             $currentGroup = $item['group'] ?? '';
                             echo '<span class="sidebar-section-title">' . h($currentGroup) . '</span>';
@@ -79,7 +88,7 @@ $menuItems = [
                             }
                         }
                         ?>
-                        <a class="sidebar-link <?= $isActive ? 'is-active' : '' ?>" href="<?= h(url($item['url'])) ?>" title="<?= h($item['label']) ?>">
+                        <a class="sidebar-link <?= $isActive ? 'is-active' : '' ?>" href="<?= h(url((string) $item['url'])) ?>" title="<?= h($item['label']) ?>">
                             <span class="nav-initial"><?= h($item['abbr']) ?></span>
                             <span class="nav-label"><?= h($item['label']) ?></span>
                         </a>

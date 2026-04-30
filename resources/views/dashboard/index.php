@@ -37,6 +37,10 @@
 <section class="module-list">
     <h2>Modulos administrativos</h2>
     <ul>
+        <?php $activeActionToken = App\Core\Session::get('active_action_token'); ?>
+        <?php if (is_string($activeActionToken) && $activeActionToken !== ''): ?>
+            <li><a href="<?= h(url('/acao/' . rawurlencode($activeActionToken) . '/residencias/novo')) ?>">Continuar cadastro da ação aberta acessada pelo QR Code.</a></li>
+        <?php endif; ?>
         <?php if (($user['perfil'] ?? '') === 'administrador'): ?>
             <li><a href="<?= h(url('/admin/acoes')) ?>">Gerenciar acoes emergenciais e links publicos.</a></li>
             <li><a href="<?= h(url('/admin/ajudas')) ?>">Gerenciar tipos de ajuda humanitaria.</a></li>

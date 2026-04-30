@@ -49,6 +49,8 @@ $router->get('/', [DashboardController::class, 'index'], ['auth']);
 $router->get('/dashboard', [DashboardController::class, 'index'], ['auth']);
 $router->get('/login', [AuthController::class, 'showLogin'], ['guest']);
 $router->post('/login', [AuthController::class, 'login'], ['guest']);
+$router->get('/cadastro-qr', [AuthController::class, 'showRegister'], ['guest']);
+$router->post('/cadastro-qr', [AuthController::class, 'register'], ['guest']);
 $router->post('/logout', [AuthController::class, 'logout'], ['auth']);
 $router->get('/alterar-senha', [AuthController::class, 'showChangePassword'], ['auth']);
 $router->post('/alterar-senha', [AuthController::class, 'changePassword'], ['auth']);

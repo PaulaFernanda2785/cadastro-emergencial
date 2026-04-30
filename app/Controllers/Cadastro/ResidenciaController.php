@@ -55,6 +55,7 @@ final class ResidenciaController extends Controller
     public function createFromAction(string $token): void
     {
         $acao = $this->openAction($token);
+        Session::put('active_action_token', $token);
 
         $this->form($acao, [
             'bairro_comunidade' => '',
@@ -69,6 +70,7 @@ final class ResidenciaController extends Controller
     public function storeFromAction(string $token): void
     {
         $acao = $this->openAction($token);
+        Session::put('active_action_token', $token);
         $this->guardPost('cadastro.residencia.store.' . $token, '/acao/' . $token . '/residencias/novo');
 
         $data = $this->input();

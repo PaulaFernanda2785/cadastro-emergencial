@@ -4,7 +4,12 @@
         <h1><?= h($residencia['protocolo']) ?></h1>
         <p><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
     </div>
-    <a class="primary-link-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/novo')) ?>">Nova familia</a>
+    <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
+        <div class="header-actions">
+            <a class="secondary-button" href="<?= h(url('/acao/' . $residencia['token_publico'] . '/residencias/novo')) ?>">Nova residencia</a>
+            <a class="primary-link-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/novo')) ?>">Nova familia</a>
+        </div>
+    <?php endif; ?>
 </section>
 
 <section class="detail-grid">

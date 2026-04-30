@@ -35,13 +35,13 @@ final class FamiliaController extends Controller
 
     public function create(string $residenciaId): void
     {
-        $residencia = $this->findResidencia((int) $residenciaId);
+        $residencia = $this->findResidenciaForCadastro((int) $residenciaId);
         $this->form($residencia, $this->emptyInput(), []);
     }
 
     public function store(string $residenciaId): void
     {
-        $residencia = $this->findResidencia((int) $residenciaId);
+        $residencia = $this->findResidenciaForCadastro((int) $residenciaId);
         $this->guardPost('cadastro.familia.store.' . (int) $residenciaId, '/cadastros/residencias/' . (int) $residenciaId . '/familias/novo');
 
         $data = $this->input();
@@ -95,6 +95,22 @@ final class FamiliaController extends Controller
 
         if ($residencia === null) {
             $this->abort(404);
+        }
+
+        return $residencia;
+    }
+
+    private function findResidenciaForCadastro(int $id): array
+    {
+        $residencia = $this->findResidencia($id);
+
+        if (($residencia['acao_status'] ?? null) !== 'aberta') {
+            Session::flash('warning', 'Esta acao nao esta aberta para novos cadastros.');
+            $this->redirect('/cadastros/residencias/' . $id);
+        }
+
+        if (!empty($residencia['token_publico'])) {
+            Session::put('active_action_token', (string) $residencia['token_publico']);
         }
 
         return $residencia;

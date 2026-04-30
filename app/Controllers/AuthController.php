@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Core\Csrf;
 use App\Core\Session;
 use App\Core\Validator;
+use App\Repositories\AcaoEmergencialRepository;
 use App\Repositories\UsuarioRepository;
 use App\Services\AuditLogService;
 use App\Services\AuthService;
@@ -21,6 +22,7 @@ final class AuthController extends Controller
             'title' => 'Entrar',
             'email' => '',
             'errors' => [],
+            'canRegister' => $this->canRegisterFromQr(),
         ]);
     }
 
@@ -55,6 +57,7 @@ final class AuthController extends Controller
                 'title' => 'Entrar',
                 'email' => $email,
                 'errors' => $validator->errors(),
+                'canRegister' => $this->canRegisterFromQr(),
             ]);
             return;
         }
@@ -80,7 +83,66 @@ final class AuthController extends Controller
             exit;
         }
 
+        $this->redirectToActiveAction($user);
         $this->redirect('/dashboard');
+    }
+
+    public function showRegister(): void
+    {
+        if (!$this->canRegisterFromQr()) {
+            Session::flash('warning', 'Acesse o cadastro pelo QR Code da acao.');
+            $this->redirect('/login');
+        }
+
+        $this->view('auth.register', [
+            'title' => 'Criar cadastro',
+            'usuario' => $this->emptyRegisterInput(),
+            'errors' => [],
+        ]);
+    }
+
+    public function register(): void
+    {
+        if (!$this->canRegisterFromQr()) {
+            Session::flash('warning', 'Acesse o cadastro pelo QR Code da acao.');
+            $this->redirect('/login');
+        }
+
+        $this->guardPost('auth.qr_register', '/cadastro-qr');
+
+        $data = $this->registerInput();
+        $validator = $this->registerValidator($data);
+
+        if ($validator->fails()) {
+            $this->view('auth.register', [
+                'title' => 'Criar cadastro',
+                'usuario' => $data,
+                'errors' => $validator->errors(),
+            ]);
+            return;
+        }
+
+        $data['perfil'] = 'cadastrador';
+        $data['ativo'] = '1';
+
+        $repository = new UsuarioRepository();
+        $id = $repository->create($data);
+        $user = $repository->find($id);
+
+        if ($user === null) {
+            Session::flash('error', 'Nao foi possivel iniciar a sessao apos o cadastro.');
+            $this->redirect('/login');
+        }
+
+        unset($user['senha_hash']);
+        Session::regenerate();
+        Session::put('user', $user);
+        $repository->touchLastAccess($id);
+
+        (new AuditLogService())->record('criou_usuario_qr', 'usuarios', $id, $data['email'], $id);
+        Session::flash('success', 'Cadastro criado. Continue o registro da acao.');
+
+        $this->redirectToIntended();
     }
 
     public function logout(): void
@@ -163,5 +225,114 @@ final class AuthController extends Controller
             Session::flash('warning', $idempotency['message']);
             $this->redirect($failureRedirect);
         }
+    }
+
+    private function emptyRegisterInput(): array
+    {
+        return [
+            'nome' => '',
+            'cpf' => '',
+            'email' => '',
+            'telefone' => '',
+            'orgao' => '',
+            'unidade_setor' => '',
+            'senha' => '',
+            'confirmar_senha' => '',
+        ];
+    }
+
+    private function registerInput(): array
+    {
+        return [
+            'nome' => trim((string) ($_POST['nome'] ?? '')),
+            'cpf' => trim((string) ($_POST['cpf'] ?? '')),
+            'email' => trim((string) ($_POST['email'] ?? '')),
+            'telefone' => trim((string) ($_POST['telefone'] ?? '')),
+            'orgao' => trim((string) ($_POST['orgao'] ?? '')),
+            'unidade_setor' => trim((string) ($_POST['unidade_setor'] ?? '')),
+            'senha' => (string) ($_POST['senha'] ?? ''),
+            'confirmar_senha' => (string) ($_POST['confirmar_senha'] ?? ''),
+        ];
+    }
+
+    private function registerValidator(array $data): Validator
+    {
+        $validator = (new Validator())
+            ->required('nome', $data['nome'], 'Nome')
+            ->max('nome', $data['nome'], 180, 'Nome')
+            ->required('cpf', $data['cpf'], 'CPF')
+            ->max('cpf', $data['cpf'], 14, 'CPF')
+            ->required('email', $data['email'], 'E-mail')
+            ->email('email', $data['email'], 'E-mail')
+            ->max('email', $data['email'], 180, 'E-mail')
+            ->max('telefone', $data['telefone'], 30, 'Telefone')
+            ->max('orgao', $data['orgao'], 180, 'Orgao/instituicao')
+            ->max('unidade_setor', $data['unidade_setor'], 180, 'Unidade/setor')
+            ->required('senha', $data['senha'], 'Senha');
+
+        if (strlen((string) $data['senha']) < 8) {
+            $validator->add('senha', 'Senha deve ter no minimo 8 caracteres.');
+        }
+
+        if ($data['senha'] !== $data['confirmar_senha']) {
+            $validator->add('confirmar_senha', 'Confirmacao nao confere com a senha.');
+        }
+
+        $repository = new UsuarioRepository();
+
+        if ($data['email'] !== '' && $repository->findByEmail($data['email']) !== null) {
+            $validator->add('email', 'E-mail ja cadastrado. Use a tela de login.');
+        }
+
+        if ($data['cpf'] !== '' && $repository->findByCpf($data['cpf']) !== null) {
+            $validator->add('cpf', 'CPF ja cadastrado. Use a tela de login.');
+        }
+
+        return $validator;
+    }
+
+    private function canRegisterFromQr(): bool
+    {
+        $intendedUrl = Session::get('intended_url');
+
+        return is_string($intendedUrl)
+            && str_contains($intendedUrl, '/acao/')
+            && str_contains($intendedUrl, '/residencias/novo');
+    }
+
+    private function redirectToIntended(): void
+    {
+        $intendedUrl = Session::get('intended_url');
+        Session::forget('intended_url');
+
+        if (is_string($intendedUrl) && str_starts_with($intendedUrl, '/') && !str_starts_with($intendedUrl, '//')) {
+            header('Location: ' . $intendedUrl);
+            exit;
+        }
+
+        $this->redirectToActiveAction(current_user());
+        $this->redirect('/dashboard');
+    }
+
+    private function redirectToActiveAction(?array $user): void
+    {
+        if (($user['perfil'] ?? null) !== 'cadastrador') {
+            return;
+        }
+
+        $token = Session::get('active_action_token');
+
+        if (!is_string($token) || $token === '') {
+            return;
+        }
+
+        $acao = (new AcaoEmergencialRepository())->findByPublicToken($token);
+
+        if ($acao === null || ($acao['status'] ?? null) !== 'aberta') {
+            Session::forget('active_action_token');
+            return;
+        }
+
+        $this->redirect('/acao/' . rawurlencode($token) . '/residencias/novo');
     }
 }

@@ -54,6 +54,38 @@ final class UsuarioRepository
         return is_array($user) ? $user : null;
     }
 
+    public function findByEmail(string $email): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, senha_hash, perfil, ativo
+             FROM usuarios
+             WHERE email = :email AND deleted_at IS NULL
+             LIMIT 1'
+        );
+        $stmt->bindValue(':email', $email);
+        $stmt->execute();
+
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($user) ? $user : null;
+    }
+
+    public function findByCpf(string $cpf): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, senha_hash, perfil, ativo
+             FROM usuarios
+             WHERE cpf = :cpf AND deleted_at IS NULL
+             LIMIT 1'
+        );
+        $stmt->bindValue(':cpf', $cpf);
+        $stmt->execute();
+
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($user) ? $user : null;
+    }
+
     public function create(array $data): int
     {
         $stmt = Database::connection()->prepare(
