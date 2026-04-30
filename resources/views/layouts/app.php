@@ -39,6 +39,7 @@ $menuItems = [
     <meta name="robots" content="noindex,nofollow">
     <title><?= h($pageTitle) ?> | <?= h($app['name']) ?></title>
     <link rel="stylesheet" href="<?= h(asset('css/app.css')) ?>">
+    <script src="<?= h(asset('js/modals.js')) ?>" defer></script>
     <script src="<?= h(asset('js/forms.js')) ?>" defer></script>
     <script src="<?= h(asset('js/layout.js')) ?>" defer></script>
     <script src="<?= h(asset('js/app-offline.js')) ?>" defer></script>
