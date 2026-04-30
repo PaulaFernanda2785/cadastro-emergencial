@@ -1,12 +1,16 @@
 <?php
 $offlineTokensJson = json_encode($offlineTokens ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 $bairroOptionsJson = json_encode(array_values($bairroOptions ?? []), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+$useOfflineQueue = (bool) ($useOfflineQueue ?? true);
+$submitLabel = $submitLabel ?? 'Salvar residencia';
+$cancelUrl = $cancelUrl ?? '/acao/' . $acao['token_publico'];
+$isEditing = !empty($residencia['id']);
 ?>
 
 <section class="form-shell">
     <div class="section-heading">
         <span class="eyebrow">Cadastro de campo</span>
-        <h1>Nova residencia</h1>
+        <h1><?= h($title ?? 'Nova residencia') ?></h1>
         <p><?= h($acao['municipio_nome']) ?> / <?= h($acao['uf']) ?> - <?= h($acao['localidade']) ?> - <?= h($acao['tipo_evento']) ?></p>
     </div>
 
@@ -17,7 +21,7 @@ $bairroOptionsJson = json_encode(array_values($bairroOptions ?? []), JSON_HEX_TA
         enctype="multipart/form-data"
         data-residence-form
         data-geolocation-form
-        data-offline-queue-form
+        <?= $useOfflineQueue ? 'data-offline-queue-form' : '' ?>
         data-offline-tokens='<?= h($offlineTokensJson ?: '[]') ?>'
         data-community-options='<?= h($bairroOptionsJson ?: '[]') ?>'
         data-action-municipality="<?= h($acao['municipio_nome']) ?>"
@@ -29,11 +33,13 @@ $bairroOptionsJson = json_encode(array_values($bairroOptions ?? []), JSON_HEX_TA
         <?= csrf_field() ?>
         <?= idempotency_field($action) ?>
 
+        <?php if ($useOfflineQueue): ?>
         <div class="offline-sync-panel" data-offline-panel hidden>
             <strong data-offline-title>Cadastro offline disponível</strong>
             <span data-offline-message>Sem conexão com o servidor. O cadastro será salvo neste celular e enviado quando a conexão voltar.</span>
             <button type="button" class="secondary-button" data-offline-sync>Sincronizar agora</button>
         </div>
+        <?php endif; ?>
 
         <label class="field smart-field" data-community-field>
             <span>Bairro/comunidade</span>
@@ -98,6 +104,9 @@ $bairroOptionsJson = json_encode(array_values($bairroOptions ?? []), JSON_HEX_TA
                 </div>
             </div>
             <small class="field-hint" data-photo-status>Ao enviar, a foto recebera localidade, endereco, latitude, longitude, data e hora.</small>
+            <?php if ($isEditing && !empty($residencia['foto_georreferenciada'])): ?>
+                <small class="field-hint">Ja existe uma foto registrada. Envie outra apenas se desejar substituir a foto principal.</small>
+            <?php endif; ?>
             <?php if (!empty($errors['foto_georreferenciada'])): ?>
                 <small class="field-error"><?= h($errors['foto_georreferenciada'][0]) ?></small>
             <?php endif; ?>
@@ -117,10 +126,10 @@ $bairroOptionsJson = json_encode(array_values($bairroOptions ?? []), JSON_HEX_TA
 
         <div class="form-actions">
             <button type="submit" class="primary-button" data-loading-text="Processando...">
-                <span class="button-label">Salvar residencia</span>
+                <span class="button-label"><?= h($submitLabel) ?></span>
                 <span class="button-spinner" aria-hidden="true"></span>
             </button>
-            <a class="secondary-link" href="<?= h(url('/acao/' . $acao['token_publico'])) ?>">Cancelar</a>
+            <a class="secondary-link" href="<?= h(url($cancelUrl)) ?>">Cancelar</a>
         </div>
     </form>
 </section>

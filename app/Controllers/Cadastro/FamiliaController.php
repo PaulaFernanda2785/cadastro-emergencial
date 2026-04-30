@@ -29,7 +29,7 @@ final class FamiliaController extends Controller
     {
         $this->view('cadastro.familias.index', [
             'title' => 'Familias cadastradas',
-            'familias' => $this->familias->all(),
+            'familias' => $this->familias->all($this->ownedRecordsUserId()),
         ]);
     }
 
@@ -233,7 +233,7 @@ final class FamiliaController extends Controller
     {
         $residencia = $this->residencias->find($id);
 
-        if ($residencia === null) {
+        if ($residencia === null || !$this->canAccessResidencia($residencia)) {
             $this->abort(404);
         }
 
@@ -265,6 +265,24 @@ final class FamiliaController extends Controller
         }
 
         return $familia;
+    }
+
+    private function canAccessResidencia(array $residencia): bool
+    {
+        $ownerId = $this->ownedRecordsUserId();
+
+        return $ownerId === null || (int) ($residencia['cadastrado_por'] ?? 0) === $ownerId;
+    }
+
+    private function ownedRecordsUserId(): ?int
+    {
+        $user = current_user();
+
+        if (($user['perfil'] ?? null) !== 'cadastrador') {
+            return null;
+        }
+
+        return (int) ($user['id'] ?? 0);
     }
 
     private function form(string $title, array $residencia, array $familia, array $errors, string $action, string $submitLabel, array $documentos = []): void

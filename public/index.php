@@ -79,6 +79,8 @@ $router->post('/admin/acoes/{id}', [AcaoEmergencialController::class, 'update'],
 $router->get('/gestor/familias', [FamiliaController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias', [ResidenciaController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/documentos/{documentoId}', [ResidenciaController::class, 'viewDocument'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->get('/cadastros/residencias/{id}/editar', [ResidenciaController::class, 'edit'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->post('/cadastros/residencias/{id}', [ResidenciaController::class, 'update'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}', [ResidenciaController::class, 'show'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/novo', [FamiliaController::class, 'create'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias', [FamiliaController::class, 'store'], ['auth', 'role:cadastrador,gestor,administrador']);

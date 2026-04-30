@@ -29,6 +29,7 @@ $podeCadastrarFamilia = $familiasCadastradas < max(1, $familiasPrevistas);
     <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
         <div class="header-actions">
             <a class="secondary-button residence-action-button" href="<?= h(url('/acao/' . $residencia['token_publico'] . '/residencias/novo')) ?>">Nova residencia</a>
+            <a class="secondary-button residence-action-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/editar')) ?>">Editar residencia</a>
             <?php if ($podeCadastrarFamilia): ?>
                 <a class="primary-link-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/novo')) ?>">Nova familia</a>
             <?php else: ?>

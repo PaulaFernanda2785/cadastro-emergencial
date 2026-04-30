@@ -9,26 +9,37 @@ use PDO;
 
 final class ResidenciaRepository
 {
-    public function all(): array
+    public function all(?int $cadastradoPor = null): array
     {
-        return Database::connection()
-            ->query(
-                'SELECT r.id, r.protocolo, r.bairro_comunidade, r.endereco, r.quantidade_familias,
-                        r.data_cadastro, a.localidade, a.tipo_evento, m.nome AS municipio_nome, m.uf,
-                        u.nome AS cadastrador_nome,
-                        (
-                            SELECT COUNT(*)
-                            FROM familias f
-                            WHERE f.residencia_id = r.id AND f.deleted_at IS NULL
-                        ) AS familias_cadastradas
-                 FROM residencias r
-                 INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
-                 INNER JOIN municipios m ON m.id = r.municipio_id
-                 INNER JOIN usuarios u ON u.id = r.cadastrado_por
-                 WHERE r.deleted_at IS NULL
-                 ORDER BY r.data_cadastro DESC'
-            )
-            ->fetchAll(PDO::FETCH_ASSOC);
+        $sql = 'SELECT r.id, r.protocolo, r.bairro_comunidade, r.endereco, r.quantidade_familias,
+                       r.data_cadastro, a.localidade, a.tipo_evento, m.nome AS municipio_nome, m.uf,
+                       u.nome AS cadastrador_nome,
+                       (
+                           SELECT COUNT(*)
+                           FROM familias f
+                           WHERE f.residencia_id = r.id AND f.deleted_at IS NULL
+                       ) AS familias_cadastradas
+                FROM residencias r
+                INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+                INNER JOIN municipios m ON m.id = r.municipio_id
+                INNER JOIN usuarios u ON u.id = r.cadastrado_por
+                WHERE r.deleted_at IS NULL';
+
+        if ($cadastradoPor !== null) {
+            $sql .= ' AND r.cadastrado_por = :cadastrado_por';
+        }
+
+        $sql .= ' ORDER BY r.data_cadastro DESC';
+
+        $stmt = Database::connection()->prepare($sql);
+
+        if ($cadastradoPor !== null) {
+            $stmt->bindValue(':cadastrado_por', $cadastradoPor, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function find(int $id): ?array
@@ -75,6 +86,31 @@ final class ResidenciaRepository
         $stmt->execute();
 
         return (int) Database::connection()->lastInsertId();
+    }
+
+    public function update(int $id, array $data): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE residencias
+             SET bairro_comunidade = :bairro_comunidade,
+                 endereco = :endereco,
+                 complemento = :complemento,
+                 latitude = :latitude,
+                 longitude = :longitude,
+                 foto_georreferenciada = :foto_georreferenciada,
+                 quantidade_familias = :quantidade_familias
+             WHERE id = :id
+               AND deleted_at IS NULL'
+        );
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':bairro_comunidade', $data['bairro_comunidade']);
+        $stmt->bindValue(':endereco', $data['endereco']);
+        $stmt->bindValue(':complemento', $data['complemento'] !== '' ? $data['complemento'] : null);
+        $stmt->bindValue(':latitude', $data['latitude'] !== '' ? $data['latitude'] : null);
+        $stmt->bindValue(':longitude', $data['longitude'] !== '' ? $data['longitude'] : null);
+        $stmt->bindValue(':foto_georreferenciada', $data['foto_georreferenciada'] ?? null);
+        $stmt->bindValue(':quantidade_familias', (int) $data['quantidade_familias'], PDO::PARAM_INT);
+        $stmt->execute();
     }
 
     public function nextSequenceForAction(int $acaoId): int

@@ -32,17 +32,13 @@ final class ResidenciaController extends Controller
     {
         $this->view('cadastro.residencias.index', [
             'title' => 'Cadastros de residencias',
-            'residencias' => $this->residencias->all(),
+            'residencias' => $this->residencias->all($this->ownedRecordsUserId()),
         ]);
     }
 
     public function show(string $id): void
     {
-        $residencia = $this->residencias->find((int) $id);
-
-        if ($residencia === null) {
-            $this->abort(404);
-        }
+        $residencia = $this->findResidenciaForAccess((int) $id);
 
         $this->view('cadastro.residencias.show', [
             'title' => 'Residencia ' . $residencia['protocolo'],
@@ -54,11 +50,7 @@ final class ResidenciaController extends Controller
 
     public function viewDocument(string $id, string $documentoId): void
     {
-        $residencia = $this->residencias->find((int) $id);
-
-        if ($residencia === null) {
-            $this->abort(404);
-        }
+        $this->findResidenciaForAccess((int) $id);
 
         $documento = $this->documentos->findForResidencia((int) $documentoId, (int) $id);
 
@@ -85,6 +77,92 @@ final class ResidenciaController extends Controller
         header('X-Content-Type-Options: nosniff');
         readfile($filePath);
         exit;
+    }
+
+    public function edit(string $id): void
+    {
+        $residencia = $this->findResidenciaForEdit((int) $id);
+
+        $this->form(
+            $this->actionFromResidencia($residencia),
+            $residencia,
+            [],
+            'Editar residencia',
+            '/cadastros/residencias/' . (int) $id,
+            'Salvar alteracoes',
+            '/cadastros/residencias/' . (int) $id,
+            false
+        );
+    }
+
+    public function update(string $id): void
+    {
+        $residencia = $this->findResidenciaForEdit((int) $id);
+        $this->guardPost('cadastro.residencia.update.' . (int) $id, '/cadastros/residencias/' . (int) $id . '/editar');
+
+        $data = $this->input();
+        $data['foto_georreferenciada'] = $residencia['foto_georreferenciada'] ?? null;
+        $validator = $this->validator($data);
+        $familiasCadastradas = $this->familias->countByResidencia((int) $id);
+
+        if (!$validator->fails() && (int) $data['quantidade_familias'] < $familiasCadastradas) {
+            $validator->add('quantidade_familias', 'A quantidade de familias nao pode ser menor que as familias ja cadastradas nesta residencia.');
+        }
+
+        if ($validator->fails()) {
+            $this->form(
+                $this->actionFromResidencia($residencia),
+                $data + ['id' => $residencia['id'], 'protocolo' => $residencia['protocolo']],
+                $validator->errors(),
+                'Editar residencia',
+                '/cadastros/residencias/' . (int) $id,
+                'Salvar alteracoes',
+                '/cadastros/residencias/' . (int) $id,
+                false
+            );
+            return;
+        }
+
+        $upload = new UploadService();
+        $foto = $_FILES['foto_georreferenciada'] ?? null;
+        $fotoMetadata = null;
+
+        if (is_array($foto) && $upload->hasFile($foto)) {
+            try {
+                $fotoMetadata = $upload->storePrivate($foto, 'residencias', ['image/jpeg', 'image/png']);
+                $data['foto_georreferenciada'] = $fotoMetadata['caminho_arquivo'];
+            } catch (RuntimeException $exception) {
+                $errors = $validator->errors();
+                $errors['foto_georreferenciada'][] = $exception->getMessage();
+                $this->form(
+                    $this->actionFromResidencia($residencia),
+                    $data + ['id' => $residencia['id'], 'protocolo' => $residencia['protocolo']],
+                    $errors,
+                    'Editar residencia',
+                    '/cadastros/residencias/' . (int) $id,
+                    'Salvar alteracoes',
+                    '/cadastros/residencias/' . (int) $id,
+                    false
+                );
+                return;
+            }
+        }
+
+        $this->residencias->update((int) $id, $data);
+
+        if ($fotoMetadata !== null) {
+            $this->documentos->create($fotoMetadata + [
+                'residencia_id' => (int) $id,
+                'familia_id' => null,
+                'tipo_documento' => 'foto_georreferenciada',
+                'enviado_por' => (int) (current_user()['id'] ?? 0),
+            ]);
+        }
+
+        (new AuditLogService())->record('alterou_residencia', 'residencias', (int) $id, (string) $residencia['protocolo']);
+        Session::flash('success', 'Residencia atualizada.');
+
+        $this->redirect('/cadastros/residencias/' . (int) $id);
     }
 
     public function createFromAction(string $token): void
@@ -155,15 +233,27 @@ final class ResidenciaController extends Controller
         $this->redirect('/cadastros/residencias/' . $id);
     }
 
-    private function form(array $acao, array $residencia, array $errors): void
+    private function form(
+        array $acao,
+        array $residencia,
+        array $errors,
+        string $title = 'Nova residencia',
+        ?string $action = null,
+        string $submitLabel = 'Salvar residencia',
+        ?string $cancelUrl = null,
+        bool $useOfflineQueue = true
+    ): void
     {
         $this->view('cadastro.residencias.form', [
-            'title' => 'Nova residencia',
+            'title' => $title,
             'acao' => $acao,
             'residencia' => $residencia,
             'errors' => $errors,
-            'action' => '/acao/' . $acao['token_publico'] . '/residencias',
-            'offlineTokens' => $this->offlineTokens($acao['token_publico']),
+            'action' => $action ?? '/acao/' . $acao['token_publico'] . '/residencias',
+            'submitLabel' => $submitLabel,
+            'cancelUrl' => $cancelUrl ?? '/acao/' . $acao['token_publico'],
+            'useOfflineQueue' => $useOfflineQueue,
+            'offlineTokens' => $useOfflineQueue ? $this->offlineTokens($acao['token_publico']) : [],
             'bairroOptions' => $this->bairroOptions($acao),
         ]);
     }
@@ -210,6 +300,60 @@ final class ResidenciaController extends Controller
         }
 
         return $acao;
+    }
+
+    private function findResidenciaForEdit(int $id): array
+    {
+        $residencia = $this->findResidenciaForAccess($id);
+
+        if (($residencia['acao_status'] ?? null) !== 'aberta') {
+            Session::flash('warning', 'Esta acao nao esta aberta para editar residencias.');
+            $this->redirect('/cadastros/residencias/' . $id);
+        }
+
+        return $residencia;
+    }
+
+    private function findResidenciaForAccess(int $id): array
+    {
+        $residencia = $this->residencias->find($id);
+
+        if ($residencia === null || !$this->canAccessResidencia($residencia)) {
+            $this->abort(404);
+        }
+
+        return $residencia;
+    }
+
+    private function canAccessResidencia(array $residencia): bool
+    {
+        $ownerId = $this->ownedRecordsUserId();
+
+        return $ownerId === null || (int) ($residencia['cadastrado_por'] ?? 0) === $ownerId;
+    }
+
+    private function ownedRecordsUserId(): ?int
+    {
+        $user = current_user();
+
+        if (($user['perfil'] ?? null) !== 'cadastrador') {
+            return null;
+        }
+
+        return (int) ($user['id'] ?? 0);
+    }
+
+    private function actionFromResidencia(array $residencia): array
+    {
+        return [
+            'id' => $residencia['acao_id'],
+            'municipio_id' => $residencia['municipio_id'],
+            'municipio_nome' => $residencia['municipio_nome'],
+            'uf' => $residencia['uf'],
+            'localidade' => $residencia['localidade'],
+            'tipo_evento' => $residencia['tipo_evento'],
+            'token_publico' => $residencia['token_publico'],
+        ];
     }
 
     private function input(): array

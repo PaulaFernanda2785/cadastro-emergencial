@@ -9,30 +9,41 @@ use PDO;
 
 final class FamiliaRepository
 {
-    public function all(): array
+    public function all(?int $cadastradoPor = null): array
     {
-        return Database::connection()
-            ->query(
-                'SELECT f.id, f.residencia_id, f.responsavel_nome, f.responsavel_cpf,
-                        f.telefone, f.email, f.quantidade_integrantes, f.possui_gestantes, f.criado_em,
-                        r.protocolo, r.bairro_comunidade,
-                        a.localidade, a.tipo_evento,
-                        m.nome AS municipio_nome, m.uf,
-                        (
-                            SELECT COUNT(*)
-                            FROM entregas_ajuda e
-                            WHERE e.familia_id = f.id AND e.deleted_at IS NULL
-                        ) AS entregas_registradas
-                 FROM familias f
-                 INNER JOIN residencias r ON r.id = f.residencia_id
-                 INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
-                 INNER JOIN municipios m ON m.id = r.municipio_id
-                 WHERE f.deleted_at IS NULL
-                    AND r.deleted_at IS NULL
-                    AND a.deleted_at IS NULL
-                 ORDER BY f.criado_em DESC'
-            )
-            ->fetchAll(PDO::FETCH_ASSOC);
+        $sql = 'SELECT f.id, f.residencia_id, f.responsavel_nome, f.responsavel_cpf,
+                       f.telefone, f.email, f.quantidade_integrantes, f.possui_gestantes, f.criado_em,
+                       r.protocolo, r.bairro_comunidade,
+                       a.localidade, a.tipo_evento,
+                       m.nome AS municipio_nome, m.uf,
+                       (
+                           SELECT COUNT(*)
+                           FROM entregas_ajuda e
+                           WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                       ) AS entregas_registradas
+                FROM familias f
+                INNER JOIN residencias r ON r.id = f.residencia_id
+                INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+                INNER JOIN municipios m ON m.id = r.municipio_id
+                WHERE f.deleted_at IS NULL
+                   AND r.deleted_at IS NULL
+                   AND a.deleted_at IS NULL';
+
+        if ($cadastradoPor !== null) {
+            $sql .= ' AND r.cadastrado_por = :cadastrado_por';
+        }
+
+        $sql .= ' ORDER BY f.criado_em DESC';
+
+        $stmt = Database::connection()->prepare($sql);
+
+        if ($cadastradoPor !== null) {
+            $stmt->bindValue(':cadastrado_por', $cadastradoPor, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function find(int $id): ?array
