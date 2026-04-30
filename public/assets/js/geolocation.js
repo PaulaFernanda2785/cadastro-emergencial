@@ -232,6 +232,11 @@
         }
 
         button.addEventListener('click', function () {
+            if (form.dataset.photoLocationSource === 'photo-metadata' || form.dataset.photoLocationSource === 'photo-ocr') {
+                setStatus('Foto anexada com localizacao propria. Remova ou troque a foto para capturar a localizacao atual.');
+                return;
+            }
+
             button.disabled = true;
             setStatus('Solicitando permissao de localizacao...');
 
@@ -239,6 +244,7 @@
                 var lat = position.coords.latitude.toFixed(7);
                 var lng = position.coords.longitude.toFixed(7);
 
+                form.dataset.locationSource = 'device-current';
                 latitude.value = lat;
                 longitude.value = lng;
                 setStatus('Localizacao capturada. Buscando endereco...');
@@ -246,11 +252,13 @@
                 reverseGeocode(lat, lng).then(function (result) {
                     if (result.address !== '' && address) {
                         address.value = result.address;
+                        form.dataset.addressSource = 'device-current';
                         address.dispatchEvent(new Event('input', { bubbles: true }));
                     }
 
                     if (result.community !== '' && community && community.value.trim() === '') {
                         community.value = result.community;
+                        form.dataset.communitySource = 'device-current';
                         community.dispatchEvent(new Event('input', { bubbles: true }));
                         community.dispatchEvent(new Event('change', { bubbles: true }));
                     }

@@ -147,6 +147,7 @@
         var logoSrc = wrapper.dataset.photoLogoSrc || '';
         var previewUrl = null;
         var metadataScanId = 0;
+        var photoMetadataPrefix = 'CadastroEmergencialGeo=';
         var modal = null;
         var modalImage = null;
         var photoProcessingPromise = null;
@@ -199,6 +200,36 @@
 
             element.dispatchEvent(new Event('input', { bubbles: true }));
             element.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        function clearField(element) {
+            if (!element || element.value === '') {
+                return;
+            }
+
+            element.value = '';
+            dispatchFieldEvents(element);
+        }
+
+        function clearDeviceLocationFields() {
+            if (form.dataset.locationSource !== 'device-current') {
+                return;
+            }
+
+            clearField(field('[data-latitude]'));
+            clearField(field('[data-longitude]'));
+
+            if (form.dataset.addressSource === 'device-current') {
+                clearField(field('[data-address]'));
+                form.dataset.addressSource = '';
+            }
+
+            if (form.dataset.communitySource === 'device-current') {
+                clearField(field('[data-community-input]'));
+                form.dataset.communitySource = '';
+            }
+
+            form.dataset.locationSource = '';
         }
 
         function createPreviewModal() {
@@ -258,6 +289,21 @@
             }
 
             return value.replace(/\0+$/, '');
+        }
+
+        function readText(view, offset, length) {
+            var bytes;
+
+            if (offset < 0 || length < 0 || offset + length > view.byteLength) {
+                return '';
+            }
+
+            if (typeof TextDecoder !== 'undefined') {
+                bytes = new Uint8Array(view.buffer, view.byteOffset + offset, length);
+                return new TextDecoder('utf-8').decode(bytes).replace(/\0+$/, '');
+            }
+
+            return readAscii(view, offset, length);
         }
 
         function readUint16(view, offset, littleEndian) {
@@ -391,9 +437,91 @@
             return gpsOffset > 0 ? parseGpsIfd(view, tiffStart, tiffStart + gpsOffset, littleEndian) : null;
         }
 
-        function extractPhotoGps(file) {
+        function parseStoredPhotoMetadata(comment) {
+            var prefixIndex = String(comment || '').indexOf(photoMetadataPrefix);
+            var payload;
+            var metadata;
+
+            if (prefixIndex === -1) {
+                return null;
+            }
+
+            payload = String(comment).slice(prefixIndex + photoMetadataPrefix.length).trim();
+
+            try {
+                metadata = JSON.parse(payload);
+            } catch (error) {
+                return null;
+            }
+
+            return metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata : null;
+        }
+
+        function decimalValue(value) {
+            var number;
+
+            if (value === null || typeof value === 'undefined') {
+                return null;
+            }
+
+            number = Number(String(value).trim().replace(',', '.'));
+
+            return Number.isFinite(number) ? number : null;
+        }
+
+        function validCoordinates(latitude, longitude) {
+            return latitude !== null && longitude !== null &&
+                latitude >= -90 && latitude <= 90 &&
+                longitude >= -180 && longitude <= 180;
+        }
+
+        function coordinatesFromMetadata(metadata) {
+            var latitude = decimalValue(metadata && metadata.latitude);
+            var longitude = decimalValue(metadata && metadata.longitude);
+
+            if (!validCoordinates(latitude, longitude)) {
+                return null;
+            }
+
+            return {
+                latitude: latitude,
+                longitude: longitude
+            };
+        }
+
+        function normalizedText(value) {
+            return String(value || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function parseCoordinatesFromText(text) {
+            var normalized = String(text || '')
+                .replace(/\s*([\.,])\s*/g, '$1')
+                .replace(/(-?\d{1,3})\s+(?=[\.,]\d)/g, '$1');
+            var matches = normalized.match(/-?\d{1,3}[\.,]\d{4,}/g) || [];
+            var latitude;
+            var longitude;
+
+            matches.some(function (match, index) {
+                var first = decimalValue(match);
+                var second = index + 1 < matches.length ? decimalValue(matches[index + 1]) : null;
+
+                if (validCoordinates(first, second)) {
+                    latitude = first;
+                    longitude = second;
+                    return true;
+                }
+
+                return false;
+            });
+
+            return validCoordinates(latitude, longitude)
+                ? { latitude: latitude, longitude: longitude }
+                : null;
+        }
+
+        function extractPhotoGeodata(file) {
             if (!file || typeof file.arrayBuffer !== 'function') {
-                return Promise.resolve(null);
+                return Promise.resolve({ metadata: null, coords: null });
             }
 
             return file.arrayBuffer().then(function (buffer) {
@@ -403,35 +531,57 @@
                 var segmentLength;
                 var segmentStart;
                 var segmentEnd;
+                var metadata = null;
+                var coords = null;
+                var parsedCoords;
+                var parsedMetadata;
 
                 if (view.byteLength < 4 || view.getUint16(0, false) !== 0xFFD8) {
-                    return null;
+                    return { metadata: null, coords: null };
                 }
 
                 while (offset + 4 <= view.byteLength) {
                     if (view.getUint8(offset) !== 0xFF) {
-                        return null;
+                        break;
                     }
 
                     marker = view.getUint8(offset + 1);
+
+                    if (marker === 0xDA || marker === 0xD9) {
+                        break;
+                    }
+
                     segmentLength = view.getUint16(offset + 2, false);
                     segmentStart = offset + 4;
                     segmentEnd = offset + 2 + segmentLength;
 
                     if (segmentLength < 2 || segmentEnd > view.byteLength) {
-                        return null;
+                        break;
                     }
 
-                    if (marker === 0xE1 && readAscii(view, segmentStart, 6) === 'Exif') {
-                        return parseExifGps(view, segmentStart + 6);
+                    if (marker === 0xFE && metadata === null) {
+                        parsedMetadata = parseStoredPhotoMetadata(readText(view, segmentStart, segmentLength - 2));
+
+                        if (parsedMetadata !== null) {
+                            metadata = parsedMetadata;
+                        }
+                    } else if (marker === 0xE1 && coords === null && readAscii(view, segmentStart, 6) === 'Exif') {
+                        parsedCoords = parseExifGps(view, segmentStart + 6);
+
+                        if (parsedCoords && validCoordinates(parsedCoords.latitude, parsedCoords.longitude)) {
+                            coords = parsedCoords;
+                        }
                     }
 
                     offset = segmentEnd;
                 }
 
-                return null;
+                return {
+                    metadata: metadata,
+                    coords: coordinatesFromMetadata(metadata) || coords
+                };
             }).catch(function () {
-                return null;
+                return { metadata: null, coords: null };
             });
         }
 
@@ -466,20 +616,514 @@
             });
         }
 
+        function cropBinaryBounds(mask, width, height) {
+            var minX = width;
+            var minY = height;
+            var maxX = -1;
+            var maxY = -1;
+            var x;
+            var y;
+
+            for (y = 0; y < height; y += 1) {
+                for (x = 0; x < width; x += 1) {
+                    if (!mask[y * width + x]) {
+                        continue;
+                    }
+
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x);
+                    maxY = Math.max(maxY, y);
+                }
+            }
+
+            if (maxX < minX || maxY < minY) {
+                return null;
+            }
+
+            return {
+                minX: minX,
+                minY: minY,
+                maxX: maxX,
+                maxY: maxY,
+                width: maxX - minX + 1,
+                height: maxY - minY + 1
+            };
+        }
+
+        function normalizeMask(mask, width, height, bounds, gridWidth, gridHeight) {
+            var grid = [];
+            var x;
+            var y;
+            var sourceX;
+            var sourceY;
+
+            if (!bounds) {
+                return grid;
+            }
+
+            for (y = 0; y < gridHeight; y += 1) {
+                sourceY = bounds.minY + Math.min(bounds.height - 1, Math.floor((y + 0.5) * bounds.height / gridHeight));
+
+                for (x = 0; x < gridWidth; x += 1) {
+                    sourceX = bounds.minX + Math.min(bounds.width - 1, Math.floor((x + 0.5) * bounds.width / gridWidth));
+                    grid.push(mask[sourceY * width + sourceX] ? 1 : 0);
+                }
+            }
+
+            return grid;
+        }
+
+        function ocrTemplates(gridWidth, gridHeight) {
+            var chars = '0123456789';
+            var canvas = document.createElement('canvas');
+            var context;
+            var templates = {};
+            var data;
+            var mask;
+            var bounds;
+            var index;
+            var offset;
+
+            canvas.width = 72;
+            canvas.height = 96;
+            context = canvas.getContext('2d');
+
+            chars.split('').forEach(function (char) {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = '#000000';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = '#ffffff';
+                context.font = '700 72px Arial, Helvetica, sans-serif';
+                context.textBaseline = 'alphabetic';
+                context.fillText(char, 8, 76);
+
+                data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+                mask = new Uint8Array(canvas.width * canvas.height);
+
+                for (index = 0; index < mask.length; index += 1) {
+                    offset = index * 4;
+                    mask[index] = data[offset] > 20 || data[offset + 1] > 20 || data[offset + 2] > 20 ? 1 : 0;
+                }
+
+                bounds = cropBinaryBounds(mask, canvas.width, canvas.height);
+                templates[char] = normalizeMask(mask, canvas.width, canvas.height, bounds, gridWidth, gridHeight);
+            });
+
+            return templates;
+        }
+
+        function compareGrid(left, right) {
+            var score = 0;
+            var index;
+
+            for (index = 0; index < left.length; index += 1) {
+                if (left[index] === right[index]) {
+                    score += 1;
+                }
+            }
+
+            return score / Math.max(1, left.length);
+        }
+
+        function recognizeDigit(mask, width, height, bounds, lineHeight, templates) {
+            var gridWidth = 20;
+            var gridHeight = 32;
+            var grid;
+            var bestChar = '';
+            var bestScore = -1;
+
+            if (bounds.height < lineHeight * 0.22) {
+                return bounds.width > bounds.height * 1.9 ? '-' : '.';
+            }
+
+            grid = normalizeMask(mask, width, height, bounds, gridWidth, gridHeight);
+
+            Object.keys(templates).forEach(function (char) {
+                var score = compareGrid(grid, templates[char]);
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestChar = char;
+                }
+            });
+
+            return bestScore >= 0.52 ? bestChar : '';
+        }
+
+        function recognizeCoordinateLine(mask, width, height, templates) {
+            var colCounts = [];
+            var segments = [];
+            var text = '';
+            var x;
+            var y;
+            var active = false;
+            var start = 0;
+            var gap = 0;
+            var index;
+            var segmentMask;
+            var segmentBounds;
+
+            for (x = 0; x < width; x += 1) {
+                colCounts[x] = 0;
+
+                for (y = 0; y < height; y += 1) {
+                    if (mask[y * width + x]) {
+                        colCounts[x] += 1;
+                    }
+                }
+            }
+
+            for (x = 0; x <= width; x += 1) {
+                if (x < width && colCounts[x] > 0) {
+                    if (!active) {
+                        active = true;
+                        start = x;
+                    }
+                    gap = 0;
+                    continue;
+                }
+
+                if (!active) {
+                    continue;
+                }
+
+                gap += 1;
+
+                if (gap <= 1 && x < width) {
+                    continue;
+                }
+
+                segments.push({ start: start, end: x - gap });
+                active = false;
+                gap = 0;
+            }
+
+            segments.forEach(function (segment, segmentIndex) {
+                var segmentWidth = segment.end - segment.start + 1;
+
+                if (segmentIndex > 0 && segment.start - segments[segmentIndex - 1].end > Math.max(6, Math.round(height * 0.32))) {
+                    text += ' ';
+                }
+
+                if (segmentWidth <= 0) {
+                    return;
+                }
+
+                segmentMask = new Uint8Array(segmentWidth * height);
+
+                for (y = 0; y < height; y += 1) {
+                    for (index = 0; index < segmentWidth; index += 1) {
+                        segmentMask[y * segmentWidth + index] = mask[y * width + segment.start + index];
+                    }
+                }
+
+                segmentBounds = cropBinaryBounds(segmentMask, segmentWidth, height);
+
+                if (!segmentBounds) {
+                    return;
+                }
+
+                text += recognizeDigit(segmentMask, segmentWidth, height, segmentBounds, height, templates);
+            });
+
+            return text;
+        }
+
+        function buildWhiteTextMask(context, cropX, cropY, width, height) {
+            var imageData = context.getImageData(cropX, cropY, width, height).data;
+            var mask = new Uint8Array(width * height);
+            var index;
+            var offset;
+            var red;
+            var green;
+            var blue;
+            var max;
+            var min;
+
+            for (index = 0; index < mask.length; index += 1) {
+                offset = index * 4;
+                red = imageData[offset];
+                green = imageData[offset + 1];
+                blue = imageData[offset + 2];
+                max = Math.max(red, green, blue);
+                min = Math.min(red, green, blue);
+
+                if ((red > 178 && green > 178 && blue > 178 && max - min < 92) || (red > 225 && green > 225 && blue > 225)) {
+                    mask[index] = 1;
+                }
+            }
+
+            return mask;
+        }
+
+        function candidateTextLineMasks(mask, width, height) {
+            var rowCounts = [];
+            var threshold = Math.max(4, Math.round(width * 0.01));
+            var bands = [];
+            var active = false;
+            var start = 0;
+            var gap = 0;
+            var x;
+            var y;
+
+            for (y = 0; y < height; y += 1) {
+                rowCounts[y] = 0;
+
+                for (x = 0; x < width; x += 1) {
+                    if (mask[y * width + x]) {
+                        rowCounts[y] += 1;
+                    }
+                }
+            }
+
+            for (y = 0; y <= height; y += 1) {
+                if (y < height && rowCounts[y] >= threshold) {
+                    if (!active) {
+                        active = true;
+                        start = y;
+                    }
+                    gap = 0;
+                    continue;
+                }
+
+                if (!active) {
+                    continue;
+                }
+
+                gap += 1;
+
+                if (gap <= 3 && y < height) {
+                    continue;
+                }
+
+                bands.push({ start: start, end: y - gap });
+                active = false;
+                gap = 0;
+            }
+
+            return bands.map(function (band) {
+                var bandHeight = band.end - band.start + 1;
+                var bandMask;
+                var bounds;
+                var lineMask;
+                var lineWidth;
+                var paddingX;
+                var paddingY;
+                var minX;
+                var maxX;
+                var minY;
+                var maxY;
+
+                if (bandHeight < 12 || bandHeight > 90) {
+                    return null;
+                }
+
+                bandMask = new Uint8Array(width * bandHeight);
+
+                for (y = 0; y < bandHeight; y += 1) {
+                    for (x = 0; x < width; x += 1) {
+                        bandMask[y * width + x] = mask[(band.start + y) * width + x];
+                    }
+                }
+
+                bounds = cropBinaryBounds(bandMask, width, bandHeight);
+
+                if (!bounds || bounds.width < 90 || bounds.height < 10) {
+                    return null;
+                }
+
+                paddingX = Math.max(2, Math.round(bounds.height * 0.15));
+                paddingY = Math.max(1, Math.round(bounds.height * 0.08));
+                minX = Math.max(0, bounds.minX - paddingX);
+                maxX = Math.min(width - 1, bounds.maxX + paddingX);
+                minY = Math.max(0, bounds.minY - paddingY);
+                maxY = Math.min(bandHeight - 1, bounds.maxY + paddingY);
+                lineWidth = maxX - minX + 1;
+                lineMask = new Uint8Array(lineWidth * (maxY - minY + 1));
+
+                for (y = minY; y <= maxY; y += 1) {
+                    for (x = minX; x <= maxX; x += 1) {
+                        lineMask[(y - minY) * lineWidth + (x - minX)] = bandMask[y * width + x];
+                    }
+                }
+
+                return {
+                    mask: lineMask,
+                    width: lineWidth,
+                    height: maxY - minY + 1,
+                    y: band.start + minY
+                };
+            }).filter(Boolean).sort(function (left, right) {
+                return right.y - left.y;
+            });
+        }
+
+        function extractStampedCoordinates(file) {
+            return loadImage(file).then(function (image) {
+                var maxWidth = 1200;
+                var scale = Math.min(1, maxWidth / Math.max(1, image.naturalWidth));
+                var canvas = document.createElement('canvas');
+                var context = canvas.getContext('2d');
+                var cropX;
+                var cropY;
+                var cropWidth;
+                var cropHeight;
+                var mask;
+                var lines;
+                var templates = ocrTemplates(20, 32);
+                var found = null;
+
+                canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+                canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+                context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+                cropX = Math.floor(canvas.width * 0.35);
+                cropY = Math.floor(canvas.height * 0.48);
+                cropWidth = canvas.width - cropX;
+                cropHeight = canvas.height - cropY;
+                mask = buildWhiteTextMask(context, cropX, cropY, cropWidth, cropHeight);
+                lines = candidateTextLineMasks(mask, cropWidth, cropHeight);
+
+                lines.some(function (line) {
+                    var text = recognizeCoordinateLine(line.mask, line.width, line.height, templates);
+                    var coords = parseCoordinatesFromText(text);
+
+                    if (coords) {
+                        found = coords;
+                        return true;
+                    }
+
+                    return false;
+                });
+
+                return found;
+            }).catch(function () {
+                return null;
+            });
+        }
+
         function applyPhotoGeolocation(file) {
             var latitude = field('[data-latitude]');
             var longitude = field('[data-longitude]');
             var scanId = metadataScanId += 1;
 
-            return extractPhotoGps(file).then(function (coords) {
+            function setFieldValue(element, value) {
+                value = normalizedText(value);
+
+                if (!element || value === '') {
+                    return false;
+                }
+
+                if (element.maxLength > 0 && value.length > element.maxLength) {
+                    value = value.slice(0, element.maxLength);
+                }
+
+                element.value = value;
+                dispatchFieldEvents(element);
+                return true;
+            }
+
+            function applyPhotoCoordinates(coords, sourceKey, sourceLabel) {
+                form.dataset.photoLocationSource = sourceKey;
+                form.dataset.locationSource = sourceKey;
+
+                if (latitude) {
+                    latitude.value = coords.latitude.toFixed(7);
+                    dispatchFieldEvents(latitude);
+                }
+
+                if (longitude) {
+                    longitude.value = coords.longitude.toFixed(7);
+                    dispatchFieldEvents(longitude);
+                }
+
+                return fillAddressFromCoordinates(coords.latitude.toFixed(7), coords.longitude.toFixed(7), sourceLabel).then(function () {
+                    return true;
+                });
+            }
+
+            function applyStoredMetadata(metadata, coords) {
+                var address = field('[data-address]');
+                var community = field('[data-community-input]');
+                var changed = false;
+
+                if (!metadata) {
+                    return false;
+                }
+
+                if (coords) {
+                    form.dataset.locationSource = 'photo-metadata';
+                    form.dataset.photoLocationSource = 'photo-metadata';
+                    changed = setFieldValue(latitude, coords.latitude.toFixed(7)) || changed;
+                    changed = setFieldValue(longitude, coords.longitude.toFixed(7)) || changed;
+                } else {
+                    clearDeviceLocationFields();
+                }
+
+                changed = setFieldValue(address, metadata.endereco) || changed;
+                changed = setFieldValue(community, metadata.bairro_comunidade || metadata.localidade_acao) || changed;
+
+                return changed;
+            }
+
+            return extractPhotoGeodata(file).then(function (geodata) {
+                var coords = geodata && geodata.coords ? geodata.coords : null;
+
                 if (scanId !== metadataScanId) {
                     return null;
                 }
 
-                if (!coords) {
-                    setStatus('Foto sem GPS interno. Capturando localizacao atual do celular...');
-                    return false;
+                if (geodata && geodata.metadata) {
+                    if (applyStoredMetadata(geodata.metadata, coords) && coords) {
+                        if (normalizedText(geodata.metadata.endereco) === '') {
+                            return fillAddressFromCoordinates(coords.latitude.toFixed(7), coords.longitude.toFixed(7), 'Metadados da foto').then(function () {
+                                return true;
+                            });
+                        }
+
+                        setStatus('Metadados da foto encontrados. Campos preenchidos automaticamente.');
+                        return true;
+                    }
+
+                    setStatus('Metadados da foto sem coordenadas. Tentando ler coordenadas carimbadas na imagem...');
+
+                    return extractStampedCoordinates(file).then(function (ocrCoords) {
+                        if (scanId !== metadataScanId) {
+                            return null;
+                        }
+
+                        if (ocrCoords) {
+                            return applyPhotoCoordinates(ocrCoords, 'photo-ocr', 'Coordenadas lidas da foto');
+                        }
+
+                        form.dataset.photoLocationSource = 'missing';
+                        setStatus('Foto sem coordenadas legiveis. A localizacao atual nao sera usada automaticamente.');
+                        return false;
+                    });
                 }
+
+                if (!coords) {
+                    form.dataset.photoLocationSource = 'missing';
+                    clearDeviceLocationFields();
+                    setStatus('Foto sem metadados de localizacao. Tentando ler coordenadas carimbadas na imagem...');
+
+                    return extractStampedCoordinates(file).then(function (ocrCoords) {
+                        if (scanId !== metadataScanId) {
+                            return null;
+                        }
+
+                        if (!ocrCoords) {
+                            setStatus('Foto sem metadados ou coordenadas legiveis. A localizacao atual nao sera usada automaticamente.');
+                            return false;
+                        }
+
+                        return applyPhotoCoordinates(ocrCoords, 'photo-ocr', 'Coordenadas lidas da foto');
+                    });
+                }
+
+                form.dataset.photoLocationSource = 'photo-metadata';
+                form.dataset.locationSource = 'photo-metadata';
 
                 if (latitude) {
                     latitude.value = coords.latitude.toFixed(7);
@@ -497,58 +1141,6 @@
             });
         }
 
-        function geolocationErrorMessage(error) {
-            if (!window.isSecureContext && !/^(localhost|127\.0\.0\.1|::1|\[::1\])$/.test(window.location.hostname)) {
-                return 'Para capturar a localizacao pelo celular, acesse o sistema em HTTPS.';
-            }
-
-            switch (error && error.code) {
-                case 1:
-                    return 'Permita o acesso a localizacao do celular para preencher os dados da foto.';
-                case 2:
-                    return 'Nao foi possivel obter a localizacao atual do celular.';
-                case 3:
-                    return 'A localizacao demorou demais. Tente novamente em local com melhor sinal.';
-                default:
-                    return 'Nao foi possivel capturar a localizacao atual.';
-            }
-        }
-
-        function captureDeviceGeolocationForPhoto() {
-            var latitude = field('[data-latitude]');
-            var longitude = field('[data-longitude]');
-
-            if (!('geolocation' in navigator) || !latitude || !longitude) {
-                setStatus('Foto pronta. Localizacao pode ser preenchida manualmente.');
-                return Promise.resolve(false);
-            }
-
-            setStatus('Capturando localizacao atual do celular...');
-
-            return new Promise(function (resolve) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    var lat = position.coords.latitude.toFixed(7);
-                    var lng = position.coords.longitude.toFixed(7);
-
-                    latitude.value = lat;
-                    longitude.value = lng;
-                    dispatchFieldEvents(latitude);
-                    dispatchFieldEvents(longitude);
-
-                    fillAddressFromCoordinates(lat, lng, 'Localizacao da foto').then(function () {
-                        resolve(true);
-                    });
-                }, function (error) {
-                    setStatus(geolocationErrorMessage(error));
-                    resolve(false);
-                }, {
-                    enableHighAccuracy: true,
-                    timeout: 15000,
-                    maximumAge: 0
-                });
-            });
-        }
-
         function updatePreview() {
             var file = input.files && input.files[0] ? input.files[0] : null;
 
@@ -557,6 +1149,8 @@
             }
 
             if (!file) {
+                form.dataset.photoLocationSource = '';
+
                 if (previewUrl) {
                     URL.revokeObjectURL(previewUrl);
                     previewUrl = null;
@@ -863,12 +1457,9 @@
                 return;
             }
 
-            setStatus('Foto selecionada. Verificando GPS da imagem...');
+            form.dataset.photoLocationSource = 'pending';
+            setStatus('Foto selecionada. Verificando metadados e coordenadas da imagem...');
             applyPhotoGeolocation(file).then(function (foundPhotoGps) {
-                if (foundPhotoGps === false) {
-                    return captureDeviceGeolocationForPhoto();
-                }
-
                 return foundPhotoGps;
             }).then(function () {
                 return processPhoto();
