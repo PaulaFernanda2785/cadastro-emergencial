@@ -1,0 +1,54 @@
+# Ambiente e credenciais
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+
+# Dependencias e caches
+vendor/
+node_modules/
+.phpunit.cache/
+.cache/
+
+# Logs, sessoes, arquivos privados e uploads
+storage/*
+!storage/.gitkeep
+!storage/.htaccess
+!storage/logs/
+!storage/logs/.gitkeep
+!storage/cache/
+!storage/cache/.gitkeep
+!storage/private_uploads/
+!storage/private_uploads/.gitkeep
+storage/logs/*
+!storage/logs/.gitkeep
+storage/cache/*
+!storage/cache/.gitkeep
+storage/private_uploads/*
+!storage/private_uploads/.gitkeep
+public/uploads/
+public/assets/uploads/
+
+# Backups e dumps de banco
+*.sql.gz
+*.sql.zip
+*.dump
+*.bak
+*.backup
+*.7z
+*.rar
+*.tar
+*.tgz
+*.zip
+
+# Sistema operacional e editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
