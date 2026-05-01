@@ -4,13 +4,13 @@
             <img src="<?= h(asset('images/logo-cedec.png')) ?>" alt="CEDEC-PA" class="auth-brand-logo">
             <div class="auth-brand-title">
                 <strong>Cadastro Emergencial</strong>
-                <span>Aplicativo de campo</span>
+                <span>Sistema web</span>
             </div>
         </div>
 
         <div class="section-heading">
             <span class="eyebrow">Acesso restrito</span>
-            <h1>Entrar no aplicativo</h1>
+            <h1>Entrar no sistema</h1>
             <p>Entre com sua conta institucional para operar os cadastros, entregas e relatórios.</p>
         </div>
 

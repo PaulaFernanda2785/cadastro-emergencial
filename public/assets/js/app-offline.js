@@ -1,8 +1,26 @@
 (function () {
     'use strict';
 
+    var CACHE_NAME = 'cadastro-emergencial-v20260501-45';
+
     if (!('serviceWorker' in navigator)) {
         return;
+    }
+
+    function clearCadastroCaches() {
+        if (!window.caches || typeof caches.keys !== 'function') {
+            return;
+        }
+
+        caches.keys().then(function (keys) {
+            return Promise.all(keys.map(function (key) {
+                if (key.indexOf('cadastro-emergencial-') === 0) {
+                    return caches.delete(key);
+                }
+
+                return Promise.resolve();
+            }));
+        }).catch(function () {});
     }
 
     function clearOldDynamicCaches() {
@@ -12,7 +30,7 @@
 
         caches.keys().then(function (keys) {
             return Promise.all(keys.map(function (key) {
-                if (key.indexOf('cadastro-emergencial-') === 0 && key !== 'cadastro-emergencial-v20260501-43') {
+                if (key.indexOf('cadastro-emergencial-') === 0 && key !== CACHE_NAME) {
                     return caches.delete(key);
                 }
 
@@ -21,7 +39,42 @@
         }).catch(function () {});
     }
 
+    function shouldUseOfflineWorker() {
+        return Boolean(document.querySelector('[data-offline-queue-form]'));
+    }
+
+    function disableOfflineWorker() {
+        if (!navigator.serviceWorker.getRegistrations) {
+            clearCadastroCaches();
+            return;
+        }
+
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+            registrations.forEach(function (registration) {
+                var scriptUrl = registration.active
+                    ? registration.active.scriptURL
+                    : registration.installing
+                        ? registration.installing.scriptURL
+                        : registration.waiting
+                            ? registration.waiting.scriptURL
+                            : '';
+
+                if (scriptUrl.indexOf('/sw.js') !== -1) {
+                    registration.unregister().catch(function () {});
+                }
+            });
+            clearCadastroCaches();
+        }).catch(function () {
+            clearCadastroCaches();
+        });
+    }
+
     window.addEventListener('load', function () {
+        if (!shouldUseOfflineWorker()) {
+            disableOfflineWorker();
+            return;
+        }
+
         clearOldDynamicCaches();
 
         var script = document.currentScript || document.querySelector('script[src*="/assets/js/app-offline.js"]');

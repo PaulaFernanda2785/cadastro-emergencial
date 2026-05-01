@@ -36,7 +36,7 @@ final class Middleware
             }
 
             Session::flash('warning', 'Acesse sua conta para continuar.');
-            header('Location: ' . url('/login'));
+            header('Location: ' . url('/login?intended=1'));
             exit;
         }
     }

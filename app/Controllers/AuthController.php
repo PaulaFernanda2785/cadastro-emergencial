@@ -18,6 +18,10 @@ final class AuthController extends Controller
 {
     public function showLogin(): void
     {
+        if (($_GET['intended'] ?? '') !== '1') {
+            Session::forget('intended_url');
+        }
+
         $this->sendNoStoreHeaders();
 
         $this->view('auth.login', [
@@ -79,7 +83,6 @@ final class AuthController extends Controller
             exit;
         }
 
-        $this->redirectToActiveAction($user);
         $this->redirect('/dashboard');
     }
 
@@ -346,31 +349,7 @@ final class AuthController extends Controller
             exit;
         }
 
-        $this->redirectToActiveAction(current_user());
         $this->redirect('/dashboard');
-    }
-
-    private function redirectToActiveAction(?array $user): void
-    {
-        if (($user['perfil'] ?? null) !== 'cadastrador') {
-            return;
-        }
-
-        $this->restoreActiveActionForUser($user);
-        $token = Session::get('active_action_token');
-
-        if (!is_string($token) || $token === '') {
-            return;
-        }
-
-        $acao = (new AcaoEmergencialRepository())->findByPublicToken($token);
-
-        if ($acao === null || ($acao['status'] ?? null) !== 'aberta') {
-            Session::forget('active_action_token');
-            return;
-        }
-
-        $this->redirect('/acao/' . rawurlencode($token) . '/residencias/novo');
     }
 
     private function restoreActiveActionForUser(?array $user): void
@@ -392,9 +371,15 @@ final class AuthController extends Controller
             Session::forget('active_action_token');
         }
 
-        $acao = $repository->latestOpen();
+        $intendedUrl = Session::get('intended_url');
 
-        if ($acao !== null && !empty($acao['token_publico'])) {
+        if (!is_string($intendedUrl) || !preg_match('#/acao/([^/]+)/#', $intendedUrl, $matches)) {
+            return;
+        }
+
+        $acao = $repository->findByPublicToken(rawurldecode($matches[1]));
+
+        if ($acao !== null && ($acao['status'] ?? null) === 'aberta') {
             Session::put('active_action_token', (string) $acao['token_publico']);
         }
     }

@@ -2517,13 +2517,13 @@ button:disabled,
     gap: 10px;
 }
 
-.family-doc-autofill-grid {
+.family-doc-upload-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
 }
 
-.family-doc-autofill-grid-single {
+.family-doc-upload-grid-single {
     grid-template-columns: minmax(0, 1fr);
 }
 
@@ -3651,7 +3651,7 @@ button:disabled,
 
 @media (max-width: 900px) {
     .three-columns,
-    .family-doc-autofill-grid {
+    .family-doc-upload-grid {
         grid-template-columns: 1fr;
     }
 

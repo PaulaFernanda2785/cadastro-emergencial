@@ -49,7 +49,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
         </div>
     </div>
 
-    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form residence-edit-form family-edit-form js-prevent-double-submit" enctype="multipart/form-data" data-family-form data-ocr-endpoint="<?= h(url('/cadastros/familias/ocr-documento')) ?>" novalidate>
+    <form method="post" action="<?= h(url($action)) ?>" class="form panel-form residence-edit-form family-edit-form js-prevent-double-submit" enctype="multipart/form-data" data-family-form novalidate>
         <?= csrf_field() ?>
         <?= idempotency_field($action) ?>
 
@@ -96,7 +96,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
                 </div>
             <?php endif; ?>
 
-            <div class="family-doc-autofill-grid family-doc-autofill-grid-single">
+            <div class="family-doc-upload-grid family-doc-upload-grid-single">
                 <div class="family-doc-upload photo-upload" data-family-doc-upload data-doc-target="responsavel">
                     <input class="file-input-native" id="documentos-responsavel" type="file" name="documentos[]" accept="image/jpeg,image/png,application/pdf,image/*" capture="environment" multiple data-family-doc-input>
                     <label class="photo-dropzone family-doc-dropzone" for="documentos-responsavel" tabindex="0" data-family-doc-dropzone>
@@ -120,7 +120,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
             <label class="field">
                 <span>Nome completo</span>
-                <input type="text" name="responsavel_nome" value="<?= h($familia['responsavel_nome'] ?? '') ?>" maxlength="180" required data-family-autofill-target="responsavel_nome">
+                <input type="text" name="responsavel_nome" value="<?= h($familia['responsavel_nome'] ?? '') ?>" maxlength="180" required>
                 <?php if (!empty($errors['responsavel_nome'])): ?>
                     <small class="field-error"><?= h($errors['responsavel_nome'][0]) ?></small>
                 <?php endif; ?>
@@ -129,14 +129,14 @@ $optionSelected = static function (array $familia, string $field, string $value)
             <div class="form-grid two-columns">
                 <label class="field">
                     <span>CPF</span>
-                    <input type="text" name="responsavel_cpf" value="<?= h($familia['responsavel_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input data-family-autofill-target="responsavel_cpf" required>
+                    <input type="text" name="responsavel_cpf" value="<?= h($familia['responsavel_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input required>
                     <?php if (!empty($errors['responsavel_cpf'])): ?>
                         <small class="field-error"><?= h($errors['responsavel_cpf'][0]) ?></small>
                     <?php endif; ?>
                 </label>
                 <label class="field">
                     <span>RG</span>
-                    <input type="text" name="responsavel_rg" value="<?= h($familia['responsavel_rg'] ?? '') ?>" maxlength="30" data-family-autofill-target="responsavel_rg">
+                    <input type="text" name="responsavel_rg" value="<?= h($familia['responsavel_rg'] ?? '') ?>" maxlength="30">
                     <?php if (!empty($errors['responsavel_rg'])): ?>
                         <small class="field-error"><?= h($errors['responsavel_rg'][0]) ?></small>
                     <?php endif; ?>
@@ -146,21 +146,21 @@ $optionSelected = static function (array $familia, string $field, string $value)
             <div class="form-grid three-columns">
                 <label class="field">
                     <span>Orgao expedidor</span>
-                    <input type="text" name="responsavel_orgao_expedidor" value="<?= h($familia['responsavel_orgao_expedidor'] ?? '') ?>" maxlength="30" data-family-autofill-target="responsavel_orgao_expedidor">
+                    <input type="text" name="responsavel_orgao_expedidor" value="<?= h($familia['responsavel_orgao_expedidor'] ?? '') ?>" maxlength="30">
                     <?php if (!empty($errors['responsavel_orgao_expedidor'])): ?>
                         <small class="field-error"><?= h($errors['responsavel_orgao_expedidor'][0]) ?></small>
                     <?php endif; ?>
                 </label>
                 <label class="field date-field">
                     <span>Data de nascimento</span>
-                    <input type="date" name="data_nascimento" value="<?= h($familia['data_nascimento'] ?? '') ?>" data-family-autofill-target="data_nascimento">
+                    <input type="date" name="data_nascimento" value="<?= h($familia['data_nascimento'] ?? '') ?>">
                     <?php if (!empty($errors['data_nascimento'])): ?>
                         <small class="field-error"><?= h($errors['data_nascimento'][0]) ?></small>
                     <?php endif; ?>
                 </label>
                 <label class="field">
                     <span>Sexo</span>
-                    <select name="responsavel_sexo" data-family-autofill-target="responsavel_sexo">
+                    <select name="responsavel_sexo">
                         <option value="">Nao informado</option>
                         <option value="feminino" <?= $optionSelected($familia, 'responsavel_sexo', 'feminino') ?>>Feminino</option>
                         <option value="masculino" <?= $optionSelected($familia, 'responsavel_sexo', 'masculino') ?>>Masculino</option>
@@ -293,7 +293,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
                     <input class="file-input-native" id="documentos-representante" type="file" name="documentos[]" accept="image/jpeg,image/png,application/pdf,image/*" capture="environment" multiple data-family-doc-input>
                     <label class="photo-dropzone family-doc-dropzone" for="documentos-representante" tabindex="0" data-family-doc-dropzone>
                         <strong>Documentos do representante</strong>
-                        <span>Anexe primeiro RG, CPF ou documento equivalente para tentar preencher os dados abaixo.</span>
+                        <span>Anexe RG, CPF ou documento equivalente.</span>
                     </label>
                     <div class="family-doc-list" data-family-doc-list hidden></div>
                     <small class="field-hint" data-family-doc-status>JPG, PNG ou PDF. Tamanho maximo por arquivo: 5 MB.</small>
@@ -301,20 +301,20 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
                 <label class="field">
                     <span>Nome completo</span>
-                    <input type="text" name="representante_nome" value="<?= h($familia['representante_nome'] ?? '') ?>" maxlength="180" data-representative-input data-family-autofill-target="representante_nome">
+                    <input type="text" name="representante_nome" value="<?= h($familia['representante_nome'] ?? '') ?>" maxlength="180" data-representative-input>
                 </label>
 
                 <div class="form-grid two-columns">
                     <label class="field">
                         <span>CPF</span>
-                        <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input data-representative-input data-family-autofill-target="representante_cpf">
+                        <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input data-representative-input>
                         <?php if (!empty($errors['representante_cpf'])): ?>
                             <small class="field-error"><?= h($errors['representante_cpf'][0]) ?></small>
                         <?php endif; ?>
                     </label>
                     <label class="field">
                         <span>RG</span>
-                        <input type="text" name="representante_rg" value="<?= h($familia['representante_rg'] ?? '') ?>" maxlength="30" data-representative-input data-family-autofill-target="representante_rg">
+                        <input type="text" name="representante_rg" value="<?= h($familia['representante_rg'] ?? '') ?>" maxlength="30" data-representative-input>
                         <?php if (!empty($errors['representante_rg'])): ?>
                             <small class="field-error"><?= h($errors['representante_rg'][0]) ?></small>
                         <?php endif; ?>
@@ -324,15 +324,15 @@ $optionSelected = static function (array $familia, string $field, string $value)
                 <div class="form-grid three-columns">
                     <label class="field">
                         <span>Orgao expedidor</span>
-                        <input type="text" name="representante_orgao_expedidor" value="<?= h($familia['representante_orgao_expedidor'] ?? '') ?>" maxlength="30" data-representative-input data-family-autofill-target="representante_orgao_expedidor">
+                        <input type="text" name="representante_orgao_expedidor" value="<?= h($familia['representante_orgao_expedidor'] ?? '') ?>" maxlength="30" data-representative-input>
                     </label>
                     <label class="field date-field">
                         <span>Data de nascimento</span>
-                        <input type="date" name="representante_data_nascimento" value="<?= h($familia['representante_data_nascimento'] ?? '') ?>" data-representative-input data-family-autofill-target="representante_data_nascimento">
+                        <input type="date" name="representante_data_nascimento" value="<?= h($familia['representante_data_nascimento'] ?? '') ?>" data-representative-input>
                     </label>
                     <label class="field">
                         <span>Sexo</span>
-                        <select name="representante_sexo" data-representative-input data-family-autofill-target="representante_sexo">
+                        <select name="representante_sexo" data-representative-input>
                             <option value="">Nao informado</option>
                             <option value="feminino" <?= $optionSelected($familia, 'representante_sexo', 'feminino') ?>>Feminino</option>
                             <option value="masculino" <?= $optionSelected($familia, 'representante_sexo', 'masculino') ?>>Masculino</option>

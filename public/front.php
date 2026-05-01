@@ -82,7 +82,6 @@ $router->get('/cadastros/residencias/{id}/documentos/{documentoId}', [Residencia
 $router->get('/cadastros/residencias/{id}/editar', [ResidenciaController::class, 'edit'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}', [ResidenciaController::class, 'update'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}', [ResidenciaController::class, 'show'], ['auth', 'role:cadastrador,gestor,administrador']);
-$router->post('/cadastros/familias/ocr-documento', [FamiliaController::class, 'ocrDocument'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/novo', [FamiliaController::class, 'create'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias', [FamiliaController::class, 'store'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/{familiaId}', [FamiliaController::class, 'show'], ['auth', 'role:cadastrador,gestor,administrador']);

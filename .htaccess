@@ -1,0 +1,30 @@
+Options -Indexes
+DirectoryIndex root-front.php
+
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+
+<FilesMatch "^(\.env|\.git|\.gitattributes|\.gitignore|LICENSE)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteRule ^(?:app|config|database|doc|resources|scripts|storage|terit)(?:/|$) - [F,L]
+    RewriteRule ^(?:\.env|\.git|\.gitattributes|\.gitignore|LICENSE)$ - [F,L]
+
+    RewriteRule ^assets/(.*)$ public/assets/$1 [L]
+    RewriteRule ^sw\.js$ public/sw.js [L]
+    RewriteRule ^manifest\.webmanifest$ public/manifest.webmanifest [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ root-front.php [L]
+</IfModule>

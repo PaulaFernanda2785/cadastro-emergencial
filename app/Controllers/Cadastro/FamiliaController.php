@@ -12,7 +12,6 @@ use App\Repositories\DocumentoAnexoRepository;
 use App\Repositories\FamiliaRepository;
 use App\Repositories\ResidenciaRepository;
 use App\Services\AuditLogService;
-use App\Services\DocumentOcrService;
 use App\Services\IdempotenciaService;
 use App\Services\UploadService;
 use RuntimeException;
@@ -83,22 +82,6 @@ final class FamiliaController extends Controller
         header('X-Content-Type-Options: nosniff');
         readfile($filePath);
         exit;
-    }
-
-    public function ocrDocument(): void
-    {
-        if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            $this->json([
-                'ok' => false,
-                'text' => '',
-                'message' => 'Sessao expirada ou formulario invalido.',
-            ], 403);
-        }
-
-        $file = is_array($_FILES['documento'] ?? null) ? $_FILES['documento'] : [];
-        $result = (new DocumentOcrService())->extractText($file);
-
-        $this->json($result, $result['ok'] ? 200 : 422);
     }
 
     public function edit(string $residenciaId, string $familiaId): void
@@ -491,14 +474,6 @@ final class FamiliaController extends Controller
     private function normalizeCpf(string $cpf): string
     {
         return preg_replace('/\D+/', '', $cpf) ?? '';
-    }
-
-    private function json(array $payload, int $statusCode = 200): void
-    {
-        http_response_code($statusCode);
-        header('Content-Type: application/json; charset=UTF-8');
-        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
     }
 
     private function guardPost(string $scope, string $failureRedirect): void

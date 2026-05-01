@@ -43,7 +43,7 @@ final class UsuarioRepository
         $stmt = Database::connection()->prepare(
             'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, militar, graduacao, nome_guerra, senha_hash, perfil, ativo
              FROM usuarios
-             WHERE email = :email AND ativo = 1
+             WHERE email = :email AND ativo = 1 AND deleted_at IS NULL
              LIMIT 1'
         );
         $stmt->bindValue(':email', $email);
@@ -151,6 +151,22 @@ final class UsuarioRepository
             'UPDATE usuarios SET senha_hash = :senha_hash WHERE id = :id AND deleted_at IS NULL'
         );
         $stmt->bindValue(':senha_hash', password_hash($password, PASSWORD_DEFAULT));
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    public function updatePasswordHash(int $id, string $hash): void
+    {
+        $info = password_get_info($hash);
+
+        if (($info['algoName'] ?? 'unknown') === 'unknown') {
+            throw new \InvalidArgumentException('Hash de senha invalido.');
+        }
+
+        $stmt = Database::connection()->prepare(
+            'UPDATE usuarios SET senha_hash = :senha_hash WHERE id = :id AND deleted_at IS NULL'
+        );
+        $stmt->bindValue(':senha_hash', $hash);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
     }
