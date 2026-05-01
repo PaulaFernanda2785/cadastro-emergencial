@@ -16,7 +16,6 @@
 
         <form method="post" action="<?= h(url('/login')) ?>" class="form js-prevent-double-submit" novalidate>
             <?= csrf_field() ?>
-            <?= idempotency_field('auth.login') ?>
 
             <label class="field">
                 <span>E-mail</span>

@@ -1,14 +1,21 @@
 <?php
 $fotoPrincipal = null;
+$fotosExtras = [];
 
 foreach ($documentos as $documento) {
     $isResidencePhoto = (string) ($documento['tipo_documento'] ?? '') === 'foto_georreferenciada'
         && (int) ($documento['residencia_id'] ?? 0) === (int) $residencia['id']
         && str_starts_with((string) ($documento['mime_type'] ?? ''), 'image/');
+    $isExtraResidencePhoto = (string) ($documento['tipo_documento'] ?? '') === 'foto_residencia_extra'
+        && (int) ($documento['residencia_id'] ?? 0) === (int) $residencia['id']
+        && str_starts_with((string) ($documento['mime_type'] ?? ''), 'image/');
 
-    if ($isResidencePhoto) {
+    if ($isResidencePhoto && $fotoPrincipal === null) {
         $fotoPrincipal = $documento;
-        break;
+    }
+
+    if ($isExtraResidencePhoto) {
+        $fotosExtras[] = $documento;
     }
 }
 
@@ -88,6 +95,23 @@ $podeCadastrarFamilia = $familiasCadastradas < max(1, $familiasPrevistas);
         <?php endif; ?>
     </article>
 </section>
+
+<?php if ($fotosExtras !== []): ?>
+<section class="residence-extra-photos-panel">
+    <div class="table-heading">
+        <h2>Fotos adicionais da residencia</h2>
+        <span><?= h(count($fotosExtras)) ?> de 3 foto(s)</span>
+    </div>
+    <div class="residence-extra-photo-grid">
+        <?php foreach ($fotosExtras as $fotoExtra): ?>
+            <?php $fotoExtraUrl = url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $fotoExtra['id']); ?>
+            <button class="residence-photo-preview" type="button" data-residence-image-open data-image-src="<?= h($fotoExtraUrl) ?>" data-image-title="<?= h($fotoExtra['nome_original']) ?>">
+                <img src="<?= h($fotoExtraUrl) ?>" alt="Foto adicional da residencia">
+            </button>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
 
 <section class="detail-grid residence-detail-grid">
     <article class="detail-panel">

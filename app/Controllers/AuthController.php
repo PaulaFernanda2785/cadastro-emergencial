@@ -18,6 +18,8 @@ final class AuthController extends Controller
 {
     public function showLogin(): void
     {
+        $this->sendNoStoreHeaders();
+
         $this->view('auth.login', [
             'title' => 'Entrar',
             'email' => '',
@@ -30,19 +32,10 @@ final class AuthController extends Controller
     {
         $email = trim((string) ($_POST['email'] ?? ''));
         $password = (string) ($_POST['password'] ?? '');
+        $csrfValid = Csrf::validate($_POST['_csrf_token'] ?? null);
 
-        if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
-            $this->redirect('/login');
-        }
-
-        $idempotency = (new IdempotenciaService())->validateAndReserve(
-            $_POST['_idempotency_token'] ?? null,
-            'auth.login'
-        );
-
-        if (!$idempotency['ok']) {
-            Session::flash('warning', $idempotency['message']);
+        if (!$csrfValid) {
+            Session::flash('error', 'Sessao expirada. Recarregue a pagina e tente novamente.');
             $this->redirect('/login');
         }
 
@@ -53,6 +46,8 @@ final class AuthController extends Controller
             ->required('password', $password, 'Senha');
 
         if ($validator->fails()) {
+            $this->sendNoStoreHeaders();
+
             $this->view('auth.login', [
                 'title' => 'Entrar',
                 'email' => $email,
@@ -95,6 +90,8 @@ final class AuthController extends Controller
             $this->redirect('/login');
         }
 
+        $this->sendNoStoreHeaders();
+
         $this->view('auth.register', [
             'title' => 'Criar cadastro',
             'usuario' => $this->emptyRegisterInput(),
@@ -116,6 +113,8 @@ final class AuthController extends Controller
         $validator = $this->registerValidator($data);
 
         if ($validator->fails()) {
+            $this->sendNoStoreHeaders();
+
             $this->view('auth.register', [
                 'title' => 'Criar cadastro',
                 'usuario' => $data,
@@ -229,6 +228,17 @@ final class AuthController extends Controller
             Session::flash('warning', $idempotency['message']);
             $this->redirect($failureRedirect);
         }
+    }
+
+    private function sendNoStoreHeaders(): void
+    {
+        if (headers_sent()) {
+            return;
+        }
+
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
     }
 
     private function emptyRegisterInput(): array

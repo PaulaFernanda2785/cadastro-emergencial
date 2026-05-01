@@ -128,7 +128,7 @@
         });
     }
 
-    function setupPhotoUpload(form) {
+        function setupPhotoUpload(form) {
         var wrapper = form.querySelector('[data-photo-upload]');
 
         if (!wrapper) {
@@ -162,6 +162,60 @@
             if (status) {
                 status.textContent = text;
             }
+        }
+
+        function setSubmitBusy() {
+            var button = form.querySelector('button[type="submit"]');
+            var label;
+            var loadingText;
+
+            form.dataset.processing = 'true';
+
+            if (!button) {
+                return;
+            }
+
+            loadingText = button.dataset.loadingText || 'Processando...';
+            label = button.querySelector('.button-label');
+
+            if (label) {
+                if (!button.dataset.originalLabel) {
+                    button.dataset.originalLabel = label.textContent || '';
+                }
+                label.textContent = loadingText;
+            } else {
+                if (!button.dataset.originalLabel) {
+                    button.dataset.originalLabel = button.textContent || '';
+                }
+                button.textContent = loadingText;
+            }
+
+            button.disabled = true;
+            button.classList.add('is-processing');
+            button.setAttribute('aria-busy', 'true');
+        }
+
+        function clearSubmitBusy() {
+            var button = form.querySelector('button[type="submit"]');
+            var label;
+
+            form.dataset.processing = '';
+
+            if (!button) {
+                return;
+            }
+
+            label = button.querySelector('.button-label');
+
+            if (label && button.dataset.originalLabel) {
+                label.textContent = button.dataset.originalLabel;
+            } else if (button.dataset.originalLabel) {
+                button.textContent = button.dataset.originalLabel;
+            }
+
+            button.disabled = false;
+            button.classList.remove('is-processing');
+            button.removeAttribute('aria-busy');
         }
 
         function firstImage(files) {
@@ -1318,11 +1372,10 @@
             }
         }
 
-        function metadataPayload() {
+        function metadataPayload(overrides) {
             var now = new Date();
             var timezone = form.dataset.appTimezone || 'America/Belem';
-
-            return {
+            var metadata = {
                 sistema: 'Cadastro Emergencial',
                 municipio: form.dataset.actionMunicipality || '',
                 uf: form.dataset.actionState || '',
@@ -1338,10 +1391,16 @@
                 data_hora_timezone: timezone,
                 data_hora_br: formatDateTimeInAppTimezone(now)
             };
+
+            Object.keys(overrides || {}).forEach(function (key) {
+                metadata[key] = overrides[key];
+            });
+
+            return metadata;
         }
 
-        function textLines() {
-            var metadata = metadataPayload();
+        function textLines(overrides) {
+            var metadata = metadataPayload(overrides);
 
             return [
                 'Cadastro Emergencial',
@@ -1476,14 +1535,15 @@
             context.restore();
         }
 
-        function drawWatermark(image, file, logo) {
+        function drawWatermark(image, file, logo, metadataOverrides) {
             var maxSide = 1920;
             var scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
             var width = Math.max(1, Math.round(image.naturalWidth * scale));
             var height = Math.max(1, Math.round(image.naturalHeight * scale));
             var canvas = document.createElement('canvas');
             var context = canvas.getContext('2d');
-            var lines = textLines();
+            var metadata = metadataPayload(metadataOverrides);
+            var lines = textLines(metadataOverrides);
             var fontSize = Math.max(18, Math.round(width * 0.018));
             var padding = Math.max(18, Math.round(width * 0.018));
             var lineHeight = Math.round(fontSize * 1.35);
@@ -1519,7 +1579,7 @@
                     return file;
                 }
 
-                return addJpegCommentMetadata(blob, metadataPayload());
+                return addJpegCommentMetadata(blob, metadata);
             }).then(function (blob) {
                 var baseName = file.name.replace(/\.[^.]+$/, '') || 'foto';
                 return new File([blob], baseName + '-georreferenciada.jpg', { type: 'image/jpeg' });
@@ -1561,6 +1621,422 @@
 
             return photoProcessingPromise;
         }
+
+        function submitWithFetch() {
+            var data = new FormData(form);
+
+            if (typeof form.__applyResidenceUploadFiles === 'function') {
+                form.__applyResidenceUploadFiles(data);
+            }
+
+            setSubmitBusy();
+
+            return fetch(form.action, {
+                method: form.method || 'POST',
+                body: data,
+                credentials: 'same-origin'
+            }).then(function (response) {
+                if (response.redirected && response.url) {
+                    window.location.href = response.url;
+                    return null;
+                }
+
+                return response.text().then(function (html) {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                    return null;
+                });
+            }).catch(function () {
+                clearSubmitBusy();
+                setStatus('Nao foi possivel enviar agora. Verifique a conexao e tente novamente.');
+            });
+        }
+
+        function setupExtraResidencePhotos() {
+            var wrapper = form.querySelector('[data-extra-residence-photos]');
+
+            if (!wrapper) {
+                return null;
+            }
+
+            var toggle = wrapper.querySelector('[data-extra-photos-toggle]');
+            var fields = wrapper.querySelector('[data-extra-photos-fields]');
+            var extraInput = wrapper.querySelector('[data-extra-photos-input]');
+            var extraDropzone = wrapper.querySelector('[data-extra-photos-dropzone]');
+            var list = wrapper.querySelector('[data-extra-photos-list]');
+            var extraStatus = wrapper.querySelector('[data-extra-photos-status]');
+            var maxFiles = parseInt(wrapper.dataset.maxFiles || '3', 10);
+            var existingFiles = parseInt(wrapper.dataset.existingFiles || '0', 10);
+            var files = [];
+            var previewUrls = [];
+            var syncing = false;
+            var processingPromise = null;
+
+            maxFiles = Number.isFinite(maxFiles) && maxFiles > 0 ? maxFiles : 3;
+            existingFiles = Number.isFinite(existingFiles) && existingFiles > 0 ? existingFiles : 0;
+
+            if (!toggle || !fields || !extraInput || !extraDropzone || !list) {
+                return null;
+            }
+
+            function setExtraStatus(text) {
+                if (extraStatus) {
+                    extraStatus.textContent = text;
+                }
+            }
+
+            function markPending() {
+                form.dataset.extraPhotosProcessed = '';
+            }
+
+            function selectedTotal() {
+                return existingFiles + files.length;
+            }
+
+            function canAddMore() {
+                return selectedTotal() < maxFiles;
+            }
+
+            function defaultStatusText() {
+                if (existingFiles >= maxFiles) {
+                    return 'Limite maximo de 3 fotos extras da residencia atingido.';
+                }
+
+                if (existingFiles > 0) {
+                    return existingFiles + ' de 3 fotos extras ja cadastradas. Voce pode anexar mais ' + (maxFiles - existingFiles) + '.';
+                }
+
+                return 'Opcional. Limite de 3 fotos extras por residencia.';
+            }
+
+            function syncExtraInput() {
+                var transfer;
+
+                if (typeof DataTransfer === 'undefined') {
+                    return false;
+                }
+
+                transfer = new DataTransfer();
+                files.forEach(function (file) {
+                    transfer.items.add(file);
+                });
+
+                syncing = true;
+                extraInput.files = transfer.files;
+                syncing = false;
+                return true;
+            }
+
+            function replaceFormDataFiles(formData) {
+                if (!formData || files.length === 0) {
+                    return;
+                }
+
+                formData.delete('fotos_residencia[]');
+                files.forEach(function (file) {
+                    formData.append('fotos_residencia[]', file, file.name);
+                });
+            }
+
+            function clearExtraPreviewUrls() {
+                previewUrls.forEach(function (url) {
+                    URL.revokeObjectURL(url);
+                });
+                previewUrls = [];
+            }
+
+            function openExtraPreview(url) {
+                if (!url) {
+                    return;
+                }
+
+                createPreviewModal();
+                modalImage.src = url;
+                modal.hidden = false;
+                document.body.classList.add('is-photo-preview-open');
+            }
+
+            function createExtraItem(file, index) {
+                var item = document.createElement('div');
+                var image = document.createElement('img');
+                var info = document.createElement('div');
+                var name = document.createElement('span');
+                var actions = document.createElement('div');
+                var openButton = document.createElement('button');
+                var removeButton = document.createElement('button');
+                var url = URL.createObjectURL(file);
+
+                previewUrls.push(url);
+                item.className = 'photo-preview extra-photo-item';
+                image.src = url;
+                image.alt = 'Previa de ' + file.name;
+                info.className = 'photo-preview-info';
+                name.textContent = file.name;
+                actions.className = 'photo-preview-actions';
+                openButton.type = 'button';
+                openButton.className = 'secondary-button photo-preview-button';
+                openButton.textContent = 'Ampliar foto';
+                removeButton.type = 'button';
+                removeButton.className = 'secondary-button photo-preview-button';
+                removeButton.textContent = 'Remover foto';
+
+                openButton.addEventListener('click', function () {
+                    openExtraPreview(url);
+                });
+
+                removeButton.addEventListener('click', function () {
+                    files.splice(index, 1);
+                    markPending();
+                    renderExtraPhotos();
+                });
+
+                actions.appendChild(openButton);
+                actions.appendChild(removeButton);
+                info.appendChild(name);
+                info.appendChild(actions);
+                item.appendChild(image);
+                item.appendChild(info);
+
+                return item;
+            }
+
+            function renderExtraPhotos() {
+                clearExtraPreviewUrls();
+                list.innerHTML = '';
+
+                if (files.length === 0) {
+                    list.hidden = true;
+                    extraDropzone.classList.remove('has-file');
+                    extraDropzone.classList.toggle('is-limit-reached', !canAddMore());
+                    wrapper.classList.toggle('is-limit-reached', !canAddMore());
+                    extraDropzone.setAttribute('aria-disabled', canAddMore() ? 'false' : 'true');
+                    setExtraStatus(defaultStatusText());
+                    syncExtraInput();
+                    return;
+                }
+
+                files.forEach(function (file, index) {
+                    list.appendChild(createExtraItem(file, index));
+                });
+
+                list.hidden = false;
+                extraDropzone.classList.add('has-file');
+                extraDropzone.classList.toggle('is-limit-reached', !canAddMore());
+                wrapper.classList.toggle('is-limit-reached', !canAddMore());
+                extraDropzone.setAttribute('aria-disabled', canAddMore() ? 'false' : 'true');
+                setExtraStatus(!canAddMore()
+                    ? 'Limite maximo de 3 fotos extras atingido.'
+                    : files.length + ' foto(s) extra(s) selecionada(s).');
+                syncExtraInput();
+            }
+
+            function addExtraFiles(fileList) {
+                var reachedLimit = false;
+                var added = false;
+
+                Array.prototype.slice.call(fileList || []).forEach(function (file) {
+                    if (!file || !/^image\//.test(file.type)) {
+                        return;
+                    }
+
+                    if (!canAddMore()) {
+                        reachedLimit = true;
+                        return;
+                    }
+
+                    if (files.some(function (item) {
+                        return item.name === file.name && item.size === file.size && item.lastModified === file.lastModified;
+                    })) {
+                        return;
+                    }
+
+                    files.push(file);
+                    added = true;
+                });
+
+                if (reachedLimit) {
+                    setExtraStatus('Limite maximo de 3 fotos extras atingido.');
+                }
+
+                if (added || reachedLimit) {
+                    markPending();
+                    renderExtraPhotos();
+                }
+            }
+
+            function extraMetadataOverrides() {
+                if (fieldValue('[data-latitude]') !== '' && fieldValue('[data-longitude]') !== '') {
+                    return Promise.resolve({});
+                }
+
+                setExtraStatus('Capturando localizacao atual para carimbar as fotos extras...');
+
+                return requestCurrentPosition().then(function (coords) {
+                    if (!coords) {
+                        return {};
+                    }
+
+                    return {
+                        latitude: coords.latitude.toFixed(7),
+                        longitude: coords.longitude.toFixed(7)
+                    };
+                });
+            }
+
+            function processExtraPhotos() {
+                if (processingPromise) {
+                    return processingPromise;
+                }
+
+                if (files.length === 0 || form.dataset.extraPhotosProcessed === 'true') {
+                    return Promise.resolve();
+                }
+
+                setExtraStatus('Gravando dados nas fotos extras...');
+
+                processingPromise = Promise.all([loadLogoImage(), extraMetadataOverrides()]).then(function (items) {
+                    var logo = items[0];
+                    var metadataOverrides = items[1];
+
+                    return Promise.all(files.map(function (file) {
+                        return loadImage(file).then(function (image) {
+                            return drawWatermark(image, file, logo, metadataOverrides);
+                        });
+                    }));
+                }).then(function (processedFiles) {
+                    files = processedFiles;
+                    form.dataset.extraPhotosProcessed = 'true';
+
+                    if (!syncExtraInput()) {
+                        renderExtraPhotos();
+                        setExtraStatus(!canAddMore()
+                            ? 'Fotos extras prontas. Limite maximo de 3 fotos extras atingido.'
+                            : 'Fotos extras prontas para envio.');
+                        return;
+                    }
+
+                    renderExtraPhotos();
+                    setExtraStatus(!canAddMore()
+                        ? 'Fotos extras prontas. Limite maximo de 3 fotos extras atingido.'
+                        : 'Fotos extras prontas para envio.');
+                }).catch(function () {
+                    form.dataset.extraPhotosProcessed = 'true';
+                    setExtraStatus('Nao foi possivel gravar os dados nas fotos extras. O envio seguira com os arquivos originais.');
+                }).finally(function () {
+                    processingPromise = null;
+                });
+
+                return processingPromise;
+            }
+
+            function applyToggleState() {
+                var enabled = toggle.checked;
+                var canAdd = canAddMore();
+
+                fields.hidden = !enabled;
+                extraInput.disabled = !enabled || existingFiles >= maxFiles;
+                extraDropzone.classList.toggle('is-disabled', enabled && !canAdd);
+                extraDropzone.classList.toggle('is-limit-reached', enabled && !canAdd);
+                wrapper.classList.toggle('is-limit-reached', enabled && !canAdd);
+                extraDropzone.setAttribute('aria-disabled', enabled && !canAdd ? 'true' : 'false');
+
+                if (!enabled && files.length > 0) {
+                    files = [];
+                    markPending();
+                    renderExtraPhotos();
+                }
+
+                if (enabled && !canAdd) {
+                    setExtraStatus(defaultStatusText());
+                }
+            }
+
+            toggle.addEventListener('change', applyToggleState);
+
+            extraInput.addEventListener('change', function () {
+                if (!syncing) {
+                    addExtraFiles(extraInput.files);
+                }
+            });
+
+            extraDropzone.addEventListener('keydown', function (event) {
+                if (!canAddMore()) {
+                    event.preventDefault();
+                    setExtraStatus('Limite maximo de 3 fotos extras atingido.');
+                    return;
+                }
+
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    extraInput.click();
+                }
+            });
+
+            ['dragenter', 'dragover'].forEach(function (eventName) {
+                extraDropzone.addEventListener(eventName, function (event) {
+                    event.preventDefault();
+                    extraDropzone.classList.add('is-dragging');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(function (eventName) {
+                extraDropzone.addEventListener(eventName, function () {
+                    extraDropzone.classList.remove('is-dragging');
+                });
+            });
+
+            extraDropzone.addEventListener('drop', function (event) {
+                event.preventDefault();
+
+                if (!canAddMore()) {
+                    setExtraStatus('Limite maximo de 3 fotos extras atingido.');
+                    return;
+                }
+
+                addExtraFiles(event.dataTransfer ? event.dataTransfer.files : []);
+            });
+
+            extraDropzone.addEventListener('click', function (event) {
+                if (!canAddMore()) {
+                    event.preventDefault();
+                    setExtraStatus('Limite maximo de 3 fotos extras atingido.');
+                }
+            });
+
+            form.addEventListener('formdata', function (event) {
+                if (toggle.checked && form.dataset.extraPhotosProcessed === 'true') {
+                    replaceFormDataFiles(event.formData);
+                }
+            });
+
+            form.addEventListener('reset', function () {
+                files = [];
+                markPending();
+                window.setTimeout(renderExtraPhotos, 0);
+            });
+
+            window.addEventListener('beforeunload', clearExtraPreviewUrls);
+            form.__applyResidenceUploadFiles = function (formData) {
+                if (toggle.checked && form.dataset.extraPhotosProcessed === 'true') {
+                    replaceFormDataFiles(formData);
+                }
+            };
+            applyToggleState();
+
+            return {
+                hasFiles: function () {
+                    return files.length > 0;
+                },
+                hasPendingFiles: function () {
+                    return files.length > 0 && form.dataset.extraPhotosProcessed !== 'true';
+                },
+                processAll: processExtraPhotos,
+                appendProcessedFiles: replaceFormDataFiles
+            };
+        }
+
+        var extraResidencePhotos = setupExtraResidencePhotos();
 
         input.addEventListener('change', function () {
             var file;
@@ -1651,21 +2127,27 @@
         });
 
         form.addEventListener('submit', function (event) {
-            if (form.dataset.photoProcessed === 'true') {
-                return;
-            }
+            var mainFile = input.files && input.files[0] ? input.files[0] : null;
+            var shouldProcessMain = mainFile && /^image\//.test(mainFile.type) && form.dataset.photoProcessed !== 'true';
+            var hasExtraFiles = extraResidencePhotos && extraResidencePhotos.hasFiles();
+            var shouldProcessExtra = extraResidencePhotos && extraResidencePhotos.hasPendingFiles();
 
-            var file = input.files && input.files[0] ? input.files[0] : null;
-
-            if (!file || !/^image\//.test(file.type)) {
+            if (!shouldProcessMain && !shouldProcessExtra && !(hasExtraFiles && navigator.onLine)) {
                 return;
             }
 
             event.preventDefault();
             event.stopImmediatePropagation();
 
-            processPhoto().finally(function () {
+            (shouldProcessMain ? processPhoto() : Promise.resolve()).then(function () {
+                return shouldProcessExtra ? extraResidencePhotos.processAll() : Promise.resolve();
+            }).finally(function () {
                 form.dataset.photoProcessed = 'true';
+
+                if (hasExtraFiles && navigator.onLine) {
+                    submitWithFetch();
+                    return;
+                }
 
                 if (typeof form.requestSubmit === 'function') {
                     form.requestSubmit();

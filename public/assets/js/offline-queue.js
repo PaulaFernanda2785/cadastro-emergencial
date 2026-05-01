@@ -131,6 +131,10 @@
         var fields = {};
         var files = [];
 
+        if (typeof form.__applyResidenceUploadFiles === 'function') {
+            form.__applyResidenceUploadFiles(data);
+        }
+
         data.set('_idempotency_token', nextToken());
 
         data.forEach(function (value, key) {

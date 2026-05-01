@@ -1,4 +1,5 @@
 Options -Indexes
+DirectoryIndex front.php
 
 <IfModule mod_authz_core.c>
     Require all granted
@@ -14,5 +15,5 @@ Options -Indexes
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^ index.php [L]
+    RewriteRule ^ front.php [L]
 </IfModule>

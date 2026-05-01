@@ -7,6 +7,7 @@ $cancelUrl = $cancelUrl ?? '/acao/' . $acao['token_publico'];
 $isEditing = !empty($residencia['id']);
 $appConfig = require BASE_PATH . '/config/app.php';
 $appTimezone = (string) ($appConfig['timezone'] ?? 'America/Belem');
+$extraResidencePhotosCount = (int) ($extraResidencePhotosCount ?? 0);
 ?>
 
 <section class="form-shell">
@@ -73,6 +74,35 @@ $appTimezone = (string) ($appConfig['timezone'] ?? 'America/Belem');
                 <?php if (!empty($errors['foto_georreferenciada'])): ?>
                     <small class="field-error"><?= h($errors['foto_georreferenciada'][0]) ?></small>
                 <?php endif; ?>
+            </div>
+
+            <div class="extra-residence-photos" data-extra-residence-photos data-max-files="3" data-existing-files="<?= h($extraResidencePhotosCount) ?>">
+                <div class="representative-toggle extra-residence-photos-toggle">
+                    <div>
+                        <span>Fotos da residencia</span>
+                        <strong>Anexar ate 3 fotos adicionais</strong>
+                    </div>
+                    <label class="switch-control">
+                        <input type="checkbox" name="anexar_fotos_residencia" value="1" data-extra-photos-toggle>
+                    </label>
+                </div>
+
+                <div class="extra-residence-photos-fields" data-extra-photos-fields hidden>
+                    <input class="file-input-native" id="fotos-residencia" type="file" name="fotos_residencia[]" accept="image/jpeg,image/png,image/*" capture="environment" multiple data-extra-photos-input disabled>
+                    <label class="photo-dropzone" for="fotos-residencia" data-extra-photos-dropzone tabindex="0">
+                        <strong>Adicionar fotos da residencia</strong>
+                        <span>As fotos extras recebem o mesmo carimbo da foto principal, mas nao alteram os campos de localizacao do formulario.</span>
+                    </label>
+                    <div class="extra-photo-list" data-extra-photos-list hidden></div>
+                    <small class="field-hint" data-extra-photos-status>
+                        <?= $extraResidencePhotosCount > 0
+                            ? h($extraResidencePhotosCount . ' de 3 fotos extras ja cadastradas para esta residencia.')
+                            : 'Opcional. Limite de 3 fotos extras por residencia.' ?>
+                    </small>
+                    <?php if (!empty($errors['fotos_residencia'])): ?>
+                        <small class="field-error"><?= h($errors['fotos_residencia'][0]) ?></small>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <div class="form-grid location-fields-grid">

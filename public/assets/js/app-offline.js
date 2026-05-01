@@ -5,8 +5,26 @@
         return;
     }
 
+    function clearOldDynamicCaches() {
+        if (!window.caches || typeof caches.keys !== 'function') {
+            return;
+        }
+
+        caches.keys().then(function (keys) {
+            return Promise.all(keys.map(function (key) {
+                if (key.indexOf('cadastro-emergencial-') === 0 && key !== 'cadastro-emergencial-v20260501-13') {
+                    return caches.delete(key);
+                }
+
+                return Promise.resolve();
+            }));
+        }).catch(function () {});
+    }
+
     window.addEventListener('load', function () {
-        var script = document.currentScript || document.querySelector('script[src$="/assets/js/app-offline.js"]');
+        clearOldDynamicCaches();
+
+        var script = document.currentScript || document.querySelector('script[src*="/assets/js/app-offline.js"]');
         var swUrl = script && script.src
             ? script.src.replace('/assets/js/app-offline.js', '/sw.js')
             : '/sw.js';

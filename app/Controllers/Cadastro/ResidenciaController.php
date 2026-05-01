@@ -22,6 +22,7 @@ final class ResidenciaController extends Controller
 {
     private const IMOVEL_OPTIONS = ['proprio', 'alugado', 'cedido'];
     private const CONDICAO_RESIDENCIA_OPTIONS = ['perda_total', 'perda_parcial', 'nao_atingida'];
+    private const MAX_FOTOS_RESIDENCIA_EXTRAS = 3;
 
     public function __construct(
         private readonly ResidenciaRepository $residencias = new ResidenciaRepository(),
@@ -129,6 +130,7 @@ final class ResidenciaController extends Controller
         $upload = new UploadService();
         $foto = $_FILES['foto_georreferenciada'] ?? null;
         $fotoMetadata = null;
+        $extraPhotoMetadata = [];
 
         if (is_array($foto) && $upload->hasFile($foto)) {
             try {
@@ -151,6 +153,27 @@ final class ResidenciaController extends Controller
             }
         }
 
+        try {
+            $extraPhotoMetadata = $this->storeExtraResidencePhotos(
+                $upload,
+                $this->documentos->countResidenceDocumentsByType((int) $id, 'foto_residencia_extra')
+            );
+        } catch (RuntimeException $exception) {
+            $errors = $validator->errors();
+            $errors['fotos_residencia'][] = $exception->getMessage();
+            $this->form(
+                $this->actionFromResidencia($residencia),
+                $data + ['id' => $residencia['id'], 'protocolo' => $residencia['protocolo']],
+                $errors,
+                'Editar residencia',
+                '/cadastros/residencias/' . (int) $id,
+                'Salvar alteracoes',
+                '/cadastros/residencias/' . (int) $id,
+                false
+            );
+            return;
+        }
+
         $this->residencias->update((int) $id, $data);
 
         if ($fotoMetadata !== null) {
@@ -161,6 +184,8 @@ final class ResidenciaController extends Controller
                 'enviado_por' => (int) (current_user()['id'] ?? 0),
             ]);
         }
+
+        $this->createExtraResidencePhotoDocuments((int) $id, $extraPhotoMetadata);
 
         (new AuditLogService())->record('alterou_residencia', 'residencias', (int) $id, (string) $residencia['protocolo']);
         Session::flash('success', 'Residencia atualizada.');
@@ -208,6 +233,7 @@ final class ResidenciaController extends Controller
         $upload = new UploadService();
         $foto = $_FILES['foto_georreferenciada'] ?? null;
         $fotoMetadata = null;
+        $extraPhotoMetadata = [];
 
         if (is_array($foto) && $upload->hasFile($foto)) {
             try {
@@ -221,6 +247,15 @@ final class ResidenciaController extends Controller
             }
         }
 
+        try {
+            $extraPhotoMetadata = $this->storeExtraResidencePhotos($upload);
+        } catch (RuntimeException $exception) {
+            $errors = $validator->errors();
+            $errors['fotos_residencia'][] = $exception->getMessage();
+            $this->form($acao, $data, $errors);
+            return;
+        }
+
         $id = $this->residencias->create($data);
 
         if ($fotoMetadata !== null) {
@@ -231,6 +266,8 @@ final class ResidenciaController extends Controller
                 'enviado_por' => (int) (current_user()['id'] ?? 0),
             ]);
         }
+
+        $this->createExtraResidencePhotoDocuments($id, $extraPhotoMetadata);
 
         (new AuditLogService())->record('criou_residencia', 'residencias', $id, $data['protocolo']);
         Session::flash('success', 'Residencia cadastrada. Agora cadastre as familias vinculadas.');
@@ -260,6 +297,9 @@ final class ResidenciaController extends Controller
             'useOfflineQueue' => $useOfflineQueue,
             'offlineTokens' => $useOfflineQueue ? $this->offlineTokens($acao['token_publico']) : [],
             'bairroOptions' => $this->bairroOptions($acao),
+            'extraResidencePhotosCount' => !empty($residencia['id'])
+                ? $this->documentos->countResidenceDocumentsByType((int) $residencia['id'], 'foto_residencia_extra')
+                : 0,
         ]);
     }
 
@@ -391,6 +431,48 @@ final class ResidenciaController extends Controller
             ->minInt('quantidade_familias', $data['quantidade_familias'], 1, 'Quantidade de familias')
             ->decimalRange('latitude', $data['latitude'], -90, 90, 'Latitude')
             ->decimalRange('longitude', $data['longitude'], -180, 180, 'Longitude');
+    }
+
+    private function storeExtraResidencePhotos(UploadService $upload, int $existingCount = 0): array
+    {
+        $files = $_FILES['fotos_residencia'] ?? null;
+
+        if (!is_array($files)) {
+            return [];
+        }
+
+        $pendingFiles = array_values(array_filter(
+            $upload->normalizeMultiple($files),
+            static fn (array $file): bool => $upload->hasFile($file)
+        ));
+
+        if ($pendingFiles === []) {
+            return [];
+        }
+
+        if ($existingCount + count($pendingFiles) > self::MAX_FOTOS_RESIDENCIA_EXTRAS) {
+            throw new RuntimeException('Limite maximo de 3 fotos extras da residencia atingido.');
+        }
+
+        $stored = [];
+
+        foreach ($pendingFiles as $file) {
+            $stored[] = $upload->storePrivate($file, 'residencias', ['image/jpeg', 'image/png']);
+        }
+
+        return $stored;
+    }
+
+    private function createExtraResidencePhotoDocuments(int $residenciaId, array $photos): void
+    {
+        foreach ($photos as $photoMetadata) {
+            $this->documentos->create($photoMetadata + [
+                'residencia_id' => $residenciaId,
+                'familia_id' => null,
+                'tipo_documento' => 'foto_residencia_extra',
+                'enviado_por' => (int) (current_user()['id'] ?? 0),
+            ]);
+        }
     }
 
     private function guardPost(string $scope, string $failureRedirect): void

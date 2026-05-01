@@ -71,6 +71,23 @@ final class DocumentoAnexoRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function countResidenceDocumentsByType(int $residenciaId, string $tipoDocumento): int
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*)
+             FROM documentos_anexos
+             WHERE residencia_id = :residencia_id
+               AND familia_id IS NULL
+               AND tipo_documento = :tipo_documento
+               AND deleted_at IS NULL'
+        );
+        $stmt->bindValue(':residencia_id', $residenciaId, PDO::PARAM_INT);
+        $stmt->bindValue(':tipo_documento', $tipoDocumento);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
     public function findForResidencia(int $documentoId, int $residenciaId): ?array
     {
         $stmt = Database::connection()->prepare(
