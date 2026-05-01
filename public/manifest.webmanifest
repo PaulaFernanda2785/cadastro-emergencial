@@ -1,0 +1,26 @@
+{
+    "name": "Cadastro Emergencial",
+    "short_name": "CadEmerg",
+    "description": "Aplicativo de campo para cadastro emergencial de residencias e familias.",
+    "id": "./",
+    "start_url": "./dashboard",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#f4f7fb",
+    "theme_color": "#155e75",
+    "icons": [
+        {
+            "src": "./assets/images/app-icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "./assets/images/app-icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

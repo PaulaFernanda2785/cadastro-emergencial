@@ -405,7 +405,7 @@ a:focus {
 }
 
 .auth-register-panel {
-    width: min(760px, 100%);
+    width: min(840px, 100%);
 }
 
 .auth-brand-header {
@@ -493,6 +493,85 @@ a:focus {
     color: var(--primary-strong);
     background: #eef7f9;
     text-decoration: none;
+}
+
+.qr-register-panel {
+    padding: 24px;
+}
+
+.qr-register-brand {
+    margin-bottom: 18px;
+}
+
+.qr-register-heading {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.qr-register-heading h1 {
+    margin-bottom: 0;
+}
+
+.qr-action-summary {
+    display: grid;
+    gap: 3px;
+    border: 1px solid rgba(21, 94, 117, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    background: #eef7f9;
+}
+
+.qr-action-summary span,
+.qr-action-summary small {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.qr-action-summary strong {
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.25;
+}
+
+.qr-register-form {
+    gap: 14px;
+}
+
+.qr-register-block {
+    min-width: 0;
+    display: grid;
+    gap: 14px;
+    border: 1px solid rgba(216, 224, 232, 0.92);
+    border-radius: 8px;
+    padding: 16px;
+    background: #ffffff;
+}
+
+.qr-register-block .form-block-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eef3f7;
+}
+
+.qr-register-block .form-block-heading h2 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.qr-register-block .form-block-heading span {
+    border: 1px solid rgba(21, 94, 117, 0.2);
+    border-radius: 999px;
+    padding: 4px 9px;
+    color: var(--primary);
+    background: #f5fafb;
+    font-size: 12px;
+    font-weight: 800;
 }
 
 .section-heading {
@@ -725,6 +804,12 @@ p {
     font-size: 14px;
     font-weight: 800;
     line-height: 1.35;
+}
+
+.photo-preview-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .photo-preview-button {
@@ -2842,8 +2927,21 @@ button:disabled,
         padding: 22px;
     }
 
+    .qr-register-panel {
+        padding: 14px;
+    }
+
     .auth-brand-header {
         align-items: flex-start;
+    }
+
+    .qr-register-block {
+        padding: 12px;
+    }
+
+    .qr-register-block .form-block-heading {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .auth-secondary-action,

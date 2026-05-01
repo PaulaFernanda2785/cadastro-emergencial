@@ -232,7 +232,7 @@
         }
 
         button.addEventListener('click', function () {
-            if (form.dataset.photoLocationSource === 'photo-metadata' || form.dataset.photoLocationSource === 'photo-ocr') {
+            if (String(form.dataset.photoLocationSource || '').indexOf('photo-') === 0) {
                 setStatus('Foto anexada com localizacao propria. Remova ou troque a foto para capturar a localizacao atual.');
                 return;
             }

@@ -43,6 +43,61 @@ $isEditing = !empty($residencia['id']);
 
         <section class="residence-form-block">
             <div class="form-block-heading">
+                <h2>Localizacao e foto</h2>
+            </div>
+
+            <div class="field photo-upload" data-photo-upload data-photo-logo-src="<?= h(asset('images/logo-cadastro-emergencial-app.png')) ?>">
+                <span>Foto georreferenciada da residencia</span>
+                <input class="file-input-native" id="foto-georreferenciada" type="file" name="foto_georreferenciada" accept="image/jpeg,image/png,image/*" data-photo-input>
+                <label class="photo-dropzone" for="foto-georreferenciada" data-photo-dropzone tabindex="0">
+                    <strong data-photo-title>Selecionar foto</strong>
+                    <span data-photo-description>Arraste, cole, busque nos arquivos ou tire uma foto pela camera do celular.</span>
+                </label>
+                <div class="photo-preview" data-photo-preview hidden>
+                    <img alt="Previa da foto georreferenciada" data-photo-preview-image>
+                    <div class="photo-preview-info">
+                        <span data-photo-preview-name></span>
+                        <div class="photo-preview-actions">
+                            <button type="button" class="secondary-button photo-preview-button" data-photo-open-preview>Ampliar foto</button>
+                            <button type="button" class="secondary-button photo-preview-button" data-photo-clear>Remover foto</button>
+                        </div>
+                    </div>
+                </div>
+                <small class="field-hint" data-photo-status>Ao enviar, a foto recebera localidade, endereco, latitude, longitude, data e hora.</small>
+                <?php if ($isEditing && !empty($residencia['foto_georreferenciada'])): ?>
+                    <small class="field-hint">Ja existe uma foto registrada. Envie outra apenas se desejar substituir a foto principal.</small>
+                <?php endif; ?>
+                <?php if (!empty($errors['foto_georreferenciada'])): ?>
+                    <small class="field-error"><?= h($errors['foto_georreferenciada'][0]) ?></small>
+                <?php endif; ?>
+            </div>
+
+            <div class="form-grid location-fields-grid">
+                <div class="inline-action-panel">
+                    <button type="button" class="secondary-button" data-geolocation-button>Capturar localizacao atual</button>
+                    <span data-geolocation-status></span>
+                </div>
+
+                <label class="field">
+                    <span>Latitude</span>
+                    <input type="text" name="latitude" value="<?= h($residencia['latitude'] ?? '') ?>" inputmode="decimal" placeholder="-1.455833" data-latitude>
+                    <?php if (!empty($errors['latitude'])): ?>
+                        <small class="field-error"><?= h($errors['latitude'][0]) ?></small>
+                    <?php endif; ?>
+                </label>
+
+                <label class="field">
+                    <span>Longitude</span>
+                    <input type="text" name="longitude" value="<?= h($residencia['longitude'] ?? '') ?>" inputmode="decimal" placeholder="-48.503887" data-longitude>
+                    <?php if (!empty($errors['longitude'])): ?>
+                        <small class="field-error"><?= h($errors['longitude'][0]) ?></small>
+                    <?php endif; ?>
+                </label>
+            </div>
+        </section>
+
+        <section class="residence-form-block">
+            <div class="form-block-heading">
                 <h2>Endereco</h2>
             </div>
 
@@ -109,58 +164,6 @@ $isEditing = !empty($residencia['id']);
                         <small class="field-error"><?= h($errors['condicao_residencia'][0]) ?></small>
                     <?php endif; ?>
                 </fieldset>
-            </div>
-        </section>
-
-        <section class="residence-form-block">
-            <div class="form-block-heading">
-                <h2>Localizacao e foto</h2>
-            </div>
-
-            <div class="form-grid location-fields-grid">
-                <label class="field">
-                    <span>Latitude</span>
-                    <input type="text" name="latitude" value="<?= h($residencia['latitude'] ?? '') ?>" inputmode="decimal" placeholder="-1.455833" data-latitude>
-                    <?php if (!empty($errors['latitude'])): ?>
-                        <small class="field-error"><?= h($errors['latitude'][0]) ?></small>
-                    <?php endif; ?>
-                </label>
-
-                <label class="field">
-                    <span>Longitude</span>
-                    <input type="text" name="longitude" value="<?= h($residencia['longitude'] ?? '') ?>" inputmode="decimal" placeholder="-48.503887" data-longitude>
-                    <?php if (!empty($errors['longitude'])): ?>
-                        <small class="field-error"><?= h($errors['longitude'][0]) ?></small>
-                    <?php endif; ?>
-                </label>
-
-                <div class="inline-action-panel">
-                    <button type="button" class="secondary-button" data-geolocation-button>Capturar localizacao atual</button>
-                    <span data-geolocation-status>Latitude e longitude tambem podem ser preenchidas manualmente.</span>
-                </div>
-            </div>
-
-            <div class="field photo-upload" data-photo-upload data-photo-logo-src="<?= h(asset('images/logo-cadastro-emergencial-app.png')) ?>">
-                <span>Foto georreferenciada da residencia</span>
-                <input class="file-input-native" id="foto-georreferenciada" type="file" name="foto_georreferenciada" accept="image/jpeg,image/png,image/*" capture="environment" data-photo-input>
-                <label class="photo-dropzone" for="foto-georreferenciada" data-photo-dropzone tabindex="0">
-                    <strong data-photo-title>Selecionar foto</strong>
-                    <span data-photo-description>Arraste, cole, busque nos arquivos ou tire uma foto pela camera do celular.</span>
-                </label>
-                <div class="photo-preview" data-photo-preview hidden>
-                    <img alt="Previa da foto georreferenciada" data-photo-preview-image>
-                    <div class="photo-preview-info">
-                        <span data-photo-preview-name></span>
-                        <button type="button" class="secondary-button photo-preview-button" data-photo-open-preview>Ampliar foto</button>
-                    </div>
-                </div>
-                <small class="field-hint" data-photo-status>Ao enviar, a foto recebera localidade, endereco, latitude, longitude, data e hora.</small>
-                <?php if ($isEditing && !empty($residencia['foto_georreferenciada'])): ?>
-                    <small class="field-hint">Ja existe uma foto registrada. Envie outra apenas se desejar substituir a foto principal.</small>
-                <?php endif; ?>
-                <?php if (!empty($errors['foto_georreferenciada'])): ?>
-                    <small class="field-error"><?= h($errors['foto_georreferenciada'][0]) ?></small>
-                <?php endif; ?>
             </div>
         </section>
 

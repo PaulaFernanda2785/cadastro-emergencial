@@ -142,12 +142,14 @@
         var previewImage = wrapper.querySelector('[data-photo-preview-image]');
         var previewName = wrapper.querySelector('[data-photo-preview-name]');
         var previewOpen = wrapper.querySelector('[data-photo-open-preview]');
+        var previewClear = wrapper.querySelector('[data-photo-clear]');
         var title = wrapper.querySelector('[data-photo-title]');
         var description = wrapper.querySelector('[data-photo-description]');
         var logoSrc = wrapper.dataset.photoLogoSrc || '';
         var previewUrl = null;
         var metadataScanId = 0;
         var photoMetadataPrefix = 'CadastroEmergencialGeo=';
+        var photoFilledFields = {};
         var modal = null;
         var modalImage = null;
         var photoProcessingPromise = null;
@@ -211,6 +213,38 @@
             dispatchFieldEvents(element);
         }
 
+        function fieldKey(element) {
+            return element && element.name ? element.name : '';
+        }
+
+        function trackPhotoField(element) {
+            var key = fieldKey(element);
+
+            if (key === '') {
+                return;
+            }
+
+            photoFilledFields[key] = element.value;
+        }
+
+        function clearPhotoFilledFields() {
+            Object.keys(photoFilledFields).forEach(function (key) {
+                var element = form.querySelector('[name="' + key.replace(/"/g, '\\"') + '"]');
+
+                if (element && element.value === photoFilledFields[key]) {
+                    clearField(element);
+                }
+            });
+
+            photoFilledFields = {};
+
+            if (String(form.dataset.locationSource || '').indexOf('photo-') === 0) {
+                form.dataset.locationSource = '';
+            }
+
+            form.dataset.photoLocationSource = '';
+        }
+
         function clearDeviceLocationFields() {
             if (form.dataset.locationSource !== 'device-current') {
                 return;
@@ -230,6 +264,28 @@
             }
 
             form.dataset.locationSource = '';
+        }
+
+        function requestCurrentPosition() {
+            return new Promise(function (resolve) {
+                if (!('geolocation' in navigator)) {
+                    resolve(null);
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+                }, function () {
+                    resolve(null);
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                });
+            });
         }
 
         function createPreviewModal() {
@@ -585,7 +641,7 @@
             });
         }
 
-        function fillAddressFromCoordinates(lat, lng, sourceLabel) {
+        function fillAddressFromCoordinates(lat, lng, sourceLabel, scanId) {
             var address = field('[data-address]');
             var community = field('[data-community-input]');
 
@@ -597,14 +653,20 @@
             setStatus(sourceLabel + ' encontrado. Buscando endereco real...');
 
             return window.CadastroGeo.reverseGeocode(lat, lng).then(function (result) {
+                if (scanId && scanId !== metadataScanId) {
+                    return;
+                }
+
                 if (result.address !== '' && address) {
                     address.value = result.address;
                     dispatchFieldEvents(address);
+                    trackPhotoField(address);
                 }
 
                 if (result.community !== '' && community && community.value.trim() === '') {
                     community.value = result.community;
                     dispatchFieldEvents(community);
+                    trackPhotoField(community);
                 }
 
                 if (result.address !== '') {
@@ -1021,6 +1083,7 @@
 
                 element.value = value;
                 dispatchFieldEvents(element);
+                trackPhotoField(element);
                 return true;
             }
 
@@ -1031,15 +1094,36 @@
                 if (latitude) {
                     latitude.value = coords.latitude.toFixed(7);
                     dispatchFieldEvents(latitude);
+                    trackPhotoField(latitude);
                 }
 
                 if (longitude) {
                     longitude.value = coords.longitude.toFixed(7);
                     dispatchFieldEvents(longitude);
+                    trackPhotoField(longitude);
                 }
 
-                return fillAddressFromCoordinates(coords.latitude.toFixed(7), coords.longitude.toFixed(7), sourceLabel).then(function () {
+                return fillAddressFromCoordinates(coords.latitude.toFixed(7), coords.longitude.toFixed(7), sourceLabel, scanId).then(function () {
                     return true;
+                });
+            }
+
+            function applyCurrentLocationForPhoto() {
+                form.dataset.photoLocationSource = 'pending-device';
+                setStatus('Foto sem metadados ou coordenadas carimbadas. Buscando localizacao atual do aparelho...');
+
+                return requestCurrentPosition().then(function (coords) {
+                    if (scanId !== metadataScanId) {
+                        return null;
+                    }
+
+                    if (!coords || !validCoordinates(coords.latitude, coords.longitude)) {
+                        form.dataset.photoLocationSource = 'missing';
+                        setStatus('Foto sem coordenadas legiveis e sem permissao de localizacao atual.');
+                        return false;
+                    }
+
+                    return applyPhotoCoordinates(coords, 'photo-device-current', 'Localizacao atual do aparelho');
                 });
             }
 
@@ -1077,7 +1161,7 @@
                 if (geodata && geodata.metadata) {
                     if (applyStoredMetadata(geodata.metadata, coords) && coords) {
                         if (normalizedText(geodata.metadata.endereco) === '') {
-                            return fillAddressFromCoordinates(coords.latitude.toFixed(7), coords.longitude.toFixed(7), 'Metadados da foto').then(function () {
+                            return fillAddressFromCoordinates(coords.latitude.toFixed(7), coords.longitude.toFixed(7), 'Metadados da foto', scanId).then(function () {
                                 return true;
                             });
                         }
@@ -1098,8 +1182,7 @@
                         }
 
                         form.dataset.photoLocationSource = 'missing';
-                        setStatus('Foto sem coordenadas legiveis. A localizacao atual nao sera usada automaticamente.');
-                        return false;
+                        return applyCurrentLocationForPhoto();
                     });
                 }
 
@@ -1114,8 +1197,7 @@
                         }
 
                         if (!ocrCoords) {
-                            setStatus('Foto sem metadados ou coordenadas legiveis. A localizacao atual nao sera usada automaticamente.');
-                            return false;
+                            return applyCurrentLocationForPhoto();
                         }
 
                         return applyPhotoCoordinates(ocrCoords, 'photo-ocr', 'Coordenadas lidas da foto');
@@ -1128,14 +1210,16 @@
                 if (latitude) {
                     latitude.value = coords.latitude.toFixed(7);
                     dispatchFieldEvents(latitude);
+                    trackPhotoField(latitude);
                 }
 
                 if (longitude) {
                     longitude.value = coords.longitude.toFixed(7);
                     dispatchFieldEvents(longitude);
+                    trackPhotoField(longitude);
                 }
 
-                return fillAddressFromCoordinates(coords.latitude.toFixed(7), coords.longitude.toFixed(7), 'GPS da foto').then(function () {
+                return fillAddressFromCoordinates(coords.latitude.toFixed(7), coords.longitude.toFixed(7), 'GPS da foto', scanId).then(function () {
                     return true;
                 });
             });
@@ -1149,7 +1233,8 @@
             }
 
             if (!file) {
-                form.dataset.photoLocationSource = '';
+                metadataScanId += 1;
+                clearPhotoFilledFields();
 
                 if (previewUrl) {
                     URL.revokeObjectURL(previewUrl);
@@ -1162,6 +1247,10 @@
 
                 if (previewOpen) {
                     previewOpen.disabled = true;
+                }
+
+                if (previewClear) {
+                    previewClear.disabled = true;
                 }
 
                 dropzone.classList.remove('has-file');
@@ -1191,6 +1280,10 @@
 
             if (previewOpen) {
                 previewOpen.disabled = false;
+            }
+
+            if (previewClear) {
+                previewClear.disabled = false;
             }
 
             dropzone.classList.add('has-file');
@@ -1460,6 +1553,7 @@
                 return;
             }
 
+            clearPhotoFilledFields();
             form.dataset.photoLocationSource = 'pending';
             setStatus('Foto selecionada. Verificando metadados e coordenadas da imagem...');
             applyPhotoGeolocation(file).then(function (foundPhotoGps) {
@@ -1480,6 +1574,14 @@
                 modalImage.src = previewUrl;
                 modal.hidden = false;
                 document.body.classList.add('is-photo-preview-open');
+            });
+        }
+
+        if (previewClear) {
+            previewClear.disabled = true;
+            previewClear.addEventListener('click', function () {
+                input.value = '';
+                input.dispatchEvent(new Event('change', { bubbles: true }));
             });
         }
 

@@ -99,6 +99,7 @@ final class AuthController extends Controller
             'title' => 'Criar cadastro',
             'usuario' => $this->emptyRegisterInput(),
             'errors' => [],
+            'acao' => $this->intendedQrAction(),
         ]);
     }
 
@@ -119,6 +120,7 @@ final class AuthController extends Controller
                 'title' => 'Criar cadastro',
                 'usuario' => $data,
                 'errors' => $validator->errors(),
+                'acao' => $this->intendedQrAction(),
             ]);
             return;
         }
@@ -300,6 +302,17 @@ final class AuthController extends Controller
         return is_string($intendedUrl)
             && str_contains($intendedUrl, '/acao/')
             && str_contains($intendedUrl, '/residencias/novo');
+    }
+
+    private function intendedQrAction(): ?array
+    {
+        $intendedUrl = Session::get('intended_url');
+
+        if (!is_string($intendedUrl) || !preg_match('#/acao/([^/]+)/residencias/novo#', $intendedUrl, $matches)) {
+            return null;
+        }
+
+        return (new AcaoEmergencialRepository())->findByPublicToken(rawurldecode($matches[1]));
     }
 
     private function redirectToIntended(): void

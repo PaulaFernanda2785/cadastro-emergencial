@@ -37,7 +37,10 @@ $menuItems = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
+    <meta name="theme-color" content="#155e75">
     <title><?= h($pageTitle) ?> | <?= h($app['name']) ?></title>
+    <link rel="manifest" href="<?= h(url('/manifest.webmanifest')) ?>">
+    <link rel="apple-touch-icon" href="<?= h(asset('images/logo-cadastro-emergencial-app.png')) ?>">
     <link rel="stylesheet" href="<?= h(asset('css/app.css')) ?>">
     <script src="<?= h(asset('js/modals.js')) ?>" defer></script>
     <script src="<?= h(asset('js/forms.js')) ?>" defer></script>
