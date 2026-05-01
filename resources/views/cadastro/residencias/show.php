@@ -23,221 +23,206 @@ $fotoPrincipalUrl = $fotoPrincipal !== null
     ? url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $fotoPrincipal['id'])
     : null;
 $familiasCadastradas = count($familias);
-$familiasPrevistas = (int) ($residencia['quantidade_familias'] ?? 0);
-$podeCadastrarFamilia = $familiasCadastradas < max(1, $familiasPrevistas);
+$familiasPrevistas = max(1, (int) ($residencia['quantidade_familias'] ?? 1));
+$familiasPercentual = min(100, (int) round(($familiasCadastradas / $familiasPrevistas) * 100));
+$podeCadastrarFamilia = $familiasCadastradas < $familiasPrevistas;
+$condicao = (string) ($residencia['condicao_residencia'] ?? '');
+$condicaoClass = $condicao !== '' ? preg_replace('/[^a-z0-9_-]+/i', '-', $condicao) : 'sem-condicao';
+$dataCadastro = strtotime((string) ($residencia['data_cadastro'] ?? ''));
+$canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['gestor', 'administrador'], true);
 ?>
 
-<section class="dashboard-header">
-    <div>
-        <span class="eyebrow">Residencia</span>
-        <h1><?= h($residencia['protocolo']) ?></h1>
-        <p><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
-    </div>
-    <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
-        <div class="header-actions">
-            <a class="secondary-button residence-action-button" href="<?= h(url('/acao/' . $residencia['token_publico'] . '/residencias/novo')) ?>">Nova residencia</a>
-            <a class="secondary-button residence-action-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/editar')) ?>">Editar residencia</a>
-            <?php if ($podeCadastrarFamilia): ?>
-                <a class="primary-link-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/novo')) ?>">Nova familia</a>
+<section class="records-page residence-open-page">
+    <header class="action-form-header records-header">
+        <div>
+            <span class="eyebrow">Residencia</span>
+            <h1><?= h($residencia['protocolo']) ?></h1>
+            <p><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
+        </div>
+        <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
+            <div class="header-actions">
+                <a class="secondary-button residence-action-button" href="<?= h(url('/acao/' . $residencia['token_publico'] . '/residencias/novo')) ?>">Nova residencia</a>
+                <a class="secondary-button residence-action-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/editar')) ?>">Editar residencia</a>
+                <?php if ($podeCadastrarFamilia): ?>
+                    <a class="primary-link-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/novo')) ?>">Nova familia</a>
+                <?php else: ?>
+                    <span class="limit-reached-pill">Limite de familias atingido</span>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </header>
+
+    <section class="records-summary-grid" aria-label="Resumo da residencia">
+        <article class="records-summary-card">
+            <span>Familias</span>
+            <strong><?= h($familiasCadastradas) ?> / <?= h($familiasPrevistas) ?></strong>
+            <small>Familias cadastradas sobre o limite informado.</small>
+        </article>
+        <article class="records-summary-card">
+            <span>Condicao</span>
+            <strong><?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></strong>
+            <small>Situacao declarada para o imovel.</small>
+        </article>
+        <article class="records-summary-card">
+            <span>Imovel</span>
+            <strong><?= h(residencia_imovel_label($residencia['imovel'] ?? null)) ?></strong>
+            <small>Tipo de ocupacao informada.</small>
+        </article>
+        <article class="records-summary-card">
+            <span>Cadastro</span>
+            <strong><?= $dataCadastro !== false ? h(date('d/m/Y', $dataCadastro)) : '-' ?></strong>
+            <small><?= $dataCadastro !== false ? h(date('H:i', $dataCadastro)) : 'Sem data registrada' ?></small>
+        </article>
+    </section>
+
+    <article class="record-card residence-open-card">
+        <div class="record-card-main">
+            <div class="record-card-title">
+                <span class="record-protocol"><?= h($residencia['protocolo']) ?></span>
+                <h2><?= h($residencia['bairro_comunidade']) ?></h2>
+                <p><?= h($residencia['endereco']) ?></p>
+                <?php if (!empty($residencia['complemento'])): ?>
+                    <p><?= h($residencia['complemento']) ?></p>
+                <?php endif; ?>
+            </div>
+
+            <dl class="record-card-meta">
+                <div>
+                    <dt>Acao</dt>
+                    <dd><?= h($residencia['localidade']) ?> - <?= h($residencia['tipo_evento']) ?></dd>
+                </div>
+                <div>
+                    <dt>Municipio</dt>
+                    <dd><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?></dd>
+                </div>
+                <div>
+                    <dt>Condicao</dt>
+                    <dd><span class="record-condition record-condition-<?= h($condicaoClass) ?>"><?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></span></dd>
+                </div>
+                <div>
+                    <dt>Cadastrador</dt>
+                    <dd><?= h($residencia['cadastrador_nome']) ?></dd>
+                </div>
+            </dl>
+        </div>
+
+        <aside class="record-card-side" aria-label="Indicadores da residencia">
+            <div class="record-family-meter">
+                <div>
+                    <span>Familias</span>
+                    <strong><?= h($familiasCadastradas) ?> / <?= h($familiasPrevistas) ?></strong>
+                </div>
+                <div class="record-progress" aria-hidden="true">
+                    <span style="width: <?= h((string) $familiasPercentual) ?>%"></span>
+                </div>
+            </div>
+
+            <div class="record-card-date">
+                <span>Status da acao</span>
+                <strong><?= h(ucfirst((string) $residencia['acao_status'])) ?></strong>
+            </div>
+
+            <div class="record-card-date">
+                <span>Geolocalizacao</span>
+                <strong><?= h($residencia['latitude'] ?: '-') ?> / <?= h($residencia['longitude'] ?: '-') ?></strong>
+            </div>
+        </aside>
+    </article>
+
+    <section class="residence-summary-grid residence-media-grid">
+        <article class="residence-photo-panel residence-main-photo-panel">
+            <div class="residence-card-heading">
+                <span>Foto georreferenciada</span>
+                <strong><?= $fotoPrincipal ? 'Disponivel' : 'Nao anexada' ?></strong>
+            </div>
+            <?php if ($fotoPrincipalUrl !== null): ?>
+                <button class="residence-photo-preview" type="button" data-residence-image-open data-image-src="<?= h($fotoPrincipalUrl) ?>" data-image-title="<?= h($fotoPrincipal['nome_original']) ?>">
+                    <img src="<?= h($fotoPrincipalUrl) ?>" alt="Foto georreferenciada da residencia">
+                </button>
+                <button class="primary-button residence-photo-button" type="button" data-residence-image-open data-image-src="<?= h($fotoPrincipalUrl) ?>" data-image-title="<?= h($fotoPrincipal['nome_original']) ?>">Visualizar imagem</button>
             <?php else: ?>
-                <span class="limit-reached-pill">Limite de familias atingido</span>
+                <div class="residence-photo-empty">Sem imagem registrada para esta residencia.</div>
             <?php endif; ?>
-        </div>
-    <?php endif; ?>
-</section>
+        </article>
 
-<section class="residence-summary-grid">
-    <article class="residence-hero-panel">
-        <div class="residence-card-heading">
-            <span>Endereco</span>
-            <strong><?= h($residencia['bairro_comunidade']) ?></strong>
-        </div>
-        <p><?= h($residencia['endereco']) ?></p>
-        <?php if (!empty($residencia['complemento'])): ?>
-            <small><?= h($residencia['complemento']) ?></small>
-        <?php endif; ?>
-        <dl class="residence-meta-list">
-            <div>
-                <dt>Municipio</dt>
-                <dd><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?></dd>
+        <article class="residence-photo-panel residence-extra-photo-panel">
+            <div class="residence-card-heading">
+                <span>Fotos adicionais</span>
+                <strong><?= h(count($fotosExtras)) ?> de 3</strong>
             </div>
-            <div>
-                <dt>Cadastrador</dt>
-                <dd><?= h($residencia['cadastrador_nome']) ?></dd>
-            </div>
-            <div>
-                <dt>Familias</dt>
-                <dd><?= h($familiasCadastradas) ?> de <?= h($familiasPrevistas) ?></dd>
-            </div>
-            <div>
-                <dt>Imovel</dt>
-                <dd><?= h(residencia_imovel_label($residencia['imovel'] ?? null)) ?></dd>
-            </div>
-            <div>
-                <dt>Condicao</dt>
-                <dd><?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></dd>
-            </div>
-        </dl>
-    </article>
-
-    <article class="residence-photo-panel">
-        <div class="residence-card-heading">
-            <span>Foto georreferenciada</span>
-            <strong><?= $fotoPrincipal ? 'Disponivel' : 'Nao anexada' ?></strong>
-        </div>
-        <?php if ($fotoPrincipalUrl !== null): ?>
-            <button class="residence-photo-preview" type="button" data-residence-image-open data-image-src="<?= h($fotoPrincipalUrl) ?>" data-image-title="<?= h($fotoPrincipal['nome_original']) ?>">
-                <img src="<?= h($fotoPrincipalUrl) ?>" alt="Foto georreferenciada da residencia">
-            </button>
-            <button class="primary-button residence-photo-button" type="button" data-residence-image-open data-image-src="<?= h($fotoPrincipalUrl) ?>" data-image-title="<?= h($fotoPrincipal['nome_original']) ?>">Visualizar imagem</button>
-        <?php else: ?>
-            <div class="residence-photo-empty">Sem imagem registrada para esta residencia.</div>
-        <?php endif; ?>
-    </article>
-</section>
-
-<?php if ($fotosExtras !== []): ?>
-<section class="residence-extra-photos-panel">
-    <div class="table-heading">
-        <h2>Fotos adicionais da residencia</h2>
-        <span><?= h(count($fotosExtras)) ?> de 3 foto(s)</span>
-    </div>
-    <div class="residence-extra-photo-grid">
-        <?php foreach ($fotosExtras as $fotoExtra): ?>
-            <?php $fotoExtraUrl = url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $fotoExtra['id']); ?>
-            <button class="residence-photo-preview" type="button" data-residence-image-open data-image-src="<?= h($fotoExtraUrl) ?>" data-image-title="<?= h($fotoExtra['nome_original']) ?>">
-                <img src="<?= h($fotoExtraUrl) ?>" alt="Foto adicional da residencia">
-            </button>
-        <?php endforeach; ?>
-    </div>
-</section>
-<?php endif; ?>
-
-<section class="detail-grid residence-detail-grid">
-    <article class="detail-panel">
-        <h2>Acao emergencial</h2>
-        <p><?= h($residencia['localidade']) ?> - <?= h($residencia['tipo_evento']) ?></p>
-        <span class="status-pill status-<?= h((string) $residencia['acao_status']) ?>"><?= h(ucfirst((string) $residencia['acao_status'])) ?></span>
-    </article>
-    <article class="detail-panel">
-        <h2>Geolocalizacao</h2>
-        <p>Latitude: <?= h($residencia['latitude'] ?: '-') ?></p>
-        <p>Longitude: <?= h($residencia['longitude'] ?: '-') ?></p>
-    </article>
-    <article class="detail-panel">
-        <h2>Registro</h2>
-        <p>Cadastro realizado por <?= h($residencia['cadastrador_nome']) ?>.</p>
-        <p><?= h($familiasCadastradas) ?> familia(s) vinculada(s).</p>
-    </article>
-    <article class="detail-panel">
-        <h2>Situacao do imovel</h2>
-        <p>Imovel: <?= h(residencia_imovel_label($residencia['imovel'] ?? null)) ?></p>
-        <p>Condicao: <?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></p>
-    </article>
-</section>
-
-<section class="table-panel attachments-panel residence-record-panel">
-    <div class="table-heading">
-        <h2>Anexos privados</h2>
-        <span><?= h(count($documentos)) ?> arquivo(s)</span>
-    </div>
-    <table class="data-table residence-record-table">
-        <thead>
-            <tr>
-                <th>Tipo</th>
-                <th>Arquivo</th>
-                <th>Vinculo</th>
-                <th>Tamanho</th>
-                <th>Enviado em</th>
-                <th class="actions-column">Acoes</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($documentos as $documento): ?>
-                <?php $isImage = str_starts_with((string) $documento['mime_type'], 'image/'); ?>
-                <tr>
-                    <td data-label="Tipo"><?= h($documento['tipo_documento']) ?></td>
-                    <td data-label="Arquivo"><?= h($documento['nome_original']) ?></td>
-                    <td data-label="Vinculo"><?= $documento['familia_id'] ? h($documento['responsavel_nome']) : 'Residencia' ?></td>
-                    <td data-label="Tamanho"><?= h(number_format(((int) $documento['tamanho_bytes']) / 1024, 1, ',', '.')) ?> KB</td>
-                    <td data-label="Enviado em"><?= h(date('d/m/Y H:i', strtotime((string) $documento['criado_em']))) ?></td>
-                    <td class="actions-column" data-label="Acoes">
-                        <?php if ($isImage): ?>
-                            <button class="table-action-link" type="button" data-residence-image-open data-image-src="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $documento['id'])) ?>" data-image-title="<?= h($documento['nome_original']) ?>">Visualizar</button>
-                        <?php else: ?>
-                            <span class="muted-action">Indisponivel</span>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-
-            <?php if ($documentos === []): ?>
-                <tr>
-                    <td colspan="6" class="empty-state">Nenhum anexo registrado.</td>
-                </tr>
+            <?php if ($fotosExtras !== []): ?>
+                <div class="residence-extra-photo-grid">
+                    <?php foreach ($fotosExtras as $fotoExtra): ?>
+                        <?php $fotoExtraUrl = url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $fotoExtra['id']); ?>
+                        <button class="residence-photo-preview" type="button" data-residence-image-open data-image-src="<?= h($fotoExtraUrl) ?>" data-image-title="<?= h($fotoExtra['nome_original']) ?>">
+                            <img src="<?= h($fotoExtraUrl) ?>" alt="Foto adicional da residencia">
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="residence-photo-empty">Nenhuma foto adicional registrada.</div>
             <?php endif; ?>
-        </tbody>
-    </table>
-</section>
+        </article>
+    </section>
 
-<section class="table-panel residence-record-panel">
-    <?php $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['gestor', 'administrador'], true); ?>
-    <div class="table-heading">
-        <h2>Familias vinculadas</h2>
-        <span><?= h(count($familias)) ?> cadastrada(s) de <?= h($residencia['quantidade_familias']) ?> informada(s)</span>
-    </div>
-    <table class="data-table residence-record-table">
-        <thead>
-            <tr>
-                <th>Responsavel</th>
-                <th>CPF</th>
-                <th>Telefone</th>
-                <th>Integrantes</th>
-                <th>Vulnerabilidades</th>
-                <th>Entregas</th>
-                <th class="actions-column">Acoes</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($familias as $familia): ?>
+    <section class="table-panel residence-record-panel">
+        <div class="table-heading">
+            <h2>Familias vinculadas</h2>
+            <span><?= h(count($familias)) ?> cadastrada(s) de <?= h($residencia['quantidade_familias']) ?> informada(s)</span>
+        </div>
+        <table class="data-table residence-record-table">
+            <thead>
                 <tr>
-                    <td data-label="Responsavel"><?= h($familia['responsavel_nome']) ?></td>
-                    <td data-label="CPF"><?= h($familia['responsavel_cpf']) ?></td>
-                    <td data-label="Telefone"><?= h($familia['telefone'] ?: '-') ?></td>
-                    <td data-label="Integrantes"><?= h($familia['quantidade_integrantes']) ?></td>
-                    <td data-label="Vulnerabilidades">
-                        <?= (int) $familia['possui_criancas'] === 1 ? 'Criancas ' : '' ?>
-                        <?= (int) $familia['possui_idosos'] === 1 ? 'Idosos ' : '' ?>
-                        <?= (int) $familia['possui_pcd'] === 1 ? 'PCD' : '' ?>
-                        <?= (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '' ?>
-                    </td>
-                    <td data-label="Entregas"><?= h($familia['entregas_registradas'] ?? 0) ?></td>
-                    <td class="actions-column" data-label="Acoes">
-                        <div class="family-row-actions">
-                            <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'])) ?>">Ver detalhe</a>
-                            <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
-                                <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/editar')) ?>">Editar</a>
-                                <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/excluir')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Excluir esta familia da listagem? O registro continuara preservado no banco.">
-                                    <?= csrf_field() ?>
-                                    <?= idempotency_field('cadastro.familia.delete.' . $familia['id']) ?>
-                                    <button type="submit" class="danger-button table-danger-button" data-loading-text="Excluindo...">Excluir</button>
-                                </form>
-                            <?php endif; ?>
-                            <?php if ($canRegisterDelivery): ?>
-                                <a class="table-action-link" href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Entrega</a>
-                            <?php endif; ?>
-                        </div>
-                    </td>
+                    <th>Responsavel</th>
+                    <th>CPF</th>
+                    <th>Telefone</th>
+                    <th>Integrantes</th>
+                    <th>Vulnerabilidades</th>
+                    <th>Entregas</th>
+                    <th class="actions-column">Acoes</th>
                 </tr>
-            <?php endforeach; ?>
+            </thead>
+            <tbody>
+                <?php foreach ($familias as $familia): ?>
+                    <tr>
+                        <td data-label="Responsavel"><?= h($familia['responsavel_nome']) ?></td>
+                        <td data-label="CPF"><?= h($familia['responsavel_cpf']) ?></td>
+                        <td data-label="Telefone"><?= h($familia['telefone'] ?: '-') ?></td>
+                        <td data-label="Integrantes"><?= h($familia['quantidade_integrantes']) ?></td>
+                        <td data-label="Vulnerabilidades">
+                            <?= (int) $familia['possui_criancas'] === 1 ? 'Criancas ' : '' ?>
+                            <?= (int) $familia['possui_idosos'] === 1 ? 'Idosos ' : '' ?>
+                            <?= (int) $familia['possui_pcd'] === 1 ? 'PCD' : '' ?>
+                            <?= (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '' ?>
+                        </td>
+                        <td data-label="Entregas"><?= h($familia['entregas_registradas'] ?? 0) ?></td>
+                        <td class="actions-column" data-label="Acoes">
+                            <div class="family-row-actions">
+                                <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'])) ?>">Ver detalhe</a>
+                                <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
+                                    <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/editar')) ?>">Editar</a>
+                                    <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/excluir')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Excluir esta familia da listagem? O registro continuara preservado no banco.">
+                                        <?= csrf_field() ?>
+                                        <?= idempotency_field('cadastro.familia.delete.' . $familia['id']) ?>
+                                        <button type="submit" class="danger-button table-danger-button" data-loading-text="Excluindo...">Excluir</button>
+                                    </form>
+                                <?php endif; ?>
+                                <?php if ($canRegisterDelivery): ?>
+                                    <a class="table-action-link" href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Entrega</a>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
 
-            <?php if ($familias === []): ?>
-                <tr>
-                    <td colspan="7" class="empty-state">Nenhuma familia cadastrada para esta residencia.</td>
-                </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+                <?php if ($familias === []): ?>
+                    <tr>
+                        <td colspan="7" class="empty-state">Nenhuma familia cadastrada para esta residencia.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </section>
 </section>
 
 <dialog class="residence-image-modal" data-residence-image-modal aria-labelledby="residence-image-modal-title">

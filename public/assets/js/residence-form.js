@@ -320,6 +320,19 @@
             form.dataset.locationSource = '';
         }
 
+        function clearExistingMainPhotoLocationFields() {
+            clearPhotoFilledFields();
+            clearDeviceLocationFields();
+            clearField(field('[data-community-input]'));
+            clearField(field('[data-address]'));
+            clearField(field('[data-latitude]'));
+            clearField(field('[data-longitude]'));
+            form.dataset.addressSource = '';
+            form.dataset.communitySource = '';
+            form.dataset.locationSource = '';
+            form.dataset.photoLocationSource = '';
+        }
+
         function requestCurrentPosition() {
             return new Promise(function (resolve) {
                 if (!('geolocation' in navigator)) {
@@ -382,6 +395,40 @@
             document.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape' && !modal.hidden) {
                     close();
+                }
+            });
+        }
+
+        function setupExistingMainPhotoActions() {
+            var cards = wrapper.querySelectorAll('[data-existing-photo-card]');
+
+            Array.prototype.forEach.call(cards, function (card) {
+                var openButton = card.querySelector('[data-existing-photo-open]');
+                var removeButton = card.querySelector('[data-existing-photo-remove]');
+                var removeInput = card.querySelector('[data-existing-photo-remove-input]');
+
+                if (openButton) {
+                    openButton.addEventListener('click', function () {
+                        var url = openButton.dataset.existingPhotoOpen || '';
+
+                        if (url === '') {
+                            return;
+                        }
+
+                        createPreviewModal();
+                        modalImage.src = url;
+                        modal.hidden = false;
+                        document.body.classList.add('is-photo-preview-open');
+                    });
+                }
+
+                if (removeButton && removeInput) {
+                    removeButton.addEventListener('click', function () {
+                        removeInput.checked = true;
+                        card.hidden = true;
+                        clearExistingMainPhotoLocationFields();
+                        setStatus('Foto principal atual marcada para remocao. Salve as alteracoes para confirmar.');
+                    });
                 }
             });
         }
@@ -1760,6 +1807,35 @@
                 document.body.classList.add('is-photo-preview-open');
             }
 
+            function setupExistingExtraPhotoActions() {
+                var cards = wrapper.querySelectorAll('[data-existing-extra-photo-card]');
+
+                Array.prototype.forEach.call(cards, function (card) {
+                    var openButton = card.querySelector('[data-existing-extra-photo-open]');
+                    var removeButton = card.querySelector('[data-existing-extra-photo-remove]');
+                    var removeInput = card.querySelector('[data-existing-extra-photo-remove-input]');
+
+                    if (openButton) {
+                        openButton.addEventListener('click', function () {
+                            openExtraPreview(openButton.dataset.existingExtraPhotoOpen || '');
+                        });
+                    }
+
+                    if (removeButton && removeInput) {
+                        removeButton.addEventListener('click', function () {
+                            if (!removeInput.checked) {
+                                existingFiles = Math.max(0, existingFiles - 1);
+                            }
+
+                            removeInput.checked = true;
+                            card.hidden = true;
+                            setExtraStatus('Foto extra marcada para remocao. Salve as alteracoes para confirmar.');
+                            renderExtraPhotos();
+                        });
+                    }
+                });
+            }
+
             function extraFileKey(file) {
                 return [
                     file.name || '',
@@ -2109,6 +2185,7 @@
                     replaceFormDataFiles(formData);
                 }
             };
+            setupExistingExtraPhotoActions();
             applyToggleState();
 
             return {
@@ -2124,6 +2201,7 @@
         }
 
         var extraResidencePhotos = setupExtraResidencePhotos();
+        setupExistingMainPhotoActions();
 
         input.addEventListener('change', function () {
             var file;

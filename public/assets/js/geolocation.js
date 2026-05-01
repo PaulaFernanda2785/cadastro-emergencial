@@ -191,7 +191,7 @@
         }
 
         function insecureLocalMessage() {
-            return 'No WAMP acessado por IP em HTTP, o celular pode bloquear a localizacao. Use HTTPS no WAMP ou servidor compartilhado com HTTPS.';
+            return 'Nao foi possivel obter a localizacao atual do dispositivo.';
         }
 
         function geolocationErrorMessage(error) {
@@ -211,6 +211,15 @@
             }
         }
 
+        function needsSecureOrigin() {
+            return !window.isSecureContext &&
+                !/^(localhost|127\.0\.0\.1|::1|\[::1\])$/.test(window.location.hostname);
+        }
+
+        function secureCurrentUrl() {
+            return 'https://' + window.location.host + window.location.pathname + window.location.search + window.location.hash;
+        }
+
         if (!('geolocation' in navigator)) {
             button.disabled = true;
             if (status) {
@@ -227,11 +236,43 @@
             }
         }
 
-        if (!window.isSecureContext && !/^(localhost|127\.0\.0\.1|::1|\[::1\])$/.test(window.location.hostname)) {
+        function getCurrentPosition(options) {
+            return new Promise(function (resolve, reject) {
+                navigator.geolocation.getCurrentPosition(resolve, reject, options);
+            });
+        }
+
+        function captureCurrentPosition() {
+            return getCurrentPosition({
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+            }).catch(function (error) {
+                if (error && (error.code === 2 || error.code === 3)) {
+                    setStatus('Nao foi possivel obter alta precisao. Tentando localizacao aproximada...');
+
+                    return getCurrentPosition({
+                        enableHighAccuracy: false,
+                        timeout: 30000,
+                        maximumAge: 300000
+                    });
+                }
+
+                throw error;
+            });
+        }
+
+        if (needsSecureOrigin()) {
             setStatus(insecureLocalMessage());
         }
 
         button.addEventListener('click', function () {
+            if (needsSecureOrigin()) {
+                setStatus('Abrindo a pagina em conexao segura para capturar a localizacao...');
+                window.location.href = secureCurrentUrl();
+                return;
+            }
+
             if (String(form.dataset.photoLocationSource || '').indexOf('photo-') === 0) {
                 setStatus('Foto anexada com localizacao propria. Remova ou troque a foto para capturar a localizacao atual.');
                 return;
@@ -240,7 +281,7 @@
             button.disabled = true;
             setStatus('Solicitando permissao de localizacao...');
 
-            navigator.geolocation.getCurrentPosition(function (position) {
+            captureCurrentPosition().then(function (position) {
                 var lat = position.coords.latitude.toFixed(7);
                 var lng = position.coords.longitude.toFixed(7);
 
@@ -269,16 +310,12 @@
                     }
 
                     setStatus('Localizacao capturada. Endereco pode ser preenchido manualmente.');
-                }).finally(function () {
-                    button.disabled = false;
                 });
-            }, function (error) {
+            }).catch(function (error) {
                 button.disabled = false;
                 setStatus(geolocationErrorMessage(error));
-            }, {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 0
+            }).finally(function () {
+                button.disabled = false;
             });
         });
     });

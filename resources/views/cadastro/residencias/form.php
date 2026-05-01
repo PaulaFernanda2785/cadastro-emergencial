@@ -7,20 +7,62 @@ $cancelUrl = $cancelUrl ?? '/acao/' . $acao['token_publico'];
 $isEditing = !empty($residencia['id']);
 $appConfig = require BASE_PATH . '/config/app.php';
 $appTimezone = (string) ($appConfig['timezone'] ?? 'America/Belem');
-$extraResidencePhotosCount = (int) ($extraResidencePhotosCount ?? 0);
+$documentos = $documentos ?? [];
+$residenciaId = (int) ($residencia['id'] ?? 0);
+$residenceImageDocuments = array_values(array_filter($documentos, static fn (array $documento): bool =>
+    $residenciaId > 0
+    && (int) ($documento['residencia_id'] ?? 0) === $residenciaId
+    && empty($documento['familia_id'])
+    && str_starts_with((string) ($documento['mime_type'] ?? ''), 'image/')
+));
+$existingMainPhotos = array_values(array_filter($residenceImageDocuments, static fn (array $documento): bool =>
+    (string) ($documento['tipo_documento'] ?? '') === 'foto_georreferenciada'
+));
+$existingExtraPhotos = array_values(array_filter($residenceImageDocuments, static fn (array $documento): bool =>
+    (string) ($documento['tipo_documento'] ?? '') === 'foto_residencia_extra'
+));
+$existingMainPhoto = $existingMainPhotos[0] ?? null;
 ?>
 
-<section class="form-shell">
-    <div class="section-heading">
-        <span class="eyebrow">Cadastro de campo</span>
-        <h1><?= h($title ?? 'Nova residencia') ?></h1>
-        <p><?= h($acao['municipio_nome']) ?> / <?= h($acao['uf']) ?> - <?= h($acao['localidade']) ?> - <?= h($acao['tipo_evento']) ?></p>
-    </div>
+<section class="records-page residence-edit-page">
+    <header class="action-form-header records-header">
+        <div>
+            <span class="eyebrow"><?= $isEditing ? 'Editar cadastro' : 'Cadastro de campo' ?></span>
+            <h1><?= h($title ?? 'Nova residencia') ?></h1>
+            <p><?= h($acao['municipio_nome']) ?> / <?= h($acao['uf']) ?> - <?= h($acao['localidade']) ?> - <?= h($acao['tipo_evento']) ?></p>
+        </div>
+        <?php if ($isEditing): ?>
+            <a class="secondary-button residence-action-button" href="<?= h(url($cancelUrl)) ?>">Voltar ao detalhe</a>
+        <?php endif; ?>
+    </header>
+
+    <section class="records-summary-grid" aria-label="Resumo da residencia">
+        <article class="records-summary-card">
+            <span>Protocolo</span>
+            <strong><?= h($residencia['protocolo'] ?? 'Novo') ?></strong>
+            <small><?= $isEditing ? 'Cadastro em edicao.' : 'Gerado apos salvar.' ?></small>
+        </article>
+        <article class="records-summary-card">
+            <span>Municipio</span>
+            <strong><?= h($acao['municipio_nome']) ?> / <?= h($acao['uf']) ?></strong>
+            <small>Area da acao emergencial.</small>
+        </article>
+        <article class="records-summary-card">
+            <span>Foto principal</span>
+            <strong><?= $existingMainPhoto !== null ? 'Registrada' : 'Pendente' ?></strong>
+            <small><?= $existingMainPhoto !== null ? 'Pode ampliar, remover ou substituir.' : 'Opcional, com carimbo ao enviar.' ?></small>
+        </article>
+        <article class="records-summary-card">
+            <span>Fotos extras</span>
+            <strong><?= h(count($existingExtraPhotos)) ?> / 3</strong>
+            <small>Limite de fotos adicionais da residencia.</small>
+        </article>
+    </section>
 
     <form
         method="post"
         action="<?= h(url($action)) ?>"
-        class="form panel-form js-prevent-double-submit"
+        class="form panel-form residence-edit-form js-prevent-double-submit"
         enctype="multipart/form-data"
         data-residence-form
         data-geolocation-form
@@ -39,22 +81,37 @@ $extraResidencePhotosCount = (int) ($extraResidencePhotosCount ?? 0);
 
         <?php if ($useOfflineQueue): ?>
         <div class="offline-sync-panel" data-offline-panel hidden>
-            <strong data-offline-title>Cadastro offline disponível</strong>
-            <span data-offline-message>Sem conexão com o servidor. O cadastro será salvo neste celular e enviado quando a conexão voltar.</span>
+            <strong data-offline-title>Cadastro offline disponivel</strong>
+            <span data-offline-message>Sem conexao com o servidor. O cadastro sera salvo neste celular e enviado quando a conexao voltar.</span>
             <button type="button" class="secondary-button" data-offline-sync>Sincronizar agora</button>
         </div>
         <?php endif; ?>
 
         <section class="residence-form-block">
             <div class="form-block-heading">
-                <h2>Localizacao e foto</h2>
+                <h2>Localizacao e fotos</h2>
             </div>
 
             <div class="field photo-upload" data-photo-upload data-photo-logo-src="<?= h(asset('images/logo-cadastro-emergencial-app.png')) ?>">
                 <span>Foto georreferenciada da residencia</span>
+                <?php if ($existingMainPhoto !== null): ?>
+                    <?php $mainPhotoUrl = url('/cadastros/residencias/' . $residenciaId . '/documentos/' . $existingMainPhoto['id']); ?>
+                    <div class="photo-preview existing-photo-preview" data-existing-photo-card>
+                        <img src="<?= h($mainPhotoUrl) ?>" alt="Foto principal registrada">
+                        <div class="photo-preview-info">
+                            <span><?= h($existingMainPhoto['nome_original']) ?></span>
+                            <input type="checkbox" name="remover_documentos[]" value="<?= h($existingMainPhoto['id']) ?>" data-existing-photo-remove-input hidden>
+                            <div class="photo-preview-actions">
+                                <button type="button" class="secondary-button photo-preview-button" data-existing-photo-open="<?= h($mainPhotoUrl) ?>">Ampliar foto</button>
+                                <button type="button" class="secondary-button photo-preview-button danger-outline-button" data-existing-photo-remove>Remover foto</button>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <input class="file-input-native" id="foto-georreferenciada" type="file" name="foto_georreferenciada" accept="image/jpeg,image/png,image/*" data-photo-input>
                 <label class="photo-dropzone" for="foto-georreferenciada" data-photo-dropzone tabindex="0">
-                    <strong data-photo-title>Selecionar foto</strong>
+                    <strong data-photo-title><?= $existingMainPhoto !== null ? 'Substituir foto principal' : 'Selecionar foto' ?></strong>
                     <span data-photo-description>Arraste, cole, busque nos arquivos ou tire uma foto pela camera do celular.</span>
                 </label>
                 <div class="photo-preview" data-photo-preview hidden>
@@ -68,24 +125,40 @@ $extraResidencePhotosCount = (int) ($extraResidencePhotosCount ?? 0);
                     </div>
                 </div>
                 <small class="field-hint" data-photo-status>Ao enviar, a foto recebera localidade, endereco, latitude, longitude, data e hora.</small>
-                <?php if ($isEditing && !empty($residencia['foto_georreferenciada'])): ?>
-                    <small class="field-hint">Ja existe uma foto registrada. Envie outra apenas se desejar substituir a foto principal.</small>
-                <?php endif; ?>
                 <?php if (!empty($errors['foto_georreferenciada'])): ?>
                     <small class="field-error"><?= h($errors['foto_georreferenciada'][0]) ?></small>
                 <?php endif; ?>
             </div>
 
-            <div class="extra-residence-photos" data-extra-residence-photos data-max-files="3" data-existing-files="<?= h($extraResidencePhotosCount) ?>">
+            <div class="extra-residence-photos" data-extra-residence-photos data-max-files="3" data-existing-files="<?= h(count($existingExtraPhotos)) ?>">
                 <div class="representative-toggle extra-residence-photos-toggle">
                     <div>
                         <span>Fotos da residencia</span>
-                        <strong>Anexar ate 3 fotos adicionais</strong>
+                        <strong>Gerenciar ate 3 fotos adicionais</strong>
                     </div>
                     <label class="switch-control">
                         <input type="checkbox" name="anexar_fotos_residencia" value="1" data-extra-photos-toggle>
                     </label>
                 </div>
+
+                <?php if ($existingExtraPhotos !== []): ?>
+                    <div class="existing-extra-photo-list" data-existing-extra-photo-list>
+                        <?php foreach ($existingExtraPhotos as $fotoExtra): ?>
+                            <?php $fotoExtraUrl = url('/cadastros/residencias/' . $residenciaId . '/documentos/' . $fotoExtra['id']); ?>
+                            <div class="photo-preview extra-photo-item" data-existing-extra-photo-card>
+                                <img src="<?= h($fotoExtraUrl) ?>" alt="Foto adicional registrada">
+                                <div class="photo-preview-info">
+                                    <span><?= h($fotoExtra['nome_original']) ?></span>
+                                    <input type="checkbox" name="remover_documentos[]" value="<?= h($fotoExtra['id']) ?>" data-existing-extra-photo-remove-input hidden>
+                                    <div class="photo-preview-actions">
+                                        <button type="button" class="secondary-button photo-preview-button" data-existing-extra-photo-open="<?= h($fotoExtraUrl) ?>">Ampliar foto</button>
+                                        <button type="button" class="secondary-button photo-preview-button danger-outline-button" data-existing-extra-photo-remove>Remover foto</button>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
 
                 <div class="extra-residence-photos-fields" data-extra-photos-fields hidden>
                     <input class="file-input-native" id="fotos-residencia" type="file" name="fotos_residencia[]" accept="image/jpeg,image/png,image/*" capture="environment" multiple data-extra-photos-input disabled>
@@ -95,8 +168,8 @@ $extraResidencePhotosCount = (int) ($extraResidencePhotosCount ?? 0);
                     </label>
                     <div class="extra-photo-list" data-extra-photos-list hidden></div>
                     <small class="field-hint" data-extra-photos-status>
-                        <?= $extraResidencePhotosCount > 0
-                            ? h($extraResidencePhotosCount . ' de 3 fotos extras ja cadastradas para esta residencia.')
+                        <?= count($existingExtraPhotos) > 0
+                            ? h(count($existingExtraPhotos) . ' de 3 fotos extras cadastradas. Remova uma foto para substituir ou anexe nos espacos livres.')
                             : 'Opcional. Limite de 3 fotos extras por residencia.' ?>
                     </small>
                     <?php if (!empty($errors['fotos_residencia'])): ?>

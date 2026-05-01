@@ -9,10 +9,13 @@
     }
 
     var storageKey = 'cadastroEmergencial.sidebarCollapsed';
-    var collapsed = window.localStorage.getItem(storageKey) === 'true';
+    var storedPreference = window.localStorage.getItem(storageKey);
+    var startsOnSmallScreen = window.matchMedia('(max-width: 760px)').matches;
+    var collapsed = storedPreference === null ? startsOnSmallScreen : storedPreference === 'true';
 
     function applyState(isCollapsed) {
         shell.classList.toggle('is-sidebar-collapsed', isCollapsed);
+        document.documentElement.classList.remove('sidebar-collapsed-initial');
         toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
         toggle.setAttribute('aria-label', isCollapsed ? 'Expandir menu' : 'Recolher menu');
     }

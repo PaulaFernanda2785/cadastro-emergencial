@@ -326,32 +326,41 @@ a:focus {
     font-weight: 700;
 }
 
-.is-sidebar-collapsed .sidebar {
+.is-sidebar-collapsed .sidebar,
+.sidebar-collapsed-initial .sidebar {
     width: var(--sidebar-collapsed-width);
 }
 
 .is-sidebar-collapsed .brand-text,
 .is-sidebar-collapsed .nav-label,
 .is-sidebar-collapsed .nav-badge,
-.is-sidebar-collapsed .sidebar-section-title {
+.is-sidebar-collapsed .sidebar-section-title,
+.sidebar-collapsed-initial .brand-text,
+.sidebar-collapsed-initial .nav-label,
+.sidebar-collapsed-initial .nav-badge,
+.sidebar-collapsed-initial .sidebar-section-title {
     display: none;
 }
 
-.is-sidebar-collapsed .sidebar-brand {
+.is-sidebar-collapsed .sidebar-brand,
+.sidebar-collapsed-initial .sidebar-brand {
     justify-content: center;
     padding-inline: 12px;
 }
 
-.is-sidebar-collapsed .sidebar-link {
+.is-sidebar-collapsed .sidebar-link,
+.sidebar-collapsed-initial .sidebar-link {
     justify-content: center;
     padding: 8px;
 }
 
-.is-sidebar-collapsed .sidebar-nav {
+.is-sidebar-collapsed .sidebar-nav,
+.sidebar-collapsed-initial .sidebar-nav {
     padding-inline: 14px;
 }
 
-.is-sidebar-collapsed .nav-initial {
+.is-sidebar-collapsed .nav-initial,
+.sidebar-collapsed-initial .nav-initial {
     width: 40px;
     height: 40px;
     flex-basis: 40px;
@@ -859,6 +868,19 @@ p {
     padding: 8px 12px;
 }
 
+.danger-outline-button {
+    border-color: rgba(180, 35, 24, 0.32);
+    color: var(--danger);
+    background: #fff7f5;
+}
+
+.danger-outline-button:hover,
+.danger-outline-button:focus {
+    border-color: rgba(180, 35, 24, 0.58);
+    color: var(--danger);
+    background: #fff0ed;
+}
+
 .extra-residence-photos {
     display: grid;
     gap: 12px;
@@ -894,6 +916,12 @@ p {
 
 .extra-photo-list {
     display: grid;
+    gap: 10px;
+}
+
+.existing-extra-photo-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 10px;
 }
 
@@ -1755,6 +1783,7 @@ button:disabled,
 }
 
 .record-protocol {
+    max-width: 100%;
     display: inline-flex;
     align-items: center;
     border: 1px solid rgba(21, 94, 117, 0.22);
@@ -1765,6 +1794,8 @@ button:disabled,
     font-size: 12px;
     font-weight: 900;
     line-height: 1.2;
+    overflow-wrap: anywhere;
+    white-space: normal;
 }
 
 .record-card-title h2 {
@@ -1856,10 +1887,15 @@ button:disabled,
 }
 
 .record-family-meter > div:first-child {
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+}
+
+.record-family-meter > div:first-child > * {
+    min-width: 0;
 }
 
 .record-family-meter strong,
@@ -1888,6 +1924,90 @@ button:disabled,
     min-height: 42px;
     border-radius: 8px;
     font-weight: 800;
+}
+
+.residence-open-page {
+    gap: 18px;
+}
+
+.residence-edit-page {
+    gap: 18px;
+}
+
+.residence-edit-page .records-summary-card strong {
+    font-size: 22px;
+}
+
+.residence-edit-form {
+    display: grid;
+    gap: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+    box-shadow: 0 12px 28px rgba(28, 39, 51, 0.06);
+}
+
+.residence-edit-page .existing-photo-preview {
+    background: #ffffff;
+}
+
+.existing-extra-photo-list .photo-preview {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+}
+
+.existing-extra-photo-list .photo-preview img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+}
+
+.existing-extra-photo-list .photo-preview-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.existing-extra-photo-list .photo-preview-button {
+    width: 100%;
+}
+
+.residence-open-card .record-card-meta {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.residence-media-grid {
+    align-items: start;
+    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+}
+
+.residence-media-grid .residence-photo-panel {
+    min-width: 0;
+}
+
+.residence-main-photo-panel {
+    align-self: start;
+}
+
+.residence-main-photo-panel .residence-photo-preview img {
+    aspect-ratio: 16 / 9;
+}
+
+.residence-extra-photo-panel {
+    display: grid;
+    gap: 14px;
+}
+
+.residence-media-grid .residence-extra-photo-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+}
+
+.residence-media-grid .residence-extra-photo-grid .residence-photo-preview {
+    min-height: 0;
+}
+
+.residence-media-grid .residence-extra-photo-grid .residence-photo-preview img {
+    aspect-ratio: 16 / 10;
 }
 
 .records-pagination {
@@ -2716,6 +2836,10 @@ button:disabled,
     margin-bottom: 18px;
 }
 
+.residence-summary-grid.residence-media-grid {
+    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+}
+
 .residence-hero-panel,
 .residence-photo-panel {
     min-width: 0;
@@ -3336,6 +3460,183 @@ button:disabled,
     }
 }
 
+@media (max-width: 1180px) {
+    .records-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .records-filter-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .records-search-field,
+    .records-filter-actions {
+        grid-column: 1 / -1;
+    }
+
+    .record-card {
+        grid-template-columns: 1fr;
+    }
+
+    .record-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .record-card-side {
+        border-top: 1px solid #eef3f7;
+        border-left: 0;
+        padding-top: 14px;
+        padding-left: 0;
+    }
+
+    .residence-record-panel {
+        overflow-x: visible;
+    }
+
+    .residence-record-table {
+        width: 100%;
+        min-width: 0;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .residence-record-table thead {
+        display: none;
+    }
+
+    .residence-record-table,
+    .residence-record-table tbody,
+    .residence-record-table tr,
+    .residence-record-table td {
+        display: block;
+    }
+
+    .residence-record-table tr {
+        border: 1px solid rgba(216, 224, 232, 0.9);
+        border-radius: 8px;
+        padding: 10px;
+        background: #ffffff;
+        box-shadow: 0 8px 18px rgba(28, 39, 51, 0.06);
+    }
+
+    .residence-record-table td {
+        min-width: 0;
+        border-bottom: 0;
+        padding: 8px 0;
+        overflow-wrap: anywhere;
+    }
+
+    .residence-record-table td + td {
+        border-top: 1px solid #eef3f7;
+    }
+
+    .residence-record-table td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 3px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .residence-record-table td.actions-column {
+        width: auto;
+        white-space: normal;
+    }
+
+    .residence-record-table td.actions-column::before {
+        margin-bottom: 8px;
+    }
+
+    .residence-record-table .empty-state {
+        text-align: left;
+        white-space: normal;
+    }
+
+    .residence-record-table .empty-state::before {
+        content: "";
+        display: none;
+    }
+
+    .residence-open-page .records-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .residence-open-page .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .residence-open-page .records-summary-grid,
+    .residence-open-card .record-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .residence-summary-grid.residence-media-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .residence-main-photo-panel {
+        max-width: 560px;
+    }
+
+    .residence-media-grid .residence-extra-photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .residence-open-page {
+        gap: 14px;
+    }
+
+    .residence-open-page .header-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .residence-open-page .header-actions .primary-link-button,
+    .residence-open-page .header-actions .secondary-button,
+    .residence-open-page .header-actions .limit-reached-pill {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .residence-open-page .records-summary-grid,
+    .residence-open-card .record-card-meta,
+    .residence-media-grid .residence-extra-photo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .residence-open-card {
+        grid-template-columns: 1fr;
+    }
+
+    .residence-open-card .record-card-side {
+        border-top: 1px solid #eef3f7;
+        border-left: 0;
+        padding-top: 14px;
+        padding-left: 0;
+    }
+
+    .residence-main-photo-panel {
+        max-width: none;
+    }
+
+    .residence-main-photo-panel .residence-photo-preview img,
+    .residence-media-grid .residence-extra-photo-grid .residence-photo-preview img {
+        aspect-ratio: 16 / 10;
+    }
+
+    .residence-open-page .record-family-meter > div:first-child {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
 @media (max-width: 760px) {
     .app-shell {
         display: block;
@@ -3347,15 +3648,18 @@ button:disabled,
         position: static;
     }
 
-    .is-sidebar-collapsed .sidebar {
+    .is-sidebar-collapsed .sidebar,
+    .sidebar-collapsed-initial .sidebar {
         width: 100%;
     }
 
-    .is-sidebar-collapsed .sidebar-nav {
+    .is-sidebar-collapsed .sidebar-nav,
+    .sidebar-collapsed-initial .sidebar-nav {
         display: none;
     }
 
-    .is-sidebar-collapsed .brand-text {
+    .is-sidebar-collapsed .brand-text,
+    .sidebar-collapsed-initial .brand-text {
         display: grid;
     }
 
@@ -3371,6 +3675,11 @@ button:disabled,
         width: 100%;
         justify-content: space-between;
         flex-wrap: wrap;
+    }
+
+    .user-area {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
     }
 
     .institution-title {
@@ -3503,6 +3812,14 @@ button:disabled,
 
     .record-card-meta {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .residence-open-card .record-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .residence-media-grid {
+        grid-template-columns: 1fr;
     }
 
     .records-summary-card {
@@ -3816,8 +4133,14 @@ button:disabled,
 }
 
 @media (max-width: 480px) {
+    .records-header h1 {
+        font-size: 26px;
+        line-height: 1.16;
+    }
+
     .records-summary-grid,
     .record-card-meta,
+    .residence-open-card .record-card-meta,
     .records-filter-form,
     .records-filter-actions,
     .records-pagination {
@@ -3831,6 +4154,29 @@ button:disabled,
 
     .pagination-pages {
         justify-content: flex-start;
+    }
+
+    .residence-open-page,
+    .residence-open-page .record-card,
+    .residence-open-page .records-summary-card,
+    .residence-open-page .residence-photo-panel,
+    .residence-open-page .table-panel {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .residence-record-table .empty-state {
+        white-space: normal;
+    }
+
+    .existing-extra-photo-list .photo-preview-actions,
+    .photo-preview-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .photo-preview-button {
+        width: 100%;
     }
 }
 

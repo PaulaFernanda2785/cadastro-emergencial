@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260501-22';
+$assetVersion = '20260501-35';
 
 $menuItems = [
     ['group' => 'Operacao', 'label' => 'Painel situacional', 'abbr' => 'PS', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
@@ -40,6 +40,18 @@ $menuItems = [
     <meta name="robots" content="noindex,nofollow">
     <meta name="theme-color" content="#155e75">
     <title><?= h($pageTitle) ?> | <?= h($app['name']) ?></title>
+    <script>
+        (function () {
+            try {
+                var stored = window.localStorage.getItem('cadastroEmergencial.sidebarCollapsed');
+                var small = window.matchMedia('(max-width: 760px)').matches;
+                if (stored === 'true' || (stored === null && small)) {
+                    document.documentElement.classList.add('sidebar-collapsed-initial');
+                }
+            } catch (error) {
+            }
+        })();
+    </script>
     <link rel="manifest" href="<?= h(url('/manifest.webmanifest') . '?v=' . $assetVersion) ?>">
     <link rel="apple-touch-icon" href="<?= h(asset('images/logo-cadastro-emergencial-app.png')) ?>">
     <link rel="stylesheet" href="<?= h(asset('css/app.css') . '?v=' . $assetVersion) ?>">

@@ -125,7 +125,15 @@ final class ResidenciaController extends Controller
         $this->guardPost('cadastro.residencia.update.' . (int) $id, '/cadastros/residencias/' . (int) $id . '/editar');
 
         $data = $this->input();
+        $existingDocuments = $this->documentos->byResidencia((int) $id);
+        $removeDocumentIds = $this->postedDocumentIds('remover_documentos');
+        $mainDocumentIds = $this->documentIdsByType($existingDocuments, (int) $id, 'foto_georreferenciada');
         $data['foto_georreferenciada'] = $residencia['foto_georreferenciada'] ?? null;
+
+        if (array_intersect($removeDocumentIds, $mainDocumentIds) !== []) {
+            $data['foto_georreferenciada'] = null;
+        }
+
         $validator = $this->validator($data);
         $familiasCadastradas = $this->familias->countByResidencia((int) $id);
 
@@ -176,7 +184,7 @@ final class ResidenciaController extends Controller
         try {
             $extraPhotoMetadata = $this->storeExtraResidencePhotos(
                 $upload,
-                $this->documentos->countResidenceDocumentsByType((int) $id, 'foto_residencia_extra')
+                $this->documentos->countResidenceDocumentsByTypeExcludingIds((int) $id, 'foto_residencia_extra', $removeDocumentIds)
             );
         } catch (RuntimeException $exception) {
             $errors = $validator->errors();
@@ -197,6 +205,7 @@ final class ResidenciaController extends Controller
         $this->residencias->update((int) $id, $data);
 
         if ($fotoMetadata !== null) {
+            $this->documentos->softDeleteResidenceDocumentsByType((int) $id, 'foto_georreferenciada');
             $this->documentos->create($fotoMetadata + [
                 'residencia_id' => (int) $id,
                 'familia_id' => null,
@@ -205,6 +214,7 @@ final class ResidenciaController extends Controller
             ]);
         }
 
+        $this->documentos->softDeleteByResidenciaAndIds((int) $id, $removeDocumentIds);
         $this->createExtraResidencePhotoDocuments((int) $id, $extraPhotoMetadata);
 
         (new AuditLogService())->record('alterou_residencia', 'residencias', (int) $id, (string) $residencia['protocolo']);
@@ -320,7 +330,32 @@ final class ResidenciaController extends Controller
             'extraResidencePhotosCount' => !empty($residencia['id'])
                 ? $this->documentos->countResidenceDocumentsByType((int) $residencia['id'], 'foto_residencia_extra')
                 : 0,
+            'documentos' => !empty($residencia['id'])
+                ? $this->documentos->byResidencia((int) $residencia['id'])
+                : [],
         ]);
+    }
+
+    private function postedDocumentIds(string $key): array
+    {
+        $ids = is_array($_POST[$key] ?? null) ? $_POST[$key] : [];
+
+        return array_values(array_unique(array_filter(array_map(
+            static fn (mixed $id): int => (int) $id,
+            $ids
+        ), static fn (int $id): bool => $id > 0)));
+    }
+
+    private function documentIdsByType(array $documents, int $residenciaId, string $tipoDocumento): array
+    {
+        return array_values(array_map(
+            static fn (array $documento): int => (int) $documento['id'],
+            array_filter($documents, static fn (array $documento): bool =>
+                (int) ($documento['residencia_id'] ?? 0) === $residenciaId
+                && empty($documento['familia_id'])
+                && (string) ($documento['tipo_documento'] ?? '') === $tipoDocumento
+            )
+        ));
     }
 
     private function bairroOptions(array $acao): array
