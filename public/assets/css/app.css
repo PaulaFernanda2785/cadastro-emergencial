@@ -389,6 +389,8 @@ a:focus {
 }
 
 .auth-shell {
+    width: 100%;
+    min-width: 0;
     min-height: calc(100vh - 128px);
     display: grid;
     align-items: center;
@@ -396,6 +398,8 @@ a:focus {
 }
 
 .auth-panel {
+    min-width: 0;
+    max-width: 100%;
     width: min(460px, 100%);
     background: var(--surface);
     border: 1px solid var(--line);
@@ -496,6 +500,7 @@ a:focus {
 }
 
 .qr-register-panel {
+    width: min(840px, 100%);
     padding: 24px;
 }
 
@@ -511,6 +516,7 @@ a:focus {
 
 .qr-register-heading h1 {
     margin-bottom: 0;
+    overflow-wrap: anywhere;
 }
 
 .qr-action-summary {
@@ -533,9 +539,11 @@ a:focus {
     color: var(--text);
     font-size: 15px;
     line-height: 1.25;
+    overflow-wrap: anywhere;
 }
 
 .qr-register-form {
+    min-width: 0;
     gap: 14px;
 }
 
@@ -549,29 +557,51 @@ a:focus {
     background: #ffffff;
 }
 
-.qr-register-block .form-block-heading {
-    display: flex;
+.qr-register-block .field,
+.qr-register-block .form-grid {
+    min-width: 0;
+}
+
+.qr-register-block-heading {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
     gap: 10px;
     padding-bottom: 8px;
     border-bottom: 1px solid #eef3f7;
 }
 
-.qr-register-block .form-block-heading h2 {
+.qr-register-block-heading h2 {
+    min-width: 0;
     margin: 0;
     font-size: 16px;
     line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
-.qr-register-block .form-block-heading span {
+.qr-register-block-heading .access-profile-badge {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    min-height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid rgba(21, 94, 117, 0.2);
     border-radius: 999px;
-    padding: 4px 9px;
+    padding: 4px 10px;
     color: var(--primary);
     background: #f5fafb;
     font-size: 12px;
     font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    justify-self: end;
 }
 
 .section-heading {
@@ -1821,11 +1851,19 @@ button:disabled,
 }
 
 .family-form-block .form-block-heading,
-.representative-toggle {
+.representative-toggle,
+.military-toggle {
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
+}
+
+.representative-toggle > div,
+.military-toggle > div {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .family-form-block .form-block-heading {
@@ -1834,7 +1872,8 @@ button:disabled,
 }
 
 .family-form-block .form-block-heading > span,
-.representative-toggle span {
+.representative-toggle span,
+.military-toggle span {
     width: auto;
     height: auto;
     flex: initial;
@@ -1848,12 +1887,14 @@ button:disabled,
 }
 
 .family-form-block .form-block-heading strong,
-.representative-toggle strong {
+.representative-toggle strong,
+.military-toggle strong {
     display: block;
     margin-top: 2px;
     color: var(--text);
     font-size: 18px;
     line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
 .vulnerability-picker {
@@ -1935,12 +1976,14 @@ button:disabled,
     transform: translateX(24px);
 }
 
+.military-fields,
 .representative-fields {
     display: grid;
     gap: 16px;
     padding-top: 2px;
 }
 
+.military-fields[hidden],
 .representative-fields[hidden] {
     display: none;
 }
@@ -2997,7 +3040,13 @@ button:disabled,
     }
 
     .qr-register-panel {
+        width: 100%;
         padding: 14px;
+    }
+
+    .qr-register-heading h1 {
+        font-size: 24px;
+        line-height: 1.15;
     }
 
     .auth-brand-header {
@@ -3008,14 +3057,28 @@ button:disabled,
         padding: 12px;
     }
 
-    .qr-register-block .form-block-heading {
+    .qr-register-block-heading {
         align-items: flex-start;
-        flex-direction: column;
+        grid-template-columns: 1fr;
+    }
+
+    .qr-register-block-heading .access-profile-badge {
+        justify-self: start;
     }
 
     .auth-secondary-action,
     .auth-secondary-button {
         width: 100%;
+    }
+
+    .auth-submit-button {
+        white-space: normal;
+        text-align: center;
+    }
+
+    .auth-submit-button .button-label {
+        min-width: 0;
+        overflow-wrap: anywhere;
     }
 
     .dashboard-header {
@@ -3080,7 +3143,8 @@ button:disabled,
     }
 
     .family-form-block .form-block-heading,
-    .representative-toggle {
+    .representative-toggle,
+    .military-toggle {
         align-items: flex-start;
         flex-direction: column;
     }

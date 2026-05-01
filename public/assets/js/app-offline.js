@@ -12,7 +12,7 @@
 
         caches.keys().then(function (keys) {
             return Promise.all(keys.map(function (key) {
-                if (key.indexOf('cadastro-emergencial-') === 0 && key !== 'cadastro-emergencial-v20260501-13') {
+                if (key.indexOf('cadastro-emergencial-') === 0 && key !== 'cadastro-emergencial-v20260501-18') {
                     return caches.delete(key);
                 }
 

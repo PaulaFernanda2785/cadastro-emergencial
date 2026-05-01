@@ -1,5 +1,6 @@
 Options -Indexes
 DirectoryIndex front.php
+FallbackResource /front.php
 
 <IfModule mod_authz_core.c>
     Require all granted

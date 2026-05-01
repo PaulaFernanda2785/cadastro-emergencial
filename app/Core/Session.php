@@ -27,6 +27,14 @@ final class Session
         }
 
         session_name($config['session_name']);
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isHttps,
+            'httponly' => true,
+            'samesite' => (string) $config['session_same_site'],
+        ]);
         session_start();
     }
 

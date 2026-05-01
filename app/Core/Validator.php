@@ -26,6 +26,19 @@ final class Validator
         return $this;
     }
 
+    public function cpf(string $field, mixed $value, string $label): self
+    {
+        if (!is_string($value) || trim($value) === '') {
+            return $this;
+        }
+
+        if (!$this->isValidCpf($value)) {
+            $this->errors[$field][] = "{$label} invalido.";
+        }
+
+        return $this;
+    }
+
     public function max(string $field, mixed $value, int $max, string $label): self
     {
         if (is_string($value) && mb_strlen($value) > $max) {
@@ -106,5 +119,31 @@ final class Validator
     public function errors(): array
     {
         return $this->errors;
+    }
+
+    private function isValidCpf(string $value): bool
+    {
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+
+        if (strlen($digits) !== 11 || preg_match('/^(\d)\1{10}$/', $digits) === 1) {
+            return false;
+        }
+
+        for ($position = 9; $position <= 10; $position++) {
+            $sum = 0;
+
+            for ($index = 0; $index < $position; $index++) {
+                $sum += (int) $digits[$index] * (($position + 1) - $index);
+            }
+
+            $checkDigit = ($sum * 10) % 11;
+            $checkDigit = $checkDigit === 10 ? 0 : $checkDigit;
+
+            if ($checkDigit !== (int) $digits[$position]) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

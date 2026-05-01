@@ -20,7 +20,7 @@
         <div class="form-grid two-columns">
             <label class="field">
                 <span>CPF</span>
-                <input type="text" name="cpf" value="<?= h($usuario['cpf'] ?? '') ?>" maxlength="14" required>
+                <input type="text" name="cpf" value="<?= h($usuario['cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input required>
                 <?php if (!empty($errors['cpf'])): ?>
                     <small class="field-error"><?= h($errors['cpf'][0]) ?></small>
                 <?php endif; ?>
@@ -60,6 +60,36 @@
                 <?php endif; ?>
             </label>
         </div>
+
+        <section class="form-block user-military-block">
+            <div class="military-toggle">
+                <div>
+                    <span>Secao militar</span>
+                    <strong>Graduacao e nome de guerra</strong>
+                </div>
+                <label class="switch-control" aria-label="Usuario militar">
+                    <input type="checkbox" name="militar" value="1" data-military-toggle <?= !empty($usuario['militar']) ? 'checked' : '' ?>>
+                </label>
+            </div>
+
+            <div class="form-grid two-columns military-fields" data-military-fields <?= !empty($usuario['militar']) ? '' : 'hidden' ?>>
+                <label class="field">
+                    <span>Graduacao</span>
+                    <input type="text" name="graduacao" value="<?= h($usuario['graduacao'] ?? '') ?>" maxlength="80" data-military-input>
+                    <?php if (!empty($errors['graduacao'])): ?>
+                        <small class="field-error"><?= h($errors['graduacao'][0]) ?></small>
+                    <?php endif; ?>
+                </label>
+
+                <label class="field">
+                    <span>Nome de guerra</span>
+                    <input type="text" name="nome_guerra" value="<?= h($usuario['nome_guerra'] ?? '') ?>" maxlength="120" data-military-input>
+                    <?php if (!empty($errors['nome_guerra'])): ?>
+                        <small class="field-error"><?= h($errors['nome_guerra'][0]) ?></small>
+                    <?php endif; ?>
+                </label>
+            </div>
+        </section>
 
         <div class="form-grid two-columns">
             <label class="field">

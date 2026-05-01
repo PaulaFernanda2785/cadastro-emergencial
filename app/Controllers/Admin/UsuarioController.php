@@ -69,7 +69,7 @@ final class UsuarioController extends Controller
         $this->guardPost('admin.usuarios.update.' . (int) $id, '/admin/usuarios/' . (int) $id . '/editar');
 
         $data = $this->input();
-        $validator = $this->validator($data, false);
+        $validator = $this->validator($data, false, (int) $id);
         $isCurrentUser = (int) (current_user()['id'] ?? 0) === (int) $id;
 
         if ($isCurrentUser && ($data['perfil'] !== 'administrador' || empty($data['ativo']))) {
@@ -96,6 +96,9 @@ final class UsuarioController extends Controller
                 'telefone' => $data['telefone'],
                 'orgao' => $data['orgao'],
                 'unidade_setor' => $data['unidade_setor'],
+                'militar' => $data['militar'],
+                'graduacao' => $data['graduacao'],
+                'nome_guerra' => $data['nome_guerra'],
                 'perfil' => $data['perfil'],
                 'ativo' => !empty($data['ativo']) ? 1 : 0,
             ]));
@@ -138,6 +141,9 @@ final class UsuarioController extends Controller
             'telefone' => '',
             'orgao' => '',
             'unidade_setor' => '',
+            'militar' => '',
+            'graduacao' => '',
+            'nome_guerra' => '',
             'perfil' => 'cadastrador',
             'ativo' => '1',
             'senha' => '',
@@ -147,6 +153,8 @@ final class UsuarioController extends Controller
 
     private function input(): array
     {
+        $militar = isset($_POST['militar']) ? '1' : '';
+
         return [
             'nome' => trim((string) ($_POST['nome'] ?? '')),
             'cpf' => trim((string) ($_POST['cpf'] ?? '')),
@@ -154,6 +162,9 @@ final class UsuarioController extends Controller
             'telefone' => trim((string) ($_POST['telefone'] ?? '')),
             'orgao' => trim((string) ($_POST['orgao'] ?? '')),
             'unidade_setor' => trim((string) ($_POST['unidade_setor'] ?? '')),
+            'militar' => $militar,
+            'graduacao' => $militar !== '' ? trim((string) ($_POST['graduacao'] ?? '')) : '',
+            'nome_guerra' => $militar !== '' ? trim((string) ($_POST['nome_guerra'] ?? '')) : '',
             'perfil' => trim((string) ($_POST['perfil'] ?? 'cadastrador')),
             'ativo' => (string) ($_POST['ativo'] ?? '1') === '1' ? '1' : '',
             'senha' => (string) ($_POST['senha'] ?? ''),
@@ -161,19 +172,22 @@ final class UsuarioController extends Controller
         ];
     }
 
-    private function validator(array $data, bool $passwordRequired): Validator
+    private function validator(array $data, bool $passwordRequired, ?int $ignoreId = null): Validator
     {
         $validator = (new Validator())
             ->required('nome', $data['nome'], 'Nome')
             ->max('nome', $data['nome'], 180, 'Nome')
             ->required('cpf', $data['cpf'], 'CPF')
             ->max('cpf', $data['cpf'], 14, 'CPF')
+            ->cpf('cpf', $data['cpf'], 'CPF')
             ->required('email', $data['email'], 'E-mail')
             ->email('email', $data['email'], 'E-mail')
             ->max('email', $data['email'], 180, 'E-mail')
             ->max('telefone', $data['telefone'], 30, 'Telefone')
             ->max('orgao', $data['orgao'], 180, 'Orgao')
             ->max('unidade_setor', $data['unidade_setor'], 180, 'Unidade/setor')
+            ->max('graduacao', $data['graduacao'], 80, 'Graduacao')
+            ->max('nome_guerra', $data['nome_guerra'], 120, 'Nome de guerra')
             ->in('perfil', $data['perfil'], self::PROFILES, 'Perfil');
 
         if ($passwordRequired || $data['senha'] !== '') {
@@ -186,6 +200,16 @@ final class UsuarioController extends Controller
             if ($data['senha'] !== $data['confirmar_senha']) {
                 $validator->add('confirmar_senha', 'Confirmacao nao confere com a senha.');
             }
+        }
+
+        $sameEmailUser = $data['email'] !== '' ? $this->usuarios->findByEmail($data['email']) : null;
+        if ($sameEmailUser !== null && (int) $sameEmailUser['id'] !== (int) $ignoreId) {
+            $validator->add('email', 'E-mail ja cadastrado para outro usuario.');
+        }
+
+        $sameCpfUser = $data['cpf'] !== '' ? $this->usuarios->findByCpf($data['cpf']) : null;
+        if ($sameCpfUser !== null && (int) $sameCpfUser['id'] !== (int) $ignoreId) {
+            $validator->add('cpf', 'CPF ja cadastrado para outro usuario.');
         }
 
         return $validator;

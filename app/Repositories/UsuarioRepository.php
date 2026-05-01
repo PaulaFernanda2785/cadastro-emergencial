@@ -13,7 +13,7 @@ final class UsuarioRepository
     {
         return Database::connection()
             ->query(
-                'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, perfil, ativo,
+                'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, militar, graduacao, nome_guerra, perfil, ativo,
                         ultimo_acesso, criado_em
                  FROM usuarios
                  WHERE deleted_at IS NULL
@@ -25,7 +25,7 @@ final class UsuarioRepository
     public function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, senha_hash, perfil, ativo
+            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, militar, graduacao, nome_guerra, senha_hash, perfil, ativo
              FROM usuarios
              WHERE id = :id AND deleted_at IS NULL
              LIMIT 1'
@@ -41,7 +41,7 @@ final class UsuarioRepository
     public function findActiveByEmail(string $email): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, senha_hash, perfil, ativo
+            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, militar, graduacao, nome_guerra, senha_hash, perfil, ativo
              FROM usuarios
              WHERE email = :email AND ativo = 1
              LIMIT 1'
@@ -57,7 +57,7 @@ final class UsuarioRepository
     public function findByEmail(string $email): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, senha_hash, perfil, ativo
+            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, militar, graduacao, nome_guerra, senha_hash, perfil, ativo
              FROM usuarios
              WHERE email = :email AND deleted_at IS NULL
              LIMIT 1'
@@ -72,13 +72,15 @@ final class UsuarioRepository
 
     public function findByCpf(string $cpf): ?array
     {
+        $cpfDigits = preg_replace('/\D+/', '', $cpf) ?? '';
         $stmt = Database::connection()->prepare(
-            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, senha_hash, perfil, ativo
+            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, militar, graduacao, nome_guerra, senha_hash, perfil, ativo
              FROM usuarios
-             WHERE cpf = :cpf AND deleted_at IS NULL
+             WHERE REPLACE(REPLACE(REPLACE(COALESCE(cpf, \'\'), \'.\', \'\'), \'-\', \'\'), \' \', \'\') = :cpf
+                AND deleted_at IS NULL
              LIMIT 1'
         );
-        $stmt->bindValue(':cpf', $cpf);
+        $stmt->bindValue(':cpf', $cpfDigits);
         $stmt->execute();
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -90,9 +92,9 @@ final class UsuarioRepository
     {
         $stmt = Database::connection()->prepare(
             'INSERT INTO usuarios
-                (nome, cpf, email, telefone, orgao, unidade_setor, senha_hash, perfil, ativo)
+                (nome, cpf, email, telefone, orgao, unidade_setor, militar, graduacao, nome_guerra, senha_hash, perfil, ativo)
              VALUES
-                (:nome, :cpf, :email, :telefone, :orgao, :unidade_setor, :senha_hash, :perfil, :ativo)'
+                (:nome, :cpf, :email, :telefone, :orgao, :unidade_setor, :militar, :graduacao, :nome_guerra, :senha_hash, :perfil, :ativo)'
         );
         $stmt->bindValue(':nome', $data['nome']);
         $stmt->bindValue(':cpf', $data['cpf']);
@@ -100,6 +102,9 @@ final class UsuarioRepository
         $stmt->bindValue(':telefone', $data['telefone'] !== '' ? $data['telefone'] : null);
         $stmt->bindValue(':orgao', $data['orgao'] !== '' ? $data['orgao'] : null);
         $stmt->bindValue(':unidade_setor', $data['unidade_setor'] !== '' ? $data['unidade_setor'] : null);
+        $stmt->bindValue(':militar', !empty($data['militar']) ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':graduacao', !empty($data['militar']) && $data['graduacao'] !== '' ? $data['graduacao'] : null);
+        $stmt->bindValue(':nome_guerra', !empty($data['militar']) && $data['nome_guerra'] !== '' ? $data['nome_guerra'] : null);
         $stmt->bindValue(':senha_hash', password_hash((string) $data['senha'], PASSWORD_DEFAULT));
         $stmt->bindValue(':perfil', $data['perfil']);
         $stmt->bindValue(':ativo', !empty($data['ativo']) ? 1 : 0, PDO::PARAM_INT);
@@ -118,6 +123,9 @@ final class UsuarioRepository
                  telefone = :telefone,
                  orgao = :orgao,
                  unidade_setor = :unidade_setor,
+                 militar = :militar,
+                 graduacao = :graduacao,
+                 nome_guerra = :nome_guerra,
                  perfil = :perfil,
                  ativo = :ativo
              WHERE id = :id'
@@ -128,6 +136,9 @@ final class UsuarioRepository
         $stmt->bindValue(':telefone', $data['telefone'] !== '' ? $data['telefone'] : null);
         $stmt->bindValue(':orgao', $data['orgao'] !== '' ? $data['orgao'] : null);
         $stmt->bindValue(':unidade_setor', $data['unidade_setor'] !== '' ? $data['unidade_setor'] : null);
+        $stmt->bindValue(':militar', !empty($data['militar']) ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':graduacao', !empty($data['militar']) && $data['graduacao'] !== '' ? $data['graduacao'] : null);
+        $stmt->bindValue(':nome_guerra', !empty($data['militar']) && $data['nome_guerra'] !== '' ? $data['nome_guerra'] : null);
         $stmt->bindValue(':perfil', $data['perfil']);
         $stmt->bindValue(':ativo', !empty($data['ativo']) ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);

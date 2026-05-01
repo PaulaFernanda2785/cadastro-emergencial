@@ -35,7 +35,7 @@ $documentos = $documentos ?? [];
             <div class="form-grid two-columns">
                 <label class="field">
                     <span>CPF</span>
-                    <input type="text" name="responsavel_cpf" value="<?= h($familia['responsavel_cpf'] ?? '') ?>" maxlength="14" required>
+                    <input type="text" name="responsavel_cpf" value="<?= h($familia['responsavel_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input required>
                     <?php if (!empty($errors['responsavel_cpf'])): ?>
                         <small class="field-error"><?= h($errors['responsavel_cpf'][0]) ?></small>
                     <?php endif; ?>
@@ -131,7 +131,7 @@ $documentos = $documentos ?? [];
                 <div class="form-grid two-columns">
                     <label class="field">
                         <span>CPF do representante</span>
-                        <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" data-representative-input>
+                        <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input data-representative-input>
                         <?php if (!empty($errors['representante_cpf'])): ?>
                             <small class="field-error"><?= h($errors['representante_cpf'][0]) ?></small>
                         <?php endif; ?>

@@ -349,6 +349,7 @@ final class FamiliaController extends Controller
             ->max('responsavel_nome', $data['responsavel_nome'], 180, 'Responsavel familiar')
             ->required('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsavel')
             ->max('responsavel_cpf', $data['responsavel_cpf'], 14, 'CPF do responsavel')
+            ->cpf('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsavel')
             ->max('responsavel_rg', $data['responsavel_rg'], 30, 'RG')
             ->date('data_nascimento', $data['data_nascimento'], 'Data de nascimento')
             ->max('telefone', $data['telefone'], 30, 'Telefone')
@@ -358,6 +359,7 @@ final class FamiliaController extends Controller
             ->minInt('quantidade_integrantes', $data['quantidade_integrantes'], 1, 'Quantidade de integrantes')
             ->max('representante_nome', $data['representante_nome'], 180, 'Representante')
             ->max('representante_cpf', $data['representante_cpf'], 14, 'CPF do representante')
+            ->cpf('representante_cpf', $data['representante_cpf'], 'CPF do representante')
             ->max('representante_rg', $data['representante_rg'], 30, 'RG do representante')
             ->max('representante_telefone', $data['representante_telefone'], 30, 'Telefone do representante');
     }

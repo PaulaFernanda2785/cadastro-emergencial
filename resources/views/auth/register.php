@@ -10,7 +10,7 @@
 
         <div class="qr-register-heading">
             <span class="eyebrow">Cadastro via QR Code</span>
-            <h1>Criar acesso de cadastrador</h1>
+            <h1>Criar acesso</h1>
             <?php if (!empty($acao)): ?>
                 <div class="qr-action-summary">
                     <span>Acao vinculada</span>
@@ -25,7 +25,7 @@
             <?= idempotency_field('auth.qr_register') ?>
 
             <section class="qr-register-block">
-                <div class="form-block-heading">
+                <div class="qr-register-block-heading">
                     <h2>Identificacao</h2>
                 </div>
 
@@ -40,7 +40,7 @@
                 <div class="form-grid two-columns">
                     <label class="field">
                         <span>CPF</span>
-                        <input type="text" name="cpf" value="<?= h($usuario['cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" required>
+                        <input type="text" name="cpf" value="<?= h($usuario['cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input required>
                         <?php if (!empty($errors['cpf'])): ?>
                             <small class="field-error"><?= h($errors['cpf'][0]) ?></small>
                         <?php endif; ?>
@@ -57,9 +57,44 @@
             </section>
 
             <section class="qr-register-block">
-                <div class="form-block-heading">
-                    <h2>Conta de acesso</h2>
-                    <span>Cadastrador</span>
+                <div class="qr-register-block-heading">
+                    <h2>Secao militar</h2>
+                    <span class="access-profile-badge">Opcional</span>
+                </div>
+
+                <div class="military-toggle">
+                    <div>
+                        <span>Usuario militar</span>
+                        <strong>Graduacao e nome de guerra</strong>
+                    </div>
+                    <label class="switch-control" aria-label="Usuario militar">
+                        <input type="checkbox" name="militar" value="1" data-military-toggle <?= !empty($usuario['militar']) ? 'checked' : '' ?>>
+                    </label>
+                </div>
+
+                <div class="form-grid two-columns military-fields" data-military-fields <?= !empty($usuario['militar']) ? '' : 'hidden' ?>>
+                    <label class="field">
+                        <span>Graduacao</span>
+                        <input type="text" name="graduacao" value="<?= h($usuario['graduacao'] ?? '') ?>" maxlength="80" data-military-input>
+                        <?php if (!empty($errors['graduacao'])): ?>
+                            <small class="field-error"><?= h($errors['graduacao'][0]) ?></small>
+                        <?php endif; ?>
+                    </label>
+
+                    <label class="field">
+                        <span>Nome de guerra</span>
+                        <input type="text" name="nome_guerra" value="<?= h($usuario['nome_guerra'] ?? '') ?>" maxlength="120" data-military-input>
+                        <?php if (!empty($errors['nome_guerra'])): ?>
+                            <small class="field-error"><?= h($errors['nome_guerra'][0]) ?></small>
+                        <?php endif; ?>
+                    </label>
+                </div>
+            </section>
+
+            <section class="qr-register-block">
+                <div class="qr-register-block-heading">
+                    <h2>Conta e acesso</h2>
+                    <span class="access-profile-badge">Perfil cadastrador</span>
                 </div>
 
                 <label class="field">
@@ -90,7 +125,7 @@
             </section>
 
             <section class="qr-register-block">
-                <div class="form-block-heading">
+                <div class="qr-register-block-heading">
                     <h2>Instituicao</h2>
                 </div>
 

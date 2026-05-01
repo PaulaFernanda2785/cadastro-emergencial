@@ -250,6 +250,9 @@ final class AuthController extends Controller
             'telefone' => '',
             'orgao' => '',
             'unidade_setor' => '',
+            'militar' => '',
+            'graduacao' => '',
+            'nome_guerra' => '',
             'senha' => '',
             'confirmar_senha' => '',
         ];
@@ -257,6 +260,8 @@ final class AuthController extends Controller
 
     private function registerInput(): array
     {
+        $militar = isset($_POST['militar']) ? '1' : '';
+
         return [
             'nome' => trim((string) ($_POST['nome'] ?? '')),
             'cpf' => trim((string) ($_POST['cpf'] ?? '')),
@@ -264,6 +269,9 @@ final class AuthController extends Controller
             'telefone' => trim((string) ($_POST['telefone'] ?? '')),
             'orgao' => trim((string) ($_POST['orgao'] ?? '')),
             'unidade_setor' => trim((string) ($_POST['unidade_setor'] ?? '')),
+            'militar' => $militar,
+            'graduacao' => $militar !== '' ? trim((string) ($_POST['graduacao'] ?? '')) : '',
+            'nome_guerra' => $militar !== '' ? trim((string) ($_POST['nome_guerra'] ?? '')) : '',
             'senha' => (string) ($_POST['senha'] ?? ''),
             'confirmar_senha' => (string) ($_POST['confirmar_senha'] ?? ''),
         ];
@@ -276,12 +284,15 @@ final class AuthController extends Controller
             ->max('nome', $data['nome'], 180, 'Nome')
             ->required('cpf', $data['cpf'], 'CPF')
             ->max('cpf', $data['cpf'], 14, 'CPF')
+            ->cpf('cpf', $data['cpf'], 'CPF')
             ->required('email', $data['email'], 'E-mail')
             ->email('email', $data['email'], 'E-mail')
             ->max('email', $data['email'], 180, 'E-mail')
             ->max('telefone', $data['telefone'], 30, 'Telefone')
             ->max('orgao', $data['orgao'], 180, 'Orgao/instituicao')
             ->max('unidade_setor', $data['unidade_setor'], 180, 'Unidade/setor')
+            ->max('graduacao', $data['graduacao'], 80, 'Graduacao')
+            ->max('nome_guerra', $data['nome_guerra'], 120, 'Nome de guerra')
             ->required('senha', $data['senha'], 'Senha');
 
         if (strlen((string) $data['senha']) < 8) {
