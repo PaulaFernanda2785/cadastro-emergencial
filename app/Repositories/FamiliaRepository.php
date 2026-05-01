@@ -122,12 +122,124 @@ final class FamiliaRepository
                         SELECT COUNT(*)
                         FROM entregas_ajuda e
                         WHERE e.familia_id = f.id AND e.deleted_at IS NULL
-                    ) AS entregas_registradas
+                    ) AS entregas_registradas,
+                    (
+                        SELECT GROUP_CONCAT(DISTINCT t.nome ORDER BY t.nome SEPARATOR ", ")
+                        FROM entregas_ajuda e
+                        INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
+                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                    ) AS entregas_itens_resumo,
+                    (
+                        SELECT MAX(e.data_entrega)
+                        FROM entregas_ajuda e
+                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                    ) AS ultima_entrega
              FROM familias f
              WHERE f.residencia_id = :residencia_id AND f.deleted_at IS NULL
              ORDER BY f.criado_em DESC'
         );
         $stmt->bindValue(':residencia_id', $residenciaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function deliveryCandidates(array $filters): array
+    {
+        $where = [
+            'f.deleted_at IS NULL',
+            'r.deleted_at IS NULL',
+            'a.deleted_at IS NULL',
+        ];
+        $params = [];
+
+        if (($filters['acao_id'] ?? '') !== '') {
+            $where[] = 'a.id = :acao_id';
+            $params['acao_id'] = (int) $filters['acao_id'];
+        } else {
+            $where[] = 'a.status = :status_aberta';
+            $params['status_aberta'] = 'aberta';
+
+            if (($filters['acao_busca'] ?? '') !== '') {
+                $where[] = '(a.localidade LIKE :acao_busca_localidade OR a.tipo_evento LIKE :acao_busca_evento)';
+                $actionSearch = '%' . $filters['acao_busca'] . '%';
+                $params['acao_busca_localidade'] = $actionSearch;
+                $params['acao_busca_evento'] = $actionSearch;
+            }
+        }
+
+        if (($filters['residencia_id'] ?? '') !== '') {
+            $where[] = 'r.id = :residencia_id';
+            $params['residencia_id'] = (int) $filters['residencia_id'];
+        } elseif (($filters['residencia_busca'] ?? '') !== '') {
+            $where[] = '(r.protocolo LIKE :residencia_busca_protocolo
+                OR r.bairro_comunidade LIKE :residencia_busca_bairro
+                OR r.endereco LIKE :residencia_busca_endereco)';
+            $residenceSearch = '%' . $filters['residencia_busca'] . '%';
+            $params['residencia_busca_protocolo'] = $residenceSearch;
+            $params['residencia_busca_bairro'] = $residenceSearch;
+            $params['residencia_busca_endereco'] = $residenceSearch;
+        }
+
+        if (($filters['data_inicio'] ?? '') !== '') {
+            $where[] = 'f.criado_em >= :data_inicio';
+            $params['data_inicio'] = $filters['data_inicio'] . ' 00:00:00';
+        }
+
+        if (($filters['data_fim'] ?? '') !== '') {
+            $where[] = 'f.criado_em <= :data_fim';
+            $params['data_fim'] = $filters['data_fim'] . ' 23:59:59';
+        }
+
+        if (($filters['q'] ?? '') !== '') {
+            $where[] = '(f.responsavel_nome LIKE :q_nome
+                OR f.responsavel_cpf LIKE :q_cpf
+                OR r.protocolo LIKE :q_protocolo
+                OR r.bairro_comunidade LIKE :q_bairro
+                OR r.endereco LIKE :q_endereco)';
+            $search = '%' . $filters['q'] . '%';
+            $params['q_nome'] = $search;
+            $params['q_cpf'] = $search;
+            $params['q_protocolo'] = $search;
+            $params['q_bairro'] = $search;
+            $params['q_endereco'] = $search;
+        }
+
+        $stmt = Database::connection()->prepare(
+            'SELECT f.id, f.residencia_id, f.responsavel_nome, f.responsavel_cpf,
+                    f.quantidade_integrantes, f.telefone, f.criado_em,
+                    r.protocolo, r.bairro_comunidade, r.endereco,
+                    a.id AS acao_id, a.localidade, a.tipo_evento, a.status AS acao_status,
+                    m.nome AS municipio_nome, m.uf,
+                    (
+                        SELECT COUNT(*)
+                        FROM entregas_ajuda e
+                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                    ) AS entregas_registradas,
+                    (
+                        SELECT GROUP_CONCAT(DISTINCT t.nome ORDER BY t.nome SEPARATOR ", ")
+                        FROM entregas_ajuda e
+                        INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
+                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                    ) AS entregas_itens_resumo,
+                    (
+                        SELECT MAX(e.data_entrega)
+                        FROM entregas_ajuda e
+                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                    ) AS ultima_entrega
+             FROM familias f
+             INNER JOIN residencias r ON r.id = f.residencia_id
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             INNER JOIN municipios m ON m.id = r.municipio_id
+             WHERE ' . implode(' AND ', $where) . '
+             ORDER BY r.protocolo ASC, f.responsavel_nome ASC
+             LIMIT 500'
+        );
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

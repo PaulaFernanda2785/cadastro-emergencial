@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260501-53';
+$assetVersion = '20260501-61';
 
 $menuItems = [
     ['group' => 'Operacao', 'label' => 'Painel situacional', 'abbr' => 'PS', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
@@ -68,6 +68,7 @@ $menuItems = [
     <script src="<?= h(asset('js/qrcode.bundle.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/actions-index.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/delivery-qr-scanner.js') . '?v=' . $assetVersion) ?>" defer></script>
+    <script src="<?= h(asset('js/delivery-batch.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/family-receipt.js') . '?v=' . $assetVersion) ?>" defer></script>
 </head>
 <body>

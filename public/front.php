@@ -91,6 +91,9 @@ $router->get('/cadastros/residencias/{id}/familias/{familiaId}/editar', [Familia
 $router->post('/cadastros/residencias/{id}/familias/{familiaId}', [FamiliaController::class, 'update'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias/{familiaId}/excluir', [FamiliaController::class, 'delete'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/gestor/entregas', [EntregaAjudaController::class, 'index'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/entregas/validacao', [EntregaAjudaController::class, 'validationPage'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/entregas/lote', [EntregaAjudaController::class, 'batch'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/entregas/lote', [EntregaAjudaController::class, 'batchStore'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/entregas/validar', [EntregaAjudaController::class, 'validateReceiptQuery'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/entregas/validar/{codigo}', [EntregaAjudaController::class, 'validateReceipt'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/entregas/{id}/comprovante', [EntregaAjudaController::class, 'receipt'], ['auth', 'role:gestor,administrador']);

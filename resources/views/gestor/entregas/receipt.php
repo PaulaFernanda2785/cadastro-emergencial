@@ -1,10 +1,20 @@
-<section class="receipt-actions no-print">
-    <a class="secondary-link" href="<?= h(url('/gestor/entregas')) ?>">Voltar para entregas</a>
-    <a class="secondary-link" href="<?= h(url('/cadastros/residencias/' . $entrega['residencia_id'])) ?>">Ver residencia</a>
-    <button type="button" class="primary-button" onclick="window.print()">Imprimir comprovante</button>
+<section class="dashboard-header no-print receipt-preview-header">
+    <div>
+        <span class="eyebrow">Comprovante de entrega</span>
+        <h1>Pre-visualizacao do ticket</h1>
+        <p><?= h($entrega['responsavel_nome']) ?> - <?= h($entrega['comprovante_codigo']) ?></p>
+    </div>
 </section>
 
+<section class="receipt-preview-shell">
+    <section class="receipt-actions no-print">
+        <a class="secondary-button" href="<?= h(url('/gestor/entregas')) ?>">Voltar para entregas</a>
+        <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $entrega['residencia_id'])) ?>">Ver residencia</a>
+        <button type="button" class="primary-button" onclick="window.print()">Imprimir</button>
+    </section>
+
 <article class="receipt-ticket">
+    <div class="receipt-paper-edge" aria-hidden="true"></div>
     <header class="receipt-header">
         <strong>Cadastro Emergencial</strong>
         <span>CEDEC-PA</span>
@@ -57,24 +67,11 @@
         </div>
         <div>
             <dt>Endereco</dt>
-            <dd>
-                <?= h($entrega['endereco']) ?>
-                <?php if (!empty($entrega['complemento'])): ?>
-                    - <?= h($entrega['complemento']) ?>
-                <?php endif; ?>
-            </dd>
+            <dd><?= h($entrega['endereco']) ?><?= !empty($entrega['complemento']) ? ' - ' . h($entrega['complemento']) : '' ?></dd>
         </div>
         <div>
             <dt>Bairro</dt>
             <dd><?= h($entrega['bairro_comunidade']) ?></dd>
-        </div>
-        <div>
-            <dt>Imovel</dt>
-            <dd><?= h(residencia_imovel_label($entrega['imovel'] ?? null)) ?></dd>
-        </div>
-        <div>
-            <dt>Condicao</dt>
-            <dd><?= h(residencia_condicao_label($entrega['condicao_residencia'] ?? null)) ?></dd>
         </div>
     </dl>
 
@@ -88,10 +85,12 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td><?= h($entrega['tipo_ajuda_nome']) ?></td>
-                <td><?= h(number_format((float) $entrega['quantidade'], 2, ',', '.')) ?> <?= h($entrega['unidade_medida']) ?></td>
-            </tr>
+            <?php foreach (($entrega['itens'] ?? []) as $item): ?>
+                <tr>
+                    <td><?= h($item['tipo_ajuda_nome']) ?></td>
+                    <td><?= h(number_format((float) $item['quantidade'], 2, ',', '.')) ?> <?= h($item['unidade_medida']) ?></td>
+                </tr>
+            <?php endforeach; ?>
         </tbody>
     </table>
 
@@ -123,3 +122,4 @@
         <span>Guarde este comprovante para conferencia.</span>
     </footer>
 </article>
+</section>
