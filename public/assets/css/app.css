@@ -2139,6 +2139,10 @@ button:disabled,
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.three-columns {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .compact-heading {
     margin: 4px 0 0;
 }
@@ -2306,6 +2310,18 @@ button:disabled,
     max-width: 920px;
 }
 
+.family-edit-page {
+    max-width: 1120px;
+}
+
+.family-summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.family-edit-form {
+    gap: 16px;
+}
+
 .family-form-header p {
     margin-bottom: 0;
 }
@@ -2410,6 +2426,36 @@ button:disabled,
     box-shadow: inset 0 0 0 1px rgba(21, 94, 117, 0.12);
 }
 
+.completion-check {
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: #ffffff;
+    color: var(--text);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.completion-check input {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    accent-color: var(--primary);
+}
+
+.completion-check span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.family-conclusion-block textarea {
+    resize: vertical;
+}
+
 .switch-control {
     width: 66px;
     min-width: 66px;
@@ -2453,6 +2499,7 @@ button:disabled,
 }
 
 .military-fields,
+.family-benefit-fields,
 .representative-fields {
     display: grid;
     gap: 16px;
@@ -2460,6 +2507,7 @@ button:disabled,
 }
 
 .military-fields[hidden],
+.family-benefit-fields[hidden],
 .representative-fields[hidden] {
     display: none;
 }
@@ -2467,6 +2515,20 @@ button:disabled,
 .family-doc-upload {
     display: grid;
     gap: 10px;
+}
+
+.family-doc-autofill-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.family-doc-autofill-grid-single {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.representative-doc-upload {
+    padding-bottom: 4px;
 }
 
 .family-doc-dropzone {
@@ -3588,6 +3650,11 @@ button:disabled,
 }
 
 @media (max-width: 900px) {
+    .three-columns,
+    .family-doc-autofill-grid {
+        grid-template-columns: 1fr;
+    }
+
     .residence-open-page {
         gap: 14px;
     }
@@ -3853,6 +3920,7 @@ button:disabled,
 
     .family-form-block .form-block-heading,
     .representative-toggle,
+    .family-benefit-toggle,
     .military-toggle {
         align-items: flex-start;
         flex-direction: column;

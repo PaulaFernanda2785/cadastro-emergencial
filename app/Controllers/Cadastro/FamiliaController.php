@@ -12,6 +12,7 @@ use App\Repositories\DocumentoAnexoRepository;
 use App\Repositories\FamiliaRepository;
 use App\Repositories\ResidenciaRepository;
 use App\Services\AuditLogService;
+use App\Services\DocumentOcrService;
 use App\Services\IdempotenciaService;
 use App\Services\UploadService;
 use RuntimeException;
@@ -82,6 +83,22 @@ final class FamiliaController extends Controller
         header('X-Content-Type-Options: nosniff');
         readfile($filePath);
         exit;
+    }
+
+    public function ocrDocument(): void
+    {
+        if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
+            $this->json([
+                'ok' => false,
+                'text' => '',
+                'message' => 'Sessao expirada ou formulario invalido.',
+            ], 403);
+        }
+
+        $file = is_array($_FILES['documento'] ?? null) ? $_FILES['documento'] : [];
+        $result = (new DocumentOcrService())->extractText($file);
+
+        $this->json($result, $result['ok'] ? 200 : 422);
     }
 
     public function edit(string $residenciaId, string $familiaId): void
@@ -304,10 +321,19 @@ final class FamiliaController extends Controller
             'responsavel_nome' => '',
             'responsavel_cpf' => '',
             'responsavel_rg' => '',
+            'responsavel_sexo' => '',
+            'responsavel_orgao_expedidor' => '',
             'data_nascimento' => '',
             'telefone' => '',
             'email' => '',
             'quantidade_integrantes' => '1',
+            'renda_familiar' => '',
+            'perdas_bens_moveis' => '',
+            'situacao_familia' => '',
+            'recebe_beneficio_social' => '',
+            'beneficio_social_nome' => '',
+            'cadastro_concluido' => '',
+            'conclusao_observacoes' => '',
             'possui_criancas' => '',
             'possui_idosos' => '',
             'possui_pcd' => '',
@@ -316,6 +342,9 @@ final class FamiliaController extends Controller
             'representante_nome' => '',
             'representante_cpf' => '',
             'representante_rg' => '',
+            'representante_orgao_expedidor' => '',
+            'representante_data_nascimento' => '',
+            'representante_sexo' => '',
             'representante_telefone' => '',
         ];
     }
@@ -326,10 +355,19 @@ final class FamiliaController extends Controller
             'responsavel_nome' => trim((string) ($_POST['responsavel_nome'] ?? '')),
             'responsavel_cpf' => trim((string) ($_POST['responsavel_cpf'] ?? '')),
             'responsavel_rg' => trim((string) ($_POST['responsavel_rg'] ?? '')),
+            'responsavel_sexo' => trim((string) ($_POST['responsavel_sexo'] ?? '')),
+            'responsavel_orgao_expedidor' => trim((string) ($_POST['responsavel_orgao_expedidor'] ?? '')),
             'data_nascimento' => trim((string) ($_POST['data_nascimento'] ?? '')),
             'telefone' => trim((string) ($_POST['telefone'] ?? '')),
             'email' => trim((string) ($_POST['email'] ?? '')),
             'quantidade_integrantes' => trim((string) ($_POST['quantidade_integrantes'] ?? '1')),
+            'renda_familiar' => trim((string) ($_POST['renda_familiar'] ?? '')),
+            'perdas_bens_moveis' => trim((string) ($_POST['perdas_bens_moveis'] ?? '')),
+            'situacao_familia' => trim((string) ($_POST['situacao_familia'] ?? '')),
+            'recebe_beneficio_social' => isset($_POST['recebe_beneficio_social']) ? '1' : '',
+            'beneficio_social_nome' => isset($_POST['recebe_beneficio_social']) ? trim((string) ($_POST['beneficio_social_nome'] ?? '')) : '',
+            'cadastro_concluido' => isset($_POST['cadastro_concluido']) ? '1' : '',
+            'conclusao_observacoes' => trim((string) ($_POST['conclusao_observacoes'] ?? '')),
             'possui_criancas' => isset($_POST['possui_criancas']) ? '1' : '',
             'possui_idosos' => isset($_POST['possui_idosos']) ? '1' : '',
             'possui_pcd' => isset($_POST['possui_pcd']) ? '1' : '',
@@ -338,30 +376,57 @@ final class FamiliaController extends Controller
             'representante_nome' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_nome'] ?? '')) : '',
             'representante_cpf' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_cpf'] ?? '')) : '',
             'representante_rg' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_rg'] ?? '')) : '',
+            'representante_orgao_expedidor' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_orgao_expedidor'] ?? '')) : '',
+            'representante_data_nascimento' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_data_nascimento'] ?? '')) : '',
+            'representante_sexo' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_sexo'] ?? '')) : '',
             'representante_telefone' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_telefone'] ?? '')) : '',
         ];
     }
 
     private function validator(array $data): Validator
     {
-        return (new Validator())
+        $validator = (new Validator())
             ->required('responsavel_nome', $data['responsavel_nome'], 'Responsavel familiar')
             ->max('responsavel_nome', $data['responsavel_nome'], 180, 'Responsavel familiar')
             ->required('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsavel')
             ->max('responsavel_cpf', $data['responsavel_cpf'], 14, 'CPF do responsavel')
             ->cpf('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsavel')
             ->max('responsavel_rg', $data['responsavel_rg'], 30, 'RG')
+            ->max('responsavel_orgao_expedidor', $data['responsavel_orgao_expedidor'], 30, 'Orgao expedidor')
             ->date('data_nascimento', $data['data_nascimento'], 'Data de nascimento')
             ->max('telefone', $data['telefone'], 30, 'Telefone')
             ->email('email', $data['email'], 'E-mail')
             ->max('email', $data['email'], 180, 'E-mail')
             ->integer('quantidade_integrantes', $data['quantidade_integrantes'], 'Quantidade de integrantes')
             ->minInt('quantidade_integrantes', $data['quantidade_integrantes'], 1, 'Quantidade de integrantes')
+            ->max('perdas_bens_moveis', $data['perdas_bens_moveis'], 1000, 'Perdas de bens moveis')
+            ->max('beneficio_social_nome', $data['beneficio_social_nome'], 180, 'Beneficio social')
+            ->max('conclusao_observacoes', $data['conclusao_observacoes'], 1000, 'Observacoes da conclusao')
             ->max('representante_nome', $data['representante_nome'], 180, 'Representante')
             ->max('representante_cpf', $data['representante_cpf'], 14, 'CPF do representante')
             ->cpf('representante_cpf', $data['representante_cpf'], 'CPF do representante')
             ->max('representante_rg', $data['representante_rg'], 30, 'RG do representante')
+            ->max('representante_orgao_expedidor', $data['representante_orgao_expedidor'], 30, 'Orgao expedidor do representante')
+            ->date('representante_data_nascimento', $data['representante_data_nascimento'], 'Data de nascimento do representante')
             ->max('representante_telefone', $data['representante_telefone'], 30, 'Telefone do representante');
+
+        if ($data['responsavel_sexo'] !== '') {
+            $validator->in('responsavel_sexo', $data['responsavel_sexo'], ['feminino', 'masculino', 'outro', 'nao_informado'], 'Sexo do responsavel');
+        }
+
+        if ($data['representante_sexo'] !== '') {
+            $validator->in('representante_sexo', $data['representante_sexo'], ['feminino', 'masculino', 'outro', 'nao_informado'], 'Sexo do representante');
+        }
+
+        if ($data['renda_familiar'] !== '') {
+            $validator->in('renda_familiar', $data['renda_familiar'], ['0_3_salarios', 'acima_3_salarios'], 'Renda familiar');
+        }
+
+        if ($data['situacao_familia'] !== '') {
+            $validator->in('situacao_familia', $data['situacao_familia'], ['desabrigado', 'desalojado', 'aluguel_social', 'permanece_residencia'], 'Situacao da familia');
+        }
+
+        return $validator;
     }
 
     private function ensureFamilyCapacity(array $residencia): void
@@ -426,6 +491,14 @@ final class FamiliaController extends Controller
     private function normalizeCpf(string $cpf): string
     {
         return preg_replace('/\D+/', '', $cpf) ?? '';
+    }
+
+    private function json(array $payload, int $statusCode = 200): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
     }
 
     private function guardPost(string $scope, string $failureRedirect): void

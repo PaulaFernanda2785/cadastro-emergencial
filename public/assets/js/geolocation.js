@@ -211,15 +211,6 @@
             }
         }
 
-        function needsSecureOrigin() {
-            return !window.isSecureContext &&
-                !/^(localhost|127\.0\.0\.1|::1|\[::1\])$/.test(window.location.hostname);
-        }
-
-        function secureCurrentUrl() {
-            return 'https://' + window.location.host + window.location.pathname + window.location.search + window.location.hash;
-        }
-
         if (!('geolocation' in navigator)) {
             button.disabled = true;
             if (status) {
@@ -262,17 +253,11 @@
             });
         }
 
-        if (needsSecureOrigin()) {
+        if (!window.isSecureContext && !/^(localhost|127\.0\.0\.1|::1|\[::1\])$/.test(window.location.hostname)) {
             setStatus(insecureLocalMessage());
         }
 
         button.addEventListener('click', function () {
-            if (needsSecureOrigin()) {
-                setStatus('Abrindo a pagina em conexao segura para capturar a localizacao...');
-                window.location.href = secureCurrentUrl();
-                return;
-            }
-
             if (String(form.dataset.photoLocationSource || '').indexOf('photo-') === 0) {
                 setStatus('Foto anexada com localizacao propria. Remova ou troque a foto para capturar a localizacao atual.');
                 return;
