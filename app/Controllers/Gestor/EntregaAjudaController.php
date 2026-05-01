@@ -46,7 +46,8 @@ final class EntregaAjudaController extends Controller
                 'pages' => max(1, (int) ceil($total / $perPage)),
             ],
             'acoes' => $this->acoes->all(),
-            'residencias' => $this->residencias->optionsByOpenActions(),
+            'residencias' => $this->residencias->optionsAll(),
+            'familias' => $this->familias->deliveryHistoryOptions(),
             'tipos' => $this->tipos->active(),
             'activeDeliveryPage' => 'historico',
         ]);
@@ -205,7 +206,6 @@ final class EntregaAjudaController extends Controller
         }
 
         $created = 0;
-        $firstId = null;
         $userId = (int) (current_user()['id'] ?? 0);
 
         foreach ($familiaIds as $familiaId) {
@@ -227,19 +227,13 @@ final class EntregaAjudaController extends Controller
                     'observacao' => $observacao,
                 ];
                 $id = $this->entregas->create($data);
-                $firstId ??= $id;
                 $created++;
                 (new AuditLogService())->record('registrou_entrega_lote', 'entregas_ajuda', $id, $groupCode);
             }
         }
 
         Session::flash('success', $created . ' item(ns) registrado(s) em lote, agrupados por familia no historico.');
-
-        if ($firstId !== null) {
-            $this->redirect('/gestor/entregas/' . $firstId . '/comprovante');
-        }
-
-        $this->redirect('/gestor/entregas/lote');
+        $this->redirect('/gestor/entregas');
     }
 
     private function findFamilia(int $id): array
@@ -308,7 +302,11 @@ final class EntregaAjudaController extends Controller
         return [
             'q' => trim((string) ($_GET['q'] ?? '')),
             'acao_id' => trim((string) ($_GET['acao_id'] ?? '')),
+            'acao_busca' => trim((string) ($_GET['acao_busca'] ?? '')),
             'residencia_id' => trim((string) ($_GET['residencia_id'] ?? '')),
+            'residencia_busca' => trim((string) ($_GET['residencia_busca'] ?? '')),
+            'familia_id' => trim((string) ($_GET['familia_id'] ?? '')),
+            'familia_busca' => trim((string) ($_GET['familia_busca'] ?? '')),
             'tipo_ajuda_id' => trim((string) ($_GET['tipo_ajuda_id'] ?? '')),
             'data_inicio' => trim((string) ($_GET['data_inicio'] ?? '')),
             'data_fim' => trim((string) ($_GET['data_fim'] ?? '')),

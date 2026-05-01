@@ -54,6 +54,29 @@
         return rows;
     }
 
+    function collectReceiptItems() {
+        var items = [];
+
+        if (!ticket) {
+            return items;
+        }
+
+        ticket.querySelectorAll('.receipt-items tbody tr').forEach(function (row) {
+            var cells = row.querySelectorAll('td');
+
+            if (cells.length < 2) {
+                return;
+            }
+
+            items.push({
+                name: cells[0].textContent.replace(/\s+/g, ' ').trim(),
+                quantity: cells[1].textContent.replace(/\s+/g, ' ').trim()
+            });
+        });
+
+        return items;
+    }
+
     function wrapText(context, text, maxWidth) {
         var words = String(text || '').split(/\s+/).filter(Boolean);
         var lines = [];
@@ -116,6 +139,7 @@
         var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
         var rows = collectTicketRows();
+        var receiptItems = collectReceiptItems();
         var footer = Array.prototype.slice.call(ticket ? ticket.querySelectorAll('.receipt-footer span') : [])
             .map(function (item) { return item.textContent.trim(); })
             .filter(Boolean);
@@ -156,6 +180,21 @@
             }
         });
 
+        if (receiptItems.length > 0) {
+            y = drawSeparator(context, y + 3, width, padding);
+            context.font = '700 20px "Courier New", monospace';
+            context.fillText('Itens', padding, y);
+            y += 30;
+
+            receiptItems.forEach(function (item) {
+                context.font = '700 19px "Courier New", monospace';
+                y = drawWrapped(context, item.name, padding, y, width - padding * 2, 24);
+                context.font = '19px "Courier New", monospace';
+                y = drawWrapped(context, item.quantity, padding, y, width - padding * 2, 24);
+                y += 10;
+            });
+        }
+
         y = drawSeparator(context, y + 3, width, padding);
 
         if (qrCanvas) {
@@ -172,6 +211,20 @@
         context.textAlign = 'center';
         y = drawWrapped(context, 'Apresente este comprovante na retirada da ajuda humanitaria.', width / 2, y, width - padding * 2, 23);
         y = drawSeparator(context, y + 13, width, padding);
+
+        if (ticket && ticket.querySelector('.receipt-signature')) {
+            context.setLineDash([]);
+            context.strokeStyle = '#111111';
+            context.beginPath();
+            context.moveTo(padding + 42, y + 28);
+            context.lineTo(width - padding - 42, y + 28);
+            context.stroke();
+            y += 40;
+            context.font = '17px "Courier New", monospace';
+            context.textAlign = 'center';
+            y = drawWrapped(context, textContent('.receipt-signature p', ticket), width / 2, y, width - padding * 2, 22);
+            y = drawSeparator(context, y + 13, width, padding);
+        }
 
         context.font = '17px "Courier New", monospace';
         footer.forEach(function (line) {
@@ -269,7 +322,7 @@
 
                     navigator.share({
                         files: [file],
-                        title: 'Comprovante de cadastro familiar'
+                        title: ticket.dataset.shareTitle || 'Comprovante'
                     }).then(function () {
                         setStatus('Comprovante enviado para compartilhamento.');
                     }).catch(function () {

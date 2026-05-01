@@ -245,6 +245,23 @@ final class FamiliaRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function deliveryHistoryOptions(): array
+    {
+        return Database::connection()
+            ->query(
+                'SELECT DISTINCT f.id, f.responsavel_nome, f.responsavel_cpf,
+                        r.protocolo, r.bairro_comunidade
+                 FROM entregas_ajuda e
+                 INNER JOIN familias f ON f.id = e.familia_id
+                 INNER JOIN residencias r ON r.id = f.residencia_id
+                 WHERE e.deleted_at IS NULL
+                    AND f.deleted_at IS NULL
+                    AND r.deleted_at IS NULL
+                 ORDER BY f.responsavel_nome ASC, r.protocolo ASC'
+            )
+            ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function countByResidencia(int $residenciaId): int
     {
         $stmt = Database::connection()->prepare(

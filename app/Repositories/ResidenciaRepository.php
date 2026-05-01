@@ -238,6 +238,21 @@ final class ResidenciaRepository
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function optionsAll(): array
+    {
+        return Database::connection()
+            ->query(
+                'SELECT r.id, r.protocolo, r.bairro_comunidade, r.endereco,
+                        a.id AS acao_id, a.localidade, a.tipo_evento
+                 FROM residencias r
+                 INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+                 WHERE r.deleted_at IS NULL
+                    AND a.deleted_at IS NULL
+                 ORDER BY a.localidade ASC, r.protocolo ASC'
+            )
+            ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function count(): int
     {
         return (int) Database::connection()

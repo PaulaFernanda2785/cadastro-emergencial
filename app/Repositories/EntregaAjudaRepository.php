@@ -18,7 +18,7 @@ final class EntregaAjudaRepository
                     MAX(e.data_entrega) AS data_entrega,
                     MAX(e.observacao) AS observacao,
                     f.id AS familia_id, f.responsavel_nome, f.responsavel_cpf,
-                    GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 2, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
+                    GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 0, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
                     r.id AS residencia_id, r.protocolo, r.bairro_comunidade,
                     a.id AS acao_id, a.localidade, a.tipo_evento,
                     m.nome AS municipio_nome, m.uf,
@@ -202,7 +202,7 @@ final class EntregaAjudaRepository
                     COUNT(*) AS total_itens,
                     MAX(e.data_entrega) AS data_entrega,
                     MAX(e.observacao) AS observacao,
-                    GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 2, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
+                    GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 0, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
                     u.nome AS entregue_por_nome
              FROM entregas_ajuda e
              INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
@@ -295,7 +295,15 @@ final class EntregaAjudaRepository
             $params['q_tipo'] = $search;
         }
 
-        if (($filters['acao_id'] ?? '') !== '') {
+        if (($filters['acao_busca'] ?? '') !== '') {
+            $where[] = '(a.localidade LIKE :acao_busca_localidade
+                OR a.tipo_evento LIKE :acao_busca_evento
+                OR CONCAT(a.localidade, " - ", a.tipo_evento) LIKE :acao_busca_completa)';
+            $actionSearch = '%' . $filters['acao_busca'] . '%';
+            $params['acao_busca_localidade'] = $actionSearch;
+            $params['acao_busca_evento'] = $actionSearch;
+            $params['acao_busca_completa'] = $actionSearch;
+        } elseif (($filters['acao_id'] ?? '') !== '') {
             $where[] = 'a.id = :acao_id';
             $params['acao_id'] = (int) $filters['acao_id'];
         }
@@ -303,6 +311,25 @@ final class EntregaAjudaRepository
         if (($filters['residencia_id'] ?? '') !== '') {
             $where[] = 'r.id = :residencia_id';
             $params['residencia_id'] = (int) $filters['residencia_id'];
+        } elseif (($filters['residencia_busca'] ?? '') !== '') {
+            $where[] = '(r.protocolo LIKE :residencia_busca_protocolo
+                OR r.bairro_comunidade LIKE :residencia_busca_bairro
+                OR r.endereco LIKE :residencia_busca_endereco)';
+            $residenceSearch = '%' . $filters['residencia_busca'] . '%';
+            $params['residencia_busca_protocolo'] = $residenceSearch;
+            $params['residencia_busca_bairro'] = $residenceSearch;
+            $params['residencia_busca_endereco'] = $residenceSearch;
+        }
+
+        if (($filters['familia_id'] ?? '') !== '') {
+            $where[] = 'f.id = :familia_id';
+            $params['familia_id'] = (int) $filters['familia_id'];
+        } elseif (($filters['familia_busca'] ?? '') !== '') {
+            $where[] = '(f.responsavel_nome LIKE :familia_busca_nome
+                OR f.responsavel_cpf LIKE :familia_busca_cpf)';
+            $familySearch = '%' . $filters['familia_busca'] . '%';
+            $params['familia_busca_nome'] = $familySearch;
+            $params['familia_busca_cpf'] = $familySearch;
         }
 
         if (($filters['tipo_ajuda_id'] ?? '') !== '') {

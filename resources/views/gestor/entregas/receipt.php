@@ -10,10 +10,16 @@
     <section class="receipt-actions no-print">
         <a class="secondary-button" href="<?= h(url('/gestor/entregas')) ?>">Voltar para entregas</a>
         <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $entrega['residencia_id'])) ?>">Ver residencia</a>
+        <button
+            type="button"
+            class="secondary-button"
+            data-family-receipt-share
+        >Enviar para WhatsApp</button>
         <button type="button" class="primary-button" onclick="window.print()">Imprimir</button>
+        <span class="receipt-share-status" data-family-receipt-share-status></span>
     </section>
 
-<article class="receipt-ticket">
+<article class="receipt-ticket family-receipt-ticket" data-family-receipt-ticket data-receipt-code="<?= h($entrega['comprovante_codigo']) ?>" data-share-title="Comprovante de entrega">
     <div class="receipt-paper-edge" aria-hidden="true"></div>
     <header class="receipt-header">
         <strong>Cadastro Emergencial</strong>

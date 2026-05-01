@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260501-61';
+$assetVersion = '20260501-65';
 
 $menuItems = [
     ['group' => 'Operacao', 'label' => 'Painel situacional', 'abbr' => 'PS', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
@@ -26,7 +26,7 @@ $menuItems = [
     ['group' => 'Gestao', 'label' => 'Entregas', 'abbr' => 'EN', 'url' => '/gestor/entregas', 'match' => ['/gestor/entregas'], 'roles' => ['gestor', 'administrador']],
     ['group' => 'Gestao', 'label' => 'Prestacao de contas', 'abbr' => 'PC', 'url' => '/gestor/prestacao-contas', 'match' => ['/gestor/prestacao-contas'], 'roles' => ['gestor', 'administrador']],
     ['group' => 'Gestao', 'label' => 'Relatorios', 'abbr' => 'RL', 'url' => '/gestor/relatorios', 'match' => ['/gestor/relatorios'], 'roles' => ['gestor', 'administrador']],
-    ['group' => 'Administracao', 'label' => 'Acoes emergenciais', 'abbr' => 'AE', 'url' => '/admin/acoes', 'match' => ['/admin/acoes'], 'roles' => ['administrador']],
+    ['group' => 'Administracao', 'label' => 'Acoes emergenciais', 'abbr' => 'AE', 'url' => '/admin/acoes', 'match' => ['/admin/acoes'], 'roles' => ['gestor', 'administrador']],
     ['group' => 'Administracao', 'label' => 'Tipos de ajuda', 'abbr' => 'TA', 'url' => '/admin/ajudas', 'match' => ['/admin/ajudas'], 'roles' => ['administrador']],
     ['group' => 'Administracao', 'label' => 'Usuarios', 'abbr' => 'US', 'url' => '/admin/usuarios', 'match' => ['/admin/usuarios'], 'roles' => ['administrador']],
     ['group' => 'Conta', 'label' => 'Alterar senha', 'abbr' => 'AS', 'url' => '/alterar-senha', 'match' => ['/alterar-senha']],
