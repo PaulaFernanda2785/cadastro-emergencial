@@ -11,6 +11,7 @@ return [
     'username' => Env::get('DB_USERNAME', 'root'),
     'password' => Env::get('DB_PASSWORD', ''),
     'charset' => Env::get('DB_CHARSET', 'utf8mb4'),
+    'timezone' => Env::get('DB_TIMEZONE', '-03:00'),
     'options' => [
         \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
         \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,

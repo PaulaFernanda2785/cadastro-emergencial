@@ -1296,8 +1296,31 @@
             setStatus('Foto selecionada. Os dados de localizacao serao gravados na imagem antes do envio.');
         }
 
+        function formatDateTimeInAppTimezone(date) {
+            var timezone = form.dataset.appTimezone || 'America/Belem';
+
+            if (typeof Intl === 'undefined' || typeof Intl.DateTimeFormat !== 'function') {
+                return date.toLocaleString('pt-BR');
+            }
+
+            try {
+                return new Intl.DateTimeFormat('pt-BR', {
+                    timeZone: timezone,
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }).format(date);
+            } catch (error) {
+                return date.toLocaleString('pt-BR');
+            }
+        }
+
         function metadataPayload() {
             var now = new Date();
+            var timezone = form.dataset.appTimezone || 'America/Belem';
 
             return {
                 sistema: 'Cadastro Emergencial',
@@ -1312,7 +1335,8 @@
                 latitude: fieldValue('[data-latitude]'),
                 longitude: fieldValue('[data-longitude]'),
                 data_hora_iso: now.toISOString(),
-                data_hora_br: now.toLocaleString('pt-BR')
+                data_hora_timezone: timezone,
+                data_hora_br: formatDateTimeInAppTimezone(now)
             };
         }
 

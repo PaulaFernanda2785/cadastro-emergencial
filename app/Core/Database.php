@@ -30,10 +30,20 @@ final class Database
 
         try {
             self::$connection = new PDO($dsn, $config['username'], $config['password'], $config['options']);
+            self::configureSessionTimezone(self::$connection, (string) ($config['timezone'] ?? '-03:00'));
         } catch (PDOException $exception) {
             throw new RuntimeException('Falha ao conectar ao banco de dados.', 0, $exception);
         }
 
         return self::$connection;
+    }
+
+    private static function configureSessionTimezone(PDO $connection, string $timezone): void
+    {
+        if (!preg_match('/^[+-](?:0\d|1[0-4]):[0-5]\d$/', $timezone)) {
+            $timezone = '-03:00';
+        }
+
+        $connection->exec("SET time_zone = '{$timezone}'");
     }
 }

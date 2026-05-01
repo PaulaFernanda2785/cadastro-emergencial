@@ -10,5 +10,5 @@ return [
     'debug' => filter_var(Env::get('APP_DEBUG', false), FILTER_VALIDATE_BOOL),
     'url' => Env::get('APP_URL', 'http://localhost/cadastro-emergencial/public'),
     'public_url' => Env::get('APP_PUBLIC_URL', Env::get('APP_URL', 'http://localhost/cadastro-emergencial/public')),
-    'timezone' => Env::get('APP_TIMEZONE', 'America/Fortaleza'),
+    'timezone' => Env::get('APP_TIMEZONE', 'America/Belem'),
 ];

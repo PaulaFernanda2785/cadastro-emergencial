@@ -5,6 +5,8 @@ $useOfflineQueue = (bool) ($useOfflineQueue ?? true);
 $submitLabel = $submitLabel ?? 'Salvar residencia';
 $cancelUrl = $cancelUrl ?? '/acao/' . $acao['token_publico'];
 $isEditing = !empty($residencia['id']);
+$appConfig = require BASE_PATH . '/config/app.php';
+$appTimezone = (string) ($appConfig['timezone'] ?? 'America/Belem');
 ?>
 
 <section class="form-shell">
@@ -28,6 +30,7 @@ $isEditing = !empty($residencia['id']);
         data-action-state="<?= h($acao['uf']) ?>"
         data-action-locality="<?= h($acao['localidade']) ?>"
         data-action-event="<?= h($acao['tipo_evento']) ?>"
+        data-app-timezone="<?= h($appTimezone) ?>"
         novalidate
     >
         <?= csrf_field() ?>
