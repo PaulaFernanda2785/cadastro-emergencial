@@ -9,6 +9,12 @@ use PDO;
 
 final class ResidenciaRepository
 {
+    private const FAMILIAS_COUNT_SQL = '(
+        SELECT COUNT(*)
+        FROM familias f
+        WHERE f.residencia_id = r.id AND f.deleted_at IS NULL
+    )';
+
     public function all(?int $cadastradoPor = null): array
     {
         $sql = 'SELECT r.id, r.protocolo, r.bairro_comunidade, r.endereco, r.imovel, r.condicao_residencia, r.quantidade_familias,
@@ -40,6 +46,72 @@ final class ResidenciaRepository
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function search(?int $cadastradoPor, array $filters, int $limit, int $offset): array
+    {
+        [$where, $params] = $this->buildSearchWhere($cadastradoPor, $filters);
+        $sql = 'SELECT r.id, r.protocolo, r.bairro_comunidade, r.endereco, r.imovel, r.condicao_residencia,
+                       r.quantidade_familias, r.data_cadastro, a.localidade, a.tipo_evento, a.status AS acao_status,
+                       m.nome AS municipio_nome, m.uf, u.nome AS cadastrador_nome,
+                       ' . self::FAMILIAS_COUNT_SQL . ' AS familias_cadastradas
+                FROM residencias r
+                INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+                INNER JOIN municipios m ON m.id = r.municipio_id
+                INNER JOIN usuarios u ON u.id = r.cadastrado_por
+                WHERE ' . $where . '
+                ORDER BY r.data_cadastro DESC
+                LIMIT :limit OFFSET :offset';
+
+        $stmt = Database::connection()->prepare($sql);
+        $this->bindSearchParams($stmt, $params);
+        $stmt->bindValue(':limit', max(1, $limit), PDO::PARAM_INT);
+        $stmt->bindValue(':offset', max(0, $offset), PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countSearch(?int $cadastradoPor, array $filters): int
+    {
+        [$where, $params] = $this->buildSearchWhere($cadastradoPor, $filters);
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*)
+             FROM residencias r
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             INNER JOIN municipios m ON m.id = r.municipio_id
+             INNER JOIN usuarios u ON u.id = r.cadastrado_por
+             WHERE ' . $where
+        );
+        $this->bindSearchParams($stmt, $params);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function summary(?int $cadastradoPor, array $filters): array
+    {
+        [$where, $params] = $this->buildSearchWhere($cadastradoPor, $filters);
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*) AS total_residencias,
+                    COALESCE(SUM(' . self::FAMILIAS_COUNT_SQL . '), 0) AS total_familias,
+                    COALESCE(SUM(r.quantidade_familias), 0) AS total_capacidade,
+                    MAX(r.data_cadastro) AS ultima_atualizacao,
+                    SUM(CASE WHEN r.condicao_residencia = "perda_total" THEN 1 ELSE 0 END) AS perda_total,
+                    SUM(CASE WHEN r.condicao_residencia = "perda_parcial" THEN 1 ELSE 0 END) AS perda_parcial,
+                    SUM(CASE WHEN r.condicao_residencia = "nao_atingida" THEN 1 ELSE 0 END) AS nao_atingida
+             FROM residencias r
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             INNER JOIN municipios m ON m.id = r.municipio_id
+             INNER JOIN usuarios u ON u.id = r.cadastrado_por
+             WHERE ' . $where
+        );
+        $this->bindSearchParams($stmt, $params);
+        $stmt->execute();
+
+        $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($summary) ? $summary : [];
     }
 
     public function find(int $id): ?array
@@ -155,5 +227,71 @@ final class ResidenciaRepository
         return (int) Database::connection()
             ->query('SELECT COUNT(*) FROM residencias WHERE deleted_at IS NULL')
             ->fetchColumn();
+    }
+
+    private function buildSearchWhere(?int $cadastradoPor, array $filters): array
+    {
+        $where = ['r.deleted_at IS NULL'];
+        $params = [];
+
+        if ($cadastradoPor !== null) {
+            $where[] = 'r.cadastrado_por = :cadastrado_por';
+            $params['cadastrado_por'] = $cadastradoPor;
+        }
+
+        if (($filters['q'] ?? '') !== '') {
+            $where[] = '(r.protocolo LIKE :q_protocolo
+                OR r.bairro_comunidade LIKE :q_bairro
+                OR r.endereco LIKE :q_endereco
+                OR a.localidade LIKE :q_localidade
+                OR a.tipo_evento LIKE :q_evento
+                OR m.nome LIKE :q_municipio
+                OR u.nome LIKE :q_cadastrador)';
+            $query = '%' . $filters['q'] . '%';
+            $params['q_protocolo'] = $query;
+            $params['q_bairro'] = $query;
+            $params['q_endereco'] = $query;
+            $params['q_localidade'] = $query;
+            $params['q_evento'] = $query;
+            $params['q_municipio'] = $query;
+            $params['q_cadastrador'] = $query;
+        }
+
+        if (($filters['imovel'] ?? '') !== '') {
+            $where[] = 'r.imovel = :imovel';
+            $params['imovel'] = $filters['imovel'];
+        }
+
+        if (($filters['condicao'] ?? '') !== '') {
+            $where[] = 'r.condicao_residencia = :condicao';
+            $params['condicao'] = $filters['condicao'];
+        }
+
+        if (($filters['familias'] ?? '') === 'completas') {
+            $where[] = self::FAMILIAS_COUNT_SQL . ' >= r.quantidade_familias';
+        } elseif (($filters['familias'] ?? '') === 'pendentes') {
+            $where[] = self::FAMILIAS_COUNT_SQL . ' < r.quantidade_familias';
+        } elseif (($filters['familias'] ?? '') === 'sem_familias') {
+            $where[] = self::FAMILIAS_COUNT_SQL . ' = 0';
+        }
+
+        if (($filters['data_inicio'] ?? '') !== '') {
+            $where[] = 'r.data_cadastro >= :data_inicio';
+            $params['data_inicio'] = $filters['data_inicio'] . ' 00:00:00';
+        }
+
+        if (($filters['data_fim'] ?? '') !== '') {
+            $where[] = 'r.data_cadastro <= :data_fim';
+            $params['data_fim'] = $filters['data_fim'] . ' 23:59:59';
+        }
+
+        return [implode(' AND ', $where), $params];
+    }
+
+    private function bindSearchParams(\PDOStatement $stmt, array $params): void
+    {
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
     }
 }

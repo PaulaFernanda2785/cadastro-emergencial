@@ -23,6 +23,7 @@ final class ResidenciaController extends Controller
     private const IMOVEL_OPTIONS = ['proprio', 'alugado', 'cedido'];
     private const CONDICAO_RESIDENCIA_OPTIONS = ['perda_total', 'perda_parcial', 'nao_atingida'];
     private const MAX_FOTOS_RESIDENCIA_EXTRAS = 3;
+    private const INDEX_PER_PAGE = 10;
 
     public function __construct(
         private readonly ResidenciaRepository $residencias = new ResidenciaRepository(),
@@ -34,9 +35,28 @@ final class ResidenciaController extends Controller
 
     public function index(): void
     {
+        $filters = $this->indexFilters();
+        $ownedUserId = $this->ownedRecordsUserId();
+        $total = $this->residencias->countSearch($ownedUserId, $filters);
+        $totalPages = max(1, (int) ceil($total / self::INDEX_PER_PAGE));
+        $page = min($this->requestedPage(), $totalPages);
+
         $this->view('cadastro.residencias.index', [
             'title' => 'Cadastros de residencias',
-            'residencias' => $this->residencias->all($this->ownedRecordsUserId()),
+            'residencias' => $this->residencias->search(
+                $ownedUserId,
+                $filters,
+                self::INDEX_PER_PAGE,
+                ($page - 1) * self::INDEX_PER_PAGE
+            ),
+            'filters' => $filters,
+            'summary' => $this->residencias->summary($ownedUserId, $filters),
+            'pagination' => [
+                'page' => $page,
+                'per_page' => self::INDEX_PER_PAGE,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
         ]);
     }
 
@@ -413,6 +433,57 @@ final class ResidenciaController extends Controller
             'longitude' => trim((string) ($_POST['longitude'] ?? '')),
             'quantidade_familias' => trim((string) ($_POST['quantidade_familias'] ?? '1')),
         ];
+    }
+
+    private function indexFilters(): array
+    {
+        $imovel = trim((string) ($_GET['imovel'] ?? ''));
+        $condicao = trim((string) ($_GET['condicao'] ?? ''));
+        $familias = trim((string) ($_GET['familias'] ?? ''));
+
+        if (!in_array($imovel, self::IMOVEL_OPTIONS, true)) {
+            $imovel = '';
+        }
+
+        if (!in_array($condicao, self::CONDICAO_RESIDENCIA_OPTIONS, true)) {
+            $condicao = '';
+        }
+
+        if (!in_array($familias, ['completas', 'pendentes', 'sem_familias'], true)) {
+            $familias = '';
+        }
+
+        return [
+            'q' => mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 120),
+            'imovel' => $imovel,
+            'condicao' => $condicao,
+            'familias' => $familias,
+            'data_inicio' => $this->validDateFilter($_GET['data_inicio'] ?? null),
+            'data_fim' => $this->validDateFilter($_GET['data_fim'] ?? null),
+        ];
+    }
+
+    private function requestedPage(): int
+    {
+        $page = filter_var($_GET['pagina'] ?? 1, FILTER_VALIDATE_INT);
+
+        return is_int($page) && $page > 0 ? $page : 1;
+    }
+
+    private function validDateFilter(mixed $value): string
+    {
+        $date = trim((string) $value);
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return '';
+        }
+
+        $parsed = \DateTimeImmutable::createFromFormat('Y-m-d', $date);
+        $errors = \DateTimeImmutable::getLastErrors();
+
+        return $parsed && ($errors === false || ((int) $errors['warning_count'] === 0 && (int) $errors['error_count'] === 0))
+            ? $date
+            : '';
     }
 
     private function validator(array $data): Validator

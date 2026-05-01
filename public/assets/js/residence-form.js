@@ -1669,9 +1669,11 @@
             var maxFiles = parseInt(wrapper.dataset.maxFiles || '3', 10);
             var existingFiles = parseInt(wrapper.dataset.existingFiles || '0', 10);
             var files = [];
+            var fileKeys = [];
             var previewUrls = [];
             var syncing = false;
             var processingPromise = null;
+            var processingBatch = 0;
 
             maxFiles = Number.isFinite(maxFiles) && maxFiles > 0 ? maxFiles : 3;
             existingFiles = Number.isFinite(existingFiles) && existingFiles > 0 ? existingFiles : 0;
@@ -1688,6 +1690,7 @@
 
             function markPending() {
                 form.dataset.extraPhotosProcessed = '';
+                processingBatch += 1;
             }
 
             function selectedTotal() {
@@ -1757,6 +1760,14 @@
                 document.body.classList.add('is-photo-preview-open');
             }
 
+            function extraFileKey(file) {
+                return [
+                    file.name || '',
+                    file.size || 0,
+                    file.lastModified || 0
+                ].join(':');
+            }
+
             function createExtraItem(file, index) {
                 var item = document.createElement('div');
                 var image = document.createElement('img');
@@ -1787,6 +1798,7 @@
 
                 removeButton.addEventListener('click', function () {
                     files.splice(index, 1);
+                    fileKeys.splice(index, 1);
                     markPending();
                     renderExtraPhotos();
                 });
@@ -1834,24 +1846,29 @@
             function addExtraFiles(fileList) {
                 var reachedLimit = false;
                 var added = false;
+                var batch = [];
+                var batchKeys = [];
 
                 Array.prototype.slice.call(fileList || []).forEach(function (file) {
+                    var key;
+
                     if (!file || !/^image\//.test(file.type)) {
                         return;
                     }
 
-                    if (!canAddMore()) {
+                    if (existingFiles + files.length + batch.length >= maxFiles) {
                         reachedLimit = true;
                         return;
                     }
 
-                    if (files.some(function (item) {
-                        return item.name === file.name && item.size === file.size && item.lastModified === file.lastModified;
-                    })) {
+                    key = extraFileKey(file);
+
+                    if (fileKeys.indexOf(key) !== -1 || batchKeys.indexOf(key) !== -1) {
                         return;
                     }
 
-                    files.push(file);
+                    batch.push(file);
+                    batchKeys.push(key);
                     added = true;
                 });
 
@@ -1859,8 +1876,13 @@
                     setExtraStatus('Limite maximo de 3 fotos extras atingido.');
                 }
 
-                if (added || reachedLimit) {
+                if (added) {
                     markPending();
+                    processAndAppendExtraFiles(batch, batchKeys);
+                    return;
+                }
+
+                if (reachedLimit) {
                     renderExtraPhotos();
                 }
             }
@@ -1882,6 +1904,69 @@
                         longitude: coords.longitude.toFixed(7)
                     };
                 });
+            }
+
+            function processAndAppendExtraFiles(batch, batchKeys) {
+                var version = processingBatch;
+
+                if (batch.length === 0) {
+                    return Promise.resolve();
+                }
+
+                setExtraStatus('Carimbando fotos extras para a previa...');
+
+                processingPromise = Promise.all([loadLogoImage(), extraMetadataOverrides()]).then(function (items) {
+                    var logo = items[0];
+                    var metadataOverrides = items[1];
+
+                    return Promise.all(batch.map(function (file) {
+                        return loadImage(file).then(function (image) {
+                            return drawWatermark(image, file, logo, metadataOverrides);
+                        });
+                    }));
+                }).then(function (processedFiles) {
+                    if (version !== processingBatch) {
+                        return;
+                    }
+
+                    processedFiles.forEach(function (file, index) {
+                        if (!canAddMore()) {
+                            return;
+                        }
+
+                        files.push(file);
+                        fileKeys.push(batchKeys[index]);
+                    });
+
+                    form.dataset.extraPhotosProcessed = 'true';
+                    renderExtraPhotos();
+                    setExtraStatus(!canAddMore()
+                        ? 'Fotos extras carimbadas. Limite maximo de 3 fotos extras atingido.'
+                        : 'Fotos extras carimbadas e prontas para envio.');
+                }).catch(function () {
+                    if (version !== processingBatch) {
+                        return;
+                    }
+
+                    batch.forEach(function (file, index) {
+                        if (!canAddMore()) {
+                            return;
+                        }
+
+                        files.push(file);
+                        fileKeys.push(batchKeys[index]);
+                    });
+
+                    form.dataset.extraPhotosProcessed = '';
+                    renderExtraPhotos();
+                    setExtraStatus('Nao foi possivel carimbar a previa das fotos extras. Tente adicionar as imagens novamente.');
+                }).finally(function () {
+                    if (version === processingBatch) {
+                        processingPromise = null;
+                    }
+                });
+
+                return processingPromise;
             }
 
             function processExtraPhotos() {
@@ -1941,8 +2026,9 @@
                 wrapper.classList.toggle('is-limit-reached', enabled && !canAdd);
                 extraDropzone.setAttribute('aria-disabled', enabled && !canAdd ? 'true' : 'false');
 
-                if (!enabled && files.length > 0) {
+                if (!enabled && (files.length > 0 || processingPromise !== null)) {
                     files = [];
+                    fileKeys = [];
                     markPending();
                     renderExtraPhotos();
                 }
@@ -2012,6 +2098,7 @@
 
             form.addEventListener('reset', function () {
                 files = [];
+                fileKeys = [];
                 markPending();
                 window.setTimeout(renderExtraPhotos, 0);
             });
@@ -2029,7 +2116,7 @@
                     return files.length > 0;
                 },
                 hasPendingFiles: function () {
-                    return files.length > 0 && form.dataset.extraPhotosProcessed !== 'true';
+                    return processingPromise !== null || files.length > 0 && form.dataset.extraPhotosProcessed !== 'true';
                 },
                 processAll: processExtraPhotos,
                 appendProcessedFiles: replaceFormDataFiles
