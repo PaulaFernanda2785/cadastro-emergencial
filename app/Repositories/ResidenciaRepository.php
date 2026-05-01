@@ -11,7 +11,7 @@ final class ResidenciaRepository
 {
     public function all(?int $cadastradoPor = null): array
     {
-        $sql = 'SELECT r.id, r.protocolo, r.bairro_comunidade, r.endereco, r.quantidade_familias,
+        $sql = 'SELECT r.id, r.protocolo, r.bairro_comunidade, r.endereco, r.imovel, r.condicao_residencia, r.quantidade_familias,
                        r.data_cadastro, a.localidade, a.tipo_evento, m.nome AS municipio_nome, m.uf,
                        u.nome AS cadastrador_nome,
                        (
@@ -66,10 +66,10 @@ final class ResidenciaRepository
     {
         $stmt = Database::connection()->prepare(
             'INSERT INTO residencias
-                (acao_id, protocolo, municipio_id, bairro_comunidade, endereco, complemento,
+                (acao_id, protocolo, municipio_id, bairro_comunidade, endereco, complemento, imovel, condicao_residencia,
                  latitude, longitude, foto_georreferenciada, quantidade_familias, cadastrado_por)
              VALUES
-                (:acao_id, :protocolo, :municipio_id, :bairro_comunidade, :endereco, :complemento,
+                (:acao_id, :protocolo, :municipio_id, :bairro_comunidade, :endereco, :complemento, :imovel, :condicao_residencia,
                  :latitude, :longitude, :foto_georreferenciada, :quantidade_familias, :cadastrado_por)'
         );
         $stmt->bindValue(':acao_id', (int) $data['acao_id'], PDO::PARAM_INT);
@@ -78,6 +78,8 @@ final class ResidenciaRepository
         $stmt->bindValue(':bairro_comunidade', $data['bairro_comunidade']);
         $stmt->bindValue(':endereco', $data['endereco']);
         $stmt->bindValue(':complemento', $data['complemento'] !== '' ? $data['complemento'] : null);
+        $stmt->bindValue(':imovel', $data['imovel'] !== '' ? $data['imovel'] : null);
+        $stmt->bindValue(':condicao_residencia', $data['condicao_residencia'] !== '' ? $data['condicao_residencia'] : null);
         $stmt->bindValue(':latitude', $data['latitude'] !== '' ? $data['latitude'] : null);
         $stmt->bindValue(':longitude', $data['longitude'] !== '' ? $data['longitude'] : null);
         $stmt->bindValue(':foto_georreferenciada', $data['foto_georreferenciada'] ?? null);
@@ -95,6 +97,8 @@ final class ResidenciaRepository
              SET bairro_comunidade = :bairro_comunidade,
                  endereco = :endereco,
                  complemento = :complemento,
+                 imovel = :imovel,
+                 condicao_residencia = :condicao_residencia,
                  latitude = :latitude,
                  longitude = :longitude,
                  foto_georreferenciada = :foto_georreferenciada,
@@ -106,6 +110,8 @@ final class ResidenciaRepository
         $stmt->bindValue(':bairro_comunidade', $data['bairro_comunidade']);
         $stmt->bindValue(':endereco', $data['endereco']);
         $stmt->bindValue(':complemento', $data['complemento'] !== '' ? $data['complemento'] : null);
+        $stmt->bindValue(':imovel', $data['imovel'] !== '' ? $data['imovel'] : null);
+        $stmt->bindValue(':condicao_residencia', $data['condicao_residencia'] !== '' ? $data['condicao_residencia'] : null);
         $stmt->bindValue(':latitude', $data['latitude'] !== '' ? $data['latitude'] : null);
         $stmt->bindValue(':longitude', $data['longitude'] !== '' ? $data['longitude'] : null);
         $stmt->bindValue(':foto_georreferenciada', $data['foto_georreferenciada'] ?? null);

@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS residencias (
     bairro_comunidade VARCHAR(180) NOT NULL,
     endereco VARCHAR(255) NOT NULL,
     complemento VARCHAR(180) NULL,
+    imovel ENUM('proprio', 'alugado', 'cedido') NULL,
+    condicao_residencia ENUM('perda_total', 'perda_parcial', 'nao_atingida') NULL,
     latitude DECIMAL(10,7) NULL,
     longitude DECIMAL(10,7) NULL,
     foto_georreferenciada VARCHAR(255) NULL,

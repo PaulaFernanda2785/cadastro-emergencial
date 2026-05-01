@@ -14,6 +14,8 @@
                 <th>Municipio</th>
                 <th>Acao</th>
                 <th>Bairro/comunidade</th>
+                <th>Imovel</th>
+                <th>Condicao</th>
                 <th>Familias</th>
                 <th>Cadastrador</th>
                 <th class="actions-column">Acoes</th>
@@ -26,6 +28,8 @@
                     <td><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?></td>
                     <td><?= h($residencia['localidade']) ?> - <?= h($residencia['tipo_evento']) ?></td>
                     <td><?= h($residencia['bairro_comunidade']) ?></td>
+                    <td><?= h(residencia_imovel_label($residencia['imovel'] ?? null)) ?></td>
+                    <td><?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></td>
                     <td><?= h($residencia['familias_cadastradas']) ?> / <?= h($residencia['quantidade_familias']) ?></td>
                     <td><?= h($residencia['cadastrador_nome']) ?></td>
                     <td class="actions-column"><a href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Abrir</a></td>
@@ -34,7 +38,7 @@
 
             <?php if ($residencias === []): ?>
                 <tr>
-                    <td colspan="7" class="empty-state">Nenhuma residencia cadastrada.</td>
+                    <td colspan="9" class="empty-state">Nenhuma residencia cadastrada.</td>
                 </tr>
             <?php endif; ?>
         </tbody>

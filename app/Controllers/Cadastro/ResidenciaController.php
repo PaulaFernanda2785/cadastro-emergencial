@@ -20,6 +20,9 @@ use RuntimeException;
 
 final class ResidenciaController extends Controller
 {
+    private const IMOVEL_OPTIONS = ['proprio', 'alugado', 'cedido'];
+    private const CONDICAO_RESIDENCIA_OPTIONS = ['perda_total', 'perda_parcial', 'nao_atingida'];
+
     public function __construct(
         private readonly ResidenciaRepository $residencias = new ResidenciaRepository(),
         private readonly FamiliaRepository $familias = new FamiliaRepository(),
@@ -174,6 +177,8 @@ final class ResidenciaController extends Controller
             'bairro_comunidade' => '',
             'endereco' => '',
             'complemento' => '',
+            'imovel' => '',
+            'condicao_residencia' => '',
             'latitude' => '',
             'longitude' => '',
             'quantidade_familias' => '1',
@@ -362,6 +367,8 @@ final class ResidenciaController extends Controller
             'bairro_comunidade' => trim((string) ($_POST['bairro_comunidade'] ?? '')),
             'endereco' => trim((string) ($_POST['endereco'] ?? '')),
             'complemento' => trim((string) ($_POST['complemento'] ?? '')),
+            'imovel' => trim((string) ($_POST['imovel'] ?? '')),
+            'condicao_residencia' => trim((string) ($_POST['condicao_residencia'] ?? '')),
             'latitude' => trim((string) ($_POST['latitude'] ?? '')),
             'longitude' => trim((string) ($_POST['longitude'] ?? '')),
             'quantidade_familias' => trim((string) ($_POST['quantidade_familias'] ?? '1')),
@@ -376,6 +383,10 @@ final class ResidenciaController extends Controller
             ->required('endereco', $data['endereco'], 'Endereco')
             ->max('endereco', $data['endereco'], 255, 'Endereco')
             ->max('complemento', $data['complemento'], 180, 'Complemento')
+            ->required('imovel', $data['imovel'], 'Imovel')
+            ->in('imovel', $data['imovel'], self::IMOVEL_OPTIONS, 'Imovel')
+            ->required('condicao_residencia', $data['condicao_residencia'], 'Condicao da residencia')
+            ->in('condicao_residencia', $data['condicao_residencia'], self::CONDICAO_RESIDENCIA_OPTIONS, 'Condicao da residencia')
             ->integer('quantidade_familias', $data['quantidade_familias'], 'Quantidade de familias')
             ->minInt('quantidade_familias', $data['quantidade_familias'], 1, 'Quantidade de familias')
             ->decimalRange('latitude', $data['latitude'], -90, 90, 'Latitude')

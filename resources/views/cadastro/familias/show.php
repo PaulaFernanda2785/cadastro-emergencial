@@ -50,6 +50,8 @@
         <h2>Residencia</h2>
         <p><?= h($residencia['endereco']) ?></p>
         <p><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?></p>
+        <p>Imovel: <?= h(residencia_imovel_label($residencia['imovel'] ?? null)) ?></p>
+        <p>Condicao: <?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></p>
     </article>
     <article class="detail-panel">
         <h2>Acao</h2>

@@ -1214,6 +1214,8 @@
                 evento: form.dataset.actionEvent || '',
                 bairro_comunidade: fieldValue('[data-community-input]'),
                 endereco: fieldValue('[data-address]'),
+                imovel: fieldValue('input[name="imovel"]:checked'),
+                condicao_residencia: fieldValue('input[name="condicao_residencia"]:checked'),
                 latitude: fieldValue('[data-latitude]'),
                 longitude: fieldValue('[data-longitude]'),
                 data_hora_iso: now.toISOString(),
@@ -1229,6 +1231,7 @@
                 'Municipio: ' + [form.dataset.actionMunicipality, form.dataset.actionState].filter(Boolean).join(' / '),
                 'Localidade: ' + (metadata.bairro_comunidade || metadata.localidade_acao || '-'),
                 'Endereco: ' + (metadata.endereco || '-'),
+                'Imovel: ' + (metadata.imovel || '-') + ' | Condicao: ' + (metadata.condicao_residencia || '-'),
                 'Lat: ' + (metadata.latitude || '-') + ' | Long: ' + (metadata.longitude || '-'),
                 'Data/hora: ' + metadata.data_hora_br
             ];

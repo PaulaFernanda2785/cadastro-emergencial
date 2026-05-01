@@ -17,6 +17,7 @@ final class EntregaAjudaRepository
                     f.telefone, f.quantidade_integrantes,
                     t.nome AS tipo_ajuda_nome, t.unidade_medida,
                     r.id AS residencia_id, r.protocolo, r.bairro_comunidade, r.endereco, r.complemento,
+                    r.imovel, r.condicao_residencia,
                     a.localidade, a.tipo_evento, a.data_evento,
                     m.nome AS municipio_nome, m.uf,
                     u.nome AS entregue_por_nome, u.cpf AS entregue_por_cpf

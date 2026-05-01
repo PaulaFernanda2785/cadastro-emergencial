@@ -166,6 +166,70 @@ if (($filters['data_inicio'] ?? '') !== '' || ($filters['data_fim'] ?? '') !== '
 
         <article class="table-panel report-section">
             <div class="table-heading">
+                <h2>Por imovel</h2>
+                <span><?= h(count($byHousingType)) ?> tipo(s)</span>
+            </div>
+            <table class="data-table compact-table">
+                <thead>
+                    <tr>
+                        <th>Imovel</th>
+                        <th>Residencias</th>
+                        <th>Familias</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($byHousingType as $item): ?>
+                        <tr>
+                            <td><?= h(residencia_imovel_label($item['imovel'] ?? null)) ?></td>
+                            <td><?= h($item['residencias']) ?></td>
+                            <td><?= h($item['familias']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                    <?php if ($byHousingType === []): ?>
+                        <tr>
+                            <td colspan="3" class="empty-state">Sem dados.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </article>
+    </section>
+
+    <section class="detail-grid report-split">
+        <article class="table-panel report-section">
+            <div class="table-heading">
+                <h2>Por condicao</h2>
+                <span><?= h(count($byResidenceCondition)) ?> situacao(oes)</span>
+            </div>
+            <table class="data-table compact-table">
+                <thead>
+                    <tr>
+                        <th>Condicao</th>
+                        <th>Residencias</th>
+                        <th>Familias</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($byResidenceCondition as $item): ?>
+                        <tr>
+                            <td><?= h(residencia_condicao_label($item['condicao_residencia'] ?? null)) ?></td>
+                            <td><?= h($item['residencias']) ?></td>
+                            <td><?= h($item['familias']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                    <?php if ($byResidenceCondition === []): ?>
+                        <tr>
+                            <td colspan="3" class="empty-state">Sem dados.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </article>
+
+        <article class="table-panel report-section">
+            <div class="table-heading">
                 <h2>Entregas por tipo</h2>
                 <span><?= h(count($deliveriesByType)) ?> tipo(s)</span>
             </div>

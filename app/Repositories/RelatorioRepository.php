@@ -101,6 +101,50 @@ final class RelatorioRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function byHousingType(array $filters): array
+    {
+        $where = $this->cadastroWhere($filters);
+        $params = $this->cadastroParams($filters);
+        $stmt = Database::connection()->prepare(
+            "SELECT r.imovel,
+                    COUNT(DISTINCT r.id) AS residencias,
+                    COUNT(DISTINCT f.id) AS familias,
+                    COALESCE(SUM(f.quantidade_integrantes), 0) AS pessoas
+             FROM residencias r
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             LEFT JOIN familias f ON f.residencia_id = r.id AND f.deleted_at IS NULL
+             {$where}
+             GROUP BY r.imovel
+             ORDER BY r.imovel"
+        );
+        $this->bind($stmt, $params);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function byResidenceCondition(array $filters): array
+    {
+        $where = $this->cadastroWhere($filters);
+        $params = $this->cadastroParams($filters);
+        $stmt = Database::connection()->prepare(
+            "SELECT r.condicao_residencia,
+                    COUNT(DISTINCT r.id) AS residencias,
+                    COUNT(DISTINCT f.id) AS familias,
+                    COALESCE(SUM(f.quantidade_integrantes), 0) AS pessoas
+             FROM residencias r
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             LEFT JOIN familias f ON f.residencia_id = r.id AND f.deleted_at IS NULL
+             {$where}
+             GROUP BY r.condicao_residencia
+             ORDER BY r.condicao_residencia"
+        );
+        $this->bind($stmt, $params);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function deliveriesByType(array $filters): array
     {
         $where = $this->entregaWhere($filters);
@@ -159,6 +203,7 @@ final class RelatorioRepository
         $params = $this->cadastroParams($filters);
         $stmt = Database::connection()->prepare(
             "SELECT r.protocolo, m.nome AS municipio, m.uf, r.bairro_comunidade, r.endereco,
+                    r.imovel, r.condicao_residencia,
                     a.localidade, a.tipo_evento, r.data_cadastro,
                     f.responsavel_nome, f.responsavel_cpf, f.telefone, f.quantidade_integrantes,
                     CASE

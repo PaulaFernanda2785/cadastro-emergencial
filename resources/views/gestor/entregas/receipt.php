@@ -68,6 +68,14 @@
             <dt>Bairro</dt>
             <dd><?= h($entrega['bairro_comunidade']) ?></dd>
         </div>
+        <div>
+            <dt>Imovel</dt>
+            <dd><?= h(residencia_imovel_label($entrega['imovel'] ?? null)) ?></dd>
+        </div>
+        <div>
+            <dt>Condicao</dt>
+            <dd><?= h(residencia_condicao_label($entrega['condicao_residencia'] ?? null)) ?></dd>
+        </div>
     </dl>
 
     <div class="receipt-separator"></div>

@@ -105,3 +105,37 @@ function flash(string $key, mixed $default = null): mixed
 {
     return Session::pullFlash($key, $default);
 }
+
+function residencia_imovel_options(): array
+{
+    return [
+        'proprio' => 'Proprio',
+        'alugado' => 'Alugado',
+        'cedido' => 'Cedido',
+    ];
+}
+
+function residencia_condicao_options(): array
+{
+    return [
+        'perda_total' => 'Perda total',
+        'perda_parcial' => 'Perda parcial',
+        'nao_atingida' => 'Nao atingida',
+    ];
+}
+
+function residencia_imovel_label(mixed $value): string
+{
+    $options = residencia_imovel_options();
+    $key = (string) $value;
+
+    return $options[$key] ?? '-';
+}
+
+function residencia_condicao_label(mixed $value): string
+{
+    $options = residencia_condicao_options();
+    $key = (string) $value;
+
+    return $options[$key] ?? '-';
+}

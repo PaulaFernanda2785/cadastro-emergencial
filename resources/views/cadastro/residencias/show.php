@@ -62,6 +62,14 @@ $podeCadastrarFamilia = $familiasCadastradas < max(1, $familiasPrevistas);
                 <dt>Familias</dt>
                 <dd><?= h($familiasCadastradas) ?> de <?= h($familiasPrevistas) ?></dd>
             </div>
+            <div>
+                <dt>Imovel</dt>
+                <dd><?= h(residencia_imovel_label($residencia['imovel'] ?? null)) ?></dd>
+            </div>
+            <div>
+                <dt>Condicao</dt>
+                <dd><?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></dd>
+            </div>
         </dl>
     </article>
 
@@ -96,6 +104,11 @@ $podeCadastrarFamilia = $familiasCadastradas < max(1, $familiasPrevistas);
         <h2>Registro</h2>
         <p>Cadastro realizado por <?= h($residencia['cadastrador_nome']) ?>.</p>
         <p><?= h($familiasCadastradas) ?> familia(s) vinculada(s).</p>
+    </article>
+    <article class="detail-panel">
+        <h2>Situacao do imovel</h2>
+        <p>Imovel: <?= h(residencia_imovel_label($residencia['imovel'] ?? null)) ?></p>
+        <p>Condicao: <?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></p>
     </article>
 </section>
 
