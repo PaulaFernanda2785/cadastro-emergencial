@@ -14,6 +14,15 @@ DirectoryIndex root-front.php
     </IfModule>
 </FilesMatch>
 
+<IfModule mod_headers.c>
+    Header unset Permissions-Policy
+    Header always unset Permissions-Policy
+    Header set Permissions-Policy "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()"
+    Header unset Feature-Policy
+    Header always unset Feature-Policy
+    Header set Feature-Policy "geolocation 'self'; camera 'self'; microphone 'none'; payment 'none'; usb 'none'"
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 

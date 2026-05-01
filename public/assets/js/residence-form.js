@@ -335,22 +335,57 @@
 
         function requestCurrentPosition() {
             return new Promise(function (resolve) {
+                var resolved = false;
+
+                function finish(coords) {
+                    if (resolved) {
+                        return;
+                    }
+
+                    resolved = true;
+                    resolve(coords);
+                }
+
+                function normalizedPosition(position) {
+                    if (!position || !position.coords) {
+                        return null;
+                    }
+
+                    return {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                }
+
+                function readPosition(options, onError) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        finish(normalizedPosition(position));
+                    }, onError, options);
+                }
+
                 if (!('geolocation' in navigator)) {
-                    resolve(null);
+                    finish(null);
                     return;
                 }
 
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    resolve({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
-                    });
-                }, function () {
-                    resolve(null);
-                }, {
+                readPosition({
                     enableHighAccuracy: true,
                     timeout: 15000,
                     maximumAge: 0
+                }, function (error) {
+                    if (error && error.code === 1) {
+                        finish(null);
+                        return;
+                    }
+
+                    setStatus('Nao foi possivel obter alta precisao. Tentando localizacao aproximada...');
+                    readPosition({
+                        enableHighAccuracy: false,
+                        timeout: 30000,
+                        maximumAge: 300000
+                    }, function () {
+                        finish(null);
+                    });
                 });
             });
         }
@@ -1641,7 +1676,7 @@
             }
 
             if (!file || !/^image\//.test(file.type)) {
-                return Promise.resolve();
+                return Promise.resolve(true);
             }
 
             form.dataset.photoProcessing = 'true';
@@ -1652,21 +1687,54 @@
             }).then(function (processedFile) {
                 if (!setInputFile(processedFile)) {
                     form.dataset.photoProcessing = '';
-                    setStatus('Nao foi possivel substituir a foto automaticamente. O envio seguira com o arquivo original.');
-                    return;
+                    setStatus('Nao foi possivel substituir a foto automaticamente. Tente anexar a imagem novamente.');
+                    return false;
                 }
 
                 form.dataset.photoProcessing = '';
                 form.dataset.photoProcessed = 'true';
                 setStatus('Foto georreferenciada pronta. Confira na previa ampliada antes de salvar.');
+                return true;
             }).catch(function () {
                 form.dataset.photoProcessing = '';
-                setStatus('Nao foi possivel gravar os dados na foto. O envio seguira com o arquivo original.');
+                setStatus('Nao foi possivel gravar os dados na foto. Tente anexar a imagem novamente.');
+                return false;
             }).finally(function () {
                 photoProcessingPromise = null;
             });
 
             return photoProcessingPromise;
+        }
+
+        function hasMainPhotoCoordinates() {
+            return validCoordinates(decimalValue(fieldValue('[data-latitude]')), decimalValue(fieldValue('[data-longitude]')));
+        }
+
+        function processMainPhotoForSubmit(file) {
+            var ensureLocation;
+
+            if (!file || !/^image\//.test(file.type)) {
+                return Promise.resolve(true);
+            }
+
+            ensureLocation = hasMainPhotoCoordinates() ? Promise.resolve(true) : applyPhotoGeolocation(file);
+
+            return ensureLocation.then(function (foundLocation) {
+                if (foundLocation !== true && !hasMainPhotoCoordinates()) {
+                    form.dataset.photoProcessed = '';
+                    setStatus('Nao foi possivel obter localizacao para esta foto. Capture a localizacao atual antes de salvar.');
+                    return false;
+                }
+
+                return processPhoto().then(function (processed) {
+                    if (processed !== true) {
+                        form.dataset.photoProcessed = '';
+                        return false;
+                    }
+
+                    return true;
+                });
+            });
         }
 
         function submitWithFetch() {
@@ -2222,8 +2290,11 @@
             form.dataset.photoLocationSource = 'pending';
             setStatus('Foto selecionada. Verificando metadados e coordenadas da imagem...');
             applyPhotoGeolocation(file).then(function (foundPhotoGps) {
-                return foundPhotoGps;
-            }).then(function () {
+                if (foundPhotoGps !== true && !hasMainPhotoCoordinates()) {
+                    form.dataset.photoProcessed = '';
+                    return false;
+                }
+
                 return processPhoto();
             });
         });
@@ -2304,10 +2375,25 @@
             event.preventDefault();
             event.stopImmediatePropagation();
 
-            (shouldProcessMain ? processPhoto() : Promise.resolve()).then(function () {
-                return shouldProcessExtra ? extraResidencePhotos.processAll() : Promise.resolve();
-            }).finally(function () {
-                form.dataset.photoProcessed = 'true';
+            setSubmitBusy();
+
+            (shouldProcessMain ? processMainPhotoForSubmit(mainFile) : Promise.resolve(true)).then(function (mainProcessed) {
+                if (mainProcessed !== true) {
+                    clearSubmitBusy();
+                    return false;
+                }
+
+                return (shouldProcessExtra ? extraResidencePhotos.processAll() : Promise.resolve()).then(function () {
+                    return true;
+                });
+            }).then(function (readyToSubmit) {
+                if (readyToSubmit !== true) {
+                    return;
+                }
+
+                if (shouldProcessMain) {
+                    form.dataset.photoProcessed = 'true';
+                }
 
                 if (hasExtraFiles && navigator.onLine) {
                     submitWithFetch();
@@ -2319,6 +2405,9 @@
                 } else {
                     form.submit();
                 }
+            }).catch(function () {
+                clearSubmitBusy();
+                setStatus('Nao foi possivel preparar a foto para envio. Tente novamente.');
             });
         }, true);
     }

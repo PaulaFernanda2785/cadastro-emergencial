@@ -52,6 +52,34 @@ final class EntregaAjudaController extends Controller
         ], 'receipt');
     }
 
+    public function validateReceiptQuery(): void
+    {
+        $code = $this->extractReceiptCode(trim((string) ($_GET['codigo'] ?? '')));
+
+        if ($code === '') {
+            Session::flash('warning', 'Informe ou leia o codigo do comprovante de cadastro familiar.');
+            $this->redirect('/gestor/entregas');
+        }
+
+        $this->validateReceipt($code);
+    }
+
+    public function validateReceipt(string $codigo): void
+    {
+        $code = $this->extractReceiptCode($codigo);
+        $familia = $this->familias->findByReceiptCode($code);
+
+        if ($familia === null) {
+            Session::flash('error', 'Comprovante de cadastro familiar invalido ou nao localizado.');
+            $this->redirect('/gestor/entregas');
+        }
+
+        (new AuditLogService())->record('validou_comprovante_familia', 'familias', (int) $familia['id'], $code);
+        Session::flash('success', 'Cadastro familiar validado pelo QR. Confira os dados e registre a entrega.');
+
+        $this->redirect('/gestor/familias/' . (int) $familia['id'] . '/entregas/novo');
+    }
+
     public function store(string $familiaId): void
     {
         $familia = $this->findFamilia((int) $familiaId);
@@ -136,6 +164,25 @@ final class EntregaAjudaController extends Controller
     private function generateReceiptCode(): string
     {
         return 'ENT-' . date('Ymd-His') . '-' . strtoupper(bin2hex(random_bytes(3)));
+    }
+
+    private function extractReceiptCode(string $value): string
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            $path = parse_url($value, PHP_URL_PATH);
+
+            if (is_string($path) && preg_match('#/gestor/entregas/validar/([^/]+)$#', $path, $matches) === 1) {
+                return strtoupper(rawurldecode($matches[1]));
+            }
+        }
+
+        return strtoupper($value);
     }
 
     private function guardPost(string $scope, string $failureRedirect): void

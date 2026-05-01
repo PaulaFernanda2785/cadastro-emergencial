@@ -6,6 +6,30 @@
     </div>
 </section>
 
+<section class="delivery-qr-panel no-print" data-delivery-qr-scanner data-validate-base="<?= h(url('/gestor/entregas/validar')) ?>">
+    <div class="delivery-qr-heading">
+        <div>
+            <span class="eyebrow">Validacao por QR Code</span>
+            <h2>Ler comprovante de cadastro familiar</h2>
+        </div>
+        <div class="delivery-qr-actions">
+            <button type="button" class="primary-button" data-delivery-qr-start>Ler QR Code</button>
+            <button type="button" class="secondary-button" data-delivery-qr-stop hidden>Parar leitura</button>
+        </div>
+    </div>
+
+    <video class="delivery-qr-video" data-delivery-qr-video muted playsinline hidden></video>
+    <p class="delivery-qr-status" data-delivery-qr-status>Leia o QR Code impresso no comprovante ou informe o codigo manualmente.</p>
+
+    <form method="get" action="<?= h(url('/gestor/entregas/validar')) ?>" class="delivery-qr-manual-form">
+        <label class="field">
+            <span>Codigo do comprovante</span>
+            <input type="text" name="codigo" placeholder="FAM-000000-XXXXXXXXXX" maxlength="26" autocomplete="off">
+        </label>
+        <button type="submit" class="secondary-button">Validar codigo</button>
+    </form>
+</section>
+
 <section class="table-panel">
     <table class="data-table">
         <thead>

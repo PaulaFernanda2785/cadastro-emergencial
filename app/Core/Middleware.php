@@ -32,7 +32,7 @@ final class Middleware
             $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
             if ($method === 'GET') {
-                Session::put('intended_url', (string) ($_SERVER['REQUEST_URI'] ?? '/dashboard'));
+                Session::put('intended_url', self::intendedPath());
             }
 
             Session::flash('warning', 'Acesse sua conta para continuar.');
@@ -59,5 +59,21 @@ final class Middleware
             View::render('errors.403', ['title' => 'Acesso negado']);
             exit;
         }
+    }
+
+    private static function intendedPath(): string
+    {
+        $requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '/dashboard');
+        $path = parse_url($requestUri, PHP_URL_PATH) ?: '/dashboard';
+        $query = parse_url($requestUri, PHP_URL_QUERY);
+        $scriptDir = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
+
+        if ($scriptDir !== '/' && $scriptDir !== '\\' && $scriptDir !== '.' && str_starts_with($path, $scriptDir)) {
+            $path = substr($path, strlen($scriptDir)) ?: '/';
+        }
+
+        $path = '/' . ltrim($path, '/');
+
+        return $query ? $path . '?' . $query : $path;
     }
 }

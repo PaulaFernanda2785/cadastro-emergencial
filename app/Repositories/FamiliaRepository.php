@@ -62,8 +62,9 @@ final class FamiliaRepository
                     f.representante_nome, f.representante_cpf, f.representante_rg,
                     f.representante_orgao_expedidor, f.representante_data_nascimento,
                     f.representante_sexo, f.representante_telefone,
-                    r.protocolo, r.bairro_comunidade, r.endereco,
-                    a.localidade, a.tipo_evento, m.nome AS municipio_nome, m.uf
+                    f.criado_em,
+                    r.protocolo, r.bairro_comunidade, r.endereco, r.complemento, r.imovel, r.condicao_residencia,
+                    a.localidade, a.tipo_evento, a.data_evento, m.nome AS municipio_nome, m.uf
              FROM familias f
              INNER JOIN residencias r ON r.id = f.residencia_id
              INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
@@ -84,6 +85,21 @@ final class FamiliaRepository
         $familia = $this->find($id);
 
         if ($familia === null || (int) $familia['residencia_id'] !== $residenciaId) {
+            return null;
+        }
+
+        return $familia;
+    }
+
+    public function findByReceiptCode(string $code): ?array
+    {
+        if (preg_match('/^FAM-(\d{1,10})-[A-F0-9]{10}$/', strtoupper(trim($code)), $matches) !== 1) {
+            return null;
+        }
+
+        $familia = $this->find((int) $matches[1]);
+
+        if ($familia === null || !hash_equals(familia_comprovante_codigo($familia), strtoupper(trim($code)))) {
             return null;
         }
 

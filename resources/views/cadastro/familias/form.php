@@ -146,27 +146,30 @@ $optionSelected = static function (array $familia, string $field, string $value)
             <div class="form-grid three-columns">
                 <label class="field">
                     <span>Orgao expedidor</span>
-                    <input type="text" name="responsavel_orgao_expedidor" value="<?= h($familia['responsavel_orgao_expedidor'] ?? '') ?>" maxlength="30">
+                    <input type="text" name="responsavel_orgao_expedidor" value="<?= h($familia['responsavel_orgao_expedidor'] ?? '') ?>" maxlength="30" required>
                     <?php if (!empty($errors['responsavel_orgao_expedidor'])): ?>
                         <small class="field-error"><?= h($errors['responsavel_orgao_expedidor'][0]) ?></small>
                     <?php endif; ?>
                 </label>
                 <label class="field date-field">
                     <span>Data de nascimento</span>
-                    <input type="date" name="data_nascimento" value="<?= h($familia['data_nascimento'] ?? '') ?>">
+                    <input type="date" name="data_nascimento" value="<?= h($familia['data_nascimento'] ?? '') ?>" required>
                     <?php if (!empty($errors['data_nascimento'])): ?>
                         <small class="field-error"><?= h($errors['data_nascimento'][0]) ?></small>
                     <?php endif; ?>
                 </label>
                 <label class="field">
                     <span>Sexo</span>
-                    <select name="responsavel_sexo">
-                        <option value="">Nao informado</option>
+                    <select name="responsavel_sexo" required>
+                        <option value="">Selecione</option>
                         <option value="feminino" <?= $optionSelected($familia, 'responsavel_sexo', 'feminino') ?>>Feminino</option>
                         <option value="masculino" <?= $optionSelected($familia, 'responsavel_sexo', 'masculino') ?>>Masculino</option>
                         <option value="outro" <?= $optionSelected($familia, 'responsavel_sexo', 'outro') ?>>Outro</option>
                         <option value="nao_informado" <?= $optionSelected($familia, 'responsavel_sexo', 'nao_informado') ?>>Nao informado</option>
                     </select>
+                    <?php if (!empty($errors['responsavel_sexo'])): ?>
+                        <small class="field-error"><?= h($errors['responsavel_sexo'][0]) ?></small>
+                    <?php endif; ?>
                 </label>
             </div>
 
@@ -205,21 +208,27 @@ $optionSelected = static function (array $familia, string $field, string $value)
             <div class="form-grid two-columns">
                 <label class="field">
                     <span>Renda familiar</span>
-                    <select name="renda_familiar">
-                        <option value="">Nao informado</option>
+                    <select name="renda_familiar" required>
+                        <option value="">Selecione</option>
                         <option value="0_3_salarios" <?= $optionSelected($familia, 'renda_familiar', '0_3_salarios') ?>>0 a 3 salarios</option>
                         <option value="acima_3_salarios" <?= $optionSelected($familia, 'renda_familiar', 'acima_3_salarios') ?>>Acima de 3 salarios</option>
                     </select>
+                    <?php if (!empty($errors['renda_familiar'])): ?>
+                        <small class="field-error"><?= h($errors['renda_familiar'][0]) ?></small>
+                    <?php endif; ?>
                 </label>
                 <label class="field">
                     <span>Situacao da familia</span>
-                    <select name="situacao_familia">
-                        <option value="">Nao informado</option>
+                    <select name="situacao_familia" required>
+                        <option value="">Selecione</option>
                         <option value="desabrigado" <?= $optionSelected($familia, 'situacao_familia', 'desabrigado') ?>>Desabrigado</option>
                         <option value="desalojado" <?= $optionSelected($familia, 'situacao_familia', 'desalojado') ?>>Desalojado</option>
                         <option value="aluguel_social" <?= $optionSelected($familia, 'situacao_familia', 'aluguel_social') ?>>Aluguel social</option>
                         <option value="permanece_residencia" <?= $optionSelected($familia, 'situacao_familia', 'permanece_residencia') ?>>Permanece na residencia</option>
                     </select>
+                    <?php if (!empty($errors['situacao_familia'])): ?>
+                        <small class="field-error"><?= h($errors['situacao_familia'][0]) ?></small>
+                    <?php endif; ?>
                 </label>
             </div>
 
@@ -301,13 +310,16 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
                 <label class="field">
                     <span>Nome completo</span>
-                    <input type="text" name="representante_nome" value="<?= h($familia['representante_nome'] ?? '') ?>" maxlength="180" data-representative-input>
+                    <input type="text" name="representante_nome" value="<?= h($familia['representante_nome'] ?? '') ?>" maxlength="180" required data-representative-input>
+                    <?php if (!empty($errors['representante_nome'])): ?>
+                        <small class="field-error"><?= h($errors['representante_nome'][0]) ?></small>
+                    <?php endif; ?>
                 </label>
 
                 <div class="form-grid two-columns">
                     <label class="field">
                         <span>CPF</span>
-                        <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input data-representative-input>
+                        <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" required data-cpf-input data-representative-input>
                         <?php if (!empty($errors['representante_cpf'])): ?>
                             <small class="field-error"><?= h($errors['representante_cpf'][0]) ?></small>
                         <?php endif; ?>
@@ -324,21 +336,30 @@ $optionSelected = static function (array $familia, string $field, string $value)
                 <div class="form-grid three-columns">
                     <label class="field">
                         <span>Orgao expedidor</span>
-                        <input type="text" name="representante_orgao_expedidor" value="<?= h($familia['representante_orgao_expedidor'] ?? '') ?>" maxlength="30" data-representative-input>
+                        <input type="text" name="representante_orgao_expedidor" value="<?= h($familia['representante_orgao_expedidor'] ?? '') ?>" maxlength="30" required data-representative-input>
+                        <?php if (!empty($errors['representante_orgao_expedidor'])): ?>
+                            <small class="field-error"><?= h($errors['representante_orgao_expedidor'][0]) ?></small>
+                        <?php endif; ?>
                     </label>
                     <label class="field date-field">
                         <span>Data de nascimento</span>
-                        <input type="date" name="representante_data_nascimento" value="<?= h($familia['representante_data_nascimento'] ?? '') ?>" data-representative-input>
+                        <input type="date" name="representante_data_nascimento" value="<?= h($familia['representante_data_nascimento'] ?? '') ?>" required data-representative-input>
+                        <?php if (!empty($errors['representante_data_nascimento'])): ?>
+                            <small class="field-error"><?= h($errors['representante_data_nascimento'][0]) ?></small>
+                        <?php endif; ?>
                     </label>
                     <label class="field">
                         <span>Sexo</span>
-                        <select name="representante_sexo" data-representative-input>
-                            <option value="">Nao informado</option>
+                        <select name="representante_sexo" required data-representative-input>
+                            <option value="">Selecione</option>
                             <option value="feminino" <?= $optionSelected($familia, 'representante_sexo', 'feminino') ?>>Feminino</option>
                             <option value="masculino" <?= $optionSelected($familia, 'representante_sexo', 'masculino') ?>>Masculino</option>
                             <option value="outro" <?= $optionSelected($familia, 'representante_sexo', 'outro') ?>>Outro</option>
                             <option value="nao_informado" <?= $optionSelected($familia, 'representante_sexo', 'nao_informado') ?>>Nao informado</option>
                         </select>
+                        <?php if (!empty($errors['representante_sexo'])): ?>
+                            <small class="field-error"><?= h($errors['representante_sexo'][0]) ?></small>
+                        <?php endif; ?>
                     </label>
                 </div>
 
@@ -356,13 +377,16 @@ $optionSelected = static function (array $familia, string $field, string $value)
             </div>
 
             <label class="completion-check">
-                <input type="checkbox" name="cadastro_concluido" value="1" <?= !empty($familia['cadastro_concluido']) ? 'checked' : '' ?>>
+                <input type="checkbox" name="cadastro_concluido" value="1" required <?= !empty($familia['cadastro_concluido']) ? 'checked' : '' ?>>
                 <span>Cadastro familiar revisado e concluido</span>
             </label>
+            <?php if (!empty($errors['cadastro_concluido'])): ?>
+                <small class="field-error"><?= h($errors['cadastro_concluido'][0]) ?></small>
+            <?php endif; ?>
 
             <label class="field">
                 <span>Observacoes finais</span>
-                <textarea name="conclusao_observacoes" rows="3" maxlength="1000"><?= h($familia['conclusao_observacoes'] ?? '') ?></textarea>
+                <textarea name="conclusao_observacoes" rows="3" maxlength="1000" required><?= h($familia['conclusao_observacoes'] ?? '') ?></textarea>
                 <?php if (!empty($errors['conclusao_observacoes'])): ?>
                     <small class="field-error"><?= h($errors['conclusao_observacoes'][0]) ?></small>
                 <?php endif; ?>

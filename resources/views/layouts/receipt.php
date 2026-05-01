@@ -5,6 +5,7 @@ $pageTitle = $title ?? 'Comprovante';
 $success = flash('success');
 $warning = flash('warning');
 $error = flash('error');
+$assetVersion = '20260501-53';
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -13,7 +14,9 @@ $error = flash('error');
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
     <title><?= h($pageTitle) ?> | <?= h($app['name']) ?></title>
-    <link rel="stylesheet" href="<?= h(asset('css/app.css')) ?>">
+    <link rel="stylesheet" href="<?= h(asset('css/app.css') . '?v=' . $assetVersion) ?>">
+    <script src="<?= h(asset('js/qrcode.bundle.js') . '?v=' . $assetVersion) ?>" defer></script>
+    <script src="<?= h(asset('js/family-receipt.js') . '?v=' . $assetVersion) ?>" defer></script>
 </head>
 <body class="receipt-page">
     <main class="receipt-main">

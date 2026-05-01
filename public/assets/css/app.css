@@ -694,6 +694,14 @@ p {
     font-weight: 400;
 }
 
+.field:has(:is(input, select, textarea)[required]:not([disabled])) > span::after,
+.choice-field:has(input[required]) legend::after,
+.completion-check:has(input[required]:not([disabled])) span::after {
+    content: " *";
+    color: #dc2626;
+    font-weight: 900;
+}
+
 .smart-field {
     position: relative;
 }
@@ -1094,9 +1102,19 @@ button:hover,
 
 .secondary-button {
     min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 9px 14px;
     color: var(--text);
     background: var(--surface-muted);
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .secondary-button:hover,
@@ -2456,6 +2474,71 @@ button:disabled,
     resize: vertical;
 }
 
+.family-edit-form select[name="responsavel_sexo"],
+.family-edit-form select[name="representante_sexo"],
+.family-edit-form select[name="renda_familiar"],
+.family-edit-form select[name="situacao_familia"] {
+    appearance: none;
+    min-height: 48px;
+    border-color: #cbd8e3;
+    border-radius: 8px;
+    padding-right: 42px;
+    background-color: #ffffff;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #155e75 50%),
+        linear-gradient(135deg, #155e75 50%, transparent 50%),
+        linear-gradient(180deg, #ffffff 0%, #f7fbfc 100%);
+    background-position:
+        calc(100% - 21px) 21px,
+        calc(100% - 15px) 21px,
+        0 0;
+    background-size:
+        6px 6px,
+        6px 6px,
+        100% 100%;
+    background-repeat: no-repeat;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.family-edit-form select[name="responsavel_sexo"]:hover,
+.family-edit-form select[name="representante_sexo"]:hover,
+.family-edit-form select[name="renda_familiar"]:hover,
+.family-edit-form select[name="situacao_familia"]:hover,
+.family-edit-form textarea[name="perdas_bens_moveis"]:hover,
+.family-edit-form textarea[name="conclusao_observacoes"]:hover,
+.completion-check:hover {
+    border-color: rgba(21, 94, 117, 0.45);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.family-edit-form textarea[name="perdas_bens_moveis"],
+.family-edit-form textarea[name="conclusao_observacoes"] {
+    min-height: 108px;
+    border-color: #cbd8e3;
+    border-radius: 8px;
+    line-height: 1.45;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.family-edit-form textarea[name="conclusao_observacoes"] {
+    min-height: 132px;
+}
+
+.completion-check {
+    border-color: #cbd8e3;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #ffffff 0%, #f6fbfc 100%);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.completion-check:has(input:checked) {
+    border-color: rgba(21, 94, 117, 0.55);
+    background: #eef8f9;
+    box-shadow: inset 0 0 0 1px rgba(21, 94, 117, 0.16), 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
 .switch-control {
     width: 66px;
     min-width: 66px;
@@ -3406,10 +3489,29 @@ button:disabled,
 .receipt-actions {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 12px;
     flex-wrap: wrap;
     margin-bottom: 16px;
+}
+
+.receipt-preview-shell {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.receipt-preview-header {
+    margin-bottom: 10px;
+}
+
+.receipt-share-status {
+    flex-basis: 100%;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
 }
 
 .receipt-ticket {
@@ -3423,6 +3525,18 @@ button:disabled,
     font-family: "Courier New", Courier, monospace;
     font-size: 13px;
     line-height: 1.35;
+    box-shadow: 0 18px 44px rgba(28, 39, 51, 0.13);
+}
+
+.receipt-paper-edge {
+    height: 9px;
+    margin: -9px -18px 12px;
+    border-radius: 8px 8px 0 0;
+    background:
+        linear-gradient(135deg, transparent 7px, #ffffff 0) left,
+        linear-gradient(225deg, transparent 7px, #ffffff 0) right;
+    background-size: 14px 9px;
+    background-repeat: repeat-x;
 }
 
 .receipt-header,
@@ -3506,6 +3620,82 @@ button:disabled,
 .receipt-footer {
     margin-top: 16px;
     font-size: 11px;
+}
+
+.receipt-qr {
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    text-align: center;
+}
+
+.receipt-qr canvas {
+    width: 38mm;
+    height: 38mm;
+    max-width: 100%;
+    display: block;
+    image-rendering: pixelated;
+}
+
+.receipt-qr strong {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.receipt-qr span {
+    color: #111111;
+    font-size: 11px;
+}
+
+.delivery-qr-panel {
+    display: grid;
+    gap: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: var(--surface);
+    box-shadow: 0 10px 24px rgba(28, 39, 51, 0.05);
+}
+
+.delivery-qr-heading {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.delivery-qr-heading h2 {
+    margin-bottom: 0;
+    font-size: 20px;
+}
+
+.delivery-qr-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.delivery-qr-video {
+    width: min(100%, 420px);
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #0f172a;
+    object-fit: cover;
+}
+
+.delivery-qr-status {
+    margin-bottom: 0;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.delivery-qr-manual-form {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) auto;
+    gap: 10px;
+    align-items: end;
 }
 
 .error-page {
@@ -4198,6 +4388,11 @@ button:disabled,
         align-items: flex-start;
         flex-direction: column;
     }
+
+    .delivery-qr-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 480px) {
@@ -4211,6 +4406,7 @@ button:disabled,
     .residence-open-card .record-card-meta,
     .records-filter-form,
     .records-filter-actions,
+    .delivery-qr-manual-form,
     .records-pagination {
         grid-template-columns: 1fr;
     }
@@ -4249,6 +4445,11 @@ button:disabled,
 }
 
 @media print {
+    @page {
+        size: 80mm auto;
+        margin: 3mm;
+    }
+
     :root {
         --bg: #ffffff;
         --surface: #ffffff;
@@ -4329,7 +4530,46 @@ button:disabled,
         border: 0;
         border-radius: 0;
         padding: 0;
-        font-size: 10.5pt;
+        font-size: 9pt;
+        line-height: 1.22;
+        box-shadow: none;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .receipt-paper-edge {
+        display: none;
+    }
+
+    .receipt-separator {
+        margin: 7px 0;
+    }
+
+    .receipt-lines {
+        gap: 4px;
+    }
+
+    .receipt-lines div {
+        grid-template-columns: 23mm minmax(0, 1fr);
+        gap: 2mm;
+    }
+
+    .receipt-header strong {
+        font-size: 11pt;
+    }
+
+    .receipt-qr {
+        gap: 4px;
+    }
+
+    .receipt-qr canvas {
+        width: 31mm;
+        height: 31mm;
+    }
+
+    .receipt-footer {
+        margin-top: 8px;
+        font-size: 8pt;
     }
 
     a {

@@ -79,7 +79,7 @@ final class AuthController extends Controller
         Session::forget('intended_url');
 
         if (is_string($intendedUrl) && str_starts_with($intendedUrl, '/') && !str_starts_with($intendedUrl, '//')) {
-            header('Location: ' . $intendedUrl);
+            header('Location: ' . url($intendedUrl));
             exit;
         }
 
@@ -345,7 +345,7 @@ final class AuthController extends Controller
         Session::forget('intended_url');
 
         if (is_string($intendedUrl) && str_starts_with($intendedUrl, '/') && !str_starts_with($intendedUrl, '//')) {
-            header('Location: ' . $intendedUrl);
+            header('Location: ' . url($intendedUrl));
             exit;
         }
 

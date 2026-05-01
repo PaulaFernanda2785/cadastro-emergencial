@@ -37,6 +37,7 @@
                     <td><?= h($familia['localidade']) ?> - <?= h($familia['tipo_evento']) ?></td>
                     <td><?= h($familia['entregas_registradas']) ?></td>
                     <td class="actions-column">
+                        <a href="<?= h(url('/cadastros/residencias/' . $familia['residencia_id'] . '/familias/' . $familia['id'] . '/comprovante')) ?>">Comprovante</a>
                         <?php if (in_array((string) (current_user()['perfil'] ?? ''), ['gestor', 'administrador'], true)): ?>
                             <a href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Entrega</a>
                         <?php else: ?>

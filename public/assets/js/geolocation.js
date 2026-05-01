@@ -227,6 +227,15 @@
             }
         }
 
+        function dispatchFieldEvents(field) {
+            if (!field) {
+                return;
+            }
+
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
         function getCurrentPosition(options) {
             return new Promise(function (resolve, reject) {
                 navigator.geolocation.getCurrentPosition(resolve, reject, options);
@@ -253,10 +262,6 @@
             });
         }
 
-        if (!window.isSecureContext && !/^(localhost|127\.0\.0\.1|::1|\[::1\])$/.test(window.location.hostname)) {
-            setStatus(insecureLocalMessage());
-        }
-
         button.addEventListener('click', function () {
             if (String(form.dataset.photoLocationSource || '').indexOf('photo-') === 0) {
                 setStatus('Foto anexada com localizacao propria. Remova ou troque a foto para capturar a localizacao atual.');
@@ -273,6 +278,8 @@
                 form.dataset.locationSource = 'device-current';
                 latitude.value = lat;
                 longitude.value = lng;
+                dispatchFieldEvents(latitude);
+                dispatchFieldEvents(longitude);
                 setStatus('Localizacao capturada. Buscando endereco...');
 
                 reverseGeocode(lat, lng).then(function (result) {

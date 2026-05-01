@@ -65,6 +65,7 @@ function send_security_headers(): void
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()');
+    header('Feature-Policy: geolocation \'self\'; camera \'self\'; microphone \'none\'; payment \'none\'; usb \'none\'');
     header('X-Robots-Tag: noindex, nofollow');
 
     if (app_is_secure_request()) {
@@ -138,4 +139,37 @@ function residencia_condicao_label(mixed $value): string
     $key = (string) $value;
 
     return $options[$key] ?? '-';
+}
+
+function familia_renda_label(mixed $value): string
+{
+    $options = [
+        '0_3_salarios' => '0 a 3 salarios',
+        'acima_3_salarios' => 'Acima de 3 salarios',
+    ];
+    $key = (string) $value;
+
+    return $options[$key] ?? '-';
+}
+
+function familia_situacao_label(mixed $value): string
+{
+    $options = [
+        'desabrigado' => 'Desabrigado',
+        'desalojado' => 'Desalojado',
+        'aluguel_social' => 'Aluguel social',
+        'permanece_residencia' => 'Permanece na residencia',
+    ];
+    $key = (string) $value;
+
+    return $options[$key] ?? '-';
+}
+
+function familia_comprovante_codigo(array $familia): string
+{
+    $familiaId = (int) ($familia['id'] ?? 0);
+    $residenciaId = (int) ($familia['residencia_id'] ?? 0);
+    $hash = strtoupper(substr(hash('sha256', $familiaId . '|' . $residenciaId . '|cadastro-familiar'), 0, 10));
+
+    return 'FAM-' . str_pad((string) $familiaId, 6, '0', STR_PAD_LEFT) . '-' . $hash;
 }

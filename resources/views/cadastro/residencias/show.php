@@ -199,6 +199,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                         <td class="actions-column" data-label="Acoes">
                             <div class="family-row-actions">
                                 <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'])) ?>">Ver detalhe</a>
+                                <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/comprovante')) ?>">Comprovante</a>
                                 <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
                                     <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/editar')) ?>">Editar</a>
                                     <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/excluir')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Excluir esta familia da listagem? O registro continuara preservado no banco.">
