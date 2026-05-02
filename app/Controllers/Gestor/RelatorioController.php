@@ -7,12 +7,14 @@ namespace App\Controllers\Gestor;
 use App\Core\Controller;
 use App\Repositories\AcaoEmergencialRepository;
 use App\Repositories\RelatorioRepository;
+use App\Repositories\TipoAjudaRepository;
 
 final class RelatorioController extends Controller
 {
     public function __construct(
         private readonly RelatorioRepository $relatorios = new RelatorioRepository(),
-        private readonly AcaoEmergencialRepository $acoes = new AcaoEmergencialRepository()
+        private readonly AcaoEmergencialRepository $acoes = new AcaoEmergencialRepository(),
+        private readonly TipoAjudaRepository $tiposAjuda = new TipoAjudaRepository()
     ) {
     }
 
@@ -24,12 +26,19 @@ final class RelatorioController extends Controller
             'title' => 'Relatorios operacionais',
             'filters' => $filters,
             'acoes' => $this->acoes->all(),
+            'tiposAjuda' => $this->tiposAjuda->all(),
             'indicators' => $this->relatorios->indicators($filters),
             'byAction' => $this->relatorios->byAction($filters),
             'byNeighborhood' => $this->relatorios->byNeighborhood($filters),
             'byHousingType' => $this->relatorios->byHousingType($filters),
             'byResidenceCondition' => $this->relatorios->byResidenceCondition($filters),
             'deliveriesByType' => $this->relatorios->deliveriesByType($filters),
+            'vulnerableGroups' => $this->relatorios->vulnerableGroups($filters),
+            'registrationQuality' => $this->relatorios->registrationQuality($filters),
+            'deliveryTimeline' => $this->relatorios->deliveryTimeline($filters),
+            'documentStats' => $this->relatorios->documentStats($filters),
+            'signatureStats' => $this->relatorios->signatureStats($filters),
+            'recomecarStats' => $this->relatorios->recomecarStats($filters),
             'pendingFamilies' => $this->relatorios->pendingFamilies($filters),
             'generatedAt' => new \DateTimeImmutable(),
         ]);
@@ -97,7 +106,15 @@ final class RelatorioController extends Controller
     {
         return [
             'acao_id' => $this->positiveInt($_GET['acao_id'] ?? null),
+            'acao_busca' => $this->text($_GET['acao_busca'] ?? null, 180),
+            'tipo_ajuda_id' => $this->positiveInt($_GET['tipo_ajuda_id'] ?? null),
+            'q' => $this->text($_GET['q'] ?? null, 180),
             'bairro' => $this->text($_GET['bairro'] ?? null, 180),
+            'status_acao' => $this->choice($_GET['status_acao'] ?? null, ['aberta', 'encerrada', 'cancelada']),
+            'imovel' => $this->choice($_GET['imovel'] ?? null, array_keys(residencia_imovel_options())),
+            'condicao' => $this->choice($_GET['condicao'] ?? null, array_keys(residencia_condicao_options())),
+            'entregas' => $this->choice($_GET['entregas'] ?? null, ['com_entrega', 'sem_entrega']),
+            'cadastro' => $this->choice($_GET['cadastro'] ?? null, ['concluido', 'pendente']),
             'data_inicio' => $this->date($_GET['data_inicio'] ?? null),
             'data_fim' => $this->date($_GET['data_fim'] ?? null),
         ];
@@ -121,6 +138,17 @@ final class RelatorioController extends Controller
         }
 
         return mb_substr(trim($value), 0, $max);
+    }
+
+    private function choice(mixed $value, array $allowed): string
+    {
+        if (!is_string($value) && !is_int($value)) {
+            return '';
+        }
+
+        $value = trim((string) $value);
+
+        return in_array($value, $allowed, true) ? $value : '';
     }
 
     private function date(mixed $value): string
