@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260502-114';
+$assetVersion = '20260502-116';
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
 $signatureRequestedPendingCount = 0;

@@ -17,6 +17,7 @@ $formatDateTime = static function (mixed $value): string {
 };
 $isCoauthor = (int) ($assinatura['coautor_usuario_id'] ?? 0) === (int) (current_user()['id'] ?? 0);
 $isRequester = (int) ($assinatura['solicitante_usuario_id'] ?? 0) === (int) (current_user()['id'] ?? 0);
+$isPrincipalHistory = (int) ($assinatura['coautor_usuario_id'] ?? 0) === (int) ($assinatura['solicitante_usuario_id'] ?? 0);
 $printReady = (bool) ($printReady ?? false);
 $isAdmin = (string) (current_user()['perfil'] ?? '') === 'administrador';
 $documentUrl = (string) ($assinatura['url_documento'] ?? '');
@@ -61,9 +62,9 @@ if ($documentUrl !== '') {
             <small>Usuario que solicitou a coassinatura.</small>
         </article>
         <article>
-            <span>Coautor</span>
+            <span><?= $isPrincipalHistory ? 'Assinante principal' : 'Coautor' ?></span>
             <strong><?= h($assinatura['coautor_nome'] ?? '-') ?></strong>
-            <small>Usuario indicado para autorizar.</small>
+            <small><?= $isPrincipalHistory ? 'Usuario que assinou e gerou o documento.' : 'Usuario indicado para autorizar.' ?></small>
         </article>
     </section>
 
@@ -87,11 +88,11 @@ if ($documentUrl !== '') {
                     <dd><?= h($assinatura['solicitante_cpf'] ?? '-') ?></dd>
                 </div>
                 <div>
-                    <dt>Coautor</dt>
+                    <dt><?= $isPrincipalHistory ? 'Assinante principal' : 'Coautor' ?></dt>
                     <dd><?= h($assinatura['coautor_nome'] ?? '-') ?></dd>
                 </div>
                 <div>
-                    <dt>CPF do coautor</dt>
+                    <dt><?= $isPrincipalHistory ? 'CPF do assinante' : 'CPF do coautor' ?></dt>
                     <dd><?= h($assinatura['coautor_cpf'] ?? '-') ?></dd>
                 </div>
                 <div>
@@ -129,8 +130,8 @@ if ($documentUrl !== '') {
                     <h3>Aguardando resposta</h3>
                     <p>O documento permanecera bloqueado para impressao ate a decisao do coautor.</p>
                 <?php elseif ($status === 'autorizado'): ?>
-                    <h3>Coassinatura autorizada</h3>
-                    <p><?= $printReady ? 'Todas as assinaturas foram autorizadas. A impressao do documento esta liberada.' : 'Sua autorizacao foi registrada. O documento ainda pode depender de outros coautores.' ?></p>
+                    <h3><?= $isPrincipalHistory ? 'Assinatura principal registrada' : 'Coassinatura autorizada' ?></h3>
+                    <p><?= $isPrincipalHistory ? 'Este documento foi assinado pelo usuario principal e ficou registrado no historico.' : ($printReady ? 'Todas as assinaturas foram autorizadas. A impressao do documento esta liberada.' : 'Sua autorizacao foi registrada. O documento ainda pode depender de outros coautores.') ?></p>
                 <?php elseif ($status === 'negado'): ?>
                     <h3>Coassinatura nao autorizada</h3>
                     <p>O documento permanece bloqueado enquanto houver negativa ativa.</p>

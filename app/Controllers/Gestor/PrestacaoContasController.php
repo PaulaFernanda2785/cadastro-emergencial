@@ -121,9 +121,53 @@ final class PrestacaoContasController extends Controller
         $identity = $this->documentIdentity($filters);
         $this->guardPost('gestor.prestacao_contas.remove_signature.' . $identity['entity_id'], $this->filterUrl($filters));
 
-        if ($this->latestSignature($identity) === null) {
+        $signature = $this->latestSignature($identity);
+
+        if ($signature === null) {
             Session::flash('warning', 'Esta prestacao de contas nao possui assinatura ativa para remover.');
             $this->redirect($this->filterUrl($filters));
+        }
+
+        $principalUserId = (int) ($signature['usuario_id'] ?? 0);
+        if ($principalUserId <= 0 || $principalUserId !== (int) (current_user()['id'] ?? 0)) {
+            $this->abort(403);
+        }
+
+        $removePrincipal = (string) ($_POST['remover_assinatura_principal'] ?? '') === '1';
+        $removeCoSignatureIds = $this->postedCoSignatureRequestIds();
+
+        if (!$removePrincipal && $removeCoSignatureIds === []) {
+            Session::flash('warning', 'Selecione a assinatura principal ou pelo menos um responsavel pela conferencia para remover.');
+            $this->redirect($this->filterUrl($filters, true));
+        }
+
+        if (!$removePrincipal) {
+            $removed = (new CoassinaturaRepository())->cancelCoSignatures(
+                'prestacao_contas',
+                (string) $identity['document_key'],
+                $removeCoSignatureIds,
+                $principalUserId
+            );
+
+            if ($removed <= 0) {
+                Session::flash('warning', 'Nenhuma coassinatura selecionada pode ser removida.');
+                $this->redirect($this->filterUrl($filters, true));
+            }
+
+            (new AuditLogService())->record(
+                'removeu_coassinaturas_prestacao_contas',
+                'prestacao_contas',
+                (int) $identity['entity_id'],
+                json_encode([
+                    'document_key' => $identity['document_key'],
+                    'removido_por' => $principalUserId,
+                    'coassinaturas' => $removeCoSignatureIds,
+                    'removed_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+                ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            );
+
+            Session::flash('success', 'Responsavel(is) pela conferencia removido(s). A assinatura principal foi mantida.');
+            $this->redirect($this->filterUrl($filters, true));
         }
 
         (new AuditLogService())->record(
@@ -132,7 +176,8 @@ final class PrestacaoContasController extends Controller
             (int) $identity['entity_id'],
             json_encode([
                 'document_key' => $identity['document_key'],
-                'removido_por' => (int) (current_user()['id'] ?? 0),
+                'removido_por' => $principalUserId,
+                'coassinaturas' => $removeCoSignatureIds,
                 'removed_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
@@ -223,6 +268,16 @@ final class PrestacaoContasController extends Controller
         ), static fn (int $id): bool => $id > 0 && $id !== $currentUserId));
 
         return $this->usuarios->activeByIds($ids);
+    }
+
+    private function postedCoSignatureRequestIds(): array
+    {
+        $postedIds = is_array($_POST['remover_coassinaturas'] ?? null) ? $_POST['remover_coassinaturas'] : [];
+
+        return array_values(array_unique(array_filter(array_map(
+            static fn (mixed $id): int => (int) $id,
+            $postedIds
+        ), static fn (int $id): bool => $id > 0)));
     }
 
     private function latestSignature(array $identity): ?array
@@ -364,6 +419,14 @@ final class PrestacaoContasController extends Controller
             'descricao' => 'Documento gerado por filtros operacionais em ' . date('d/m/Y H:i'),
             'url_documento' => $this->filterUrl($filters, true),
             'solicitante_usuario_id' => (int) (current_user()['id'] ?? 0),
+            'assinante_principal' => array_merge(
+                is_array($signature['assinantes'][0] ?? null) ? $signature['assinantes'][0] : [],
+                [
+                    'usuario_id' => (int) ($signature['usuario_id'] ?? current_user()['id'] ?? 0),
+                    'signed_at' => (string) ($signature['signed_at'] ?? ''),
+                    'hash' => (string) ($signature['hash'] ?? ''),
+                ]
+            ),
             'payload' => [
                 'documento' => $signature['documento'] ?? 'Prestacao de contas',
                 'document_key' => $identity['document_key'],

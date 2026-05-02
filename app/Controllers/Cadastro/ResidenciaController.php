@@ -130,8 +130,52 @@ final class ResidenciaController extends Controller
         $residencia = $this->findResidenciaForAccess((int) $id);
         $this->guardPost('cadastro.residencia.dti.remove_signature.' . (int) $id, '/cadastros/residencias/' . (int) $id . '/dti');
 
-        if ($this->latestDtiSignature((int) $id) === null) {
+        $signature = $this->latestDtiSignature((int) $id);
+
+        if ($signature === null) {
             Session::flash('warning', 'Esta DTI nao possui assinatura ativa para remover.');
+            $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
+        }
+
+        $principalUserId = (int) ($signature['usuario_id'] ?? 0);
+        if ($principalUserId <= 0 || $principalUserId !== (int) (current_user()['id'] ?? 0)) {
+            $this->abort(403);
+        }
+
+        $removePrincipal = (string) ($_POST['remover_assinatura_principal'] ?? '') === '1';
+        $removeCoSignatureIds = $this->postedCoSignatureRequestIds();
+
+        if (!$removePrincipal && $removeCoSignatureIds === []) {
+            Session::flash('warning', 'Selecione a assinatura principal ou pelo menos um coautor para remover.');
+            $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
+        }
+
+        if (!$removePrincipal) {
+            $removed = (new CoassinaturaRepository())->cancelCoSignatures(
+                'dti',
+                $this->dtiDocumentKey((int) $id),
+                $removeCoSignatureIds,
+                $principalUserId
+            );
+
+            if ($removed <= 0) {
+                Session::flash('warning', 'Nenhuma coassinatura selecionada pode ser removida.');
+                $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
+            }
+
+            (new AuditLogService())->record(
+                'removeu_coassinaturas_dti',
+                'residencias',
+                (int) $id,
+                json_encode([
+                    'protocolo' => (string) ($residencia['protocolo'] ?? ''),
+                    'removido_por' => $principalUserId,
+                    'coassinaturas' => $removeCoSignatureIds,
+                    'removed_at' => (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s'),
+                ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            );
+
+            Session::flash('success', 'Coassinatura(s) selecionada(s) removida(s). A assinatura principal foi mantida.');
             $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
         }
 
@@ -141,7 +185,8 @@ final class ResidenciaController extends Controller
             (int) $id,
             json_encode([
                 'protocolo' => (string) ($residencia['protocolo'] ?? ''),
-                'removido_por' => (int) (current_user()['id'] ?? 0),
+                'removido_por' => $principalUserId,
+                'coassinaturas' => $removeCoSignatureIds,
                 'removed_at' => (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s'),
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
@@ -754,6 +799,7 @@ final class ResidenciaController extends Controller
             'graduacao' => $log['usuario_graduacao'] ?? '',
             'nome_guerra' => $log['usuario_nome_guerra'] ?? '',
             'matricula_funcional' => $log['usuario_matricula_funcional'] ?? '',
+            'usuario_id' => $log['usuario_id'] ?? null,
             'signed_at' => $log['criado_em'] ?? '',
             'hash' => '',
         ], 'dti', $this->dtiDocumentKey($residenciaId));
@@ -769,6 +815,16 @@ final class ResidenciaController extends Controller
         ), static fn (int $id): bool => $id > 0 && $id !== $currentUserId));
 
         return (new UsuarioRepository())->activeByIds($ids);
+    }
+
+    private function postedCoSignatureRequestIds(): array
+    {
+        $postedIds = is_array($_POST['remover_coassinaturas'] ?? null) ? $_POST['remover_coassinaturas'] : [];
+
+        return array_values(array_unique(array_filter(array_map(
+            static fn (mixed $id): int => (int) $id,
+            $postedIds
+        ), static fn (int $id): bool => $id > 0)));
     }
 
     private function signatureUserPayload(array $user, string $tipo): array
@@ -854,6 +910,14 @@ final class ResidenciaController extends Controller
             'descricao' => trim((string) ($residencia['municipio_nome'] ?? '') . '/' . (string) ($residencia['uf'] ?? '') . ' - ' . (string) ($residencia['bairro_comunidade'] ?? '')),
             'url_documento' => '/cadastros/residencias/' . (int) ($residencia['id'] ?? 0) . '/dti',
             'solicitante_usuario_id' => (int) (current_user()['id'] ?? 0),
+            'assinante_principal' => array_merge(
+                is_array($signature['assinantes'][0] ?? null) ? $signature['assinantes'][0] : [],
+                [
+                    'usuario_id' => (int) ($signature['usuario_id'] ?? current_user()['id'] ?? 0),
+                    'signed_at' => (string) ($signature['signed_at'] ?? ''),
+                    'hash' => (string) ($signature['hash'] ?? ''),
+                ]
+            ),
             'payload' => [
                 'documento' => $signature['documento'] ?? 'DTI',
                 'protocolo' => $residencia['protocolo'] ?? '',

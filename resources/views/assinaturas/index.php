@@ -204,13 +204,14 @@ $lastRecord = min($totalRecords, $page * $perPage);
             <?php foreach (($assinaturas ?? []) as $assinatura): ?>
                 <?php
                 $isMine = ($assinatura['vinculo'] ?? '') === 'para_mim';
-                $personLabel = $isAdmin ? 'Solicitante / coautor' : ($isMine ? 'Solicitante' : 'Coautor');
+                $isPrincipalHistory = ($assinatura['vinculo'] ?? '') === 'assinante_principal';
+                $personLabel = $isAdmin ? 'Solicitante / assinante' : ($isPrincipalHistory ? 'Assinante principal' : ($isMine ? 'Solicitante' : 'Coautor'));
                 $personName = $isAdmin
                     ? trim((string) ($assinatura['solicitante_nome'] ?? '-') . ' / ' . (string) ($assinatura['coautor_nome'] ?? '-'))
-                    : ($isMine ? ($assinatura['solicitante_nome'] ?? '-') : ($assinatura['coautor_nome'] ?? '-'));
+                    : ($isPrincipalHistory ? ($assinatura['solicitante_nome'] ?? '-') : ($isMine ? ($assinatura['solicitante_nome'] ?? '-') : ($assinatura['coautor_nome'] ?? '-')));
                 $personCpf = $isAdmin
                     ? trim((string) ($assinatura['solicitante_cpf'] ?? '') . ' / ' . (string) ($assinatura['coautor_cpf'] ?? ''))
-                    : ($isMine ? ($assinatura['solicitante_cpf'] ?? '') : ($assinatura['coautor_cpf'] ?? ''));
+                    : ($isPrincipalHistory ? ($assinatura['solicitante_cpf'] ?? '') : ($isMine ? ($assinatura['solicitante_cpf'] ?? '') : ($assinatura['coautor_cpf'] ?? '')));
                 ?>
                 <article class="signature-list-card">
                     <div class="signature-list-main">
@@ -225,7 +226,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
                         <div class="signature-list-meta">
                             <div>
                                 <span>Vinculo</span>
-                                <strong><?= h($isAdmin ? 'Controle administrativo' : ($isMine ? 'Para minha assinatura' : 'Solicitada por mim')) ?></strong>
+                                <strong><?= h($isAdmin ? 'Controle administrativo' : ($isPrincipalHistory ? 'Assinado por mim' : ($isMine ? 'Para minha assinatura' : 'Solicitada por mim'))) ?></strong>
                             </div>
                             <div>
                                 <span><?= h($personLabel) ?></span>

@@ -24,6 +24,7 @@ final class AssinaturaController extends Controller
     {
         $userId = (int) (current_user()['id'] ?? 0);
         $isAdmin = $this->isAdmin();
+        $this->coassinaturas->repairPrincipalHistoryFromAuditLogs($userId, $isAdmin);
         $this->coassinaturas->markRequesterNotified($userId);
         $filters = $this->signatureFilters();
         $page = max(1, (int) ($_GET['page'] ?? 1));

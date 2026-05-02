@@ -13,6 +13,14 @@ $signatureSigners = is_array($signature['assinantes'] ?? null) ? $signature['ass
 $coSignatureStatus = is_array($signature['coassinatura_status'] ?? null) ? $signature['coassinatura_status'] : ($coSignatureStatus ?? ['total' => 0, 'pendentes' => 0, 'autorizados' => 0, 'negados' => 0, 'impressao_liberada' => true, 'solicitacoes' => []]);
 $printReady = $signature !== null && (bool) ($signature['impressao_liberada'] ?? $coSignatureStatus['impressao_liberada'] ?? true);
 $embedDocument = (bool) ($embedDocument ?? false);
+$currentUserId = (int) (current_user()['id'] ?? 0);
+$signaturePrincipalId = (int) ($signature['usuario_id'] ?? 0);
+$canManageSignature = $signature !== null && $signaturePrincipalId > 0 && $signaturePrincipalId === $currentUserId;
+$coSignatureRequests = array_values(array_filter(
+    is_array($coSignatureStatus['solicitacoes'] ?? null) ? $coSignatureStatus['solicitacoes'] : [],
+    static fn (array $solicitacao): bool =>
+        (int) ($solicitacao['coautor_usuario_id'] ?? 0) !== (int) ($solicitacao['solicitante_usuario_id'] ?? 0)
+));
 if ($signature !== null && $signatureSigners === []) {
     $signatureSigners[] = [
         'tipo' => 'assinante_principal',
@@ -144,12 +152,9 @@ $renderFilterFields = static function (array $filters): void {
             <a class="secondary-button" href="#prestacao-signature-form">Assinatura conjunta</a>
         <?php elseif ($hasAppliedFilters): ?>
             <span class="limit-reached-pill"><?= $printReady ? 'Documento assinado' : 'Aguardando conferencia' ?></span>
-            <form method="post" action="<?= h(url('/gestor/prestacao-contas/remover-assinatura')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Remover a assinatura ativa desta prestacao de contas? O historico da assinatura sera preservado no log.">
-                <?= csrf_field() ?>
-                <?= idempotency_field('gestor.prestacao_contas.remove_signature.' . (int) ($documentIdentity['entity_id'] ?? 0)) ?>
-                <?php $renderFilterFields($filters); ?>
-                <button type="submit" class="danger-button" data-loading-text="Removendo...">Remover assinatura</button>
-            </form>
+            <?php if ($canManageSignature): ?>
+                <a class="danger-button" href="#prestacao-signature-removal">Gerenciar assinaturas</a>
+            <?php endif; ?>
             <?php if ($printReady): ?>
                 <button type="button" class="primary-button" onclick="window.print()">Imprimir documento</button>
             <?php else: ?>
@@ -157,6 +162,48 @@ $renderFilterFields = static function (array $filters): void {
             <?php endif; ?>
         <?php endif; ?>
     </header>
+
+    <?php if ($hasAppliedFilters && $signature !== null && $canManageSignature): ?>
+        <section class="dti-signature-setup no-print" id="prestacao-signature-removal">
+            <div>
+                <span class="eyebrow">Gerenciamento de assinaturas</span>
+                <h2>Remover assinaturas</h2>
+                <p>Somente o assinante principal pode remover a assinatura principal ou remover responsaveis pela conferencia selecionados.</p>
+            </div>
+            <form method="post" action="<?= h(url('/gestor/prestacao-contas/remover-assinatura')) ?>" class="js-prevent-double-submit" data-confirm="Confirmar a remocao das assinaturas selecionadas?">
+                <?= csrf_field() ?>
+                <?= idempotency_field('gestor.prestacao_contas.remove_signature.' . (int) ($documentIdentity['entity_id'] ?? 0)) ?>
+                <?php $renderFilterFields($filters); ?>
+                <label class="dti-primary-signer">
+                    <span>Assinatura principal</span>
+                    <strong><?= h($valueOrDash($signature['nome'] ?? current_user()['nome'] ?? '')) ?></strong>
+                    <small>
+                        <input type="checkbox" name="remover_assinatura_principal" value="1">
+                        Remover assinatura principal e cancelar todos os responsaveis pela conferencia deste documento.
+                    </small>
+                </label>
+
+                <div class="dti-cosigner-panel">
+                    <span>Responsaveis pela conferencia</span>
+                    <?php if ($coSignatureRequests !== []): ?>
+                        <?php foreach ($coSignatureRequests as $solicitacao): ?>
+                            <label class="dti-primary-signer">
+                                <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
+                                <small>
+                                    <input type="checkbox" name="remover_coassinaturas[]" value="<?= h((int) ($solicitacao['id'] ?? 0)) ?>">
+                                    <?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?>
+                                </small>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <small>Nao ha responsaveis pela conferencia ativos neste documento.</small>
+                    <?php endif; ?>
+                </div>
+
+                <button type="submit" class="danger-button" data-loading-text="Removendo...">Remover selecionados</button>
+            </form>
+        </section>
+    <?php endif; ?>
 
     <section class="records-summary-grid delivery-summary-grid no-print">
         <article class="records-summary-card">
@@ -483,10 +530,10 @@ $renderFilterFields = static function (array $filters): void {
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
-                    <?php if (!empty($coSignatureStatus['solicitacoes']) && !$printReady): ?>
+                    <?php if ($coSignatureRequests !== [] && !$printReady): ?>
                         <div class="dti-cosigner-list no-print">
                             <span>Status dos responsaveis pela conferencia</span>
-                            <?php foreach ($coSignatureStatus['solicitacoes'] as $solicitacao): ?>
+                            <?php foreach ($coSignatureRequests as $solicitacao): ?>
                                 <div>
                                     <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
                                     <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>

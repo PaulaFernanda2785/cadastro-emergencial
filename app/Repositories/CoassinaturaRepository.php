@@ -40,30 +40,76 @@ final class CoassinaturaRepository
             $cancel->bindValue(':documento_chave', $documentKey);
             $cancel->execute();
 
-            if ($coSigners !== []) {
-                $insert = $connection->prepare(
-                    'INSERT INTO coassinaturas_documentos
-                        (documento_tipo, documento_chave, entidade, entidade_id, titulo, descricao, url_documento,
-                         solicitante_usuario_id, coautor_usuario_id, status, payload_json, coautor_snapshot_json)
-                     VALUES
-                        (:documento_tipo, :documento_chave, :entidade, :entidade_id, :titulo, :descricao, :url_documento,
-                         :solicitante_usuario_id, :coautor_usuario_id, \'pendente\', :payload_json, :coautor_snapshot_json)'
-                );
+            $insert = $connection->prepare(
+                'INSERT INTO coassinaturas_documentos
+                    (documento_tipo, documento_chave, entidade, entidade_id, titulo, descricao, url_documento,
+                     solicitante_usuario_id, coautor_usuario_id, status, payload_json, coautor_snapshot_json,
+                     hash_autorizacao, autorizado_em)
+                 VALUES
+                    (:documento_tipo, :documento_chave, :entidade, :entidade_id, :titulo, :descricao, :url_documento,
+                     :solicitante_usuario_id, :coautor_usuario_id, :status, :payload_json, :coautor_snapshot_json,
+                     :hash_autorizacao, :autorizado_em)'
+            );
 
-                foreach ($coSigners as $coSigner) {
-                    $insert->bindValue(':documento_tipo', $documentType);
-                    $insert->bindValue(':documento_chave', $documentKey);
-                    $insert->bindValue(':entidade', (string) ($document['entidade'] ?? 'documentos'));
-                    $insert->bindValue(':entidade_id', (int) ($document['entidade_id'] ?? 0), PDO::PARAM_INT);
-                    $insert->bindValue(':titulo', mb_substr((string) ($document['titulo'] ?? 'Documento para assinatura'), 0, 180));
-                    $insert->bindValue(':descricao', (string) ($document['descricao'] ?? ''));
-                    $insert->bindValue(':url_documento', mb_substr((string) ($document['url_documento'] ?? ''), 0, 255));
-                    $insert->bindValue(':solicitante_usuario_id', (int) ($document['solicitante_usuario_id'] ?? 0), PDO::PARAM_INT);
-                    $insert->bindValue(':coautor_usuario_id', (int) ($coSigner['id'] ?? 0), PDO::PARAM_INT);
-                    $insert->bindValue(':payload_json', json_encode($document['payload'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-                    $insert->bindValue(':coautor_snapshot_json', json_encode($this->userSnapshot($coSigner), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-                    $insert->execute();
+            $payloadJson = json_encode($document['payload'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $solicitanteId = (int) ($document['solicitante_usuario_id'] ?? 0);
+            $principalSigner = is_array($document['assinante_principal'] ?? null) ? $document['assinante_principal'] : [];
+            $principalUserId = (int) ($principalSigner['usuario_id'] ?? $principalSigner['id'] ?? $solicitanteId);
+            $solicitanteId = $solicitanteId > 0 ? $solicitanteId : $principalUserId;
+            $bindAndExecute = function (array $signer, string $status, ?string $hash, ?string $authorizedAt) use (
+                $insert,
+                $document,
+                $documentType,
+                $documentKey,
+                $payloadJson,
+                $solicitanteId
+            ): void {
+                $insert->bindValue(':documento_tipo', $documentType);
+                $insert->bindValue(':documento_chave', $documentKey);
+                $insert->bindValue(':entidade', (string) ($document['entidade'] ?? 'documentos'));
+                $insert->bindValue(':entidade_id', (int) ($document['entidade_id'] ?? 0), PDO::PARAM_INT);
+                $insert->bindValue(':titulo', mb_substr((string) ($document['titulo'] ?? 'Documento para assinatura'), 0, 180));
+                $insert->bindValue(':descricao', (string) ($document['descricao'] ?? ''));
+                $insert->bindValue(':url_documento', mb_substr((string) ($document['url_documento'] ?? ''), 0, 255));
+                $insert->bindValue(':solicitante_usuario_id', $solicitanteId, PDO::PARAM_INT);
+                $insert->bindValue(':coautor_usuario_id', (int) ($signer['usuario_id'] ?? $signer['id'] ?? 0), PDO::PARAM_INT);
+                $insert->bindValue(':status', $status);
+                $insert->bindValue(':payload_json', $payloadJson);
+                $insert->bindValue(':coautor_snapshot_json', json_encode($this->userSnapshot($signer), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
+                if ($hash !== null && $hash !== '') {
+                    $insert->bindValue(':hash_autorizacao', mb_substr($hash, 0, 64));
+                } else {
+                    $insert->bindValue(':hash_autorizacao', null, PDO::PARAM_NULL);
                 }
+
+                if ($authorizedAt !== null && $authorizedAt !== '') {
+                    $insert->bindValue(':autorizado_em', $authorizedAt);
+                } else {
+                    $insert->bindValue(':autorizado_em', null, PDO::PARAM_NULL);
+                }
+
+                $insert->execute();
+            };
+
+            if ($principalUserId > 0) {
+                $principalSigner['usuario_id'] = $principalUserId;
+                $principalSigner['tipo'] = 'assinante_principal';
+                $bindAndExecute(
+                    $principalSigner,
+                    'autorizado',
+                    (string) ($principalSigner['hash'] ?? $document['hash_autorizacao'] ?? ($document['payload']['hash'] ?? '')),
+                    (string) ($principalSigner['signed_at'] ?? $document['assinado_em'] ?? date('Y-m-d H:i:s'))
+                );
+            }
+
+            foreach ($coSigners as $coSigner) {
+                $coSignerId = (int) ($coSigner['usuario_id'] ?? $coSigner['id'] ?? 0);
+                if ($coSignerId <= 0 || $coSignerId === $principalUserId) {
+                    continue;
+                }
+
+                $bindAndExecute($coSigner, 'pendente', null, null);
             }
 
             $connection->commit();
@@ -85,6 +131,45 @@ final class CoassinaturaRepository
         $stmt->bindValue(':documento_tipo', $documentType);
         $stmt->bindValue(':documento_chave', $documentKey);
         $stmt->execute();
+    }
+
+    public function cancelCoSignatures(string $documentType, string $documentKey, array $requestIds, int $principalUserId): int
+    {
+        $ids = array_values(array_unique(array_filter(array_map(
+            static fn (mixed $id): int => (int) $id,
+            $requestIds
+        ), static fn (int $id): bool => $id > 0)));
+
+        if ($documentType === '' || $documentKey === '' || $ids === [] || $principalUserId <= 0) {
+            return 0;
+        }
+
+        $placeholders = [];
+        foreach ($ids as $index => $id) {
+            $placeholders[] = ':request_id_' . $index;
+        }
+
+        $stmt = Database::connection()->prepare(
+            "UPDATE coassinaturas_documentos
+             SET status = 'cancelado', atualizado_em = NOW()
+             WHERE documento_tipo = :documento_tipo
+               AND documento_chave = :documento_chave
+               AND solicitante_usuario_id = :principal_usuario_id
+               AND coautor_usuario_id <> solicitante_usuario_id
+               AND status IN ('pendente', 'autorizado', 'negado')
+               AND id IN (" . implode(', ', $placeholders) . ')'
+        );
+        $stmt->bindValue(':documento_tipo', $documentType);
+        $stmt->bindValue(':documento_chave', $documentKey);
+        $stmt->bindValue(':principal_usuario_id', $principalUserId, PDO::PARAM_INT);
+
+        foreach ($ids as $index => $id) {
+            $stmt->bindValue(':request_id_' . $index, $id, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+
+        return $stmt->rowCount();
     }
 
     public function activeByDocument(string $documentType, string $documentKey): array
@@ -137,6 +222,48 @@ final class CoassinaturaRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function repairPrincipalHistoryFromAuditLogs(int $userId, bool $includeAll = false): void
+    {
+        if ($userId <= 0 && !$includeAll) {
+            return;
+        }
+
+        $userFilter = $includeAll ? '' : 'AND l.usuario_id = :usuario_id';
+        $stmt = Database::connection()->prepare(
+            "SELECT l.id, l.usuario_id, l.acao, l.entidade, l.entidade_id, l.descricao, l.criado_em,
+                    u.nome, u.cpf, u.email, u.telefone, u.graduacao, u.nome_guerra,
+                    u.matricula_funcional, u.orgao, u.unidade_setor
+             FROM logs_sistema l
+             LEFT JOIN usuarios u ON u.id = l.usuario_id
+             WHERE l.acao IN ('assinou_dti', 'assinou_prestacao_contas')
+               AND l.usuario_id IS NOT NULL
+               {$userFilter}
+               AND NOT EXISTS (
+                    SELECT 1
+                    FROM logs_sistema r
+                    WHERE r.entidade = l.entidade
+                      AND r.entidade_id = l.entidade_id
+                      AND (
+                        (l.acao = 'assinou_dti' AND r.acao = 'removeu_assinatura_dti')
+                        OR (l.acao = 'assinou_prestacao_contas' AND r.acao = 'removeu_assinatura_prestacao_contas')
+                      )
+                      AND (r.criado_em > l.criado_em OR (r.criado_em = l.criado_em AND r.id > l.id))
+               )
+             ORDER BY l.criado_em DESC, l.id DESC
+             LIMIT 500"
+        );
+
+        if (!$includeAll) {
+            $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $log) {
+            $this->repairPrincipalHistoryFromLog($log);
+        }
+    }
+
     public function summaryForUser(int $userId, bool $includeAll = false): array
     {
         if ($includeAll) {
@@ -165,8 +292,8 @@ final class CoassinaturaRepository
 
         $stmt = Database::connection()->prepare(
             "SELECT
-                SUM(CASE WHEN coautor_usuario_id = :coautor_total_id THEN 1 ELSE 0 END) AS para_mim_total,
-                SUM(CASE WHEN coautor_usuario_id = :coautor_pendente_id AND status = 'pendente' THEN 1 ELSE 0 END) AS para_mim_pendentes,
+                SUM(CASE WHEN coautor_usuario_id = :coautor_total_id AND coautor_usuario_id <> solicitante_usuario_id THEN 1 ELSE 0 END) AS para_mim_total,
+                SUM(CASE WHEN coautor_usuario_id = :coautor_pendente_id AND coautor_usuario_id <> solicitante_usuario_id AND status = 'pendente' THEN 1 ELSE 0 END) AS para_mim_pendentes,
                 SUM(CASE WHEN solicitante_usuario_id = :solicitante_total_id THEN 1 ELSE 0 END) AS solicitadas_total,
                 SUM(CASE WHEN solicitante_usuario_id = :solicitante_pendente_id AND status = 'pendente' THEN 1 ELSE 0 END) AS solicitadas_pendentes,
                 SUM(CASE WHEN (coautor_usuario_id = :coautor_autorizado_id OR solicitante_usuario_id = :solicitante_autorizado_id) AND status = 'autorizado' THEN 1 ELSE 0 END) AS autorizadas,
@@ -230,6 +357,7 @@ final class CoassinaturaRepository
             "SELECT c.*, u.nome AS coautor_nome, u.cpf AS coautor_cpf,
                     s.nome AS solicitante_nome, s.cpf AS solicitante_cpf,
                     CASE
+                        WHEN c.coautor_usuario_id = c.solicitante_usuario_id THEN 'assinante_principal'
                         WHEN c.coautor_usuario_id = :vinculo_usuario_id THEN 'para_mim'
                         ELSE 'solicitada'
                     END AS vinculo
@@ -395,7 +523,8 @@ final class CoassinaturaRepository
              FROM coassinaturas_documentos
              WHERE solicitante_usuario_id = :usuario_id
                AND status IN ('autorizado', 'negado')
-               AND solicitante_notificado_em IS NULL"
+               AND solicitante_notificado_em IS NULL
+               AND coautor_usuario_id <> solicitante_usuario_id"
         );
         $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
@@ -424,7 +553,8 @@ final class CoassinaturaRepository
              SET solicitante_notificado_em = NOW()
              WHERE solicitante_usuario_id = :usuario_id
                AND status IN ('autorizado', 'negado')
-               AND solicitante_notificado_em IS NULL"
+               AND solicitante_notificado_em IS NULL
+               AND coautor_usuario_id <> solicitante_usuario_id"
         );
         $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
@@ -465,6 +595,10 @@ final class CoassinaturaRepository
 
         foreach ($this->activeByDocument($documentType, $documentKey) as $request) {
             if ((string) ($request['status'] ?? '') !== 'autorizado') {
+                continue;
+            }
+
+            if ((int) ($request['coautor_usuario_id'] ?? 0) === (int) ($request['solicitante_usuario_id'] ?? 0)) {
                 continue;
             }
 
@@ -521,6 +655,7 @@ final class CoassinaturaRepository
         $scope = (string) ($filters['escopo'] ?? 'todas');
         if ($scope === 'para_mim') {
             $where[] = 'c.coautor_usuario_id = :scope_coautor_id';
+            $where[] = 'c.coautor_usuario_id <> c.solicitante_usuario_id';
             $params[':scope_coautor_id'] = [$userId, PDO::PARAM_INT];
         } elseif ($scope === 'solicitadas') {
             $where[] = 'c.solicitante_usuario_id = :scope_solicitante_id';
@@ -573,11 +708,138 @@ final class CoassinaturaRepository
         }
     }
 
+    private function repairPrincipalHistoryFromLog(array $log): void
+    {
+        $decoded = json_decode((string) ($log['descricao'] ?? ''), true);
+
+        if (!is_array($decoded)) {
+            return;
+        }
+
+        $documentType = (string) ($log['acao'] ?? '') === 'assinou_dti' ? 'dti' : 'prestacao_contas';
+        $documentKey = $documentType === 'dti'
+            ? 'dti:' . (int) ($log['entidade_id'] ?? 0)
+            : (string) ($decoded['document_key'] ?? '');
+
+        if ($documentKey === '' || (int) ($log['usuario_id'] ?? 0) <= 0) {
+            return;
+        }
+
+        if ($this->principalHistoryExists($documentType, $documentKey, (int) $log['usuario_id'])) {
+            return;
+        }
+
+        $filters = is_array($decoded['filters'] ?? null) ? $decoded['filters'] : [];
+        $url = $documentType === 'dti'
+            ? '/cadastros/residencias/' . (int) ($log['entidade_id'] ?? 0) . '/dti'
+            : '/gestor/prestacao-contas?' . http_build_query(array_filter($filters, static fn (mixed $value): bool => (string) $value !== '') + ['assinatura' => '1']);
+
+        $this->insertPrincipalHistory([
+            'documento_tipo' => $documentType,
+            'documento_chave' => $documentKey,
+            'entidade' => $documentType === 'dti' ? 'residencias' : 'prestacao_contas',
+            'entidade_id' => (int) ($log['entidade_id'] ?? 0),
+            'titulo' => $documentType === 'dti'
+                ? 'DTI ' . (string) ($decoded['protocolo'] ?? '')
+                : 'Prestacao de contas de ajuda humanitaria',
+            'descricao' => $documentType === 'dti'
+                ? 'Documento DTI assinado pelo usuario principal.'
+                : 'Documento de prestacao de contas assinado pelo usuario principal.',
+            'url_documento' => $url,
+            'solicitante_usuario_id' => (int) $log['usuario_id'],
+            'payload' => [
+                'documento' => $decoded['documento'] ?? ($documentType === 'dti' ? 'DTI' : 'Prestacao de contas'),
+                'document_key' => $decoded['document_key'] ?? $documentKey,
+                'protocolo' => $decoded['protocolo'] ?? '',
+                'hash' => $decoded['hash'] ?? '',
+                'filters' => $filters,
+            ],
+            'assinante_principal' => [
+                'usuario_id' => (int) $log['usuario_id'],
+                'tipo' => 'assinante_principal',
+                'nome' => (string) ($decoded['nome'] ?? $log['nome'] ?? ''),
+                'cpf' => (string) ($decoded['cpf'] ?? $log['cpf'] ?? ''),
+                'email' => (string) ($decoded['email'] ?? $log['email'] ?? ''),
+                'telefone' => (string) ($decoded['telefone'] ?? $log['telefone'] ?? ''),
+                'graduacao' => (string) ($decoded['graduacao'] ?? $log['graduacao'] ?? ''),
+                'nome_guerra' => (string) ($decoded['nome_guerra'] ?? $log['nome_guerra'] ?? ''),
+                'matricula_funcional' => (string) ($decoded['matricula_funcional'] ?? $log['matricula_funcional'] ?? ''),
+                'orgao' => (string) ($decoded['orgao'] ?? $log['orgao'] ?? ''),
+                'unidade_setor' => (string) ($decoded['unidade_setor'] ?? $log['unidade_setor'] ?? ''),
+                'signed_at' => (string) ($decoded['signed_at'] ?? $log['criado_em'] ?? ''),
+                'hash' => (string) ($decoded['hash'] ?? ''),
+            ],
+        ]);
+    }
+
+    private function principalHistoryExists(string $documentType, string $documentKey, int $userId): bool
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT COUNT(*)
+             FROM coassinaturas_documentos
+             WHERE documento_tipo = :documento_tipo
+               AND documento_chave = :documento_chave
+               AND solicitante_usuario_id = :solicitante_usuario_id
+               AND coautor_usuario_id = :coautor_usuario_id
+               AND status IN ('pendente', 'autorizado', 'negado')"
+        );
+        $stmt->bindValue(':documento_tipo', $documentType);
+        $stmt->bindValue(':documento_chave', $documentKey);
+        $stmt->bindValue(':solicitante_usuario_id', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':coautor_usuario_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    private function insertPrincipalHistory(array $document): void
+    {
+        $principalSigner = is_array($document['assinante_principal'] ?? null) ? $document['assinante_principal'] : [];
+        $principalUserId = (int) ($principalSigner['usuario_id'] ?? $principalSigner['id'] ?? $document['solicitante_usuario_id'] ?? 0);
+
+        if ($principalUserId <= 0) {
+            return;
+        }
+
+        $stmt = Database::connection()->prepare(
+            'INSERT INTO coassinaturas_documentos
+                (documento_tipo, documento_chave, entidade, entidade_id, titulo, descricao, url_documento,
+                 solicitante_usuario_id, coautor_usuario_id, status, payload_json, coautor_snapshot_json,
+                 hash_autorizacao, autorizado_em)
+             VALUES
+                (:documento_tipo, :documento_chave, :entidade, :entidade_id, :titulo, :descricao, :url_documento,
+                 :solicitante_usuario_id, :coautor_usuario_id, \'autorizado\', :payload_json, :coautor_snapshot_json,
+                 :hash_autorizacao, :autorizado_em)'
+        );
+        $stmt->bindValue(':documento_tipo', (string) ($document['documento_tipo'] ?? ''));
+        $stmt->bindValue(':documento_chave', (string) ($document['documento_chave'] ?? ''));
+        $stmt->bindValue(':entidade', (string) ($document['entidade'] ?? 'documentos'));
+        $stmt->bindValue(':entidade_id', (int) ($document['entidade_id'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':titulo', mb_substr((string) ($document['titulo'] ?? 'Documento assinado'), 0, 180));
+        $stmt->bindValue(':descricao', (string) ($document['descricao'] ?? ''));
+        $stmt->bindValue(':url_documento', mb_substr((string) ($document['url_documento'] ?? ''), 0, 255));
+        $stmt->bindValue(':solicitante_usuario_id', $principalUserId, PDO::PARAM_INT);
+        $stmt->bindValue(':coautor_usuario_id', $principalUserId, PDO::PARAM_INT);
+        $stmt->bindValue(':payload_json', json_encode($document['payload'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        $stmt->bindValue(':coautor_snapshot_json', json_encode($this->userSnapshot($principalSigner), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
+        $hash = (string) ($principalSigner['hash'] ?? $document['hash_autorizacao'] ?? ($document['payload']['hash'] ?? ''));
+        if ($hash !== '') {
+            $stmt->bindValue(':hash_autorizacao', mb_substr($hash, 0, 64));
+        } else {
+            $stmt->bindValue(':hash_autorizacao', null, PDO::PARAM_NULL);
+        }
+
+        $authorizedAt = (string) ($principalSigner['signed_at'] ?? $document['assinado_em'] ?? date('Y-m-d H:i:s'));
+        $stmt->bindValue(':autorizado_em', $authorizedAt !== '' ? $authorizedAt : date('Y-m-d H:i:s'));
+        $stmt->execute();
+    }
+
     private function userSnapshot(array $user): array
     {
         return [
             'usuario_id' => (int) ($user['id'] ?? $user['usuario_id'] ?? 0),
-            'tipo' => 'coassinante',
+            'tipo' => (string) ($user['tipo'] ?? 'coassinante'),
             'nome' => (string) ($user['nome'] ?? ''),
             'cpf' => (string) ($user['cpf'] ?? ''),
             'email' => (string) ($user['email'] ?? ''),

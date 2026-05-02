@@ -5504,6 +5504,22 @@ button:disabled,
     text-transform: uppercase;
 }
 
+.dti-wrap-value {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.dti-neighborhood-value {
+    line-height: 1.35;
+}
+
+.dti-table th.dti-neighborhood-label {
+    font-size: 10px;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
 .dti-family-table {
     max-width: 100%;
     min-width: 0;
@@ -8120,7 +8136,6 @@ button:disabled,
         margin: 0;
         padding: 0;
         background: #ffffff;
-        page: dti;
         page-break-before: auto;
         break-before: auto;
     }
@@ -8130,7 +8145,6 @@ button:disabled,
         width: auto;
         margin: 0;
         padding: 0;
-        page: dti;
         page-break-before: auto;
         break-before: auto;
     }
@@ -8148,7 +8162,6 @@ button:disabled,
         margin: 0 !important;
         padding: 0 !important;
         overflow: visible !important;
-        page: dti;
     }
 
     .document-embed-body .dti-document {
@@ -8177,7 +8190,6 @@ button:disabled,
         margin: 0;
         border: 0;
         padding: 0;
-        page: dti;
         box-shadow: none;
         overflow: visible;
         page-break-after: always;

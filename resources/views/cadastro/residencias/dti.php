@@ -33,6 +33,14 @@ $signatureUsers = $signatureUsers ?? [];
 $coSignatureStatus = is_array($signature['coassinatura_status'] ?? null) ? $signature['coassinatura_status'] : ($coSignatureStatus ?? ['total' => 0, 'pendentes' => 0, 'autorizados' => 0, 'negados' => 0, 'impressao_liberada' => true, 'solicitacoes' => []]);
 $printReady = $signature !== null && (bool) ($signature['impressao_liberada'] ?? $coSignatureStatus['impressao_liberada'] ?? true);
 $embedDocument = (bool) ($embedDocument ?? false);
+$currentUserId = (int) (current_user()['id'] ?? 0);
+$signaturePrincipalId = (int) ($signature['usuario_id'] ?? 0);
+$canManageSignature = $signature !== null && $signaturePrincipalId > 0 && $signaturePrincipalId === $currentUserId;
+$coSignatureRequests = array_values(array_filter(
+    is_array($coSignatureStatus['solicitacoes'] ?? null) ? $coSignatureStatus['solicitacoes'] : [],
+    static fn (array $solicitacao): bool =>
+        (int) ($solicitacao['coautor_usuario_id'] ?? 0) !== (int) ($solicitacao['solicitante_usuario_id'] ?? 0)
+));
 $signatureSigners = is_array($signature['assinantes'] ?? null) ? $signature['assinantes'] : [];
 if ($signature !== null && $signatureSigners === []) {
     $signatureSigners[] = [
@@ -103,11 +111,9 @@ $pageNumber = 1;
                 <a class="secondary-button residence-action-button" href="#dti-signature-form">Assinatura conjunta</a>
             <?php else: ?>
                 <span class="limit-reached-pill"><?= $printReady ? 'Documento assinado' : 'Aguardando coautor' ?></span>
-                <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/dti/remover-assinatura')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Remover a assinatura ativa desta DTI? O historico da assinatura sera preservado no log.">
-                    <?= csrf_field() ?>
-                    <?= idempotency_field('cadastro.residencia.dti.remove_signature.' . $residencia['id']) ?>
-                    <button type="submit" class="danger-button" data-loading-text="Removendo...">Remover assinatura</button>
-                </form>
+                <?php if ($canManageSignature): ?>
+                    <a class="danger-button" href="#dti-signature-removal">Gerenciar assinaturas</a>
+                <?php endif; ?>
                 <?php if ($printReady): ?>
                     <button type="button" class="primary-button" onclick="window.print()">Imprimir</button>
                 <?php else: ?>
@@ -125,6 +131,47 @@ $pageNumber = 1;
                 <p><?= h((int) ($coSignatureStatus['pendentes'] ?? 0)) ?> pendente(s), <?= h((int) ($coSignatureStatus['autorizados'] ?? 0)) ?> autorizado(s), <?= h((int) ($coSignatureStatus['negados'] ?? 0)) ?> nao autorizado(s).</p>
             </div>
             <a class="secondary-button signature-flow-action" href="<?= h(url('/assinaturas')) ?>">Acompanhar assinaturas</a>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($signature !== null && $canManageSignature): ?>
+        <section class="dti-signature-setup no-print" id="dti-signature-removal">
+            <div>
+                <span class="eyebrow">Gerenciamento de assinaturas</span>
+                <h2>Remover assinaturas</h2>
+                <p>Somente o assinante principal pode remover a assinatura principal ou remover coautores selecionados deste documento.</p>
+            </div>
+            <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/dti/remover-assinatura')) ?>" class="js-prevent-double-submit" data-confirm="Confirmar a remocao das assinaturas selecionadas?">
+                <?= csrf_field() ?>
+                <?= idempotency_field('cadastro.residencia.dti.remove_signature.' . $residencia['id']) ?>
+                <label class="dti-primary-signer">
+                    <span>Assinatura principal</span>
+                    <strong><?= h($valueOrDash($signature['nome'] ?? current_user()['nome'] ?? '')) ?></strong>
+                    <small>
+                        <input type="checkbox" name="remover_assinatura_principal" value="1">
+                        Remover assinatura principal e cancelar todas as coassinaturas deste documento.
+                    </small>
+                </label>
+
+                <div class="dti-cosigner-panel">
+                    <span>Coautores</span>
+                    <?php if ($coSignatureRequests !== []): ?>
+                        <?php foreach ($coSignatureRequests as $solicitacao): ?>
+                            <label class="dti-primary-signer">
+                                <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
+                                <small>
+                                    <input type="checkbox" name="remover_coassinaturas[]" value="<?= h((int) ($solicitacao['id'] ?? 0)) ?>">
+                                    <?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?>
+                                </small>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <small>Nao ha coautores ativos neste documento.</small>
+                    <?php endif; ?>
+                </div>
+
+                <button type="submit" class="danger-button" data-loading-text="Removendo...">Remover selecionados</button>
+            </form>
         </section>
     <?php endif; ?>
 
@@ -234,8 +281,8 @@ $pageNumber = 1;
                         <tr>
                             <th>Municipio/UF</th>
                             <td><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?></td>
-                            <th>Bairro/comunidade</th>
-                            <td><?= h($valueOrDash($residencia['bairro_comunidade'] ?? '')) ?></td>
+                            <th class="dti-neighborhood-label">Bairro/comunidade</th>
+                            <td class="dti-wrap-value dti-neighborhood-value"><?= h($valueOrDash($residencia['bairro_comunidade'] ?? '')) ?></td>
                         </tr>
                         <tr>
                             <th>Endereco</th>
@@ -449,10 +496,10 @@ $pageNumber = 1;
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
-                    <?php if (!empty($coSignatureStatus['solicitacoes']) && !$printReady): ?>
+                    <?php if ($coSignatureRequests !== [] && !$printReady): ?>
                         <div class="dti-cosigner-list no-print">
                             <span>Status dos coassinantes</span>
-                            <?php foreach ($coSignatureStatus['solicitacoes'] as $solicitacao): ?>
+                            <?php foreach ($coSignatureRequests as $solicitacao): ?>
                                 <div>
                                     <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
                                     <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>
