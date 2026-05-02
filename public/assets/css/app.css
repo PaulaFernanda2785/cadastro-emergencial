@@ -16,6 +16,58 @@
     --topbar-height: 74px;
 }
 
+.back-to-top-button {
+    position: fixed;
+    right: max(18px, env(safe-area-inset-right));
+    bottom: max(18px, env(safe-area-inset-bottom));
+    z-index: 80;
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 999px;
+    background: #0f766e;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.22);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+    transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease, background-color 160ms ease;
+}
+
+.back-to-top-button.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top-button:hover,
+.back-to-top-button:focus-visible {
+    background: #115e59;
+}
+
+.back-to-top-button:focus-visible {
+    outline: 3px solid rgba(20, 184, 166, 0.35);
+    outline-offset: 3px;
+}
+
+.back-to-top-button img {
+    display: block;
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+}
+
+@media (max-width: 640px) {
+    .back-to-top-button {
+        right: 14px;
+        bottom: 14px;
+        width: 44px;
+        height: 44px;
+    }
+}
+
 * {
     box-sizing: border-box;
 }
@@ -243,6 +295,15 @@ a:focus {
     gap: 14px;
 }
 
+.topbar-left {
+    flex: 1 1 auto;
+}
+
+.user-area {
+    flex: 0 1 min(460px, 44vw);
+    justify-content: flex-end;
+}
+
 .menu-toggle {
     width: 44px;
     min-width: 44px;
@@ -294,21 +355,31 @@ a:focus {
 
 .user-summary {
     min-width: 0;
+    max-width: 100%;
     display: grid;
     justify-items: end;
 }
 
 .user-summary strong,
 .user-summary span {
-    max-width: 240px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: right;
+    white-space: normal;
+}
+
+.user-summary strong {
+    display: -webkit-box;
+    line-height: 1.2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .user-summary span {
     color: var(--muted);
     font-size: 13px;
+    line-height: 1.25;
 }
 
 .logout-button {
@@ -4444,6 +4515,48 @@ button:disabled,
     font-weight: 700;
 }
 
+.signature-document-signers {
+    display: grid;
+    gap: 12px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    margin-top: 14px;
+}
+
+.signature-document-signers .signature-panel-heading h2 {
+    font-size: 18px;
+}
+
+.signature-signer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+}
+
+.signature-signer-grid article {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #ffffff;
+}
+
+.signature-signer-grid span,
+.signature-signer-grid small {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.signature-signer-grid strong {
+    display: block;
+    margin: 4px 0;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
 .signature-action-panel {
     display: grid;
     grid-template-columns: minmax(220px, 0.6fr) minmax(280px, 1fr);
@@ -4524,6 +4637,27 @@ button:disabled,
     margin: 0 auto;
     background: #eef3f7;
     overflow: hidden;
+}
+
+.signature-document-stage.is-inline-document {
+    display: grid;
+    justify-items: center;
+}
+
+.signature-document-stage.is-inline-document .dti-preview-page {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+}
+
+.signature-document-stage.is-inline-document .dti-document {
+    width: 100%;
+    max-width: 100%;
+}
+
+.signature-document-stage.is-inline-document .dti-page,
+.signature-document-stage.is-inline-document .accountability-page-sheet {
+    box-sizing: border-box;
 }
 
 .document-embed-body {
@@ -6589,9 +6723,23 @@ button:disabled,
         grid-template-columns: 1fr;
     }
 
+    .signature-list-meta {
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
+    }
+
     .signature-list-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
         border-top: 1px solid #eef3f7;
         padding-top: 12px;
+    }
+
+    .signature-list-actions .status-pill,
+    .signature-list-actions .secondary-button {
+        width: auto;
+        min-width: 150px;
     }
 
     .accountability-filter-form {
@@ -6880,6 +7028,79 @@ button:disabled,
 }
 
 @media (max-width: 900px) {
+    .signatures-page {
+        max-width: 100%;
+    }
+
+    .signatures-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .signatures-filter-panel,
+    .signatures-list-panel,
+    .signature-request-panel,
+    .signature-document-panel {
+        padding: 14px;
+    }
+
+    .signatures-filter-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .signature-list-card {
+        padding: 12px;
+    }
+
+    .signature-list-title h2 {
+        font-size: 18px;
+        line-height: 1.2;
+    }
+
+    .signature-list-title p {
+        font-size: 13px;
+        line-height: 1.35;
+    }
+
+    .signature-list-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .signature-list-meta div {
+        padding: 9px;
+    }
+
+    .signature-list-meta strong {
+        font-size: 12px;
+    }
+
+    .signature-context-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .signature-request-body {
+        grid-template-columns: 1fr;
+    }
+
+    .signature-data-grid,
+    .signature-signer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .signature-detail-hero {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .signature-detail-hero h1 {
+        font-size: 24px;
+        line-height: 1.15;
+    }
+
+    .signature-hero-actions {
+        justify-content: flex-start;
+    }
+
     .three-columns,
     .aid-type-fields-grid,
     .family-doc-upload-grid {
@@ -7284,8 +7505,21 @@ button:disabled,
     }
 
     .signatures-filter-form,
-    .signature-list-meta {
+    .signature-list-meta,
+    .signature-context-grid,
+    .signature-data-grid,
+    .signature-signer-grid {
         grid-template-columns: 1fr;
+    }
+
+    .signature-list-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .signature-list-actions .status-pill,
+    .signature-list-actions .secondary-button {
+        width: 100%;
     }
 
     .signatures-filter-actions {
@@ -7359,29 +7593,73 @@ button:disabled,
 
     .topbar {
         position: static;
-        align-items: flex-start;
-        flex-direction: column;
-        padding: 14px 16px;
-    }
-
-    .topbar-left,
-    .user-area {
-        width: 100%;
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
-
-    .user-area {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        min-height: 56px;
+        gap: 8px;
+        padding: 8px 10px;
+    }
+
+    .topbar-left {
+        display: contents;
+    }
+
+    .user-area {
+        grid-column: 3;
+        width: auto;
+        max-width: min(46vw, 230px);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    .menu-toggle {
+        width: 40px;
+        min-width: 40px;
+        height: 40px;
+        padding: 9px;
     }
 
     .institution-title {
-        flex: 1;
+        grid-column: 2;
+        min-width: 0;
+        gap: 0;
+    }
+
+    .institution-title strong {
+        font-size: 13px;
+    }
+
+    .institution-title span {
+        display: none;
     }
 
     .user-summary {
         justify-items: start;
+        min-width: 0;
+        max-width: 150px;
+    }
+
+    .user-summary strong,
+    .user-summary span {
+        text-align: left;
+    }
+
+    .user-summary strong {
+        font-size: 12px;
+        -webkit-line-clamp: 1;
+    }
+
+    .user-summary span {
+        display: none;
+    }
+
+    .logout-button {
+        min-height: 34px;
+        padding: 7px 9px;
     }
 
     .main {
@@ -7895,6 +8173,24 @@ button:disabled,
 }
 
 @media (max-width: 520px) {
+    .topbar {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .institution-title {
+        display: none;
+    }
+
+    .user-area {
+        grid-column: 2 / 4;
+        max-width: none;
+        width: 100%;
+    }
+
+    .user-summary {
+        max-width: calc(100vw - 132px);
+    }
+
     .accountability-filter-panel {
         padding: 14px;
     }
@@ -8182,6 +8478,35 @@ button:disabled,
         min-height: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
+    }
+
+    body.is-printing-signature-document .app-shell,
+    body.is-printing-signature-document .app-main,
+    body.is-printing-signature-document .content-shell,
+    body.is-printing-signature-document .signature-detail-page,
+    body.is-printing-signature-document .signature-document-panel,
+    body.is-printing-signature-document .signature-document-stage {
+        display: block !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    body.is-printing-signature-document .signature-detail-page > :not(.signature-document-panel),
+    body.is-printing-signature-document .signature-document-panel > .signature-panel-heading {
+        display: none !important;
+    }
+
+    body.is-printing-signature-document .signature-document-stage.is-inline-document .records-page {
+        display: block !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .dti-page {

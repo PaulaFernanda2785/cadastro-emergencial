@@ -338,13 +338,34 @@ final class CoassinaturaRepository
         $page = max(1, $page);
         [$whereSql, $params] = $this->signatureSearchWhere($userId, $filters, $includeAll);
 
-        $countStmt = Database::connection()->prepare(
-            'SELECT COUNT(*)
+        $groupedSelect = "SELECT
+                c.documento_tipo,
+                c.documento_chave,
+                COALESCE(
+                    MIN(CASE WHEN c.coautor_usuario_id = :group_user_action_id AND c.coautor_usuario_id <> c.solicitante_usuario_id THEN c.id END),
+                    MIN(CASE WHEN c.coautor_usuario_id = c.solicitante_usuario_id THEN c.id END),
+                    MIN(c.id)
+                ) AS representative_id,
+                COUNT(*) AS total_assinaturas,
+                SUM(CASE WHEN c.status = 'pendente' THEN 1 ELSE 0 END) AS pendentes_count,
+                SUM(CASE WHEN c.status = 'autorizado' THEN 1 ELSE 0 END) AS autorizados_count,
+                SUM(CASE WHEN c.status = 'negado' THEN 1 ELSE 0 END) AS negados_count,
+                GROUP_CONCAT(
+                    DISTINCT CASE WHEN c.coautor_usuario_id <> c.solicitante_usuario_id THEN u.nome ELSE NULL END
+                    ORDER BY u.nome SEPARATOR ', '
+                ) AS coautores_nomes,
+                MAX(COALESCE(c.atualizado_em, c.solicitado_em)) AS ultima_atualizacao,
+                MIN(c.solicitado_em) AS primeira_solicitacao
              FROM coassinaturas_documentos c
              JOIN usuarios u ON u.id = c.coautor_usuario_id
              JOIN usuarios s ON s.id = c.solicitante_usuario_id
-             ' . $whereSql
+             " . $whereSql . "
+             GROUP BY c.documento_tipo, c.documento_chave";
+
+        $countStmt = Database::connection()->prepare(
+            'SELECT COUNT(*) FROM (' . $groupedSelect . ') grouped_documents'
         );
+        $countStmt->bindValue(':group_user_action_id', $userId, PDO::PARAM_INT);
         $this->bindSearchParams($countStmt, $params);
         $countStmt->execute();
 
@@ -354,24 +375,60 @@ final class CoassinaturaRepository
         $offset = ($page - 1) * $perPage;
 
         $stmt = Database::connection()->prepare(
-            "SELECT c.*, u.nome AS coautor_nome, u.cpf AS coautor_cpf,
+            "SELECT
+                    c.id,
+                    c.documento_tipo,
+                    c.documento_chave,
+                    c.entidade,
+                    c.entidade_id,
+                    c.titulo,
+                    c.descricao,
+                    c.url_documento,
+                    c.solicitante_usuario_id,
+                    c.coautor_usuario_id,
+                    CASE
+                        WHEN grouped.negados_count > 0 THEN 'negado'
+                        WHEN grouped.pendentes_count > 0 THEN 'pendente'
+                        ELSE 'autorizado'
+                    END AS status,
+                    c.payload_json,
+                    c.coautor_snapshot_json,
+                    c.hash_autorizacao,
+                    c.motivo_negativa,
+                    grouped.primeira_solicitacao AS solicitado_em,
+                    c.autorizado_em,
+                    c.negado_em,
+                    c.solicitante_notificado_em,
+                    grouped.ultima_atualizacao AS atualizado_em,
+                    grouped.total_assinaturas,
+                    grouped.pendentes_count,
+                    grouped.autorizados_count,
+                    grouped.negados_count,
+                    grouped.coautores_nomes,
+                    u.nome AS coautor_nome,
+                    u.cpf AS coautor_cpf,
                     s.nome AS solicitante_nome, s.cpf AS solicitante_cpf,
                     CASE
                         WHEN c.coautor_usuario_id = c.solicitante_usuario_id THEN 'assinante_principal'
                         WHEN c.coautor_usuario_id = :vinculo_usuario_id THEN 'para_mim'
                         ELSE 'solicitada'
                     END AS vinculo
-             FROM coassinaturas_documentos c
+             FROM (" . $groupedSelect . ") grouped
+             JOIN coassinaturas_documentos c ON c.id = grouped.representative_id
              JOIN usuarios u ON u.id = c.coautor_usuario_id
              JOIN usuarios s ON s.id = c.solicitante_usuario_id
-             " . $whereSql . "
              ORDER BY
-                CASE WHEN c.status = 'pendente' THEN 0 ELSE 1 END ASC,
-                COALESCE(c.atualizado_em, c.solicitado_em) DESC,
+                CASE
+                    WHEN grouped.pendentes_count > 0 THEN 0
+                    WHEN grouped.negados_count > 0 THEN 1
+                    ELSE 2
+                END ASC,
+                grouped.ultima_atualizacao DESC,
                 c.id DESC
              LIMIT :limit OFFSET :offset"
         );
         $stmt->bindValue(':vinculo_usuario_id', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':group_user_action_id', $userId, PDO::PARAM_INT);
         $this->bindSearchParams($stmt, $params);
         $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cadastro-emergencial-v20260502-116';
+const CACHE_NAME = 'cadastro-emergencial-v20260502-123';
 const CORE_ASSETS = [
     './manifest.webmanifest',
     './assets/css/app.css',
@@ -21,6 +21,7 @@ const CORE_ASSETS = [
     './assets/images/app-icon-512.png',
     './assets/images/logo-cedec.png',
     './assets/images/logo-cadastro-emergencial-app.png',
+    './assets/images/arrow-up.svg',
     './assets/images/logo.cbmpa.ico'
 ];
 

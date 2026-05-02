@@ -25,10 +25,26 @@
         return;
     }
 
+    function normalizeRegisterUrl(value) {
+        if (!value || value === '#') {
+            return '#';
+        }
+
+        try {
+            return new URL(value, window.location.origin).href;
+        } catch (error) {
+            return value;
+        }
+    }
+
+    function shareText(link) {
+        return 'Acesse o cadastro web desta acao emergencial:\n' + link;
+    }
+
     document.querySelectorAll('[data-action-qr-open]').forEach(function (button) {
         button.addEventListener('click', function () {
             var actionTitle = button.dataset.title || 'Ação emergencial';
-            var registerUrl = button.dataset.registerUrl || '#';
+            var registerUrl = normalizeRegisterUrl(button.dataset.registerUrl || '#');
 
             title.textContent = actionTitle;
             registerLink.href = registerUrl;
@@ -76,7 +92,7 @@
     }
 
     function currentRegisterUrl() {
-        return registerLink.href || (sharedLink ? sharedLink.value : '');
+        return normalizeRegisterUrl(registerLink.href || (sharedLink ? sharedLink.value : ''));
     }
 
     function fallbackCopy(text) {
@@ -118,23 +134,25 @@
     }
 
     if (shareButton) {
-        if (!navigator.share) {
-            shareButton.hidden = true;
-        } else {
-            shareButton.addEventListener('click', function () {
-                var link = currentRegisterUrl();
+        shareButton.addEventListener('click', function () {
+            var link = currentRegisterUrl();
 
-                if (!link || link === '#') {
-                    setCopyStatus('Link indisponivel.');
-                    return;
-                }
+            if (!link || link === '#') {
+                setCopyStatus('Link indisponivel.');
+                return;
+            }
 
+            if (navigator.share) {
                 navigator.share({
                     title: title.textContent || 'Acao emergencial',
                     text: 'Acesse o cadastro web desta acao emergencial.',
                     url: link
                 }).catch(function () {});
-            });
-        }
+                return;
+            }
+
+            window.open('https://wa.me/?text=' + encodeURIComponent(shareText(link)), '_blank', 'noopener');
+            setCopyStatus('Compartilhamento aberto pelo WhatsApp.');
+        });
     }
 })();

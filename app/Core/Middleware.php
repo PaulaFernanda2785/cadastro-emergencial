@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Services\AuditLogService;
+
 final class Middleware
 {
     public static function handle(array $middleware): void
@@ -39,6 +41,33 @@ final class Middleware
             header('Location: ' . url('/login?intended=1'));
             exit;
         }
+
+        self::enforceIdleTimeout();
+    }
+
+    private static function enforceIdleTimeout(): void
+    {
+        $config = require BASE_PATH . '/config/security.php';
+        $timeout = max(60, (int) ($config['session_idle_timeout_seconds'] ?? 1800));
+        $now = time();
+        $lastActivity = (int) Session::get('last_activity_at', $now);
+
+        if (($now - $lastActivity) > $timeout) {
+            $user = current_user();
+            $userId = is_array($user) && is_numeric($user['id'] ?? null) ? (int) $user['id'] : null;
+
+            if ($userId !== null) {
+                (new AuditLogService())->record('logout_inatividade', 'usuarios', $userId, 'Sessao encerrada por inatividade.', $userId);
+            }
+
+            Session::destroy();
+            Session::start();
+            Session::flash('warning', 'Sessao encerrada por inatividade apos 30 minutos.');
+            header('Location: ' . url('/login?timeout=1'));
+            exit;
+        }
+
+        Session::put('last_activity_at', $now);
     }
 
     private static function guest(): void

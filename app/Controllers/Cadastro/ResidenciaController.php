@@ -199,7 +199,11 @@ final class ResidenciaController extends Controller
 
     public function viewDocument(string $id, string $documentoId): void
     {
-        $this->findResidenciaForAccess((int) $id);
+        $residencia = $this->residencias->find((int) $id);
+
+        if ($residencia === null || (!$this->canAccessResidencia($residencia) && !$this->canAccessDtiSignedDocument((int) $id))) {
+            $this->abort(404);
+        }
 
         $documento = $this->documentos->findForResidencia((int) $documentoId, (int) $id);
 
@@ -569,6 +573,21 @@ final class ResidenciaController extends Controller
         $activeActionToken = $this->activeActionTokenForCadastrador();
 
         return $activeActionToken === null || hash_equals($activeActionToken, (string) ($residencia['token_publico'] ?? ''));
+    }
+
+    private function canAccessDtiSignedDocument(int $residenciaId): bool
+    {
+        $userId = (int) (current_user()['id'] ?? 0);
+
+        if ($userId <= 0) {
+            return false;
+        }
+
+        return (new CoassinaturaRepository())->canUserAccessDocument(
+            'dti',
+            $this->dtiDocumentKey($residenciaId),
+            $userId
+        );
     }
 
     private function ownedRecordsUserId(): ?int

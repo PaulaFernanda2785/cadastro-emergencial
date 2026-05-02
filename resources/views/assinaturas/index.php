@@ -196,7 +196,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
 
     <section class="table-panel signatures-list-panel">
         <div class="records-list-toolbar">
-            <strong><?= h($totalRecords) ?> assinatura(s)</strong>
+            <strong><?= h($totalRecords) ?> documento(s)</strong>
             <span>Exibindo <?= h($firstRecord) ?>-<?= h($lastRecord) ?> de <?= h($totalRecords) ?>, maximo de 10 por pagina</span>
         </div>
 
@@ -232,6 +232,11 @@ $lastRecord = min($totalRecords, $page * $perPage);
                                 <span><?= h($personLabel) ?></span>
                                 <strong><?= h($personName) ?></strong>
                                 <?php if ($personCpf !== ''): ?><small><?= h($personCpf) ?></small><?php endif; ?>
+                            </div>
+                            <div>
+                                <span>Assinaturas</span>
+                                <strong><?= h((int) ($assinatura['total_assinaturas'] ?? 1)) ?> vinculada(s)</strong>
+                                <?php if (!empty($assinatura['coautores_nomes'] ?? '')): ?><small><?= h($assinatura['coautores_nomes']) ?></small><?php endif; ?>
                             </div>
                             <div>
                                 <span>Solicitada em</span>

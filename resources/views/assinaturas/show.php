@@ -20,13 +20,37 @@ $isRequester = (int) ($assinatura['solicitante_usuario_id'] ?? 0) === (int) (cur
 $isPrincipalHistory = (int) ($assinatura['coautor_usuario_id'] ?? 0) === (int) ($assinatura['solicitante_usuario_id'] ?? 0);
 $printReady = (bool) ($printReady ?? false);
 $isAdmin = (string) (current_user()['perfil'] ?? '') === 'administrador';
+$coSignatureStatus = is_array($coSignatureStatus ?? null) ? $coSignatureStatus : ['solicitacoes' => []];
+$documentSignatures = is_array($coSignatureStatus['solicitacoes'] ?? null) ? $coSignatureStatus['solicitacoes'] : [];
+$inlineDocumentHtml = trim((string) ($inlineDocumentHtml ?? ''));
 $documentUrl = (string) ($assinatura['url_documento'] ?? '');
 $documentEmbedUrl = '';
+$documentEmbedSrc = '';
+$appendQueryParams = static function (string $url, array $params): string {
+    foreach ($params as $key => $value) {
+        if (preg_match('/(?:^|[?&])' . preg_quote((string) $key, '/') . '=/', $url) === 1) {
+            continue;
+        }
+
+        $url .= (str_contains($url, '?') ? '&' : '?') . rawurlencode((string) $key) . '=' . rawurlencode((string) $value);
+    }
+
+    return $url;
+};
 
 if ($documentUrl !== '') {
-    $separator = str_contains($documentUrl, '?') ? '&' : '?';
-    $documentEmbedUrl = $documentUrl . $separator . 'embed_document=1';
+    $documentEmbedParams = ['embed_document' => '1'];
+
+    if ((string) ($assinatura['documento_tipo'] ?? '') === 'prestacao_contas') {
+        $documentEmbedParams = ['assinatura' => '1', 'embed_document' => '1'];
+    }
+
+    $documentEmbedUrl = $appendQueryParams($documentUrl, $documentEmbedParams);
+    $documentEmbedSrc = preg_match('#^https?://#i', $documentEmbedUrl) === 1
+        ? $documentEmbedUrl
+        : url($documentEmbedUrl);
 }
+$hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
 ?>
 
 <section class="records-page signature-detail-page">
@@ -38,7 +62,7 @@ if ($documentUrl !== '') {
         </div>
         <div class="signature-hero-actions">
             <span class="status-pill status-<?= h($status) ?>"><?= h($statusLabel) ?></span>
-            <?php if ($printReady && $documentEmbedUrl !== ''): ?>
+            <?php if ($printReady && $hasDocumentPreview): ?>
                 <button type="button" class="primary-button" data-signature-print-document>Imprimir / baixar PDF</button>
             <?php endif; ?>
             <a class="secondary-button" href="<?= h(url('/assinaturas')) ?>">Voltar</a>
@@ -145,6 +169,27 @@ if ($documentUrl !== '') {
             </aside>
         </div>
 
+        <?php if ($documentSignatures !== []): ?>
+            <section class="signature-document-signers" aria-label="Assinaturas vinculadas ao documento">
+                <div class="signature-panel-heading">
+                    <div>
+                        <span class="eyebrow">Documento</span>
+                        <h2>Assinaturas vinculadas</h2>
+                    </div>
+                </div>
+                <div class="signature-signer-grid">
+                    <?php foreach ($documentSignatures as $documentSignature): ?>
+                        <?php $isPrimarySigner = (int) ($documentSignature['coautor_usuario_id'] ?? 0) === (int) ($documentSignature['solicitante_usuario_id'] ?? 0); ?>
+                        <article>
+                            <span><?= h($isPrimarySigner ? 'Assinante principal' : 'Coautor') ?></span>
+                            <strong><?= h($documentSignature['coautor_nome'] ?? '-') ?></strong>
+                            <small><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$documentSignature['status'] ?? ''] ?? '-') ?></small>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        <?php endif; ?>
+
         <?php if ($isCoauthor && $status === 'pendente'): ?>
             <div class="signature-action-panel">
                 <form method="post" action="<?= h(url('/assinaturas/' . (int) $assinatura['id'] . '/autorizar')) ?>" class="js-prevent-double-submit">
@@ -180,7 +225,7 @@ if ($documentUrl !== '') {
             </div>
         <?php endif; ?>
 
-        <?php if ($printReady && $documentEmbedUrl !== ''): ?>
+        <?php if ($printReady && $hasDocumentPreview): ?>
             <div class="signature-print-ready-panel">
                 <div>
                     <span class="eyebrow">Documento liberado</span>
@@ -200,9 +245,11 @@ if ($documentUrl !== '') {
             </div>
         </div>
 
-        <div class="signature-document-stage">
-            <?php if ($documentEmbedUrl !== ''): ?>
-                <iframe src="<?= h(url($documentEmbedUrl)) ?>" title="Documento para assinatura" scrolling="no" data-signature-document-frame></iframe>
+        <div class="signature-document-stage <?= $inlineDocumentHtml !== '' ? 'is-inline-document' : '' ?>" <?= $inlineDocumentHtml !== '' ? 'data-signature-inline-document' : '' ?>>
+            <?php if ($inlineDocumentHtml !== ''): ?>
+                <?= $inlineDocumentHtml ?>
+            <?php elseif ($documentEmbedSrc !== ''): ?>
+                <iframe src="<?= h($documentEmbedSrc) ?>" title="Documento para assinatura" scrolling="no" data-signature-document-frame></iframe>
             <?php else: ?>
                 <div class="empty-state">Documento sem URL de visualizacao.</div>
             <?php endif; ?>
@@ -239,6 +286,12 @@ if ($documentUrl !== '') {
             var frame = document.querySelector('[data-signature-document-frame]');
 
             if (!frame || !frame.contentWindow) {
+                if (document.querySelector('[data-signature-inline-document]')) {
+                    document.body.classList.add('is-printing-signature-document');
+                    window.print();
+                    return;
+                }
+
                 window.print();
                 return;
             }
@@ -246,5 +299,9 @@ if ($documentUrl !== '') {
             frame.contentWindow.focus();
             frame.contentWindow.print();
         });
+    });
+
+    window.addEventListener('afterprint', function () {
+        document.body.classList.remove('is-printing-signature-document');
     });
 </script>

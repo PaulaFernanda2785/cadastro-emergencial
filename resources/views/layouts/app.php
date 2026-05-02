@@ -16,7 +16,8 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260502-116';
+$assetVersion = '20260502-124';
+$sessionTimeoutSeconds = 1800;
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
 $signatureRequestedPendingCount = 0;
@@ -89,7 +90,11 @@ $menuItems = [
     <script src="<?= h(asset('js/family-receipt.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/dti-signature.js') . '?v=' . $assetVersion) ?>" defer></script>
 </head>
-<body>
+<body
+    data-session-timeout-seconds="<?= $user !== null ? h($sessionTimeoutSeconds) : '0' ?>"
+    data-logout-url="<?= $user !== null ? h(url('/logout')) : '' ?>"
+    data-csrf-token="<?= $user !== null ? h(App\Core\Csrf::token()) : '' ?>"
+>
     <div class="app-shell" data-layout-shell>
         <?php if ($user !== null): ?>
             <aside class="sidebar" data-sidebar>
@@ -218,5 +223,8 @@ $menuItems = [
             </footer>
         </div>
     </div>
+    <button type="button" class="back-to-top-button no-print" data-back-to-top aria-label="Voltar ao topo">
+        <img src="<?= h(asset('images/arrow-up.svg') . '?v=' . $assetVersion) ?>" alt="" aria-hidden="true">
+    </button>
 </body>
 </html>

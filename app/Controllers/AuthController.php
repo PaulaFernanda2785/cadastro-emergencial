@@ -71,6 +71,7 @@ final class AuthController extends Controller
 
         Session::regenerate();
         Session::put('user', $user);
+        Session::put('last_activity_at', time());
         $this->restoreActiveActionForUser($user);
 
         (new AuditLogService())->record('login_sucesso', 'usuarios', (int) $user['id'], 'Usuario autenticado.', (int) $user['id']);
@@ -142,6 +143,7 @@ final class AuthController extends Controller
         unset($user['senha_hash']);
         Session::regenerate();
         Session::put('user', $user);
+        Session::put('last_activity_at', time());
         $this->restoreActiveActionForUser($user);
         $repository->touchLastAccess($id);
 
