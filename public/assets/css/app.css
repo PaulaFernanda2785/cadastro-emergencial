@@ -1934,6 +1934,22 @@ button:disabled,
     background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
 }
 
+.account-password-page {
+    width: min(860px, 100%);
+}
+
+.account-password-card {
+    overflow: hidden;
+}
+
+.account-password-block {
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+}
+
+.account-password-current {
+    max-width: 420px;
+}
+
 .qr-modal {
     width: min(92vw, 460px);
     border: 0;
@@ -6361,9 +6377,11 @@ button:disabled,
     .action-form-card,
     .aid-type-form-card,
     .user-form-card,
+    .account-password-card,
     .form-block,
     .aid-type-form-block,
     .user-form-block,
+    .account-password-block,
     .family-form-block {
         padding: 14px;
     }
