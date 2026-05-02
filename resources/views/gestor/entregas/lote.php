@@ -74,6 +74,14 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                 <input type="search" name="lote_q" value="<?= h($batchFilters['q'] ?? '') ?>" placeholder="Nome, CPF, residencia">
             </label>
             <label class="field">
+                <span>Status da entrega</span>
+                <select name="lote_status_entrega">
+                    <option value="">Todos</option>
+                    <option value="entregue" <?= ($batchFilters['status_entrega'] ?? '') === 'entregue' ? 'selected' : '' ?>>Com entrega</option>
+                    <option value="nao_entregue" <?= ($batchFilters['status_entrega'] ?? '') === 'nao_entregue' ? 'selected' : '' ?>>Sem entrega</option>
+                </select>
+            </label>
+            <label class="field">
                 <span>Inicio cadastro</span>
                 <input type="date" name="lote_data_inicio" value="<?= h($batchFilters['data_inicio'] ?? '') ?>">
             </label>

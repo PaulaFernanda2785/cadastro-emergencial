@@ -351,6 +351,20 @@ final class FamiliaRepository
             $params['residencia_busca_endereco'] = $residenceSearch;
         }
 
+        if (($filters['status_entrega'] ?? '') === 'entregue') {
+            $where[] = 'EXISTS (
+                SELECT 1
+                FROM entregas_ajuda e_status
+                WHERE e_status.familia_id = f.id AND e_status.deleted_at IS NULL
+            )';
+        } elseif (($filters['status_entrega'] ?? '') === 'nao_entregue') {
+            $where[] = 'NOT EXISTS (
+                SELECT 1
+                FROM entregas_ajuda e_status
+                WHERE e_status.familia_id = f.id AND e_status.deleted_at IS NULL
+            )';
+        }
+
         if (($filters['data_inicio'] ?? '') !== '') {
             $where[] = 'f.criado_em >= :data_inicio';
             $params['data_inicio'] = $filters['data_inicio'] . ' 00:00:00';

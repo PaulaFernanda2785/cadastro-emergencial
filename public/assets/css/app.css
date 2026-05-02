@@ -4671,7 +4671,8 @@ button:disabled,
     width: 1123px;
     max-width: none;
     transform-origin: top center;
-    will-change: transform;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
 }
 
 .recomecar-document .accountability-page-sheet {
@@ -4682,7 +4683,7 @@ button:disabled,
 }
 
 .recomecar-list-table {
-    font-size: 9.2px;
+    font-size: 10px;
     table-layout: fixed;
 }
 
@@ -4691,15 +4692,15 @@ button:disabled,
 }
 
 .recomecar-list-table .recomecar-col-protocol {
-    width: 16%;
+    width: 13%;
 }
 
 .recomecar-list-table .recomecar-col-name {
-    width: 23%;
+    width: 25%;
 }
 
 .recomecar-list-table .recomecar-col-sex {
-    width: 8%;
+    width: 7%;
 }
 
 .recomecar-list-table .recomecar-col-birth {
@@ -4707,7 +4708,7 @@ button:disabled,
 }
 
 .recomecar-list-table .recomecar-col-cpf {
-    width: 11%;
+    width: 12%;
 }
 
 .recomecar-list-table .recomecar-col-rg {
@@ -4724,10 +4725,63 @@ button:disabled,
 
 .recomecar-list-table th,
 .recomecar-list-table td {
-    padding: 4px 3px;
-    line-height: 1.15;
+    padding: 5px 4px;
+    line-height: 1.2;
     overflow-wrap: break-word;
     word-break: normal;
+}
+
+.recomecar-list-table thead th {
+    font-size: 9px;
+    line-height: 1.15;
+    font-weight: 800;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.accountability-list-table.recomecar-list-table th:nth-child(1),
+.accountability-list-table.recomecar-list-table td:nth-child(1) {
+    width: 4%;
+}
+
+.accountability-list-table.recomecar-list-table th:nth-child(2),
+.accountability-list-table.recomecar-list-table td:nth-child(2) {
+    width: 13%;
+}
+
+.accountability-list-table.recomecar-list-table th:nth-child(3),
+.accountability-list-table.recomecar-list-table td:nth-child(3) {
+    width: 25%;
+}
+
+.accountability-list-table.recomecar-list-table th:nth-child(4),
+.accountability-list-table.recomecar-list-table td:nth-child(4) {
+    width: 7%;
+}
+
+.accountability-list-table.recomecar-list-table th:nth-child(5),
+.accountability-list-table.recomecar-list-table td:nth-child(5) {
+    width: 10%;
+}
+
+.accountability-list-table.recomecar-list-table th:nth-child(6),
+.accountability-list-table.recomecar-list-table td:nth-child(6) {
+    width: 12%;
+}
+
+.accountability-list-table.recomecar-list-table th:nth-child(7),
+.accountability-list-table.recomecar-list-table td:nth-child(7) {
+    width: 8%;
+}
+
+.accountability-list-table.recomecar-list-table th:nth-child(8),
+.accountability-list-table.recomecar-list-table td:nth-child(8) {
+    width: 10%;
+}
+
+.accountability-list-table.recomecar-list-table th:nth-child(9),
+.accountability-list-table.recomecar-list-table td:nth-child(9) {
+    width: 11%;
 }
 
 .recomecar-list-table th:nth-child(1),
@@ -4747,11 +4801,8 @@ button:disabled,
     text-align: center;
 }
 
-.recomecar-list-table th:nth-child(5),
 .recomecar-list-table td:nth-child(5),
-.recomecar-list-table th:nth-child(6),
 .recomecar-list-table td:nth-child(6),
-.recomecar-list-table th:nth-child(7),
 .recomecar-list-table td:nth-child(7) {
     white-space: nowrap;
 }
@@ -8542,6 +8593,11 @@ button:disabled,
         margin: 12mm;
     }
 
+    @page recomecar {
+        size: A4 landscape;
+        margin: 12mm;
+    }
+
     :root {
         --bg: #ffffff;
         --surface: #ffffff;
@@ -8818,6 +8874,225 @@ button:disabled,
     .accountability-list-table th:nth-child(5),
     .accountability-list-table td:nth-child(5) {
         width: 25%;
+    }
+
+    body.is-printing-recomecar-document {
+        background: #ffffff !important;
+        overflow: visible !important;
+    }
+
+    body.is-printing-recomecar-document .app-shell,
+    body.is-printing-recomecar-document .app-content,
+    body.is-printing-recomecar-document .main {
+        display: block !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    body.is-printing-recomecar-document .main > .alert,
+    body.is-printing-recomecar-document .recomecar-page > :not(.recomecar-document-viewport) {
+        display: none !important;
+    }
+
+    body.is-printing-recomecar-document .recomecar-page,
+    body.is-printing-recomecar-document .recomecar-document-viewport {
+        display: block !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+    }
+
+    body.is-printing-recomecar-document .recomecar-document {
+        page: recomecar;
+        display: block !important;
+        width: 273mm !important;
+        min-width: 273mm !important;
+        max-width: 273mm !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        gap: 0 !important;
+        background: #ffffff !important;
+        transform: none !important;
+        transform-origin: initial !important;
+        zoom: 1 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    body.is-printing-recomecar-document .recomecar-document .accountability-page-sheet {
+        display: block !important;
+        width: 273mm !important;
+        min-width: 273mm !important;
+        max-width: 273mm !important;
+        min-height: 186mm !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+        break-after: page;
+        overflow: visible !important;
+    }
+
+    body.is-printing-recomecar-document .recomecar-document .accountability-page-sheet:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table {
+        width: 100% !important;
+        min-width: 0 !important;
+        font-size: 8.2pt;
+        table-layout: fixed;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th,
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td {
+        padding: 3px 4px;
+        line-height: 1.15;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th:nth-child(1),
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td:nth-child(1) {
+        width: 4%;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th:nth-child(2),
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td:nth-child(2) {
+        width: 13%;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th:nth-child(3),
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td:nth-child(3) {
+        width: 25%;
+        white-space: normal;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th:nth-child(4),
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td:nth-child(4) {
+        width: 7%;
+        white-space: normal;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th:nth-child(5),
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td:nth-child(5) {
+        width: 10%;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th:nth-child(6),
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td:nth-child(6) {
+        width: 12%;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th:nth-child(7),
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td:nth-child(7) {
+        width: 8%;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th:nth-child(8),
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td:nth-child(8) {
+        width: 10%;
+    }
+
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table th:nth-child(9),
+    body.is-printing-recomecar-document .accountability-list-table.recomecar-list-table td:nth-child(9) {
+        width: 11%;
+    }
+
+    .document-embed-body .recomecar-document {
+        page: recomecar;
+        display: block !important;
+        width: 273mm !important;
+        min-width: 273mm !important;
+        max-width: 273mm !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        gap: 0 !important;
+        background: #ffffff !important;
+        transform: none !important;
+        transform-origin: initial !important;
+        zoom: 1 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    .document-embed-body .recomecar-document .accountability-page-sheet {
+        display: block !important;
+        width: 273mm !important;
+        min-width: 273mm !important;
+        max-width: 273mm !important;
+        min-height: 186mm !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+        break-after: page;
+        overflow: visible !important;
+    }
+
+    .document-embed-body .recomecar-document .accountability-page-sheet:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+    .document-embed-body .accountability-list-table.recomecar-list-table th:nth-child(1),
+    .document-embed-body .accountability-list-table.recomecar-list-table td:nth-child(1) {
+        width: 4%;
+    }
+
+    .document-embed-body .accountability-list-table.recomecar-list-table th:nth-child(2),
+    .document-embed-body .accountability-list-table.recomecar-list-table td:nth-child(2) {
+        width: 13%;
+    }
+
+    .document-embed-body .accountability-list-table.recomecar-list-table th:nth-child(3),
+    .document-embed-body .accountability-list-table.recomecar-list-table td:nth-child(3) {
+        width: 25%;
+        white-space: normal;
+    }
+
+    .document-embed-body .accountability-list-table.recomecar-list-table th:nth-child(4),
+    .document-embed-body .accountability-list-table.recomecar-list-table td:nth-child(4) {
+        width: 7%;
+        white-space: normal;
+    }
+
+    .document-embed-body .accountability-list-table.recomecar-list-table th:nth-child(5),
+    .document-embed-body .accountability-list-table.recomecar-list-table td:nth-child(5) {
+        width: 10%;
+    }
+
+    .document-embed-body .accountability-list-table.recomecar-list-table th:nth-child(6),
+    .document-embed-body .accountability-list-table.recomecar-list-table td:nth-child(6) {
+        width: 12%;
+    }
+
+    .document-embed-body .accountability-list-table.recomecar-list-table th:nth-child(7),
+    .document-embed-body .accountability-list-table.recomecar-list-table td:nth-child(7) {
+        width: 8%;
+    }
+
+    .document-embed-body .accountability-list-table.recomecar-list-table th:nth-child(8),
+    .document-embed-body .accountability-list-table.recomecar-list-table td:nth-child(8) {
+        width: 10%;
+    }
+
+    .document-embed-body .accountability-list-table.recomecar-list-table th:nth-child(9),
+    .document-embed-body .accountability-list-table.recomecar-list-table td:nth-child(9) {
+        width: 11%;
     }
 
     .manual-signature-cell {

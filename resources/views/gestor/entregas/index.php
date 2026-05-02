@@ -139,6 +139,14 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
             </select>
         </label>
         <label class="field">
+            <span>Status da entrega</span>
+            <select name="status_entrega">
+                <option value="">Todos</option>
+                <option value="entregue" <?= ($filters['status_entrega'] ?? '') === 'entregue' ? 'selected' : '' ?>>Com entrega</option>
+                <option value="nao_entregue" <?= ($filters['status_entrega'] ?? '') === 'nao_entregue' ? 'selected' : '' ?>>Sem entrega</option>
+            </select>
+        </label>
+        <label class="field">
             <span>Inicio</span>
             <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
         </label>

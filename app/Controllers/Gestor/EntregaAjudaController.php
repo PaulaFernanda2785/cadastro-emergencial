@@ -301,6 +301,7 @@ final class EntregaAjudaController extends Controller
     {
         $acaoBusca = trim((string) ($_GET['acao_busca'] ?? ''));
         $acaoId = $this->positiveInt($_GET['acao_id'] ?? '');
+        $statusEntrega = $this->deliveryStatus($_GET['status_entrega'] ?? '');
 
         if ($acaoId === '' && preg_match('/Acao\s+#(\d+)/i', $acaoBusca, $matches) === 1) {
             $acaoId = $this->positiveInt($matches[1]);
@@ -315,6 +316,7 @@ final class EntregaAjudaController extends Controller
             'familia_id' => trim((string) ($_GET['familia_id'] ?? '')),
             'familia_busca' => trim((string) ($_GET['familia_busca'] ?? '')),
             'tipo_ajuda_id' => trim((string) ($_GET['tipo_ajuda_id'] ?? '')),
+            'status_entrega' => $statusEntrega,
             'data_inicio' => trim((string) ($_GET['data_inicio'] ?? '')),
             'data_fim' => trim((string) ($_GET['data_fim'] ?? '')),
         ];
@@ -324,6 +326,7 @@ final class EntregaAjudaController extends Controller
     {
         $acaoBusca = trim((string) ($_GET['lote_acao_busca'] ?? ''));
         $acaoId = $this->positiveInt($_GET['lote_acao_id'] ?? '');
+        $statusEntrega = $this->deliveryStatus($_GET['lote_status_entrega'] ?? '');
 
         if ($acaoId === '' && preg_match('/Acao\s+#(\d+)/i', $acaoBusca, $matches) === 1) {
             $acaoId = $this->positiveInt($matches[1]);
@@ -335,6 +338,7 @@ final class EntregaAjudaController extends Controller
             'acao_busca' => $acaoBusca,
             'residencia_id' => trim((string) ($_GET['lote_residencia_id'] ?? '')),
             'residencia_busca' => trim((string) ($_GET['lote_residencia_busca'] ?? '')),
+            'status_entrega' => $statusEntrega,
             'data_inicio' => trim((string) ($_GET['lote_data_inicio'] ?? '')),
             'data_fim' => trim((string) ($_GET['lote_data_fim'] ?? '')),
         ];
@@ -342,13 +346,20 @@ final class EntregaAjudaController extends Controller
 
     private function hasBatchFilters(array $filters): bool
     {
-        foreach (['q', 'acao_id', 'acao_busca', 'residencia_id', 'residencia_busca', 'data_inicio', 'data_fim'] as $key) {
+        foreach (['q', 'acao_id', 'acao_busca', 'residencia_id', 'residencia_busca', 'status_entrega', 'data_inicio', 'data_fim'] as $key) {
             if (($filters[$key] ?? '') !== '') {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private function deliveryStatus(mixed $value): string
+    {
+        $status = trim((string) $value);
+
+        return in_array($status, ['entregue', 'nao_entregue'], true) ? $status : '';
     }
 
     private function integerList(mixed $value): array

@@ -51,6 +51,16 @@ $valueOrDash = static function (mixed $value): string {
     return $text !== '' ? $text : '-';
 };
 
+$beneficiaryCpfDigits = static function (mixed $value) use ($valueOrDash): string {
+    $digits = preg_replace('/\D+/', '', (string) $value) ?? '';
+
+    if ($digits === '') {
+        return $valueOrDash($value);
+    }
+
+    return $digits;
+};
+
 $softBreak = static function (mixed $value) use ($valueOrDash): string {
     $text = $valueOrDash($value);
 
@@ -424,11 +434,11 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                             <th>Protocolo</th>
                             <th>Nome do beneficiario</th>
                             <th>Sexo</th>
-                            <th>Data de nascimento</th>
+                            <th>Nascimento</th>
                             <th>CPF</th>
                             <th>RG</th>
-                            <th>Orgao expedidor</th>
-                            <th>Status da entrega</th>
+                            <th>Orgao exp.</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -440,7 +450,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                                 <td><?= h($valueOrDash($item['beneficiario_nome'] ?? '')) ?></td>
                                 <td><?= h($sexLabel($item['beneficiario_sexo'] ?? '')) ?></td>
                                 <td><?= h($formatDate($item['beneficiario_data_nascimento'] ?? '')) ?></td>
-                                <td><?= h($valueOrDash($item['beneficiario_cpf'] ?? '')) ?></td>
+                                <td><?= h($beneficiaryCpfDigits($item['beneficiario_cpf'] ?? '')) ?></td>
                                 <td><?= h($valueOrDash($item['beneficiario_rg'] ?? '')) ?></td>
                                 <td><?= h($valueOrDash($item['beneficiario_orgao_expedidor'] ?? '')) ?></td>
                                 <td>
@@ -568,25 +578,36 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                 return;
             }
 
+            var supportsZoom = 'zoom' in documentNode.style;
             documentNode.style.transform = 'none';
+            documentNode.style.zoom = '1';
             documentNode.style.width = baseWidth + 'px';
 
             var available = Math.max(300, viewport.clientWidth || baseWidth);
             var scale = Math.min(1, available / baseWidth);
-            documentNode.style.transformOrigin = 'top center';
-            documentNode.style.transform = 'scale(' + scale + ')';
+
+            if (supportsZoom) {
+                documentNode.style.zoom = String(scale);
+            } else {
+                documentNode.style.transformOrigin = 'top center';
+                documentNode.style.transform = 'scale(' + scale + ')';
+            }
+
             viewport.style.minHeight = Math.ceil(documentNode.scrollHeight * scale) + 'px';
         }
 
         function preparePrint() {
             printing = true;
+            document.body.classList.add('is-printing-recomecar-document');
             documentNode.style.transform = 'none';
-            documentNode.style.width = 'auto';
+            documentNode.style.zoom = '1';
+            documentNode.style.width = '273mm';
             viewport.style.minHeight = '0';
         }
 
         function restoreScreen() {
             printing = false;
+            document.body.classList.remove('is-printing-recomecar-document');
             resizeDocument();
         }
 

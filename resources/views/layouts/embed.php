@@ -1,7 +1,7 @@
 <?php
 $app = require BASE_PATH . '/config/app.php';
 $pageTitle = $title ?? $app['name'];
-$assetVersion = '20260502-126';
+$assetVersion = '20260502-129';
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -30,6 +30,7 @@ $assetVersion = '20260502-126';
                 baseWidth = target.classList.contains('recomecar-document') ? 1123 : 794;
 
                 target.style.transform = '';
+                target.style.zoom = '1';
                 target.style.width = baseWidth + 'px';
 
                 var viewportWidth = document.documentElement.clientWidth || window.innerWidth || baseWidth;
@@ -38,8 +39,15 @@ $assetVersion = '20260502-126';
                 var fitGutter = rawAvailable < baseWidth ? 32 : 0;
                 var available = Math.max(280, rawAvailable - fitGutter);
                 var scale = Math.min(1, available / baseWidth);
-                target.style.transformOrigin = 'top left';
-                target.style.transform = 'scale(' + scale + ')';
+
+                if (target.classList.contains('recomecar-document') && 'zoom' in target.style) {
+                    target.style.zoom = String(scale);
+                    target.style.transform = 'none';
+                } else {
+                    target.style.transformOrigin = 'top left';
+                    target.style.transform = 'scale(' + scale + ')';
+                }
+
                 target.style.marginLeft = scale < 1 ? '0' : 'auto';
                 target.style.marginRight = scale < 1 ? '0' : 'auto';
                 target.style.marginBottom = Math.ceil(target.scrollHeight * scale - target.scrollHeight) + 'px';
@@ -56,6 +64,7 @@ $assetVersion = '20260502-126';
 
                 target.style.transform = 'none';
                 target.style.transformOrigin = '';
+                target.style.zoom = '1';
                 target.style.width = 'auto';
                 target.style.marginLeft = '0';
                 target.style.marginRight = '0';

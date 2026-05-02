@@ -372,6 +372,10 @@ final class EntregaAjudaRepository
             $params['tipo_ajuda_id'] = (int) $filters['tipo_ajuda_id'];
         }
 
+        if (($filters['status_entrega'] ?? '') === 'nao_entregue') {
+            $where[] = '1 = 0';
+        }
+
         if (($filters['data_inicio'] ?? '') !== '') {
             $where[] = 'e.data_entrega >= :data_inicio';
             $params['data_inicio'] = $filters['data_inicio'] . ' 00:00:00';
