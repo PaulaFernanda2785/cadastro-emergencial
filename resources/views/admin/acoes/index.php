@@ -109,9 +109,9 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
         </article>
     </section>
 
-    <section class="records-filter-panel action-filter-panel" aria-label="Filtros de acoes emergenciais">
-        <form method="get" action="<?= h(url('/admin/acoes')) ?>" class="action-filter-form">
-            <label class="field styled-field action-search-field">
+    <section class="records-filter-panel action-filter-panel action-filter-modern-panel" aria-label="Filtros de acoes emergenciais">
+        <form method="get" action="<?= h(url('/admin/acoes')) ?>" class="action-filter-form action-filter-modern-form">
+            <label class="field styled-field action-search-field action-filter-field action-filter-field-wide">
                 <span>Buscar</span>
                 <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" list="acoes-busca-list" placeholder="Localidade, evento, municipio, UF ou IBGE">
                 <datalist id="acoes-busca-list">
@@ -126,7 +126,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 </datalist>
             </label>
 
-            <label class="field styled-field smart-search-field">
+            <label class="field styled-field smart-search-field action-filter-field action-filter-field-wide">
                 <span>Municipio</span>
                 <input type="search" name="municipio_busca" value="<?= h(($filters['municipio_busca'] ?? '') !== '' ? $filters['municipio_busca'] : $municipioSelecionado) ?>" list="acoes-municipios-list" placeholder="Digite para buscar municipio" data-smart-search data-smart-target="acoes_municipio_id" autocomplete="off">
                 <input type="hidden" name="municipio_id" value="<?= h($filters['municipio_id'] ?? '') ?>" data-smart-hidden="acoes_municipio_id">
@@ -137,7 +137,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 </datalist>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field action-filter-field action-filter-field-medium">
                 <span>Evento</span>
                 <input type="search" name="tipo_evento" value="<?= h($filters['tipo_evento'] ?? '') ?>" maxlength="120" list="acoes-eventos-list" placeholder="Tipo de evento">
                 <datalist id="acoes-eventos-list">
@@ -147,7 +147,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 </datalist>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field action-filter-field action-filter-field-compact">
                 <span>Status</span>
                 <select name="status">
                     <option value="">Todos</option>
@@ -157,12 +157,12 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field action-filter-field action-filter-field-date">
                 <span>Inicio</span>
                 <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field action-filter-field action-filter-field-date">
                 <span>Fim</span>
                 <input type="date" name="data_fim" value="<?= h($filters['data_fim'] ?? '') ?>">
             </label>

@@ -204,19 +204,19 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
         </article>
     </section>
 
-    <section class="records-filter-panel delivery-filter-panel accountability-filter-panel no-print">
+    <section class="records-filter-panel delivery-filter-panel accountability-filter-panel recomecar-filter-panel no-print">
         <div class="table-heading">
             <h2>Filtros inteligentes</h2>
             <span>Combine acao, localidade, periodo, busca textual e situacao no programa.</span>
         </div>
-        <form method="get" action="<?= h(url('/gestor/recomecar')) ?>" class="accountability-filter-form">
-            <div class="accountability-filter-main">
-                <label class="field">
+        <form method="get" action="<?= h(url('/gestor/recomecar')) ?>" class="accountability-filter-form recomecar-filter-form">
+            <div class="accountability-filter-main recomecar-filter-main">
+                <label class="field styled-field recomecar-filter-field recomecar-filter-field-wide">
                     <span>Buscar</span>
                     <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" placeholder="Nome, CPF ou protocolo">
                 </label>
 
-                <label class="field smart-search-field">
+                <label class="field styled-field smart-search-field recomecar-filter-field recomecar-filter-field-wide">
                     <span>Acao</span>
                     <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="recomecar-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="recomecar_acao_id" autocomplete="off">
                     <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="recomecar_acao_id">
@@ -227,12 +227,12 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                     </datalist>
                 </label>
 
-                <label class="field">
+                <label class="field styled-field recomecar-filter-field recomecar-filter-field-medium">
                     <span>Localidade, bairro ou comunidade</span>
                     <input type="search" name="localidade_busca" value="<?= h($filters['localidade_busca'] ?? '') ?>" placeholder="Digite localidade, bairro ou comunidade">
                 </label>
 
-                <label class="field">
+                <label class="field styled-field recomecar-filter-field recomecar-filter-field-compact">
                     <span>Situacao no programa</span>
                     <select name="aptidao">
                         <option value="apta" <?= ($filters['aptidao'] ?? 'apta') === 'apta' ? 'selected' : '' ?>>Aptas para pagamento</option>
@@ -241,7 +241,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                     </select>
                 </label>
 
-                <label class="field">
+                <label class="field styled-field recomecar-filter-field recomecar-filter-field-compact">
                     <span>Status da entrega</span>
                     <select name="status_entrega">
                         <option value="" <?= ($filters['status_entrega'] ?? '') === '' ? 'selected' : '' ?>>Todos</option>
@@ -251,14 +251,14 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                 </label>
             </div>
 
-            <div class="accountability-filter-side">
+            <div class="accountability-filter-side recomecar-filter-side">
                 <div class="accountability-date-range">
-                    <label class="field">
+                    <label class="field styled-field recomecar-filter-field recomecar-filter-field-date">
                         <span>Inicio do cadastro</span>
                         <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
                     </label>
 
-                    <label class="field">
+                    <label class="field styled-field recomecar-filter-field recomecar-filter-field-date">
                         <span>Fim do cadastro</span>
                         <input type="date" name="data_fim" value="<?= h($filters['data_fim'] ?? '') ?>">
                     </label>

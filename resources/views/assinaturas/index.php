@@ -212,7 +212,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
         </section>
     <?php endif; ?>
 
-    <section class="records-filter-panel signatures-filter-panel">
+    <section class="records-filter-panel signatures-filter-panel signatures-filter-modern-panel">
         <div class="table-heading">
             <div>
                 <h2>Filtros inteligentes</h2>
@@ -220,13 +220,13 @@ $lastRecord = min($totalRecords, $page * $perPage);
             </div>
         </div>
 
-        <form method="get" action="<?= h(url('/assinaturas')) ?>" class="signatures-filter-form">
-            <label class="field styled-field records-search-field">
+        <form method="get" action="<?= h(url('/assinaturas')) ?>" class="signatures-filter-form signatures-filter-modern-form">
+            <label class="field styled-field records-search-field signatures-filter-field signatures-filter-field-wide">
                 <span>Buscar</span>
                 <input type="text" name="busca" value="<?= h($filters['busca'] ?? '') ?>" maxlength="120" placeholder="Documento, chave, solicitante ou coautor">
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field signatures-filter-field signatures-filter-field-compact">
                 <span>Vinculo</span>
                 <select name="escopo">
                     <option value="todas" <?= ($filters['escopo'] ?? 'todas') === 'todas' ? 'selected' : '' ?>><?= $isAdmin ? 'Todos do sistema' : 'Todas' ?></option>
@@ -235,7 +235,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field signatures-filter-field signatures-filter-field-compact">
                 <span>Status</span>
                 <select name="status">
                     <option value="" <?= ($filters['status'] ?? '') === '' ? 'selected' : '' ?>>Todos</option>
@@ -245,7 +245,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field signatures-filter-field signatures-filter-field-medium">
                 <span>Documento</span>
                 <select name="documento_tipo">
                     <option value="" <?= ($filters['documento_tipo'] ?? '') === '' ? 'selected' : '' ?>>Todos</option>
@@ -255,12 +255,12 @@ $lastRecord = min($totalRecords, $page * $perPage);
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field signatures-filter-field signatures-filter-field-date">
                 <span>Data inicial</span>
                 <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field signatures-filter-field signatures-filter-field-date">
                 <span>Data final</span>
                 <input type="date" name="data_fim" value="<?= h($filters['data_fim'] ?? '') ?>">
             </label>

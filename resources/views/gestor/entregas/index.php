@@ -74,13 +74,13 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
     </article>
 </section>
 
-<section class="records-filter-panel delivery-filter-panel">
+<section class="records-filter-panel delivery-filter-panel delivery-history-filter-panel">
     <div class="table-heading">
         <h2>Filtros inteligentes</h2>
         <span>Combine texto, acao, residencia, periodo e tipo de ajuda.</span>
     </div>
     <form method="get" action="<?= h(url('/gestor/entregas')) ?>" class="delivery-filter-form delivery-history-filter-form">
-        <label class="field">
+        <label class="field styled-field delivery-history-filter-field delivery-history-filter-field-wide">
             <span>Buscar</span>
             <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" list="historico-busca-list" placeholder="Nome, CPF, comprovante, protocolo">
             <datalist id="historico-busca-list">
@@ -97,7 +97,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                 <?php endforeach; ?>
             </datalist>
         </label>
-        <label class="field smart-search-field">
+        <label class="field styled-field smart-search-field delivery-history-filter-field delivery-history-filter-field-wide">
             <span>Acao</span>
             <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $acaoSelecionada) ?>" list="historico-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="historico_acao_id" autocomplete="off">
             <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="historico_acao_id">
@@ -107,7 +107,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                 <?php endforeach; ?>
             </datalist>
         </label>
-        <label class="field smart-search-field">
+        <label class="field styled-field smart-search-field delivery-history-filter-field delivery-history-filter-field-medium">
             <span>Residencia</span>
             <input type="search" name="residencia_busca" value="<?= h(($filters['residencia_busca'] ?? '') !== '' ? $filters['residencia_busca'] : $residenciaSelecionada) ?>" list="historico-residencias-list" placeholder="Digite protocolo ou bairro" data-smart-search data-smart-target="historico_residencia_id" autocomplete="off">
             <input type="hidden" name="residencia_id" value="<?= h($filters['residencia_id'] ?? '') ?>" data-smart-hidden="historico_residencia_id">
@@ -117,7 +117,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                 <?php endforeach; ?>
             </datalist>
         </label>
-        <label class="field smart-search-field">
+        <label class="field styled-field smart-search-field delivery-history-filter-field delivery-history-filter-field-medium">
             <span>Familia</span>
             <input type="search" name="familia_busca" value="<?= h(($filters['familia_busca'] ?? '') !== '' ? $filters['familia_busca'] : $familiaSelecionada) ?>" list="historico-familias-list" placeholder="Digite nome ou CPF" data-smart-search data-smart-target="historico_familia_id" autocomplete="off">
             <input type="hidden" name="familia_id" value="<?= h($filters['familia_id'] ?? '') ?>" data-smart-hidden="historico_familia_id">
@@ -127,7 +127,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                 <?php endforeach; ?>
             </datalist>
         </label>
-        <label class="field">
+        <label class="field styled-field delivery-history-filter-field delivery-history-filter-field-compact">
             <span>Tipo de ajuda</span>
             <select name="tipo_ajuda_id">
                 <option value="">Todos</option>
@@ -138,7 +138,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                 <?php endforeach; ?>
             </select>
         </label>
-        <label class="field">
+        <label class="field styled-field delivery-history-filter-field delivery-history-filter-field-compact">
             <span>Status da entrega</span>
             <select name="status_entrega">
                 <option value="">Todos</option>
@@ -146,11 +146,11 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                 <option value="nao_entregue" <?= ($filters['status_entrega'] ?? '') === 'nao_entregue' ? 'selected' : '' ?>>Sem entrega</option>
             </select>
         </label>
-        <label class="field">
+        <label class="field styled-field delivery-history-filter-field delivery-history-filter-field-date">
             <span>Inicio</span>
             <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
         </label>
-        <label class="field">
+        <label class="field styled-field delivery-history-filter-field delivery-history-filter-field-date">
             <span>Fim</span>
             <input type="date" name="data_fim" value="<?= h($filters['data_fim'] ?? '') ?>">
         </label>

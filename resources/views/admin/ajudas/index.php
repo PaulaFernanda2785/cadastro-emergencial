@@ -80,9 +80,9 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
         </article>
     </section>
 
-    <section class="records-filter-panel aid-type-filter-panel" aria-label="Filtros de tipos de ajuda">
-        <form method="get" action="<?= h(url('/admin/ajudas')) ?>" class="aid-type-filter-form">
-            <label class="field styled-field aid-type-search-field">
+    <section class="records-filter-panel aid-type-filter-panel aid-type-filter-modern-panel" aria-label="Filtros de tipos de ajuda">
+        <form method="get" action="<?= h(url('/admin/ajudas')) ?>" class="aid-type-filter-form aid-type-filter-modern-form">
+            <label class="field styled-field aid-type-search-field aid-type-filter-field aid-type-filter-field-wide">
                 <span>Busca inteligente</span>
                 <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" list="aid-type-search-list" placeholder="Nome do material ou unidade">
                 <datalist id="aid-type-search-list">
@@ -93,7 +93,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 </datalist>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field aid-type-filter-field aid-type-filter-field-compact">
                 <span>Status</span>
                 <select name="status">
                     <option value="">Todos</option>
@@ -103,7 +103,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field aid-type-filter-field aid-type-filter-field-medium">
                 <span>Unidade</span>
                 <input type="search" name="unidade" value="<?= h($filters['unidade'] ?? '') ?>" maxlength="50" list="aid-type-unit-list" placeholder="kit, cesta, unidade">
                 <datalist id="aid-type-unit-list">

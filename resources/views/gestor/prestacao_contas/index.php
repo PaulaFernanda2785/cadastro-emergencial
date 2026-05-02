@@ -228,14 +228,14 @@ $renderFilterFields = static function (array $filters): void {
         </article>
     </section>
 
-    <section class="records-filter-panel delivery-filter-panel accountability-filter-panel no-print">
+    <section class="records-filter-panel delivery-filter-panel accountability-filter-panel prestacao-filter-panel no-print">
         <div class="table-heading">
             <h2>Filtros inteligentes</h2>
             <span>Combine busca textual, acao, tipo de material, localidade e periodo.</span>
         </div>
-        <form method="get" action="<?= h(url('/gestor/prestacao-contas')) ?>" class="accountability-filter-form">
-            <div class="accountability-filter-main">
-                <label class="field">
+        <form method="get" action="<?= h(url('/gestor/prestacao-contas')) ?>" class="accountability-filter-form prestacao-filter-form">
+            <div class="accountability-filter-main prestacao-filter-main">
+                <label class="field styled-field prestacao-filter-field prestacao-filter-field-wide">
                     <span>Buscar</span>
                     <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" list="prestacao-busca-list" placeholder="Nome, CPF, comprovante ou protocolo">
                     <datalist id="prestacao-busca-list">
@@ -247,7 +247,7 @@ $renderFilterFields = static function (array $filters): void {
                     </datalist>
                 </label>
 
-                <label class="field smart-search-field">
+                <label class="field styled-field smart-search-field prestacao-filter-field prestacao-filter-field-wide">
                     <span>Acao</span>
                     <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="prestacao-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="prestacao_acao_id" autocomplete="off">
                     <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="prestacao_acao_id">
@@ -258,7 +258,7 @@ $renderFilterFields = static function (array $filters): void {
                     </datalist>
                 </label>
 
-                <label class="field smart-search-field">
+                <label class="field styled-field smart-search-field prestacao-filter-field prestacao-filter-field-medium">
                     <span>Tipo de material</span>
                     <input type="search" name="tipo_ajuda_busca" value="<?= h(($filters['tipo_ajuda_busca'] ?? '') !== '' ? $filters['tipo_ajuda_busca'] : $selectedTypeLabel) ?>" list="prestacao-tipos-list" placeholder="Digite para buscar o material" data-smart-search data-smart-target="prestacao_tipo_ajuda_id" autocomplete="off">
                     <input type="hidden" name="tipo_ajuda_id" value="<?= h($filters['tipo_ajuda_id'] ?? '') ?>" data-smart-hidden="prestacao_tipo_ajuda_id">
@@ -269,20 +269,20 @@ $renderFilterFields = static function (array $filters): void {
                     </datalist>
                 </label>
 
-                <label class="field">
+                <label class="field styled-field prestacao-filter-field prestacao-filter-field-medium">
                     <span>Localidade, bairro ou comunidade</span>
                     <input type="search" name="localidade_busca" value="<?= h($filters['localidade_busca'] ?? '') ?>" placeholder="Digite localidade, bairro ou comunidade">
                 </label>
             </div>
 
-            <div class="accountability-filter-side">
+            <div class="accountability-filter-side prestacao-filter-side">
                 <div class="accountability-date-range">
-                    <label class="field">
+                    <label class="field styled-field prestacao-filter-field prestacao-filter-field-date">
                         <span>Inicio</span>
                         <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
                     </label>
 
-                    <label class="field">
+                    <label class="field styled-field prestacao-filter-field prestacao-filter-field-date">
                         <span>Fim</span>
                         <input type="date" name="data_fim" value="<?= h($filters['data_fim'] ?? '') ?>">
                     </label>

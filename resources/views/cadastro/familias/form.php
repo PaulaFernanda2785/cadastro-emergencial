@@ -23,7 +23,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
             <h1><?= h($title ?? 'Nova familia') ?></h1>
             <p>Residencia <?= h($residencia['protocolo']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
         </div>
-        <a class="secondary-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Voltar</a>
+        <a class="secondary-button action-back-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Voltar para residencia</a>
     </div>
 
     <div class="records-summary-grid family-summary-grid" aria-label="Resumo da familia">

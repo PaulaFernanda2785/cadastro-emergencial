@@ -78,9 +78,9 @@ $currentUserId = (int) (current_user()['id'] ?? 0);
         </article>
     </section>
 
-    <section class="records-filter-panel users-filter-panel" aria-label="Filtros de usuarios">
-        <form method="get" action="<?= h(url('/admin/usuarios')) ?>" class="users-filter-form">
-            <label class="field styled-field users-search-field">
+    <section class="records-filter-panel users-filter-panel users-filter-modern-panel" aria-label="Filtros de usuarios">
+        <form method="get" action="<?= h(url('/admin/usuarios')) ?>" class="users-filter-form users-filter-modern-form">
+            <label class="field styled-field users-search-field users-filter-field users-filter-field-wide">
                 <span>Busca inteligente</span>
                 <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" list="users-search-list" placeholder="Nome, CPF, email, orgao, setor ou MF">
                 <datalist id="users-search-list">
@@ -95,7 +95,7 @@ $currentUserId = (int) (current_user()['id'] ?? 0);
                 </datalist>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field users-filter-field users-filter-field-compact">
                 <span>Perfil</span>
                 <select name="perfil">
                     <option value="">Todos</option>
@@ -105,7 +105,7 @@ $currentUserId = (int) (current_user()['id'] ?? 0);
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field users-filter-field users-filter-field-compact">
                 <span>Status</span>
                 <select name="status">
                     <option value="">Todos</option>
@@ -115,7 +115,7 @@ $currentUserId = (int) (current_user()['id'] ?? 0);
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field users-filter-field users-filter-field-compact">
                 <span>Vinculo</span>
                 <select name="militar">
                     <option value="">Todos</option>

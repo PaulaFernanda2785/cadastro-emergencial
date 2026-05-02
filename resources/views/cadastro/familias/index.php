@@ -137,9 +137,9 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
         </article>
     </section>
 
-    <section class="records-filter-panel family-filter-panel" aria-label="Filtros de familias">
-        <form method="get" action="<?= h(url('/gestor/familias')) ?>" class="family-filter-form">
-            <label class="field styled-field family-search-field">
+    <section class="records-filter-panel family-filter-panel family-filter-modern-panel" aria-label="Filtros de familias">
+        <form method="get" action="<?= h(url('/gestor/familias')) ?>" class="family-filter-form family-filter-modern-form">
+            <label class="field styled-field family-search-field family-filter-field family-filter-field-wide">
                 <span>Buscar</span>
                 <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" list="familias-busca-list" placeholder="Nome, CPF, telefone, protocolo, bairro ou municipio">
                 <datalist id="familias-busca-list">
@@ -155,7 +155,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                 </datalist>
             </label>
 
-            <label class="field styled-field smart-search-field">
+            <label class="field styled-field smart-search-field family-filter-field family-filter-field-wide">
                 <span>Acao</span>
                 <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $acaoSelecionada) ?>" list="familias-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="familias_acao_id" autocomplete="off">
                 <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="familias_acao_id">
@@ -166,7 +166,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                 </datalist>
             </label>
 
-            <label class="field styled-field smart-search-field">
+            <label class="field styled-field smart-search-field family-filter-field family-filter-field-wide">
                 <span>Residencia</span>
                 <input type="search" name="residencia_busca" value="<?= h(($filters['residencia_busca'] ?? '') !== '' ? $filters['residencia_busca'] : $residenciaSelecionada) ?>" list="familias-residencias-list" placeholder="Digite protocolo ou bairro" data-smart-search data-smart-target="familias_residencia_id" autocomplete="off">
                 <input type="hidden" name="residencia_id" value="<?= h($filters['residencia_id'] ?? '') ?>" data-smart-hidden="familias_residencia_id">
@@ -177,7 +177,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                 </datalist>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field family-filter-field family-filter-field-compact">
                 <span>Situacao</span>
                 <select name="situacao">
                     <option value="">Todas</option>
@@ -187,7 +187,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field family-filter-field family-filter-field-compact">
                 <span>Entregas</span>
                 <select name="entregas">
                     <option value="">Todas</option>
@@ -197,7 +197,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field family-filter-field family-filter-field-compact">
                 <span>Cadastro</span>
                 <select name="cadastro">
                     <option value="">Todos</option>
@@ -207,12 +207,12 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field family-filter-field family-filter-field-date">
                 <span>Inicio</span>
                 <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field family-filter-field family-filter-field-date">
                 <span>Fim</span>
                 <input type="date" name="data_fim" value="<?= h($filters['data_fim'] ?? '') ?>">
             </label>

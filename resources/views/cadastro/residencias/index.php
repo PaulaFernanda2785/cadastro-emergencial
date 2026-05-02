@@ -116,14 +116,14 @@ $filterAction = url('/cadastros/residencias');
         </article>
     </section>
 
-    <section class="records-filter-panel" aria-label="Filtros de cadastros">
-        <form method="get" action="<?= h($filterAction) ?>" class="records-filter-form">
-            <label class="field styled-field records-search-field">
+    <section class="records-filter-panel cadastro-filter-modern-panel" aria-label="Filtros de cadastros">
+        <form method="get" action="<?= h($filterAction) ?>" class="records-filter-form cadastro-filter-modern-form">
+            <label class="field styled-field records-search-field cadastro-filter-field cadastro-filter-field-wide">
                 <span>Busca inteligente</span>
                 <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" placeholder="Protocolo, bairro, endereco, acao, municipio ou cadastrador">
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field cadastro-filter-field cadastro-filter-field-compact">
                 <span>Imovel</span>
                 <select name="imovel">
                     <option value="">Todos</option>
@@ -133,7 +133,7 @@ $filterAction = url('/cadastros/residencias');
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field cadastro-filter-field cadastro-filter-field-compact">
                 <span>Condicao</span>
                 <select name="condicao">
                     <option value="">Todas</option>
@@ -143,7 +143,7 @@ $filterAction = url('/cadastros/residencias');
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field cadastro-filter-field cadastro-filter-field-compact">
                 <span>Familias</span>
                 <select name="familias">
                     <option value="">Todas</option>
@@ -153,17 +153,17 @@ $filterAction = url('/cadastros/residencias');
                 </select>
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field cadastro-filter-field cadastro-filter-field-date">
                 <span>Inicio</span>
                 <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
             </label>
 
-            <label class="field styled-field">
+            <label class="field styled-field cadastro-filter-field cadastro-filter-field-date">
                 <span>Fim</span>
                 <input type="date" name="data_fim" value="<?= h($filters['data_fim'] ?? '') ?>">
             </label>
 
-            <div class="records-filter-actions">
+            <div class="records-filter-actions cadastro-filter-actions">
                 <button type="submit" class="primary-button">Filtrar</button>
                 <a class="secondary-button" href="<?= h(url('/cadastros/residencias')) ?>">Limpar</a>
             </div>

@@ -38,7 +38,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
     </div>
 </section>
 
-<section class="delivery-batch-panel">
+<section class="delivery-batch-panel delivery-batch-filter-panel">
     <div class="table-heading">
         <div>
             <span class="eyebrow">Familias elegiveis</span>
@@ -49,7 +49,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
 
     <form method="get" action="<?= h(url('/gestor/entregas/lote')) ?>" class="delivery-batch-filter-form">
         <div class="delivery-batch-filter-grid">
-            <label class="field smart-search-field">
+            <label class="field styled-field smart-search-field delivery-batch-filter-field delivery-batch-filter-field-wide">
                 <span>Acao aberta</span>
                 <input type="search" name="lote_acao_busca" value="<?= h($batchFilters['acao_busca'] ?: $acaoSelecionada) ?>" list="acoes-abertas-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="lote_acao_id" autocomplete="off">
                 <input type="hidden" name="lote_acao_id" value="<?= h($batchFilters['acao_id'] ?? '') ?>" data-smart-hidden="lote_acao_id">
@@ -59,7 +59,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                     <?php endforeach; ?>
                 </datalist>
             </label>
-            <label class="field smart-search-field">
+            <label class="field styled-field smart-search-field delivery-batch-filter-field delivery-batch-filter-field-wide">
                 <span>Residencia</span>
                 <input type="search" name="lote_residencia_busca" value="<?= h($batchFilters['residencia_busca'] ?: $residenciaSelecionada) ?>" list="residencias-lote-list" placeholder="Digite protocolo ou bairro" data-smart-search data-smart-target="lote_residencia_id" autocomplete="off">
                 <input type="hidden" name="lote_residencia_id" value="<?= h($batchFilters['residencia_id'] ?? '') ?>" data-smart-hidden="lote_residencia_id">
@@ -69,11 +69,11 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                     <?php endforeach; ?>
                 </datalist>
             </label>
-            <label class="field">
+            <label class="field styled-field delivery-batch-filter-field">
                 <span>Buscar familia</span>
                 <input type="search" name="lote_q" value="<?= h($batchFilters['q'] ?? '') ?>" placeholder="Nome, CPF, residencia">
             </label>
-            <label class="field">
+            <label class="field styled-field delivery-batch-filter-field delivery-batch-filter-field-compact">
                 <span>Status da entrega</span>
                 <select name="lote_status_entrega">
                     <option value="">Todos</option>
@@ -81,11 +81,11 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                     <option value="nao_entregue" <?= ($batchFilters['status_entrega'] ?? '') === 'nao_entregue' ? 'selected' : '' ?>>Sem entrega</option>
                 </select>
             </label>
-            <label class="field">
+            <label class="field styled-field delivery-batch-filter-field delivery-batch-filter-field-date">
                 <span>Inicio cadastro</span>
                 <input type="date" name="lote_data_inicio" value="<?= h($batchFilters['data_inicio'] ?? '') ?>">
             </label>
-            <label class="field">
+            <label class="field styled-field delivery-batch-filter-field delivery-batch-filter-field-date">
                 <span>Fim cadastro</span>
                 <input type="date" name="lote_data_fim" value="<?= h($batchFilters['data_fim'] ?? '') ?>">
             </label>
