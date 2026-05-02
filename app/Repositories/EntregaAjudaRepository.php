@@ -237,11 +237,42 @@ final class EntregaAjudaRepository
         return (int) Database::connection()->lastInsertId();
     }
 
-    public function count(): int
+    public function count(?int $cadastradoPor = null, ?string $activeActionToken = null): int
     {
-        return (int) Database::connection()
-            ->query('SELECT COUNT(*) FROM entregas_ajuda WHERE deleted_at IS NULL')
-            ->fetchColumn();
+        $where = [
+            'e.deleted_at IS NULL',
+            'f.deleted_at IS NULL',
+            'r.deleted_at IS NULL',
+            'a.deleted_at IS NULL',
+        ];
+        $params = [];
+
+        if ($cadastradoPor !== null) {
+            $where[] = 'r.cadastrado_por = :cadastrado_por';
+            $params['cadastrado_por'] = $cadastradoPor;
+        }
+
+        if ($activeActionToken !== null && $activeActionToken !== '') {
+            $where[] = 'a.token_publico = :active_action_token';
+            $params['active_action_token'] = $activeActionToken;
+        }
+
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*)
+             FROM entregas_ajuda e
+             INNER JOIN familias f ON f.id = e.familia_id
+             INNER JOIN residencias r ON r.id = f.residencia_id
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             WHERE ' . implode(' AND ', $where)
+        );
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
     }
 
     public function itemsByGroupCode(string $groupCode, ?int $familiaId = null): array

@@ -142,7 +142,7 @@ final class FamiliaRepository
         return is_array($summary) ? $summary : [];
     }
 
-    public function familyActionOptions(?int $cadastradoPor = null): array
+    public function familyActionOptions(?int $cadastradoPor = null, ?string $activeActionToken = null): array
     {
         $sql = 'SELECT DISTINCT a.id, a.localidade, a.tipo_evento, a.status
                 FROM familias f
@@ -156,6 +156,10 @@ final class FamiliaRepository
             $sql .= ' AND r.cadastrado_por = :cadastrado_por';
         }
 
+        if ($activeActionToken !== null && $activeActionToken !== '') {
+            $sql .= ' AND a.token_publico = :active_action_token';
+        }
+
         $sql .= ' ORDER BY a.localidade ASC, a.tipo_evento ASC LIMIT 500';
 
         $stmt = Database::connection()->prepare($sql);
@@ -164,12 +168,16 @@ final class FamiliaRepository
             $stmt->bindValue(':cadastrado_por', $cadastradoPor, PDO::PARAM_INT);
         }
 
+        if ($activeActionToken !== null && $activeActionToken !== '') {
+            $stmt->bindValue(':active_action_token', $activeActionToken);
+        }
+
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function familyResidenceOptions(?int $cadastradoPor = null): array
+    public function familyResidenceOptions(?int $cadastradoPor = null, ?string $activeActionToken = null): array
     {
         $sql = 'SELECT DISTINCT r.id, r.protocolo, r.bairro_comunidade, r.endereco
                 FROM familias f
@@ -183,12 +191,20 @@ final class FamiliaRepository
             $sql .= ' AND r.cadastrado_por = :cadastrado_por';
         }
 
+        if ($activeActionToken !== null && $activeActionToken !== '') {
+            $sql .= ' AND a.token_publico = :active_action_token';
+        }
+
         $sql .= ' ORDER BY r.protocolo ASC, r.bairro_comunidade ASC LIMIT 500';
 
         $stmt = Database::connection()->prepare($sql);
 
         if ($cadastradoPor !== null) {
             $stmt->bindValue(':cadastrado_por', $cadastradoPor, PDO::PARAM_INT);
+        }
+
+        if ($activeActionToken !== null && $activeActionToken !== '') {
+            $stmt->bindValue(':active_action_token', $activeActionToken);
         }
 
         $stmt->execute();
@@ -501,6 +517,11 @@ final class FamiliaRepository
             $params['cadastrado_por'] = $cadastradoPor;
         }
 
+        if (($filters['active_action_token'] ?? '') !== '') {
+            $where[] = 'a.token_publico = :active_action_token';
+            $params['active_action_token'] = (string) $filters['active_action_token'];
+        }
+
         if (($filters['q'] ?? '') !== '') {
             $where[] = '(f.responsavel_nome LIKE :q_nome
                 OR f.responsavel_cpf LIKE :q_cpf
@@ -719,10 +740,39 @@ final class FamiliaRepository
         $stmt->execute();
     }
 
-    public function count(): int
+    public function count(?int $cadastradoPor = null, ?string $activeActionToken = null): int
     {
-        return (int) Database::connection()
-            ->query('SELECT COUNT(*) FROM familias WHERE deleted_at IS NULL')
-            ->fetchColumn();
+        $where = [
+            'f.deleted_at IS NULL',
+            'r.deleted_at IS NULL',
+            'a.deleted_at IS NULL',
+        ];
+        $params = [];
+
+        if ($cadastradoPor !== null) {
+            $where[] = 'r.cadastrado_por = :cadastrado_por';
+            $params['cadastrado_por'] = $cadastradoPor;
+        }
+
+        if ($activeActionToken !== null && $activeActionToken !== '') {
+            $where[] = 'a.token_publico = :active_action_token';
+            $params['active_action_token'] = $activeActionToken;
+        }
+
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*)
+             FROM familias f
+             INNER JOIN residencias r ON r.id = f.residencia_id
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             WHERE ' . implode(' AND ', $where)
+        );
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
     }
 }

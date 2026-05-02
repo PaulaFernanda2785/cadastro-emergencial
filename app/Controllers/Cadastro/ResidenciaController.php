@@ -38,8 +38,9 @@ final class ResidenciaController extends Controller
     public function index(): void
     {
         $filters = $this->indexFilters();
+        $queryFilters = $this->scopedFilters($filters);
         $ownedUserId = $this->ownedRecordsUserId();
-        $total = $this->residencias->countSearch($ownedUserId, $filters);
+        $total = $this->residencias->countSearch($ownedUserId, $queryFilters);
         $totalPages = max(1, (int) ceil($total / self::INDEX_PER_PAGE));
         $page = min($this->requestedPage(), $totalPages);
 
@@ -47,12 +48,12 @@ final class ResidenciaController extends Controller
             'title' => 'Cadastros de residencias',
             'residencias' => $this->residencias->search(
                 $ownedUserId,
-                $filters,
+                $queryFilters,
                 self::INDEX_PER_PAGE,
                 ($page - 1) * self::INDEX_PER_PAGE
             ),
             'filters' => $filters,
-            'summary' => $this->residencias->summary($ownedUserId, $filters),
+            'summary' => $this->residencias->summary($ownedUserId, $queryFilters),
             'pagination' => [
                 'page' => $page,
                 'per_page' => self::INDEX_PER_PAGE,
@@ -426,7 +427,11 @@ final class ResidenciaController extends Controller
 
     private function bairroOptions(array $acao): array
     {
-        $options = $this->residencias->neighborhoodsByMunicipalityId((int) $acao['municipio_id']);
+        $options = $this->residencias->neighborhoodsByMunicipalityId(
+            (int) $acao['municipio_id'],
+            (int) ($acao['id'] ?? 0),
+            $this->ownedRecordsUserId()
+        );
         $localidade = trim((string) ($acao['localidade'] ?? ''));
         $lower = static fn (string $value): string => function_exists('mb_strtolower')
             ? mb_strtolower($value, 'UTF-8')
@@ -495,7 +500,17 @@ final class ResidenciaController extends Controller
     {
         $ownerId = $this->ownedRecordsUserId();
 
-        return $ownerId === null || (int) ($residencia['cadastrado_por'] ?? 0) === $ownerId;
+        if ($ownerId === null) {
+            return true;
+        }
+
+        if ((int) ($residencia['cadastrado_por'] ?? 0) !== $ownerId) {
+            return false;
+        }
+
+        $activeActionToken = $this->activeActionTokenForCadastrador();
+
+        return $activeActionToken === null || hash_equals($activeActionToken, (string) ($residencia['token_publico'] ?? ''));
     }
 
     private function ownedRecordsUserId(): ?int
@@ -507,6 +522,28 @@ final class ResidenciaController extends Controller
         }
 
         return (int) ($user['id'] ?? 0);
+    }
+
+    private function scopedFilters(array $filters): array
+    {
+        $activeActionToken = $this->activeActionTokenForCadastrador();
+
+        if ($activeActionToken !== null) {
+            $filters['active_action_token'] = $activeActionToken;
+        }
+
+        return $filters;
+    }
+
+    private function activeActionTokenForCadastrador(): ?string
+    {
+        if ((current_user()['perfil'] ?? null) !== 'cadastrador') {
+            return null;
+        }
+
+        $token = Session::get('active_action_token');
+
+        return is_string($token) && $token !== '' ? $token : null;
     }
 
     private function actionFromResidencia(array $residencia): array

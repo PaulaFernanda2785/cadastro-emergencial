@@ -208,7 +208,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 $canClose = $isOpen && $activeRecords > 0;
                 $canCancel = $isOpen && $activeRecords === 0;
                 $canActivate = !$isOpen;
-                $cadastroUrl = $isOpen ? public_url('/acao/' . $acao['token_publico'] . '/residencias/novo') : '';
+                $cadastroUrl = $isOpen ? public_url('/acao/' . $acao['token_publico']) : '';
                 $dataEvento = strtotime((string) ($acao['data_evento'] ?? ''));
                 $dataCriacao = strtotime((string) ($acao['criado_em'] ?? ''));
                 $familias = (int) ($acao['familias_cadastradas'] ?? 0);
@@ -350,10 +350,18 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
     <div class="qr-modal-content">
         <span class="eyebrow">Aplicativo de cadastro</span>
         <h2 id="qr-modal-title" data-action-qr-title>QR Code da acao</h2>
-        <p>Leia o QR Code para iniciar o cadastro desta acao.</p>
+        <p>Compartilhe este link personalizado ou leia o QR Code para abrir o cadastro web desta acao no computador, celular ou tablet.</p>
         <canvas class="qr-modal-image" data-action-qr-canvas aria-label="QR Code do aplicativo de cadastro"></canvas>
+        <label class="qr-modal-link-field">
+            <span>Link compartilhavel da acao</span>
+            <input type="text" value="" readonly data-action-qr-link>
+        </label>
+        <p class="qr-modal-rule">Para usuarios com perfil cadastrador, o acesso por este link ou QR Code fica atrelado somente a esta acao aberta. O cadastrador visualiza apenas os proprios registros desta acao e nao acessa dados de outras acoes ou de outros usuarios.</p>
+        <span class="qr-modal-copy-status" data-action-qr-copy-status></span>
         <div class="qr-modal-actions">
-            <a class="primary-link-button" href="#" target="_blank" rel="noopener" data-action-qr-register>Cadastrar pelo sistema</a>
+            <a class="primary-link-button" href="#" target="_blank" rel="noopener" data-action-qr-register>Abrir link da acao</a>
+            <button type="button" class="secondary-button" data-action-qr-copy>Copiar link</button>
+            <button type="button" class="secondary-button" data-action-qr-share>Compartilhar</button>
         </div>
     </div>
 </dialog>

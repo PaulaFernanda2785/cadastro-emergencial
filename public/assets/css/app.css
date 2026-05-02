@@ -2004,6 +2004,45 @@ button:disabled,
     background: #ffffff;
 }
 
+.qr-modal-link-field {
+    display: grid;
+    gap: 6px;
+}
+
+.qr-modal-link-field span {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.qr-modal-link-field input {
+    min-width: 0;
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 12px;
+    color: var(--text);
+    background: #f8fafc;
+    font: inherit;
+}
+
+.qr-modal-rule {
+    border-left: 3px solid var(--primary);
+    padding: 10px 12px;
+    color: var(--muted);
+    background: #f8fafc;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.qr-modal-copy-status {
+    min-height: 20px;
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
 .qr-modal-actions {
     display: grid;
     grid-template-columns: 1fr;

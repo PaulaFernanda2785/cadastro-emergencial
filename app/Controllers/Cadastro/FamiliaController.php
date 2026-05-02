@@ -33,8 +33,10 @@ final class FamiliaController extends Controller
     public function index(): void
     {
         $filters = $this->indexFilters();
+        $queryFilters = $this->scopedFilters($filters);
+        $activeActionToken = $this->activeActionTokenForCadastrador();
         $ownedUserId = $this->ownedRecordsUserId();
-        $total = $this->familias->countSearch($ownedUserId, $filters);
+        $total = $this->familias->countSearch($ownedUserId, $queryFilters);
         $totalPages = max(1, (int) ceil($total / self::INDEX_PER_PAGE));
         $page = min($this->requestedPage(), $totalPages);
 
@@ -42,14 +44,14 @@ final class FamiliaController extends Controller
             'title' => 'Familias cadastradas',
             'familias' => $this->familias->search(
                 $ownedUserId,
-                $filters,
+                $queryFilters,
                 self::INDEX_PER_PAGE,
                 ($page - 1) * self::INDEX_PER_PAGE
             ),
             'filters' => $filters,
-            'summary' => $this->familias->searchSummary($ownedUserId, $filters),
-            'acoes' => $this->familias->familyActionOptions($ownedUserId),
-            'residencias' => $this->familias->familyResidenceOptions($ownedUserId),
+            'summary' => $this->familias->searchSummary($ownedUserId, $queryFilters),
+            'acoes' => $this->familias->familyActionOptions($ownedUserId, $activeActionToken),
+            'residencias' => $this->familias->familyResidenceOptions($ownedUserId, $activeActionToken),
             'pagination' => [
                 'page' => $page,
                 'per_page' => self::INDEX_PER_PAGE,
@@ -323,7 +325,17 @@ final class FamiliaController extends Controller
     {
         $ownerId = $this->ownedRecordsUserId();
 
-        return $ownerId === null || (int) ($residencia['cadastrado_por'] ?? 0) === $ownerId;
+        if ($ownerId === null) {
+            return true;
+        }
+
+        if ((int) ($residencia['cadastrado_por'] ?? 0) !== $ownerId) {
+            return false;
+        }
+
+        $activeActionToken = $this->activeActionTokenForCadastrador();
+
+        return $activeActionToken === null || hash_equals($activeActionToken, (string) ($residencia['token_publico'] ?? ''));
     }
 
     private function ownedRecordsUserId(): ?int
@@ -335,6 +347,28 @@ final class FamiliaController extends Controller
         }
 
         return (int) ($user['id'] ?? 0);
+    }
+
+    private function scopedFilters(array $filters): array
+    {
+        $activeActionToken = $this->activeActionTokenForCadastrador();
+
+        if ($activeActionToken !== null) {
+            $filters['active_action_token'] = $activeActionToken;
+        }
+
+        return $filters;
+    }
+
+    private function activeActionTokenForCadastrador(): ?string
+    {
+        if ((current_user()['perfil'] ?? null) !== 'cadastrador') {
+            return null;
+        }
+
+        $token = Session::get('active_action_token');
+
+        return is_string($token) && $token !== '' ? $token : null;
     }
 
     private function form(string $title, array $residencia, array $familia, array $errors, string $action, string $submitLabel, array $documentos = []): void

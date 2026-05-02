@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Session;
 use App\Repositories\AcaoEmergencialRepository;
 use App\Repositories\EntregaAjudaRepository;
 use App\Repositories\FamiliaRepository;
@@ -33,12 +34,24 @@ final class DashboardController extends Controller
 
     private function indicators(): array
     {
+        $user = current_user();
+        $isCadastrador = ($user['perfil'] ?? null) === 'cadastrador';
+        $ownerId = $isCadastrador ? (int) ($user['id'] ?? 0) : null;
+        $token = null;
+
+        if ($isCadastrador) {
+            $activeActionToken = Session::get('active_action_token');
+            $token = is_string($activeActionToken) && $activeActionToken !== '' ? $activeActionToken : null;
+        }
+
         return [
-            'residencias' => (new ResidenciaRepository())->count(),
-            'familias' => (new FamiliaRepository())->count(),
-            'entregas' => (new EntregaAjudaRepository())->count(),
+            'residencias' => (new ResidenciaRepository())->count($ownerId, $token),
+            'familias' => (new FamiliaRepository())->count($ownerId, $token),
+            'entregas' => (new EntregaAjudaRepository())->count($ownerId, $token),
             'tipos_ajuda' => (new TipoAjudaRepository())->countActive(),
-            'acoes_abertas' => (new AcaoEmergencialRepository())->countOpen(),
+            'acoes_abertas' => $isCadastrador && $token === null
+                ? 0
+                : (new AcaoEmergencialRepository())->countOpen($isCadastrador ? $token : null),
         ];
     }
 }

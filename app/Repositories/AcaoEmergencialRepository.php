@@ -370,10 +370,18 @@ final class AcaoEmergencialRepository
         $stmt->execute();
     }
 
-    public function countOpen(): int
+    public function countOpen(?string $activeActionToken = null): int
     {
-        return (int) Database::connection()
-            ->query("SELECT COUNT(*) FROM acoes_emergenciais WHERE status = 'aberta' AND deleted_at IS NULL")
-            ->fetchColumn();
+        $sql = "SELECT COUNT(*) FROM acoes_emergenciais WHERE status = 'aberta' AND deleted_at IS NULL";
+
+        if ($activeActionToken === null || $activeActionToken === '') {
+            return (int) Database::connection()->query($sql)->fetchColumn();
+        }
+
+        $stmt = Database::connection()->prepare($sql . ' AND token_publico = :active_action_token');
+        $stmt->bindValue(':active_action_token', $activeActionToken);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
     }
 }

@@ -202,18 +202,39 @@ final class ResidenciaRepository
         return (int) $stmt->fetchColumn();
     }
 
-    public function neighborhoodsByMunicipalityId(int $municipioId): array
+    public function neighborhoodsByMunicipalityId(int $municipioId, ?int $acaoId = null, ?int $cadastradoPor = null): array
     {
+        $where = [
+            'municipio_id = :municipio_id',
+            'deleted_at IS NULL',
+            'bairro_comunidade IS NOT NULL',
+            'bairro_comunidade <> ""',
+        ];
+
+        if ($acaoId !== null && $acaoId > 0) {
+            $where[] = 'acao_id = :acao_id';
+        }
+
+        if ($cadastradoPor !== null) {
+            $where[] = 'cadastrado_por = :cadastrado_por';
+        }
+
         $stmt = Database::connection()->prepare(
             'SELECT DISTINCT bairro_comunidade
              FROM residencias
-             WHERE municipio_id = :municipio_id
-               AND deleted_at IS NULL
-               AND bairro_comunidade IS NOT NULL
-               AND bairro_comunidade <> ""
+             WHERE ' . implode(' AND ', $where) . '
              ORDER BY bairro_comunidade'
         );
         $stmt->bindValue(':municipio_id', $municipioId, PDO::PARAM_INT);
+
+        if ($acaoId !== null && $acaoId > 0) {
+            $stmt->bindValue(':acao_id', $acaoId, PDO::PARAM_INT);
+        }
+
+        if ($cadastradoPor !== null) {
+            $stmt->bindValue(':cadastrado_por', $cadastradoPor, PDO::PARAM_INT);
+        }
+
         $stmt->execute();
 
         return array_map(
@@ -253,11 +274,35 @@ final class ResidenciaRepository
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function count(): int
+    public function count(?int $cadastradoPor = null, ?string $activeActionToken = null): int
     {
-        return (int) Database::connection()
-            ->query('SELECT COUNT(*) FROM residencias WHERE deleted_at IS NULL')
-            ->fetchColumn();
+        $where = ['r.deleted_at IS NULL'];
+        $params = [];
+
+        if ($cadastradoPor !== null) {
+            $where[] = 'r.cadastrado_por = :cadastrado_por';
+            $params['cadastrado_por'] = $cadastradoPor;
+        }
+
+        if ($activeActionToken !== null && $activeActionToken !== '') {
+            $where[] = 'a.token_publico = :active_action_token';
+            $params['active_action_token'] = $activeActionToken;
+        }
+
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*)
+             FROM residencias r
+             INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
+             WHERE ' . implode(' AND ', $where)
+        );
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
     }
 
     private function buildSearchWhere(?int $cadastradoPor, array $filters): array
@@ -268,6 +313,11 @@ final class ResidenciaRepository
         if ($cadastradoPor !== null) {
             $where[] = 'r.cadastrado_por = :cadastrado_por';
             $params['cadastrado_por'] = $cadastradoPor;
+        }
+
+        if (($filters['active_action_token'] ?? '') !== '') {
+            $where[] = 'a.token_publico = :active_action_token';
+            $params['active_action_token'] = (string) $filters['active_action_token'];
         }
 
         if (($filters['q'] ?? '') !== '') {

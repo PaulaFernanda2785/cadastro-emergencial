@@ -5,6 +5,10 @@
     var title = document.querySelector('[data-action-qr-title]');
     var canvas = document.querySelector('[data-action-qr-canvas]');
     var registerLink = document.querySelector('[data-action-qr-register]');
+    var sharedLink = document.querySelector('[data-action-qr-link]');
+    var copyButton = document.querySelector('[data-action-qr-copy]');
+    var shareButton = document.querySelector('[data-action-qr-share]');
+    var copyStatus = document.querySelector('[data-action-qr-copy-status]');
 
     document.querySelectorAll('form[data-confirm]').forEach(function (form) {
         form.addEventListener('submit', function (event) {
@@ -28,6 +32,14 @@
 
             title.textContent = actionTitle;
             registerLink.href = registerUrl;
+
+            if (sharedLink) {
+                sharedLink.value = registerUrl;
+            }
+
+            if (copyStatus) {
+                copyStatus.textContent = '';
+            }
 
             if (window.QRCode && typeof window.QRCode.toCanvas === 'function') {
                 window.QRCode.toCanvas(canvas, registerUrl, {
@@ -56,4 +68,73 @@
             modal.removeAttribute('open');
         }
     });
+
+    function setCopyStatus(message) {
+        if (copyStatus) {
+            copyStatus.textContent = message;
+        }
+    }
+
+    function currentRegisterUrl() {
+        return registerLink.href || (sharedLink ? sharedLink.value : '');
+    }
+
+    function fallbackCopy(text) {
+        if (!sharedLink) {
+            return false;
+        }
+
+        sharedLink.focus();
+        sharedLink.select();
+        sharedLink.setSelectionRange(0, sharedLink.value.length);
+
+        try {
+            return document.execCommand('copy');
+        } catch (error) {
+            return false;
+        }
+    }
+
+    if (copyButton) {
+        copyButton.addEventListener('click', function () {
+            var link = currentRegisterUrl();
+
+            if (!link || link === '#') {
+                setCopyStatus('Link indisponivel.');
+                return;
+            }
+
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                navigator.clipboard.writeText(link).then(function () {
+                    setCopyStatus('Link copiado.');
+                }).catch(function () {
+                    setCopyStatus(fallbackCopy(link) ? 'Link copiado.' : 'Nao foi possivel copiar automaticamente.');
+                });
+                return;
+            }
+
+            setCopyStatus(fallbackCopy(link) ? 'Link copiado.' : 'Nao foi possivel copiar automaticamente.');
+        });
+    }
+
+    if (shareButton) {
+        if (!navigator.share) {
+            shareButton.hidden = true;
+        } else {
+            shareButton.addEventListener('click', function () {
+                var link = currentRegisterUrl();
+
+                if (!link || link === '#') {
+                    setCopyStatus('Link indisponivel.');
+                    return;
+                }
+
+                navigator.share({
+                    title: title.textContent || 'Acao emergencial',
+                    text: 'Acesse o cadastro web desta acao emergencial.',
+                    url: link
+                }).catch(function () {});
+            });
+        }
+    }
 })();
