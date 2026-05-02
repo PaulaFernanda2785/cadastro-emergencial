@@ -588,12 +588,18 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
 
             if (supportsZoom) {
                 documentNode.style.zoom = String(scale);
+                documentNode.style.marginBottom = '0';
             } else {
                 documentNode.style.transformOrigin = 'top center';
                 documentNode.style.transform = 'scale(' + scale + ')';
+                documentNode.style.marginBottom = Math.ceil(documentNode.scrollHeight * scale - documentNode.scrollHeight) + 'px';
             }
 
-            viewport.style.minHeight = Math.ceil(documentNode.scrollHeight * scale) + 'px';
+            var rectHeight = documentNode.getBoundingClientRect ? documentNode.getBoundingClientRect().height : 0;
+            var height = supportsZoom && rectHeight > 0
+                ? Math.ceil(Math.min(documentNode.scrollHeight || rectHeight, rectHeight))
+                : Math.ceil(documentNode.scrollHeight * scale);
+            viewport.style.minHeight = height + 'px';
         }
 
         function preparePrint() {
@@ -615,6 +621,20 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
         window.addEventListener('resize', resizeDocument);
         window.addEventListener('beforeprint', preparePrint);
         window.addEventListener('afterprint', restoreScreen);
+
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(resizeDocument).catch(function () {});
+        }
+
+        documentNode.querySelectorAll('img').forEach(function (image) {
+            if (!image.complete) {
+                image.addEventListener('load', resizeDocument, { once: true });
+                image.addEventListener('error', resizeDocument, { once: true });
+            }
+        });
+
         setTimeout(resizeDocument, 250);
+        setTimeout(resizeDocument, 700);
+        setTimeout(resizeDocument, 1400);
     })();
 </script>

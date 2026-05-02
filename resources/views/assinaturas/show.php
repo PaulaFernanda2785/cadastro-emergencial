@@ -263,10 +263,17 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
         var resize = function () {
             try {
                 var doc = frame.contentDocument || frame.contentWindow.document;
-                var height = Math.max(
-                    doc.body ? doc.body.scrollHeight : 0,
-                    doc.documentElement ? doc.documentElement.scrollHeight : 0
-                );
+                var documentNode = doc.querySelector('.dti-document');
+                var rectHeight = documentNode && documentNode.getBoundingClientRect
+                    ? documentNode.getBoundingClientRect().height
+                    : 0;
+                var height = rectHeight > 0
+                    ? Math.ceil(rectHeight + 32)
+                    : Math.max(
+                        doc.body ? doc.body.scrollHeight : 0,
+                        doc.documentElement ? doc.documentElement.scrollHeight : 0
+                    );
+
                 if (height > 0) {
                     frame.style.height = Math.ceil(height) + 'px';
                 }
@@ -278,6 +285,8 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
             resize();
             setTimeout(resize, 250);
             setTimeout(resize, 800);
+            setTimeout(resize, 1400);
+            setTimeout(resize, 2200);
         });
         window.addEventListener('resize', resize);
     });

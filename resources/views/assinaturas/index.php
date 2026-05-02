@@ -31,6 +31,93 @@ $formatDate = static function (mixed $value): string {
 
     return $timestamp !== false ? date('d/m/Y', $timestamp) : '-';
 };
+$signaturePayload = static function (array $assinatura): array {
+    $payload = json_decode((string) ($assinatura['payload_json'] ?? ''), true);
+
+    return is_array($payload) ? $payload : [];
+};
+$signatureUrlFilters = static function (array $assinatura): array {
+    $url = (string) ($assinatura['url_documento'] ?? '');
+    $query = (string) (parse_url($url, PHP_URL_QUERY) ?? '');
+
+    if ($query === '') {
+        return [];
+    }
+
+    parse_str($query, $params);
+
+    return is_array($params) ? $params : [];
+};
+$filterValue = static function (array $filters, string $key): string {
+    return trim((string) ($filters[$key] ?? ''));
+};
+$documentReference = static function (array $assinatura) use ($signaturePayload, $signatureUrlFilters, $filterValue, $formatDate): ?array {
+    $type = (string) ($assinatura['documento_tipo'] ?? '');
+
+    if (!in_array($type, ['prestacao_contas', 'recomecar'], true)) {
+        return null;
+    }
+
+    $payload = $signaturePayload($assinatura);
+    $filters = is_array($payload['filters'] ?? null) ? $payload['filters'] : [];
+    $filters = array_replace($signatureUrlFilters($assinatura), $filters);
+
+    $acaoBusca = $filterValue($filters, 'acao_busca');
+    $acaoId = $filterValue($filters, 'acao_id');
+    $localidade = $filterValue($filters, 'localidade_busca');
+    $dataInicio = $filterValue($filters, 'data_inicio');
+    $dataFim = $filterValue($filters, 'data_fim');
+    $statusEntrega = $filterValue($filters, 'status_entrega');
+    $aptidao = $filterValue($filters, 'aptidao');
+    $tipoAjuda = $filterValue($filters, 'tipo_ajuda_busca');
+    $tipoAjudaId = $filterValue($filters, 'tipo_ajuda_id');
+
+    $primary = $acaoBusca !== ''
+        ? $acaoBusca
+        : ($acaoId !== '' ? 'Acao #' . $acaoId : 'Acao nao informada no filtro');
+
+    $items = [];
+
+    if ($localidade !== '') {
+        $items[] = 'Localidade: ' . $localidade;
+    }
+
+    if ($type === 'prestacao_contas') {
+        if ($tipoAjuda !== '') {
+            $items[] = 'Tipo de ajuda: ' . $tipoAjuda;
+        } elseif ($tipoAjudaId !== '') {
+            $items[] = 'Tipo de ajuda #' . $tipoAjudaId;
+        }
+    }
+
+    if ($type === 'recomecar') {
+        $items[] = 'Programa: pagamento de 1 salario minimo';
+        if ($aptidao !== '') {
+            $items[] = 'Situacao: ' . ([
+                'apta' => 'Aptas para pagamento',
+                'inapta' => 'Inaptas',
+                'todas' => 'Todas',
+            ][$aptidao] ?? $aptidao);
+        }
+    }
+
+    if ($statusEntrega !== '') {
+        $items[] = 'Entrega: ' . ([
+            'entregue' => 'Com entrega',
+            'nao_entregue' => 'Sem entrega',
+        ][$statusEntrega] ?? $statusEntrega);
+    }
+
+    if ($dataInicio !== '' || $dataFim !== '') {
+        $items[] = 'Periodo: ' . ($dataInicio !== '' ? $formatDate($dataInicio) : 'inicio') . ' a ' . ($dataFim !== '' ? $formatDate($dataFim) : 'hoje');
+    }
+
+    return [
+        'label' => $type === 'recomecar' ? 'Referencia da acao no Programa Recomecar' : 'Referencia da acao na Prestacao de contas',
+        'primary' => $primary,
+        'items' => $items,
+    ];
+};
 $filters = $filters ?? [
     'escopo' => 'todas',
     'status' => '',
@@ -214,6 +301,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
                 $personCpf = $isAdmin
                     ? trim((string) ($assinatura['solicitante_cpf'] ?? '') . ' / ' . (string) ($assinatura['coautor_cpf'] ?? ''))
                     : ($isPrincipalHistory ? ($assinatura['solicitante_cpf'] ?? '') : ($isMine ? ($assinatura['solicitante_cpf'] ?? '') : ($assinatura['coautor_cpf'] ?? '')));
+                $reference = $documentReference($assinatura);
                 ?>
                 <article class="signature-list-card">
                     <div class="signature-list-main">
@@ -224,6 +312,20 @@ $lastRecord = min($totalRecords, $page * $perPage);
                                 <p><?= h($assinatura['descricao']) ?></p>
                             <?php endif; ?>
                         </div>
+
+                        <?php if ($reference !== null): ?>
+                            <div class="signature-action-reference">
+                                <span><?= h($reference['label']) ?></span>
+                                <strong><?= h($reference['primary']) ?></strong>
+                                <?php if (($reference['items'] ?? []) !== []): ?>
+                                    <div>
+                                        <?php foreach ($reference['items'] as $referenceItem): ?>
+                                            <small><?= h($referenceItem) ?></small>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
 
                         <div class="signature-list-meta">
                             <div>

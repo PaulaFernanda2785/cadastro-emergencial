@@ -4291,6 +4291,48 @@ button:disabled,
     overflow-wrap: anywhere;
 }
 
+.signature-action-reference {
+    min-width: 0;
+    display: grid;
+    gap: 7px;
+    border: 1px solid #badbe4;
+    border-left: 4px solid var(--primary);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #eef7f9;
+}
+
+.signature-action-reference > span,
+.signature-action-reference small {
+    display: block;
+    color: #44606f;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.signature-action-reference strong {
+    display: block;
+    color: #123044;
+    font-size: 14px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.signature-action-reference > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.signature-action-reference small {
+    border: 1px solid rgba(21, 94, 117, 0.18);
+    border-radius: 999px;
+    padding: 5px 8px;
+    background: #ffffff;
+}
+
 .signature-list-meta {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
