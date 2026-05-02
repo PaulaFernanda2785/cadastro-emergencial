@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260502-162';
+$assetVersion = '20260502-170';
 $sessionTimeoutSeconds = 1800;
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
@@ -162,6 +162,9 @@ $menuItems = [
                         </button>
                     <?php endif; ?>
                     <div class="institution-title">
+                        <?php if ($user === null): ?>
+                            <img src="<?= h(asset('images/logo-cedec.png')) ?>" alt="CEDEC-PA" class="public-header-logo">
+                        <?php endif; ?>
                         <strong>Corpo de Bombeiros Militar do Para</strong>
                         <span>Coordenadoria Estadual de Protecao e Defesa Civil</span>
                     </div>
@@ -178,8 +181,6 @@ $menuItems = [
                             <button type="submit" class="logout-button" data-loading-text="Saindo...">Sair</button>
                         </form>
                     </div>
-                <?php else: ?>
-                    <a class="public-brand" href="<?= h(url('/login')) ?>"><?= h($app['name']) ?></a>
                 <?php endif; ?>
             </header>
 
