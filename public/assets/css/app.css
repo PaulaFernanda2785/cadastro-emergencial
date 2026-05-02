@@ -1949,6 +1949,198 @@ button:disabled,
     font-weight: 800;
 }
 
+.family-index-page {
+    min-width: 0;
+}
+
+.family-filter-form {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+.family-search-field {
+    grid-column: span 2;
+    min-width: 0;
+}
+
+.family-filter-actions {
+    grid-column: span 2;
+}
+
+.family-card-list {
+    display: grid;
+    gap: 14px;
+}
+
+.family-index-card {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(175px, 0.22fr);
+    gap: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--surface);
+    box-shadow: 0 12px 28px rgba(28, 39, 51, 0.06);
+}
+
+.family-index-main {
+    min-width: 0;
+    display: grid;
+    gap: 14px;
+}
+
+.family-index-title {
+    min-width: 0;
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+}
+
+.family-index-title h2 {
+    margin-bottom: 0;
+    font-size: 22px;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.family-index-title p {
+    margin-bottom: 0;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.family-index-statuses {
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.family-status-pill {
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(100, 116, 139, 0.18);
+    border-radius: 999px;
+    padding: 5px 10px;
+    color: #334155;
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+.family-status-delivered,
+.family-status-reviewed {
+    border-color: rgba(22, 101, 52, 0.2);
+    color: #166534;
+    background: #ecfdf4;
+}
+
+.family-status-pending,
+.family-status-open {
+    border-color: rgba(180, 83, 9, 0.24);
+    color: #92400e;
+    background: #fff7ed;
+}
+
+.family-status-desabrigado {
+    border-color: rgba(185, 28, 28, 0.2);
+    color: #991b1b;
+    background: #fef2f2;
+}
+
+.family-status-desalojado,
+.family-status-aluguel_social {
+    border-color: rgba(180, 83, 9, 0.22);
+    color: #92400e;
+    background: #fff7dc;
+}
+
+.family-status-permanece_residencia {
+    border-color: rgba(21, 94, 117, 0.2);
+    color: var(--primary);
+    background: #f0f9fb;
+}
+
+.family-index-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.family-index-meta div {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 12px;
+    background: #fbfcfd;
+}
+
+.family-index-meta dt,
+.family-delivery-summary span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.family-index-meta dd {
+    margin: 4px 0 0;
+    font-weight: 800;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.family-delivery-summary {
+    min-width: 0;
+    display: grid;
+    gap: 5px;
+    border: 1px solid rgba(21, 94, 117, 0.18);
+    border-radius: 8px;
+    padding: 12px;
+    background: #f5fafb;
+}
+
+.family-delivery-summary strong,
+.family-delivery-summary small {
+    overflow-wrap: anywhere;
+}
+
+.family-delivery-summary strong {
+    color: var(--text);
+    line-height: 1.35;
+}
+
+.family-delivery-summary small {
+    color: var(--muted);
+}
+
+.family-index-actions {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    border-left: 1px solid #eef3f7;
+    padding-left: 16px;
+}
+
+.family-index-actions .primary-link-button,
+.family-index-actions .secondary-button {
+    width: 100%;
+    justify-content: center;
+    min-height: 42px;
+    border-radius: 8px;
+    text-align: center;
+    white-space: normal;
+}
+
 .residence-open-page {
     gap: 18px;
 }
@@ -5041,6 +5233,7 @@ button:disabled,
     }
 
     .records-filter-form,
+    .family-filter-form,
     .delivery-filter-form,
     .delivery-batch-filter {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5051,7 +5244,12 @@ button:disabled,
     }
 
     .records-search-field,
+    .family-search-field,
     .records-filter-actions {
+        grid-column: 1 / -1;
+    }
+
+    .family-filter-actions {
         grid-column: 1 / -1;
     }
 
@@ -5061,6 +5259,17 @@ button:disabled,
 
     .record-card {
         grid-template-columns: 1fr;
+    }
+
+    .family-index-card {
+        grid-template-columns: 1fr;
+    }
+
+    .family-index-actions {
+        border-top: 1px solid #eef3f7;
+        border-left: 0;
+        padding-top: 14px;
+        padding-left: 0;
     }
 
     .family-detail-summary,
@@ -5122,6 +5331,10 @@ button:disabled,
     }
 
     .record-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .family-index-meta {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -5639,12 +5852,18 @@ button:disabled,
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .records-filter-form {
+    .records-filter-form,
+    .family-filter-form {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .records-search-field,
+    .family-search-field,
     .records-filter-actions {
+        grid-column: 1 / -1;
+    }
+
+    .family-filter-actions {
         grid-column: 1 / -1;
     }
 
@@ -5652,7 +5871,15 @@ button:disabled,
         grid-template-columns: 1fr;
     }
 
+    .family-index-card {
+        grid-template-columns: 1fr;
+    }
+
     .record-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .family-index-meta {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -6051,8 +6278,11 @@ button:disabled,
 
     .records-summary-grid,
     .record-card-meta,
+    .family-index-meta,
     .residence-open-card .record-card-meta,
     .records-filter-form,
+    .family-filter-form,
+    .family-filter-actions,
     .records-filter-actions,
     .delivery-qr-manual-form,
     .delivery-filter-form,

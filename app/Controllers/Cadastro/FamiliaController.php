@@ -18,6 +18,11 @@ use RuntimeException;
 
 final class FamiliaController extends Controller
 {
+    private const INDEX_PER_PAGE = 10;
+    private const SITUACAO_OPTIONS = ['desabrigado', 'desalojado', 'aluguel_social', 'permanece_residencia'];
+    private const ENTREGA_FILTERS = ['com_entrega', 'sem_entrega'];
+    private const CADASTRO_FILTERS = ['concluido', 'pendente'];
+
     public function __construct(
         private readonly FamiliaRepository $familias = new FamiliaRepository(),
         private readonly ResidenciaRepository $residencias = new ResidenciaRepository(),
@@ -27,9 +32,30 @@ final class FamiliaController extends Controller
 
     public function index(): void
     {
+        $filters = $this->indexFilters();
+        $ownedUserId = $this->ownedRecordsUserId();
+        $total = $this->familias->countSearch($ownedUserId, $filters);
+        $totalPages = max(1, (int) ceil($total / self::INDEX_PER_PAGE));
+        $page = min($this->requestedPage(), $totalPages);
+
         $this->view('cadastro.familias.index', [
             'title' => 'Familias cadastradas',
-            'familias' => $this->familias->all($this->ownedRecordsUserId()),
+            'familias' => $this->familias->search(
+                $ownedUserId,
+                $filters,
+                self::INDEX_PER_PAGE,
+                ($page - 1) * self::INDEX_PER_PAGE
+            ),
+            'filters' => $filters,
+            'summary' => $this->familias->searchSummary($ownedUserId, $filters),
+            'acoes' => $this->familias->familyActionOptions($ownedUserId),
+            'residencias' => $this->familias->familyResidenceOptions($ownedUserId),
+            'pagination' => [
+                'page' => $page,
+                'per_page' => self::INDEX_PER_PAGE,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
         ]);
     }
 
@@ -390,6 +416,68 @@ final class FamiliaController extends Controller
             'representante_sexo' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_sexo'] ?? '')) : '',
             'representante_telefone' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_telefone'] ?? '')) : '',
         ];
+    }
+
+    private function indexFilters(): array
+    {
+        $situacao = trim((string) ($_GET['situacao'] ?? ''));
+        $entregas = trim((string) ($_GET['entregas'] ?? ''));
+        $cadastro = trim((string) ($_GET['cadastro'] ?? ''));
+
+        if (!in_array($situacao, self::SITUACAO_OPTIONS, true)) {
+            $situacao = '';
+        }
+
+        if (!in_array($entregas, self::ENTREGA_FILTERS, true)) {
+            $entregas = '';
+        }
+
+        if (!in_array($cadastro, self::CADASTRO_FILTERS, true)) {
+            $cadastro = '';
+        }
+
+        return [
+            'q' => mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 120),
+            'acao_id' => $this->integerFilter($_GET['acao_id'] ?? null),
+            'acao_busca' => mb_substr(trim((string) ($_GET['acao_busca'] ?? '')), 0, 120),
+            'residencia_id' => $this->integerFilter($_GET['residencia_id'] ?? null),
+            'residencia_busca' => mb_substr(trim((string) ($_GET['residencia_busca'] ?? '')), 0, 120),
+            'situacao' => $situacao,
+            'entregas' => $entregas,
+            'cadastro' => $cadastro,
+            'data_inicio' => $this->validDateFilter($_GET['data_inicio'] ?? null),
+            'data_fim' => $this->validDateFilter($_GET['data_fim'] ?? null),
+        ];
+    }
+
+    private function requestedPage(): int
+    {
+        $page = filter_var($_GET['pagina'] ?? 1, FILTER_VALIDATE_INT);
+
+        return is_int($page) && $page > 0 ? $page : 1;
+    }
+
+    private function integerFilter(mixed $value): string
+    {
+        $id = filter_var($value, FILTER_VALIDATE_INT);
+
+        return is_int($id) && $id > 0 ? (string) $id : '';
+    }
+
+    private function validDateFilter(mixed $value): string
+    {
+        $date = trim((string) $value);
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return '';
+        }
+
+        $parsed = \DateTimeImmutable::createFromFormat('Y-m-d', $date);
+        $errors = \DateTimeImmutable::getLastErrors();
+
+        return $parsed && ($errors === false || ((int) $errors['warning_count'] === 0 && (int) $errors['error_count'] === 0))
+            ? $date
+            : '';
     }
 
     private function validator(array $data): Validator
