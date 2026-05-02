@@ -3230,6 +3230,135 @@ button:disabled,
     overflow-wrap: anywhere;
 }
 
+.residence-family-panel {
+    overflow-x: hidden;
+}
+
+.residence-family-list {
+    display: grid;
+    gap: 10px;
+}
+
+.residence-family-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "main status"
+        "meta meta"
+        "actions actions";
+    gap: 12px;
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    background: #fbfcfd;
+}
+
+.residence-family-card.has-delivery {
+    border-color: #86b7a4;
+    background: #f0faf5;
+}
+
+.residence-family-main,
+.residence-family-meta,
+.residence-family-actions {
+    min-width: 0;
+}
+
+.residence-family-main {
+    grid-area: main;
+    display: grid;
+    gap: 4px;
+}
+
+.residence-family-main strong,
+.residence-family-main small,
+.residence-family-meta strong {
+    overflow-wrap: anywhere;
+}
+
+.residence-family-main strong {
+    font-size: 16px;
+    line-height: 1.35;
+}
+
+.residence-family-main small {
+    color: var(--muted);
+    font-weight: 800;
+}
+
+.residence-family-status {
+    grid-area: status;
+    min-width: 112px;
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    border-radius: 8px;
+    padding: 9px 10px;
+    color: #07543f;
+    background: #d9f5e7;
+    font-weight: 900;
+    text-align: center;
+}
+
+.residence-family-card.without-delivery .residence-family-status {
+    color: #7a4a00;
+    background: #fff3cf;
+}
+
+.residence-family-status span {
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.residence-family-status strong {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.residence-family-meta {
+    grid-area: meta;
+    display: grid;
+    grid-template-columns: minmax(130px, 0.75fr) minmax(110px, 0.45fr) minmax(220px, 1fr);
+    gap: 10px;
+}
+
+.residence-family-meta span {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+    border: 1px solid #eef3f7;
+    border-radius: 8px;
+    padding: 9px 10px;
+    background: rgba(255, 255, 255, 0.68);
+}
+
+.residence-family-meta small {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.residence-family-meta strong {
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.residence-family-actions {
+    grid-area: actions;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    gap: 8px;
+}
+
+.residence-family-actions .secondary-button,
+.residence-family-actions .primary-link-button,
+.residence-family-actions .danger-button,
+.residence-family-actions .inline-form {
+    width: 100%;
+}
+
 .table-action-link {
     min-height: 34px;
     display: inline-flex;
@@ -4405,6 +4534,14 @@ button:disabled,
         padding-left: 0;
     }
 
+    .residence-family-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .residence-family-meta span:nth-child(3) {
+        grid-column: 1 / -1;
+    }
+
     .residence-record-panel {
         overflow-x: visible;
     }
@@ -4639,6 +4776,25 @@ button:disabled,
     .delivery-family-status {
         justify-self: start;
         white-space: normal;
+    }
+
+    .residence-family-card {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "main"
+            "status"
+            "meta"
+            "actions";
+    }
+
+    .residence-family-status {
+        width: 100%;
+        justify-items: start;
+        text-align: left;
+    }
+
+    .residence-family-actions {
+        grid-template-columns: 1fr;
     }
 
     .app-shell {
@@ -5142,6 +5298,14 @@ button:disabled,
 }
 
 @media (max-width: 480px) {
+    .residence-family-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .residence-family-meta span:nth-child(3) {
+        grid-column: auto;
+    }
+
     .delivery-record-meta {
         grid-template-columns: 1fr;
     }

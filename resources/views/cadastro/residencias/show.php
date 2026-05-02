@@ -165,64 +165,71 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
         </article>
     </section>
 
-    <section class="table-panel residence-record-panel">
+    <section class="table-panel residence-record-panel residence-family-panel">
         <div class="table-heading">
             <h2>Familias vinculadas</h2>
             <span><?= h(count($familias)) ?> cadastrada(s) de <?= h($residencia['quantidade_familias']) ?> informada(s)</span>
         </div>
-        <table class="data-table residence-record-table">
-            <thead>
-                <tr>
-                    <th>Responsavel</th>
-                    <th>CPF</th>
-                    <th>Telefone</th>
-                    <th>Integrantes</th>
-                    <th>Vulnerabilidades</th>
-                    <th>Entregas</th>
-                    <th class="actions-column">Acoes</th>
-                </tr>
-            </thead>
-            <tbody>
+        <?php if ($familias === []): ?>
+            <div class="empty-state">Nenhuma familia cadastrada para esta residencia.</div>
+        <?php else: ?>
+            <div class="residence-family-list">
                 <?php foreach ($familias as $familia): ?>
-                    <tr>
-                        <td data-label="Responsavel"><?= h($familia['responsavel_nome']) ?></td>
-                        <td data-label="CPF"><?= h($familia['responsavel_cpf']) ?></td>
-                        <td data-label="Telefone"><?= h($familia['telefone'] ?: '-') ?></td>
-                        <td data-label="Integrantes"><?= h($familia['quantidade_integrantes']) ?></td>
-                        <td data-label="Vulnerabilidades">
-                            <?= (int) $familia['possui_criancas'] === 1 ? 'Criancas ' : '' ?>
-                            <?= (int) $familia['possui_idosos'] === 1 ? 'Idosos ' : '' ?>
-                            <?= (int) $familia['possui_pcd'] === 1 ? 'PCD' : '' ?>
-                            <?= (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '' ?>
-                        </td>
-                        <td data-label="Entregas"><?= h($familia['entregas_registradas'] ?? 0) ?></td>
-                        <td class="actions-column" data-label="Acoes">
-                            <div class="family-row-actions">
-                                <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'])) ?>">Ver detalhe</a>
-                                <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/comprovante')) ?>">Comprovante</a>
-                                <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
-                                    <a class="table-action-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/editar')) ?>">Editar</a>
-                                    <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/excluir')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Excluir esta familia da listagem? O registro continuara preservado no banco.">
-                                        <?= csrf_field() ?>
-                                        <?= idempotency_field('cadastro.familia.delete.' . $familia['id']) ?>
-                                        <button type="submit" class="danger-button table-danger-button" data-loading-text="Excluindo...">Excluir</button>
-                                    </form>
-                                <?php endif; ?>
-                                <?php if ($canRegisterDelivery): ?>
-                                    <a class="table-action-link" href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Entrega</a>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
+                    <?php
+                    $vulnerabilidades = array_values(array_filter([
+                        (int) $familia['possui_criancas'] === 1 ? 'Criancas' : '',
+                        (int) $familia['possui_idosos'] === 1 ? 'Idosos' : '',
+                        (int) $familia['possui_pcd'] === 1 ? 'PCD' : '',
+                        (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '',
+                    ]));
+                    $entregasRegistradas = (int) ($familia['entregas_registradas'] ?? 0);
+                    ?>
+                    <article class="residence-family-card <?= $entregasRegistradas > 0 ? 'has-delivery' : 'without-delivery' ?>">
+                        <div class="residence-family-main">
+                            <span class="eyebrow">Responsavel familiar</span>
+                            <strong><?= h($familia['responsavel_nome']) ?></strong>
+                            <small><?= h($familia['responsavel_cpf']) ?></small>
+                        </div>
 
-                <?php if ($familias === []): ?>
-                    <tr>
-                        <td colspan="7" class="empty-state">Nenhuma familia cadastrada para esta residencia.</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                        <div class="residence-family-status">
+                            <span><?= $entregasRegistradas > 0 ? 'Com entrega' : 'Sem entrega' ?></span>
+                            <strong><?= h($entregasRegistradas) ?></strong>
+                        </div>
+
+                        <div class="residence-family-meta">
+                            <span>
+                                <small>Telefone</small>
+                                <strong><?= h($familia['telefone'] ?: '-') ?></strong>
+                            </span>
+                            <span>
+                                <small>Integrantes</small>
+                                <strong><?= h((int) $familia['quantidade_integrantes']) ?></strong>
+                            </span>
+                            <span>
+                                <small>Vulnerabilidades</small>
+                                <strong><?= h($vulnerabilidades !== [] ? implode(', ', $vulnerabilidades) : '-') ?></strong>
+                            </span>
+                        </div>
+
+                        <div class="residence-family-actions">
+                            <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'])) ?>">Ver detalhe</a>
+                            <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/comprovante')) ?>">Comprovante</a>
+                            <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
+                                <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/editar')) ?>">Editar</a>
+                                <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/excluir')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Excluir esta familia da listagem? O registro continuara preservado no banco.">
+                                    <?= csrf_field() ?>
+                                    <?= idempotency_field('cadastro.familia.delete.' . $familia['id']) ?>
+                                    <button type="submit" class="danger-button" data-loading-text="Excluindo...">Excluir</button>
+                                </form>
+                            <?php endif; ?>
+                            <?php if ($canRegisterDelivery): ?>
+                                <a class="primary-link-button" href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Entrega</a>
+                            <?php endif; ?>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </section>
 </section>
 
