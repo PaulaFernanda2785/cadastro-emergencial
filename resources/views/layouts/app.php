@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260502-149';
+$assetVersion = '20260502-162';
 $sessionTimeoutSeconds = 1800;
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
@@ -73,10 +73,13 @@ $menuItems = [
     </script>
     <link rel="manifest" href="<?= h(url('/manifest.webmanifest') . '?v=' . $assetVersion) ?>">
     <link rel="apple-touch-icon" href="<?= h(asset('images/logo-cadastro-emergencial-app.png')) ?>">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="<?= h(asset('css/app.css') . '?v=' . $assetVersion) ?>">
     <script src="<?= h(asset('js/modals.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/forms.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/layout.js') . '?v=' . $assetVersion) ?>" defer></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+    <script src="<?= h(asset('js/dashboard-map.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/app-offline.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/geolocation.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/action-form.js') . '?v=' . $assetVersion) ?>" defer></script>

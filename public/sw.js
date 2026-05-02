@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cadastro-emergencial-v20260502-123';
+const CACHE_NAME = 'cadastro-emergencial-v20260502-159';
 const CORE_ASSETS = [
     './manifest.webmanifest',
     './assets/css/app.css',
@@ -6,6 +6,7 @@ const CORE_ASSETS = [
     './assets/js/modals.js',
     './assets/js/forms.js',
     './assets/js/layout.js',
+    './assets/js/dashboard-map.js',
     './assets/js/geolocation.js',
     './assets/js/action-form.js',
     './assets/js/residence-form.js',
@@ -78,22 +79,18 @@ self.addEventListener('fetch', function (event) {
     }
 
     event.respondWith(
-        caches.match(request).then(function (cached) {
-            if (cached) {
-                return cached;
+        fetch(request).then(function (response) {
+            var copy = response.clone();
+
+            if (response.ok) {
+                caches.open(CACHE_NAME).then(function (cache) {
+                    cache.put(request, copy);
+                });
             }
 
-            return fetch(request).then(function (response) {
-                var copy = response.clone();
-
-                if (response.ok) {
-                    caches.open(CACHE_NAME).then(function (cache) {
-                        cache.put(request, copy);
-                    });
-                }
-
-                return response;
-            });
+            return response;
+        }).catch(function () {
+            return caches.match(request);
         })
     );
 });
