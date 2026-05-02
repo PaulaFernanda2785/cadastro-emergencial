@@ -26,6 +26,9 @@
                     <td>
                         <?= h($usuario['nome']) ?><br>
                         <small><?= h($usuario['orgao'] ?: '-') ?> <?= h($usuario['unidade_setor'] ?: '') ?></small>
+                        <?php if (!empty($usuario['matricula_funcional'])): ?>
+                            <br><small>MF <?= h($usuario['matricula_funcional']) ?></small>
+                        <?php endif; ?>
                     </td>
                     <td><?= h($usuario['email']) ?></td>
                     <td><?= h($usuario['cpf']) ?></td>

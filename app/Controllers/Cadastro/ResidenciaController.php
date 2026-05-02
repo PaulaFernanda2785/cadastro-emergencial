@@ -11,7 +11,9 @@ use App\Core\Validator;
 use App\Repositories\AcaoEmergencialRepository;
 use App\Repositories\DocumentoAnexoRepository;
 use App\Repositories\FamiliaRepository;
+use App\Repositories\LogRepository;
 use App\Repositories\ResidenciaRepository;
+use App\Repositories\UsuarioRepository;
 use App\Services\AuditLogService;
 use App\Services\IdempotenciaService;
 use App\Services\ProtocoloService;
@@ -70,6 +72,70 @@ final class ResidenciaController extends Controller
             'familias' => $this->familias->byResidencia((int) $id),
             'documentos' => $this->documentos->byResidencia((int) $id),
         ]);
+    }
+
+    public function dti(string $id): void
+    {
+        $residencia = $this->findResidenciaForAccess((int) $id);
+        $documentos = $this->documentos->byResidencia((int) $id);
+
+        $this->view('cadastro.residencias.dti', [
+            'title' => 'DTI ' . $residencia['protocolo'],
+            'residencia' => $residencia,
+            'familias' => $this->familias->byResidencia((int) $id),
+            'documentos' => $documentos,
+            'fotos' => $this->dtiImageDocuments($documentos),
+            'fotosResidencia' => $this->dtiResidenceImageDocuments($documentos),
+            'fotosDocumentos' => $this->dtiFamilyDocumentImages($documentos),
+            'signature' => $this->latestDtiSignature((int) $id),
+            'signatureUsers' => (new UsuarioRepository())->activeExcept((int) (current_user()['id'] ?? 0)),
+            'generatedAt' => new \DateTimeImmutable('now'),
+        ]);
+    }
+
+    public function signDti(string $id): void
+    {
+        $residencia = $this->findResidenciaForAccess((int) $id);
+        $this->guardPost('cadastro.residencia.dti.sign.' . (int) $id, '/cadastros/residencias/' . (int) $id . '/dti');
+
+        $familias = $this->familias->byResidencia((int) $id);
+        $coSigners = $this->selectedDtiCoSigners();
+        $signature = $this->buildDtiSignature($residencia, $familias, $coSigners);
+
+        (new AuditLogService())->record(
+            'assinou_dti',
+            'residencias',
+            (int) $id,
+            json_encode($signature, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        );
+
+        Session::flash('success', 'DTI assinada digitalmente com os usuarios selecionados.');
+        $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
+    }
+
+    public function removeDtiSignature(string $id): void
+    {
+        $residencia = $this->findResidenciaForAccess((int) $id);
+        $this->guardPost('cadastro.residencia.dti.remove_signature.' . (int) $id, '/cadastros/residencias/' . (int) $id . '/dti');
+
+        if ($this->latestDtiSignature((int) $id) === null) {
+            Session::flash('warning', 'Esta DTI nao possui assinatura ativa para remover.');
+            $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
+        }
+
+        (new AuditLogService())->record(
+            'removeu_assinatura_dti',
+            'residencias',
+            (int) $id,
+            json_encode([
+                'protocolo' => (string) ($residencia['protocolo'] ?? ''),
+                'removido_por' => (int) (current_user()['id'] ?? 0),
+                'removed_at' => (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s'),
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        );
+
+        Session::flash('success', 'Assinatura da DTI removida. O documento pode ser assinado novamente.');
+        $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
     }
 
     public function viewDocument(string $id, string $documentoId): void
@@ -579,6 +645,139 @@ final class ResidenciaController extends Controller
                 'enviado_por' => (int) (current_user()['id'] ?? 0),
             ]);
         }
+    }
+
+    private function dtiImageDocuments(array $documentos): array
+    {
+        return array_values(array_filter(
+            $documentos,
+            static fn (array $documento): bool => str_starts_with((string) ($documento['mime_type'] ?? ''), 'image/')
+        ));
+    }
+
+    private function dtiResidenceImageDocuments(array $documentos): array
+    {
+        return array_values(array_filter(
+            $this->dtiImageDocuments($documentos),
+            static fn (array $documento): bool =>
+                in_array((string) ($documento['tipo_documento'] ?? ''), ['foto_georreferenciada', 'foto_residencia_extra'], true)
+                && empty($documento['familia_id'])
+        ));
+    }
+
+    private function dtiFamilyDocumentImages(array $documentos): array
+    {
+        return array_values(array_filter(
+            $this->dtiImageDocuments($documentos),
+            static fn (array $documento): bool =>
+                (int) ($documento['familia_id'] ?? 0) > 0
+                || (string) ($documento['tipo_documento'] ?? '') === 'documento_familia'
+        ));
+    }
+
+    private function latestDtiSignature(int $residenciaId): ?array
+    {
+        $log = (new LogRepository())->latestForEntityActions(
+            ['assinou_dti', 'removeu_assinatura_dti'],
+            'residencias',
+            $residenciaId
+        );
+
+        if ($log === null || (string) ($log['acao'] ?? '') === 'removeu_assinatura_dti') {
+            return null;
+        }
+
+        $decoded = json_decode((string) ($log['descricao'] ?? ''), true);
+
+        if (is_array($decoded)) {
+            return $decoded + [
+                'signed_at' => $log['criado_em'] ?? '',
+                'usuario_id' => $log['usuario_id'] ?? null,
+            ];
+        }
+
+        return [
+            'nome' => $log['usuario_nome'] ?? '',
+            'cpf' => $log['usuario_cpf'] ?? '',
+            'graduacao' => $log['usuario_graduacao'] ?? '',
+            'nome_guerra' => $log['usuario_nome_guerra'] ?? '',
+            'matricula_funcional' => $log['usuario_matricula_funcional'] ?? '',
+            'signed_at' => $log['criado_em'] ?? '',
+            'hash' => '',
+        ];
+    }
+
+    private function selectedDtiCoSigners(): array
+    {
+        $postedIds = is_array($_POST['assinantes_usuarios'] ?? null) ? $_POST['assinantes_usuarios'] : [];
+        $currentUserId = (int) (current_user()['id'] ?? 0);
+        $ids = array_values(array_filter(array_map(
+            static fn (mixed $id): int => (int) $id,
+            $postedIds
+        ), static fn (int $id): bool => $id > 0 && $id !== $currentUserId));
+
+        return (new UsuarioRepository())->activeByIds($ids);
+    }
+
+    private function signatureUserPayload(array $user, string $tipo): array
+    {
+        return [
+            'usuario_id' => (int) ($user['id'] ?? 0),
+            'tipo' => $tipo,
+            'nome' => (string) ($user['nome'] ?? ''),
+            'cpf' => (string) ($user['cpf'] ?? ''),
+            'graduacao' => (string) ($user['graduacao'] ?? ''),
+            'nome_guerra' => (string) ($user['nome_guerra'] ?? ''),
+            'matricula_funcional' => (string) ($user['matricula_funcional'] ?? ''),
+            'orgao' => (string) ($user['orgao'] ?? ''),
+            'unidade_setor' => (string) ($user['unidade_setor'] ?? ''),
+        ];
+    }
+
+    private function buildDtiSignature(array $residencia, array $familias, array $coSigners): array
+    {
+        $sessionUser = current_user() ?? [];
+        $userId = (int) ($sessionUser['id'] ?? 0);
+        $user = $userId > 0 ? ((new UsuarioRepository())->find($userId) ?? $sessionUser) : $sessionUser;
+        $signedAt = (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s');
+        $assinantes = array_merge(
+            [$this->signatureUserPayload($user, 'assinante_principal')],
+            array_map(
+                fn (array $coSigner): array => $this->signatureUserPayload($coSigner, 'coassinante'),
+                $coSigners
+            )
+        );
+        $familyIds = implode(',', array_map(
+            static fn (array $familia): string => (string) ($familia['id'] ?? ''),
+            $familias
+        ));
+        $signerIds = implode(',', array_map(
+            static fn (array $assinante): string => (string) ($assinante['usuario_id'] ?? ''),
+            $assinantes
+        ));
+        $base = implode('|', [
+            (string) ($residencia['id'] ?? ''),
+            (string) ($residencia['protocolo'] ?? ''),
+            $familyIds,
+            $signerIds,
+            $signedAt,
+        ]);
+
+        return [
+            'nome' => (string) ($user['nome'] ?? ''),
+            'cpf' => (string) ($user['cpf'] ?? ''),
+            'graduacao' => (string) ($user['graduacao'] ?? ''),
+            'nome_guerra' => (string) ($user['nome_guerra'] ?? ''),
+            'matricula_funcional' => (string) ($user['matricula_funcional'] ?? ''),
+            'orgao' => (string) ($user['orgao'] ?? ''),
+            'unidade_setor' => (string) ($user['unidade_setor'] ?? ''),
+            'usuario_id' => (int) ($user['id'] ?? 0),
+            'signed_at' => $signedAt,
+            'hash' => strtoupper(hash('sha256', $base)),
+            'documento' => 'DTI - Descricao Tecnica de Imovel',
+            'protocolo' => (string) ($residencia['protocolo'] ?? ''),
+            'assinantes' => $assinantes,
+        ];
     }
 
     private function guardPost(string $scope, string $failureRedirect): void

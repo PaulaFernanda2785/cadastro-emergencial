@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     militar TINYINT(1) NOT NULL DEFAULT 0,
     graduacao VARCHAR(80) NULL,
     nome_guerra VARCHAR(120) NULL,
+    matricula_funcional VARCHAR(60) NULL,
     senha_hash VARCHAR(255) NOT NULL,
     perfil ENUM('cadastrador', 'gestor', 'administrador') NOT NULL DEFAULT 'cadastrador',
     ativo TINYINT(1) NOT NULL DEFAULT 1,

@@ -256,6 +256,7 @@ final class AuthController extends Controller
             'militar' => '',
             'graduacao' => '',
             'nome_guerra' => '',
+            'matricula_funcional' => '',
             'senha' => '',
             'confirmar_senha' => '',
         ];
@@ -275,6 +276,7 @@ final class AuthController extends Controller
             'militar' => $militar,
             'graduacao' => $militar !== '' ? trim((string) ($_POST['graduacao'] ?? '')) : '',
             'nome_guerra' => $militar !== '' ? trim((string) ($_POST['nome_guerra'] ?? '')) : '',
+            'matricula_funcional' => $militar !== '' ? trim((string) ($_POST['matricula_funcional'] ?? '')) : '',
             'senha' => (string) ($_POST['senha'] ?? ''),
             'confirmar_senha' => (string) ($_POST['confirmar_senha'] ?? ''),
         ];
@@ -296,6 +298,7 @@ final class AuthController extends Controller
             ->max('unidade_setor', $data['unidade_setor'], 180, 'Unidade/setor')
             ->max('graduacao', $data['graduacao'], 80, 'Graduacao')
             ->max('nome_guerra', $data['nome_guerra'], 120, 'Nome de guerra')
+            ->max('matricula_funcional', $data['matricula_funcional'], 60, 'Matricula funcional')
             ->required('senha', $data['senha'], 'Senha');
 
         if (strlen((string) $data['senha']) < 8) {

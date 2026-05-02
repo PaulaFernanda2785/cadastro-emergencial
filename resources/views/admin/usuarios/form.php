@@ -72,7 +72,7 @@
                 </label>
             </div>
 
-            <div class="form-grid two-columns military-fields" data-military-fields <?= !empty($usuario['militar']) ? '' : 'hidden' ?>>
+            <div class="form-grid three-columns military-fields" data-military-fields <?= !empty($usuario['militar']) ? '' : 'hidden' ?>>
                 <label class="field">
                     <span>Graduacao</span>
                     <input type="text" name="graduacao" value="<?= h($usuario['graduacao'] ?? '') ?>" maxlength="80" data-military-input>
@@ -86,6 +86,14 @@
                     <input type="text" name="nome_guerra" value="<?= h($usuario['nome_guerra'] ?? '') ?>" maxlength="120" data-military-input>
                     <?php if (!empty($errors['nome_guerra'])): ?>
                         <small class="field-error"><?= h($errors['nome_guerra'][0]) ?></small>
+                    <?php endif; ?>
+                </label>
+
+                <label class="field">
+                    <span>Matricula Funcional - MF</span>
+                    <input type="text" name="matricula_funcional" value="<?= h($usuario['matricula_funcional'] ?? '') ?>" maxlength="60" data-military-input>
+                    <?php if (!empty($errors['matricula_funcional'])): ?>
+                        <small class="field-error"><?= h($errors['matricula_funcional'][0]) ?></small>
                     <?php endif; ?>
                 </label>
             </div>

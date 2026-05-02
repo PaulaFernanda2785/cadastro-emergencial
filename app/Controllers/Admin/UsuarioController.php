@@ -99,6 +99,7 @@ final class UsuarioController extends Controller
                 'militar' => $data['militar'],
                 'graduacao' => $data['graduacao'],
                 'nome_guerra' => $data['nome_guerra'],
+                'matricula_funcional' => $data['matricula_funcional'],
                 'perfil' => $data['perfil'],
                 'ativo' => !empty($data['ativo']) ? 1 : 0,
             ]));
@@ -144,6 +145,7 @@ final class UsuarioController extends Controller
             'militar' => '',
             'graduacao' => '',
             'nome_guerra' => '',
+            'matricula_funcional' => '',
             'perfil' => 'cadastrador',
             'ativo' => '1',
             'senha' => '',
@@ -165,6 +167,7 @@ final class UsuarioController extends Controller
             'militar' => $militar,
             'graduacao' => $militar !== '' ? trim((string) ($_POST['graduacao'] ?? '')) : '',
             'nome_guerra' => $militar !== '' ? trim((string) ($_POST['nome_guerra'] ?? '')) : '',
+            'matricula_funcional' => $militar !== '' ? trim((string) ($_POST['matricula_funcional'] ?? '')) : '',
             'perfil' => trim((string) ($_POST['perfil'] ?? 'cadastrador')),
             'ativo' => (string) ($_POST['ativo'] ?? '1') === '1' ? '1' : '',
             'senha' => (string) ($_POST['senha'] ?? ''),
@@ -188,6 +191,7 @@ final class UsuarioController extends Controller
             ->max('unidade_setor', $data['unidade_setor'], 180, 'Unidade/setor')
             ->max('graduacao', $data['graduacao'], 80, 'Graduacao')
             ->max('nome_guerra', $data['nome_guerra'], 120, 'Nome de guerra')
+            ->max('matricula_funcional', $data['matricula_funcional'], 60, 'Matricula funcional')
             ->in('perfil', $data['perfil'], self::PROFILES, 'Perfil');
 
         if ($passwordRequired || $data['senha'] !== '') {

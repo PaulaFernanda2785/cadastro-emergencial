@@ -3168,6 +3168,153 @@ button:disabled,
     overflow-wrap: anywhere;
 }
 
+.family-detail-page {
+    display: grid;
+    gap: 16px;
+}
+
+.family-detail-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.5fr);
+    gap: 14px;
+}
+
+.family-detail-profile,
+.family-detail-status,
+.family-detail-card {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+    box-shadow: 0 10px 24px rgba(28, 39, 51, 0.06);
+}
+
+.family-detail-profile {
+    display: grid;
+    gap: 8px;
+}
+
+.family-detail-profile h2 {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.family-detail-profile p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.family-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.family-detail-tags span {
+    border: 1px solid rgba(21, 94, 117, 0.18);
+    border-radius: 999px;
+    padding: 6px 10px;
+    color: var(--primary);
+    background: #eef8fb;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.family-detail-status {
+    display: grid;
+    align-content: center;
+    gap: 8px;
+}
+
+.family-detail-status span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.family-detail-status strong {
+    font-size: 24px;
+    line-height: 1.15;
+}
+
+.family-detail-status em {
+    width: fit-content;
+    max-width: 100%;
+    font-style: normal;
+    overflow-wrap: anywhere;
+}
+
+.family-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.family-detail-card {
+    display: grid;
+    gap: 12px;
+}
+
+.family-detail-card-wide {
+    grid-column: 1 / -1;
+}
+
+.family-detail-card-heading {
+    display: grid;
+    gap: 4px;
+}
+
+.family-detail-card-heading span {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.family-detail-card-heading strong {
+    font-size: 20px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.family-detail-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.family-detail-list-wide {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.family-detail-list div {
+    min-width: 0;
+    border: 1px solid #eef3f7;
+    border-radius: 8px;
+    padding: 9px 10px;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.family-detail-list dt {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.family-detail-list dd {
+    margin: 3px 0 0;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
 .status-pill {
     width: fit-content;
     display: inline-flex;
@@ -3779,6 +3926,448 @@ button:disabled,
 .receipt-qr span {
     color: #111111;
     font-size: 11px;
+}
+
+.dti-preview-page {
+    display: grid;
+    gap: 18px;
+}
+
+.dti-screen-header .header-actions {
+    align-items: center;
+}
+
+.dti-document {
+    display: grid;
+    gap: 18px;
+    justify-items: center;
+}
+
+.dti-signature-setup {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 16px;
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    background: #ffffff;
+    box-shadow: 0 12px 28px rgba(28, 39, 51, 0.07);
+}
+
+.dti-signature-setup h2 {
+    margin: 4px 0 6px;
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+.dti-signature-setup p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.dti-signature-setup form {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+}
+
+.dti-primary-signer,
+.dti-cosigner-panel {
+    display: grid;
+    gap: 6px;
+    border: 1px solid #d8e0e8;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8fafc;
+}
+
+.dti-primary-signer > span,
+.dti-cosigner-panel > span,
+.dti-cosigner-list > span {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.dti-primary-signer strong,
+.dti-primary-signer small {
+    overflow-wrap: anywhere;
+}
+
+.dti-primary-signer small {
+    color: var(--muted);
+    font-weight: 800;
+}
+
+.dti-cosigner-picker {
+    display: grid;
+    gap: 10px;
+}
+
+.dti-cosigner-selected {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 42px;
+    border: 1px dashed #b9c6d2;
+    border-radius: 8px;
+    padding: 8px;
+    background: #ffffff;
+}
+
+.dti-cosigner-selected > span:not(.dti-cosigner-chip) {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.dti-cosigner-hint {
+    border: 1px solid #e4ebf2;
+    border-radius: 8px;
+    padding: 9px 10px;
+    color: var(--muted);
+    background: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.dti-cosigner-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    border: 1px solid rgba(21, 94, 117, 0.2);
+    border-radius: 999px;
+    padding: 6px 7px 6px 10px;
+    background: #eef8fb;
+    color: var(--primary);
+}
+
+.dti-cosigner-chip strong {
+    min-width: 0;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.dti-cosigner-chip button {
+    border: 0;
+    border-radius: 999px;
+    padding: 4px 7px;
+    color: #ffffff;
+    background: var(--danger);
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.dti-cosigner-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    max-height: 260px;
+    overflow: auto;
+    padding-right: 2px;
+}
+
+.dti-cosigner-options button {
+    display: grid;
+    min-width: 0;
+    border: 1px solid #e4ebf2;
+    border-radius: 8px;
+    padding: 9px;
+    background: #ffffff;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.dti-cosigner-options button:hover,
+.dti-cosigner-options button:focus {
+    border-color: rgba(21, 94, 117, 0.35);
+    background: #eef8fb;
+}
+
+.dti-cosigner-options button[hidden] {
+    display: none;
+}
+
+.dti-cosigner-options strong,
+.dti-cosigner-options small {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.dti-cosigner-options small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.dti-page {
+    position: relative;
+    width: min(100%, 210mm);
+    min-height: 297mm;
+    padding: 18mm 16mm 16mm;
+    background: #ffffff;
+    border: 1px solid rgba(203, 213, 225, 0.9);
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+    color: #172033;
+    overflow-wrap: anywhere;
+}
+
+.dti-institutional-header {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #155e75;
+    margin-bottom: 18px;
+}
+
+.dti-institutional-header img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}
+
+.dti-institutional-header strong,
+.dti-page-heading strong {
+    display: block;
+    color: #123044;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.dti-institutional-header span,
+.dti-page-heading span {
+    display: block;
+    color: #526174;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.dti-institutional-header h2 {
+    margin: 8px 0 0;
+    color: #0f172a;
+    font-size: 20px;
+    line-height: 1.15;
+}
+
+.dti-page-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #155e75;
+    margin-bottom: 16px;
+}
+
+.dti-section {
+    margin-bottom: 16px;
+}
+
+.dti-section h3 {
+    margin: 0 0 8px;
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.dti-table {
+    width: 100%;
+    min-width: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 12px;
+}
+
+.dti-table caption {
+    padding: 7px 8px;
+    background: #eaf4f7;
+    border: 1px solid #b9ced8;
+    border-bottom: 0;
+    color: #0f3c4c;
+    font-weight: 900;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.dti-table th,
+.dti-table td {
+    border: 1px solid #b9c6d2;
+    padding: 7px 8px;
+    vertical-align: top;
+}
+
+.dti-table th {
+    width: 22%;
+    background: #f3f7fa;
+    color: #28384a;
+    font-size: 11px;
+    font-weight: 900;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.dti-family-table {
+    max-width: 100%;
+    min-width: 0;
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.dti-empty,
+.dti-signature-pending {
+    border: 1px dashed #aebdcc;
+    border-radius: 8px;
+    padding: 14px;
+    background: #f8fafc;
+    color: #526174;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dti-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.dti-photo-grid figure {
+    margin: 0;
+    border: 1px solid #b9c6d2;
+    background: #ffffff;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.dti-photo-grid img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: #e5ebf0;
+}
+
+.dti-photo-grid figcaption {
+    display: grid;
+    gap: 3px;
+    padding: 7px 8px;
+    font-size: 11px;
+}
+
+.dti-photo-grid figcaption strong {
+    color: #172033;
+}
+
+.dti-photo-grid figcaption span {
+    color: #526174;
+}
+
+.dti-signature-section {
+    margin-top: 16px;
+}
+
+.dti-signature-card {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    border: 2px solid #155e75;
+    border-radius: 8px;
+    padding: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f5fbfc 100%);
+}
+
+.dti-signature-card img {
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+}
+
+.dti-signature-card .dti-signature-logo {
+    width: 66px;
+    height: 66px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 6px;
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.dti-signature-card span {
+    color: #155e75;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.dti-signature-card strong {
+    display: block;
+    margin-top: 4px;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 900;
+}
+
+.dti-signature-card p {
+    margin: 3px 0 0;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.dti-cosigner-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.dti-cosigner-list div {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #ffffff;
+}
+
+.dti-cosigner-list strong {
+    display: block;
+    color: #0f172a;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.dti-cosigner-list p {
+    margin: 3px 0 0;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.dti-page-footer {
+    position: absolute;
+    right: 16mm;
+    bottom: 8mm;
+    left: 16mm;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid #b9c6d2;
+    padding-top: 6px;
+    color: #526174;
+    font-size: 10px;
+    font-weight: 800;
 }
 
 .delivery-qr-panel {
@@ -4474,6 +5063,15 @@ button:disabled,
         grid-template-columns: 1fr;
     }
 
+    .family-detail-summary,
+    .family-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .family-detail-list-wide {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .delivery-type-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -4693,6 +5291,65 @@ button:disabled,
         align-items: flex-start;
         flex-direction: column;
     }
+
+    .dti-screen-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .dti-screen-header .header-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .dti-screen-header .header-actions .primary-button,
+    .dti-screen-header .header-actions .secondary-button,
+    .dti-screen-header .header-actions .primary-link-button,
+    .dti-screen-header .header-actions .inline-form,
+    .dti-screen-header .header-actions .danger-button,
+    .dti-screen-header .header-actions .limit-reached-pill {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dti-signature-setup,
+    .dti-cosigner-options {
+        grid-template-columns: 1fr;
+    }
+
+    .dti-page {
+        min-height: 0;
+        padding: 18px;
+    }
+
+    .dti-table,
+    .dti-table tbody,
+    .dti-table caption,
+    .dti-table tr,
+    .dti-table th,
+    .dti-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .dti-table tr {
+        border: 1px solid #b9c6d2;
+    }
+
+    .dti-table th,
+    .dti-table td {
+        border: 0;
+    }
+
+    .dti-table td + th {
+        border-top: 1px solid #d8e1ea;
+    }
+
+    .dti-page-footer {
+        position: static;
+        margin-top: 18px;
+    }
 }
 
 @media (max-width: 760px) {
@@ -4776,6 +5433,32 @@ button:disabled,
     .delivery-family-status {
         justify-self: start;
         white-space: normal;
+    }
+
+    .family-detail-header .header-actions,
+    .family-detail-header .secondary-button,
+    .family-detail-header .primary-link-button {
+        width: 100%;
+    }
+
+    .family-detail-list,
+    .family-detail-list-wide {
+        grid-template-columns: 1fr;
+    }
+
+    .dti-institutional-header,
+    .dti-signature-card {
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+
+    .dti-page-heading,
+    .dti-page-footer {
+        flex-direction: column;
+    }
+
+    .dti-photo-grid {
+        grid-template-columns: 1fr;
     }
 
     .residence-family-card {
@@ -5420,6 +6103,16 @@ button:disabled,
         margin: 3mm;
     }
 
+    @page receipt {
+        size: 80mm auto;
+        margin: 3mm;
+    }
+
+    @page dti {
+        size: A4;
+        margin: 12mm;
+    }
+
     :root {
         --bg: #ffffff;
         --surface: #ffffff;
@@ -5449,6 +6142,95 @@ button:disabled,
     .main {
         width: 100%;
         margin: 0;
+    }
+
+    .receipt-page {
+        page: receipt;
+    }
+
+    .dti-preview-page {
+        display: block;
+        width: auto;
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+        page-break-before: auto;
+        break-before: auto;
+    }
+
+    .dti-document {
+        display: block;
+        width: auto;
+        margin: 0;
+        padding: 0;
+        page-break-before: auto;
+        break-before: auto;
+    }
+
+    .dti-page {
+        width: auto;
+        min-height: 0;
+        margin: 0;
+        border: 0;
+        padding: 0;
+        box-shadow: none;
+        overflow: visible;
+        page-break-after: always;
+        break-after: page;
+        page-break-inside: auto;
+        break-inside: auto;
+    }
+
+    .dti-page:first-of-type {
+        page-break-before: auto;
+        break-before: auto;
+    }
+
+    .dti-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+    .dti-institutional-header {
+        margin-top: 0;
+    }
+
+    .dti-page-footer {
+        position: static;
+        margin-top: 10mm;
+    }
+
+    .dti-table {
+        display: table;
+        table-layout: fixed;
+    }
+
+    .dti-table caption {
+        display: table-caption;
+    }
+
+    .dti-table tbody {
+        display: table-row-group;
+    }
+
+    .dti-table tr {
+        display: table-row;
+        border: 0;
+    }
+
+    .dti-table th,
+    .dti-table td {
+        display: table-cell;
+        width: auto;
+        border: 1px solid #b9c6d2;
+    }
+
+    .dti-table th {
+        width: 22%;
+    }
+
+    .dti-photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .indicator,

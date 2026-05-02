@@ -39,8 +39,9 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             <h1><?= h($residencia['protocolo']) ?></h1>
             <p><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
         </div>
-        <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
-            <div class="header-actions">
+        <div class="header-actions">
+            <a class="secondary-button residence-action-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/dti')) ?>">DTI</a>
+            <?php if (($residencia['acao_status'] ?? null) === 'aberta'): ?>
                 <a class="secondary-button residence-action-button" href="<?= h(url('/acao/' . $residencia['token_publico'] . '/residencias/novo')) ?>">Nova residencia</a>
                 <a class="secondary-button residence-action-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/editar')) ?>">Editar residencia</a>
                 <?php if ($podeCadastrarFamilia): ?>
@@ -48,8 +49,8 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                 <?php else: ?>
                     <span class="limit-reached-pill">Limite de familias atingido</span>
                 <?php endif; ?>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </header>
 
     <section class="records-summary-grid" aria-label="Resumo da residencia">

@@ -52,11 +52,6 @@
 
     forms.forEach(function (form) {
         form.addEventListener('submit', function (event) {
-            if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) {
-                event.preventDefault();
-                return;
-            }
-
             if (form.dataset.processing === 'true') {
                 event.preventDefault();
                 return;
