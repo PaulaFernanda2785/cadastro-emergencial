@@ -72,6 +72,62 @@ final class UsuarioRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function search(array $filters, int $limit, int $offset): array
+    {
+        [$where, $params] = $this->buildSearchWhere($filters);
+
+        $stmt = Database::connection()->prepare(
+            'SELECT id, nome, cpf, email, telefone, orgao, unidade_setor, militar, graduacao, nome_guerra, matricula_funcional, perfil, ativo,
+                    ultimo_acesso, criado_em
+             FROM usuarios
+             WHERE ' . implode(' AND ', $where) . '
+             ORDER BY ativo DESC, nome ASC
+             LIMIT :limit OFFSET :offset'
+        );
+        $this->bindSearchParams($stmt, $params);
+        $stmt->bindValue(':limit', max(1, $limit), PDO::PARAM_INT);
+        $stmt->bindValue(':offset', max(0, $offset), PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countSearch(array $filters): int
+    {
+        [$where, $params] = $this->buildSearchWhere($filters);
+
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*)
+             FROM usuarios
+             WHERE ' . implode(' AND ', $where)
+        );
+        $this->bindSearchParams($stmt, $params);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function searchSummary(array $filters): array
+    {
+        [$where, $params] = $this->buildSearchWhere($filters);
+
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*) AS total_usuarios,
+                    COALESCE(SUM(CASE WHEN ativo = 1 THEN 1 ELSE 0 END), 0) AS ativos,
+                    COALESCE(SUM(CASE WHEN ativo = 0 THEN 1 ELSE 0 END), 0) AS inativos,
+                    COALESCE(SUM(CASE WHEN militar = 1 THEN 1 ELSE 0 END), 0) AS militares,
+                    MAX(ultimo_acesso) AS ultimo_acesso
+             FROM usuarios
+             WHERE ' . implode(' AND ', $where)
+        );
+        $this->bindSearchParams($stmt, $params);
+        $stmt->execute();
+
+        $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($summary) ? $summary : [];
+    }
+
     public function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare(
@@ -208,6 +264,16 @@ final class UsuarioRepository
         $stmt->execute();
     }
 
+    public function setActive(int $id, bool $active): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE usuarios SET ativo = :ativo WHERE id = :id AND deleted_at IS NULL'
+        );
+        $stmt->bindValue(':ativo', $active ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
     public function updatePasswordHash(int $id, string $hash): void
     {
         $info = password_get_info($hash);
@@ -231,5 +297,59 @@ final class UsuarioRepository
         );
         $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
         $stmt->execute();
+    }
+
+    private function buildSearchWhere(array $filters): array
+    {
+        $where = ['deleted_at IS NULL'];
+        $params = [];
+
+        if (($filters['q'] ?? '') !== '') {
+            $where[] = '(nome LIKE :q_nome
+                OR cpf LIKE :q_cpf
+                OR email LIKE :q_email
+                OR telefone LIKE :q_telefone
+                OR orgao LIKE :q_orgao
+                OR unidade_setor LIKE :q_unidade
+                OR graduacao LIKE :q_graduacao
+                OR nome_guerra LIKE :q_nome_guerra
+                OR matricula_funcional LIKE :q_mf)';
+            $search = '%' . $filters['q'] . '%';
+            $params['q_nome'] = $search;
+            $params['q_cpf'] = $search;
+            $params['q_email'] = $search;
+            $params['q_telefone'] = $search;
+            $params['q_orgao'] = $search;
+            $params['q_unidade'] = $search;
+            $params['q_graduacao'] = $search;
+            $params['q_nome_guerra'] = $search;
+            $params['q_mf'] = $search;
+        }
+
+        if (($filters['perfil'] ?? '') !== '') {
+            $where[] = 'perfil = :perfil';
+            $params['perfil'] = (string) $filters['perfil'];
+        }
+
+        if (($filters['status'] ?? '') === 'ativo') {
+            $where[] = 'ativo = 1';
+        } elseif (($filters['status'] ?? '') === 'inativo') {
+            $where[] = 'ativo = 0';
+        }
+
+        if (($filters['militar'] ?? '') === 'sim') {
+            $where[] = 'militar = 1';
+        } elseif (($filters['militar'] ?? '') === 'nao') {
+            $where[] = 'militar = 0';
+        }
+
+        return [$where, $params];
+    }
+
+    private function bindSearchParams(\PDOStatement $stmt, array $params): void
+    {
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
     }
 }

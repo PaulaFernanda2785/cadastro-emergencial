@@ -61,6 +61,10 @@ $router->get('/admin/usuarios', [UsuarioController::class, 'index'], ['auth', 'r
 $router->get('/admin/usuarios/novo', [UsuarioController::class, 'create'], ['auth', 'role:administrador']);
 $router->post('/admin/usuarios', [UsuarioController::class, 'store'], ['auth', 'role:administrador']);
 $router->get('/admin/usuarios/{id}/editar', [UsuarioController::class, 'edit'], ['auth', 'role:administrador']);
+$router->get('/admin/usuarios/{id}/senha', [UsuarioController::class, 'password'], ['auth', 'role:administrador']);
+$router->post('/admin/usuarios/{id}/senha', [UsuarioController::class, 'updatePassword'], ['auth', 'role:administrador']);
+$router->post('/admin/usuarios/{id}/ativar', [UsuarioController::class, 'activate'], ['auth', 'role:administrador']);
+$router->post('/admin/usuarios/{id}/inativar', [UsuarioController::class, 'deactivate'], ['auth', 'role:administrador']);
 $router->post('/admin/usuarios/{id}', [UsuarioController::class, 'update'], ['auth', 'role:administrador']);
 $router->get('/admin/ajudas', [TipoAjudaController::class, 'index'], ['auth', 'role:administrador']);
 $router->get('/admin/ajudas/novo', [TipoAjudaController::class, 'create'], ['auth', 'role:administrador']);
