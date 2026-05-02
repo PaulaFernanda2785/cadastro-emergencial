@@ -66,6 +66,9 @@ $router->get('/admin/ajudas', [TipoAjudaController::class, 'index'], ['auth', 'r
 $router->get('/admin/ajudas/novo', [TipoAjudaController::class, 'create'], ['auth', 'role:administrador']);
 $router->post('/admin/ajudas', [TipoAjudaController::class, 'store'], ['auth', 'role:administrador']);
 $router->get('/admin/ajudas/{id}/editar', [TipoAjudaController::class, 'edit'], ['auth', 'role:administrador']);
+$router->post('/admin/ajudas/{id}/ativar', [TipoAjudaController::class, 'activate'], ['auth', 'role:administrador']);
+$router->post('/admin/ajudas/{id}/inativar', [TipoAjudaController::class, 'deactivate'], ['auth', 'role:administrador']);
+$router->post('/admin/ajudas/{id}/excluir', [TipoAjudaController::class, 'delete'], ['auth', 'role:administrador']);
 $router->post('/admin/ajudas/{id}', [TipoAjudaController::class, 'update'], ['auth', 'role:administrador']);
 $router->get('/admin/acoes', [AcaoEmergencialController::class, 'index'], ['auth', 'role:gestor,administrador']);
 $router->get('/admin/acoes/novo', [AcaoEmergencialController::class, 'create'], ['auth', 'role:gestor,administrador']);

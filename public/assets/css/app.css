@@ -1684,6 +1684,135 @@ button:disabled,
     text-align: center;
 }
 
+.aid-types-page {
+    min-width: 0;
+}
+
+.aid-type-filter-form {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) minmax(130px, 0.55fr) minmax(160px, 0.75fr) minmax(180px, 0.7fr);
+    gap: 12px;
+    align-items: end;
+}
+
+.aid-type-search-field {
+    min-width: 0;
+}
+
+.aid-type-filter-actions {
+    min-width: 0;
+}
+
+.aid-type-form-page {
+    width: min(920px, 100%);
+}
+
+.aid-type-form-card {
+    overflow: hidden;
+}
+
+.aid-type-form-block {
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+}
+
+.aid-type-fields-grid {
+    grid-template-columns: minmax(260px, 1fr) minmax(180px, 0.55fr);
+}
+
+.aid-type-status-field {
+    max-width: 320px;
+}
+
+.aid-type-card-list {
+    display: grid;
+    gap: 14px;
+}
+
+.aid-type-card {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 0.18fr);
+    gap: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--surface);
+    box-shadow: 0 12px 28px rgba(28, 39, 51, 0.06);
+}
+
+.aid-type-main {
+    min-width: 0;
+    display: grid;
+    gap: 14px;
+}
+
+.aid-type-title {
+    min-width: 0;
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+}
+
+.aid-type-title h2 {
+    margin-bottom: 0;
+    font-size: 22px;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.aid-type-title p {
+    margin-bottom: 0;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.aid-type-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.aid-type-meta div {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 12px;
+    background: #fbfcfd;
+}
+
+.aid-type-meta dt {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.aid-type-meta dd {
+    margin: 4px 0 0;
+    font-weight: 800;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.aid-type-actions {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    border-left: 1px solid #eef3f7;
+    padding-left: 16px;
+}
+
+.aid-type-actions .secondary-button {
+    width: 100%;
+    justify-content: center;
+    min-height: 42px;
+    border-radius: 8px;
+    text-align: center;
+    white-space: normal;
+}
+
 .qr-modal {
     width: min(92vw, 460px);
     border: 0;
@@ -5330,6 +5459,7 @@ button:disabled,
 
     .records-filter-form,
     .action-filter-form,
+    .aid-type-filter-form,
     .family-filter-form,
     .delivery-filter-form,
     .delivery-batch-filter {
@@ -5342,12 +5472,17 @@ button:disabled,
 
     .records-search-field,
     .action-search-field,
+    .aid-type-search-field,
     .family-search-field,
     .records-filter-actions {
         grid-column: 1 / -1;
     }
 
     .action-filter-actions {
+        grid-column: 1 / -1;
+    }
+
+    .aid-type-filter-actions {
         grid-column: 1 / -1;
     }
 
@@ -5365,6 +5500,17 @@ button:disabled,
 
     .action-card {
         grid-template-columns: 1fr;
+    }
+
+    .aid-type-card {
+        grid-template-columns: 1fr;
+    }
+
+    .aid-type-actions {
+        border-top: 1px solid #eef3f7;
+        border-left: 0;
+        padding-top: 14px;
+        padding-left: 0;
     }
 
     .action-card-actions {
@@ -5448,6 +5594,10 @@ button:disabled,
     }
 
     .action-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .aid-type-meta {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -5570,6 +5720,7 @@ button:disabled,
 
 @media (max-width: 900px) {
     .three-columns,
+    .aid-type-fields-grid,
     .family-doc-upload-grid {
         grid-template-columns: 1fr;
     }
@@ -5971,18 +6122,24 @@ button:disabled,
 
     .records-filter-form,
     .action-filter-form,
+    .aid-type-filter-form,
     .family-filter-form {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .records-search-field,
     .action-search-field,
+    .aid-type-search-field,
     .family-search-field,
     .records-filter-actions {
         grid-column: 1 / -1;
     }
 
     .action-filter-actions {
+        grid-column: 1 / -1;
+    }
+
+    .aid-type-filter-actions {
         grid-column: 1 / -1;
     }
 
@@ -5998,6 +6155,10 @@ button:disabled,
         grid-template-columns: 1fr;
     }
 
+    .aid-type-card {
+        grid-template-columns: 1fr;
+    }
+
     .family-index-card {
         grid-template-columns: 1fr;
     }
@@ -6007,6 +6168,10 @@ button:disabled,
     }
 
     .action-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .aid-type-meta {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -6038,7 +6203,9 @@ button:disabled,
     }
 
     .action-form-card,
+    .aid-type-form-card,
     .form-block,
+    .aid-type-form-block,
     .family-form-block {
         padding: 14px;
     }
@@ -6410,11 +6577,14 @@ button:disabled,
     .records-summary-grid,
     .record-card-meta,
     .action-card-meta,
+    .aid-type-meta,
     .family-index-meta,
     .residence-open-card .record-card-meta,
     .records-filter-form,
     .action-filter-form,
     .action-filter-actions,
+    .aid-type-filter-form,
+    .aid-type-filter-actions,
     .family-filter-form,
     .family-filter-actions,
     .records-filter-actions,

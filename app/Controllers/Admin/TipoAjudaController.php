@@ -14,6 +14,8 @@ use App\Services\IdempotenciaService;
 
 final class TipoAjudaController extends Controller
 {
+    private const INDEX_PER_PAGE = 5;
+
     public function __construct(
         private readonly TipoAjudaRepository $tipos = new TipoAjudaRepository()
     ) {
@@ -21,9 +23,24 @@ final class TipoAjudaController extends Controller
 
     public function index(): void
     {
+        $filters = $this->indexFilters();
+        $total = $this->tipos->countSearch($filters);
+        $totalPages = max(1, (int) ceil($total / self::INDEX_PER_PAGE));
+        $page = min($this->requestedPage(), $totalPages);
+
         $this->view('admin.ajudas.index', [
             'title' => 'Tipos de ajuda',
-            'tipos' => $this->tipos->all(),
+            'tipos' => $this->tipos->search($filters, self::INDEX_PER_PAGE, ($page - 1) * self::INDEX_PER_PAGE),
+            'filters' => $filters,
+            'summary' => $this->tipos->searchSummary($filters),
+            'allTipos' => $this->tipos->all(),
+            'unidades' => $this->tipos->unitOptions(),
+            'pagination' => [
+                'page' => $page,
+                'per_page' => self::INDEX_PER_PAGE,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
         ]);
     }
 
@@ -108,6 +125,80 @@ final class TipoAjudaController extends Controller
         Session::flash('success', 'Tipo de ajuda atualizado.');
 
         $this->redirect('/admin/ajudas');
+    }
+
+    public function activate(string $id): void
+    {
+        $tipo = $this->findTipo((int) $id);
+        $this->guardPost('admin.ajudas.status.' . (int) $id . '.ativar', '/admin/ajudas');
+
+        $this->tipos->setActive((int) $id, true);
+        (new AuditLogService())->record('ativou_tipo_ajuda', 'tipos_ajuda', (int) $id, $tipo['nome']);
+        Session::flash('success', 'Tipo de ajuda ativado.');
+
+        $this->redirect('/admin/ajudas');
+    }
+
+    public function deactivate(string $id): void
+    {
+        $tipo = $this->findTipo((int) $id);
+        $this->guardPost('admin.ajudas.status.' . (int) $id . '.inativar', '/admin/ajudas');
+
+        $this->tipos->setActive((int) $id, false);
+        (new AuditLogService())->record('inativou_tipo_ajuda', 'tipos_ajuda', (int) $id, $tipo['nome']);
+        Session::flash('success', 'Tipo de ajuda inativado.');
+
+        $this->redirect('/admin/ajudas');
+    }
+
+    public function delete(string $id): void
+    {
+        $tipo = $this->findTipo((int) $id);
+        $this->guardPost('admin.ajudas.delete.' . (int) $id, '/admin/ajudas');
+
+        if ($this->tipos->countDeliveries((int) $id) > 0) {
+            Session::flash('warning', 'Nao e possivel excluir um tipo de ajuda que ja possui entregas registradas. Inative o tipo para impedir novas entregas.');
+            $this->redirect('/admin/ajudas');
+        }
+
+        $this->tipos->delete((int) $id);
+        (new AuditLogService())->record('excluiu_tipo_ajuda', 'tipos_ajuda', (int) $id, $tipo['nome']);
+        Session::flash('success', 'Tipo de ajuda excluido.');
+
+        $this->redirect('/admin/ajudas');
+    }
+
+    private function findTipo(int $id): array
+    {
+        $tipo = $this->tipos->find($id);
+
+        if ($tipo === null) {
+            $this->abort(404);
+        }
+
+        return $tipo;
+    }
+
+    private function indexFilters(): array
+    {
+        $status = trim((string) ($_GET['status'] ?? ''));
+
+        if (!in_array($status, ['ativo', 'inativo'], true)) {
+            $status = '';
+        }
+
+        return [
+            'q' => mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 120),
+            'status' => $status,
+            'unidade' => mb_substr(trim((string) ($_GET['unidade'] ?? '')), 0, 50),
+        ];
+    }
+
+    private function requestedPage(): int
+    {
+        $page = filter_var($_GET['pagina'] ?? 1, FILTER_VALIDATE_INT);
+
+        return is_int($page) && $page > 0 ? $page : 1;
     }
 
     private function validator(string $nome, string $unidade): Validator
