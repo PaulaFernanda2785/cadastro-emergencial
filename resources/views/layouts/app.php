@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260502-108';
+$assetVersion = '20260502-114';
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
 $signatureRequestedPendingCount = 0;
@@ -36,7 +36,7 @@ if ($user !== null) {
 
 $menuItems = [
     ['group' => 'Operacao', 'label' => 'Painel situacional', 'abbr' => 'PS', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
-    ['group' => 'Operacao', 'label' => 'Assinaturas' . ($signaturePendingCount > 0 ? ' (' . $signaturePendingCount . ')' : ''), 'abbr' => 'AS', 'url' => '/assinaturas', 'match' => ['/assinaturas'], 'requires_signature' => true],
+    ['group' => 'Operacao', 'label' => 'Assinaturas' . ($signaturePendingCount > 0 ? ' (' . $signaturePendingCount . ')' : ''), 'abbr' => 'AS', 'url' => '/assinaturas', 'match' => ['/assinaturas']],
     ['group' => 'Operacao', 'label' => 'Novo cadastro', 'abbr' => 'NC', 'url' => $activeActionUrl, 'match' => ['/acao/'], 'roles' => ['cadastrador', 'gestor', 'administrador'], 'requires_action' => true],
     ['group' => 'Operacao', 'label' => 'Cadastros', 'abbr' => 'CD', 'url' => '/cadastros/residencias', 'match' => ['/cadastros/residencias']],
     ['group' => 'Operacao', 'label' => 'Familias', 'abbr' => 'FM', 'url' => '/gestor/familias', 'match' => ['/gestor/familias']],

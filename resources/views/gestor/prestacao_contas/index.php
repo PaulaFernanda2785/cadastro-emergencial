@@ -483,7 +483,7 @@ $renderFilterFields = static function (array $filters): void {
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
-                    <?php if (!empty($coSignatureStatus['solicitacoes'])): ?>
+                    <?php if (!empty($coSignatureStatus['solicitacoes']) && !$printReady): ?>
                         <div class="dti-cosigner-list no-print">
                             <span>Status dos responsaveis pela conferencia</span>
                             <?php foreach ($coSignatureStatus['solicitacoes'] as $solicitacao): ?>

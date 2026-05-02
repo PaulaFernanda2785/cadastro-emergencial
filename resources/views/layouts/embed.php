@@ -1,7 +1,7 @@
 <?php
 $app = require BASE_PATH . '/config/app.php';
 $pageTitle = $title ?? $app['name'];
-$assetVersion = '20260502-108';
+$assetVersion = '20260502-114';
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -18,11 +18,12 @@ $assetVersion = '20260502-108';
         (function () {
             var target = null;
             var baseWidth = 794;
+            var printing = false;
 
             function resize() {
                 target = target || document.querySelector('.dti-document');
 
-                if (!target) {
+                if (!target || printing) {
                     return;
                 }
 
@@ -43,8 +44,32 @@ $assetVersion = '20260502-108';
                 document.body.style.minHeight = Math.ceil(target.scrollHeight * scale + 28) + 'px';
             }
 
+            function preparePrint() {
+                target = target || document.querySelector('.dti-document');
+                printing = true;
+
+                if (!target) {
+                    return;
+                }
+
+                target.style.transform = 'none';
+                target.style.transformOrigin = '';
+                target.style.width = 'auto';
+                target.style.marginLeft = '0';
+                target.style.marginRight = '0';
+                target.style.marginBottom = '0';
+                document.body.style.minHeight = '0';
+            }
+
+            function restoreScreen() {
+                printing = false;
+                resize();
+            }
+
             window.addEventListener('load', resize);
             window.addEventListener('resize', resize);
+            window.addEventListener('beforeprint', preparePrint);
+            window.addEventListener('afterprint', restoreScreen);
             setTimeout(resize, 250);
         })();
     </script>

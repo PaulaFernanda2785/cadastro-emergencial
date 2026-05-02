@@ -449,7 +449,7 @@ $pageNumber = 1;
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
-                    <?php if (!empty($coSignatureStatus['solicitacoes'])): ?>
+                    <?php if (!empty($coSignatureStatus['solicitacoes']) && !$printReady): ?>
                         <div class="dti-cosigner-list no-print">
                             <span>Status dos coassinantes</span>
                             <?php foreach ($coSignatureStatus['solicitacoes'] as $solicitacao): ?>

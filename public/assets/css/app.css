@@ -4136,6 +4136,154 @@ button:disabled,
     transform: translateY(-1px);
 }
 
+.signatures-summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.signatures-filter-panel {
+    gap: 14px;
+}
+
+.signatures-filter-form {
+    display: grid;
+    grid-template-columns: minmax(240px, 1.4fr) repeat(3, minmax(150px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+.signatures-filter-form .field,
+.signatures-filter-form input,
+.signatures-filter-form select {
+    min-width: 0;
+}
+
+.signatures-filter-actions {
+    grid-template-columns: 1fr 1fr;
+    grid-column: span 2;
+    min-width: 0;
+}
+
+.signatures-filter-actions .primary-button,
+.signatures-filter-actions .secondary-button {
+    min-width: 0;
+    white-space: normal;
+}
+
+.signatures-list-panel {
+    display: grid;
+    gap: 14px;
+    overflow: visible;
+}
+
+.signatures-list {
+    display: grid;
+    gap: 12px;
+}
+
+.signature-list-card {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(148px, 0.18fr);
+    gap: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 15px;
+    background: #ffffff;
+    box-shadow: 0 12px 26px rgba(28, 39, 51, 0.05);
+}
+
+.signature-list-main {
+    min-width: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.signature-list-title {
+    min-width: 0;
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+}
+
+.signature-list-title h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(18px, 2vw, 24px);
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.signature-list-title p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.signature-list-meta {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.signature-list-meta div {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background: #f8fafc;
+}
+
+.signature-list-meta span,
+.signature-list-meta small {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.signature-list-meta strong {
+    display: block;
+    margin-top: 4px;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.signature-list-actions {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    justify-items: stretch;
+    gap: 10px;
+}
+
+.signature-list-actions .status-pill,
+.signature-list-actions .secondary-button {
+    width: 100%;
+}
+
+.signatures-empty-panel {
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 22px;
+    background: #f8fafc;
+    text-align: center;
+}
+
+.signatures-empty-panel h2 {
+    margin: 0 0 6px;
+    color: var(--text);
+}
+
+.signatures-empty-panel p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 700;
+}
+
 .signature-detail-page {
     width: 100%;
     max-width: 1480px;
@@ -4309,6 +4457,52 @@ button:disabled,
     display: grid;
     gap: 10px;
     min-width: 0;
+}
+
+.signature-return-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    margin-top: 14px;
+}
+
+.signature-return-panel h3 {
+    margin: 4px 0;
+    color: var(--text);
+    font-size: 20px;
+}
+
+.signature-return-panel p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.signature-print-ready-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border: 1px solid #b7dfca;
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 14px;
+    background: #f0faf4;
+}
+
+.signature-print-ready-panel h3 {
+    margin: 4px 0;
+    color: var(--success);
+    font-size: 20px;
+}
+
+.signature-print-ready-panel p {
+    margin: 0;
+    color: #355b46;
+    font-weight: 700;
 }
 
 .signature-document-stage {
@@ -6366,6 +6560,24 @@ button:disabled,
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .signatures-filter-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .signatures-filter-form .records-search-field,
+    .signatures-filter-actions {
+        grid-column: 1 / -1;
+    }
+
+    .signature-list-card {
+        grid-template-columns: 1fr;
+    }
+
+    .signature-list-actions {
+        border-top: 1px solid #eef3f7;
+        padding-top: 12px;
+    }
+
     .accountability-filter-form {
         grid-template-columns: 1fr;
     }
@@ -7032,16 +7244,41 @@ button:disabled,
     }
 
     .signature-alert-panel,
-    .signature-flow-panel {
+    .signature-flow-panel,
+    .signature-return-panel {
         align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .signature-print-ready-panel {
+        align-items: stretch;
         flex-direction: column;
     }
 
     .signature-alert-panel .primary-button,
     .signature-flow-panel .secondary-button,
     .signature-hero-actions .secondary-button,
+    .signature-hero-actions .primary-button,
     .signature-action-panel .primary-button,
-    .signature-action-panel .danger-button {
+    .signature-action-panel .danger-button,
+    .signature-return-panel .primary-button,
+    .signature-return-panel form,
+    .signature-print-ready-panel .primary-button {
+        width: 100%;
+    }
+
+    .signatures-filter-form,
+    .signature-list-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .signatures-filter-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .signatures-filter-actions .primary-button,
+    .signatures-filter-actions .secondary-button {
         width: 100%;
     }
 
@@ -7828,8 +8065,8 @@ button:disabled,
     }
 
     @page {
-        size: 80mm auto;
-        margin: 3mm;
+        size: A4;
+        margin: 12mm;
     }
 
     @page receipt {
@@ -7883,6 +8120,7 @@ button:disabled,
         margin: 0;
         padding: 0;
         background: #ffffff;
+        page: dti;
         page-break-before: auto;
         break-before: auto;
     }
@@ -7892,8 +8130,45 @@ button:disabled,
         width: auto;
         margin: 0;
         padding: 0;
+        page: dti;
         page-break-before: auto;
         break-before: auto;
+    }
+
+    .document-embed-body {
+        display: block !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+    }
+
+    .document-embed-body .records-page {
+        display: block !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        page: dti;
+    }
+
+    .document-embed-body .dti-document {
+        display: block !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 0 !important;
+        transform: none !important;
+        transform-origin: initial !important;
+    }
+
+    .document-embed-body .dti-page,
+    .document-embed-body .accountability-page-sheet {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
     }
 
     .dti-page {
@@ -7902,6 +8177,7 @@ button:disabled,
         margin: 0;
         border: 0;
         padding: 0;
+        page: dti;
         box-shadow: none;
         overflow: visible;
         page-break-after: always;

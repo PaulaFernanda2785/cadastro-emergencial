@@ -61,6 +61,7 @@ $router->get('/assinaturas', [AssinaturaController::class, 'index'], ['auth']);
 $router->get('/assinaturas/{id}', [AssinaturaController::class, 'show'], ['auth']);
 $router->post('/assinaturas/{id}/autorizar', [AssinaturaController::class, 'authorize'], ['auth']);
 $router->post('/assinaturas/{id}/negar', [AssinaturaController::class, 'reject'], ['auth']);
+$router->post('/assinaturas/{id}/retornar-assinatura', [AssinaturaController::class, 'returnToSignature'], ['auth']);
 $router->get('/admin', [DashboardController::class, 'admin'], ['auth', 'role:administrador']);
 $router->get('/admin/usuarios', [UsuarioController::class, 'index'], ['auth', 'role:administrador']);
 $router->get('/admin/usuarios/novo', [UsuarioController::class, 'create'], ['auth', 'role:administrador']);
@@ -114,7 +115,7 @@ $router->get('/gestor/entregas/validar/{codigo}', [EntregaAjudaController::class
 $router->get('/gestor/entregas/{id}/comprovante', [EntregaAjudaController::class, 'receipt'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/familias/{id}/entregas/novo', [EntregaAjudaController::class, 'create'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/familias/{id}/entregas', [EntregaAjudaController::class, 'store'], ['auth', 'role:gestor,administrador']);
-$router->get('/gestor/prestacao-contas', [PrestacaoContasController::class, 'index'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/prestacao-contas', [PrestacaoContasController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/gestor/prestacao-contas/assinar', [PrestacaoContasController::class, 'sign'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/prestacao-contas/remover-assinatura', [PrestacaoContasController::class, 'removeSignature'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/relatorios', [RelatorioController::class, 'index'], ['auth', 'role:gestor,administrador']);

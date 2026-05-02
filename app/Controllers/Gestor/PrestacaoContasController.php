@@ -43,6 +43,7 @@ final class PrestacaoContasController extends Controller
         $showSignature = $hasAppliedFilters && (string) ($_GET['assinatura'] ?? '') === '1';
         $signature = ($documentIdentity !== null && $showSignature) ? $this->latestSignature($documentIdentity) : null;
         $coSignatureStatus = $documentIdentity !== null ? (new CoassinaturaRepository())->statusSummary('prestacao_contas', (string) $documentIdentity['document_key']) : $this->emptyCoSignatureStatus();
+        $this->guardRestrictedProfileDocumentAccess($hasAppliedFilters, $showSignature, $documentIdentity);
 
         $this->view('gestor.prestacao_contas.index', [
             'title' => 'Prestacao de contas',
@@ -248,6 +249,29 @@ final class PrestacaoContasController extends Controller
         ];
 
         return $this->enrichSignatureWithCoSignatures($signature, (string) $identity['document_key']);
+    }
+
+    private function guardRestrictedProfileDocumentAccess(bool $hasAppliedFilters, bool $showSignature, ?array $identity): void
+    {
+        $user = current_user() ?? [];
+
+        if ((string) ($user['perfil'] ?? '') !== 'cadastrador') {
+            return;
+        }
+
+        if (!$hasAppliedFilters || !$showSignature || $identity === null) {
+            $this->abort(403);
+        }
+
+        $canAccess = (new CoassinaturaRepository())->canUserAccessDocument(
+            'prestacao_contas',
+            (string) ($identity['document_key'] ?? ''),
+            (int) ($user['id'] ?? 0)
+        );
+
+        if (!$canAccess) {
+            $this->abort(403);
+        }
     }
 
     private function documentIdentity(array $filters): array

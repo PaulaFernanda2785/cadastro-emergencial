@@ -17,6 +17,8 @@ $formatDateTime = static function (mixed $value): string {
 };
 $isCoauthor = (int) ($assinatura['coautor_usuario_id'] ?? 0) === (int) (current_user()['id'] ?? 0);
 $isRequester = (int) ($assinatura['solicitante_usuario_id'] ?? 0) === (int) (current_user()['id'] ?? 0);
+$printReady = (bool) ($printReady ?? false);
+$isAdmin = (string) (current_user()['perfil'] ?? '') === 'administrador';
 $documentUrl = (string) ($assinatura['url_documento'] ?? '');
 $documentEmbedUrl = '';
 
@@ -35,6 +37,9 @@ if ($documentUrl !== '') {
         </div>
         <div class="signature-hero-actions">
             <span class="status-pill status-<?= h($status) ?>"><?= h($statusLabel) ?></span>
+            <?php if ($printReady && $documentEmbedUrl !== ''): ?>
+                <button type="button" class="primary-button" data-signature-print-document>Imprimir / baixar PDF</button>
+            <?php endif; ?>
             <a class="secondary-button" href="<?= h(url('/assinaturas')) ?>">Voltar</a>
         </div>
     </header>
@@ -125,13 +130,16 @@ if ($documentUrl !== '') {
                     <p>O documento permanecera bloqueado para impressao ate a decisao do coautor.</p>
                 <?php elseif ($status === 'autorizado'): ?>
                     <h3>Coassinatura autorizada</h3>
-                    <p>O solicitante ja pode acompanhar a liberacao de impressao no documento original.</p>
+                    <p><?= $printReady ? 'Todas as assinaturas foram autorizadas. A impressao do documento esta liberada.' : 'Sua autorizacao foi registrada. O documento ainda pode depender de outros coautores.' ?></p>
                 <?php elseif ($status === 'negado'): ?>
                     <h3>Coassinatura nao autorizada</h3>
                     <p>O documento permanece bloqueado enquanto houver negativa ativa.</p>
                 <?php else: ?>
                     <h3>Solicitacao encerrada</h3>
                     <p>Consulte o documento original para conferir a situacao atual.</p>
+                <?php endif; ?>
+                <?php if ($isAdmin): ?>
+                    <p>Perfil administrador: acesso completo ao registro e ao documento para auditoria.</p>
                 <?php endif; ?>
             </aside>
         </div>
@@ -148,11 +156,37 @@ if ($documentUrl !== '') {
                     <?= csrf_field() ?>
                     <?= idempotency_field('assinaturas.reject.' . (int) $assinatura['id']) ?>
                     <label class="field">
-                        <span>Motivo opcional</span>
-                        <textarea name="motivo_negativa" rows="3" maxlength="500" placeholder="Descreva o motivo, se necessario"></textarea>
+                        <span>Motivo obrigatorio</span>
+                        <textarea name="motivo_negativa" rows="3" maxlength="500" required placeholder="Descreva o motivo da nao autorizacao"></textarea>
                     </label>
                     <button type="submit" class="danger-button" data-loading-text="Registrando...">Nao autorizar</button>
                 </form>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($isCoauthor && $status === 'negado'): ?>
+            <div class="signature-return-panel">
+                <div>
+                    <span class="eyebrow">Revisao da decisao</span>
+                    <h3>Retornar para assinatura</h3>
+                    <p>Use esta acao para voltar a solicitacao ao status pendente e registrar uma nova decisao.</p>
+                </div>
+                <form method="post" action="<?= h(url('/assinaturas/' . (int) $assinatura['id'] . '/retornar-assinatura')) ?>" class="js-prevent-double-submit">
+                    <?= csrf_field() ?>
+                    <?= idempotency_field('assinaturas.return.' . (int) $assinatura['id']) ?>
+                    <button type="submit" class="primary-button" data-loading-text="Retornando...">Retornar para assinar</button>
+                </form>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($printReady && $documentEmbedUrl !== ''): ?>
+            <div class="signature-print-ready-panel">
+                <div>
+                    <span class="eyebrow">Documento liberado</span>
+                    <h3>Assinaturas autorizadas</h3>
+                    <p>Usuario principal e coautores concluiram a assinatura. A impressao e o salvamento em PDF estao disponiveis para usuarios autorizados.</p>
+                </div>
+                <button type="button" class="primary-button" data-signature-print-document>Imprimir / baixar PDF</button>
             </div>
         <?php endif; ?>
     </article>
@@ -197,5 +231,19 @@ if ($documentUrl !== '') {
             setTimeout(resize, 800);
         });
         window.addEventListener('resize', resize);
+    });
+
+    document.querySelectorAll('[data-signature-print-document]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var frame = document.querySelector('[data-signature-document-frame]');
+
+            if (!frame || !frame.contentWindow) {
+                window.print();
+                return;
+            }
+
+            frame.contentWindow.focus();
+            frame.contentWindow.print();
+        });
     });
 </script>

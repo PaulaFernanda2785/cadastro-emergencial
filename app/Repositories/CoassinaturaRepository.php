@@ -137,8 +137,134 @@ final class CoassinaturaRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function findForUser(int $id, int $userId): ?array
+    public function summaryForUser(int $userId, bool $includeAll = false): array
     {
+        if ($includeAll) {
+            $stmt = Database::connection()->query(
+                "SELECT
+                    COUNT(*) AS total_sistema,
+                    SUM(CASE WHEN status = 'pendente' THEN 1 ELSE 0 END) AS pendentes_sistema,
+                    SUM(CASE WHEN status = 'autorizado' THEN 1 ELSE 0 END) AS autorizadas,
+                    SUM(CASE WHEN status = 'negado' THEN 1 ELSE 0 END) AS negadas
+                 FROM coassinaturas_documentos
+                 WHERE status IN ('pendente', 'autorizado', 'negado')"
+            );
+            $summary = $stmt !== false ? ($stmt->fetch(PDO::FETCH_ASSOC) ?: []) : [];
+
+            return [
+                'total_sistema' => (int) ($summary['total_sistema'] ?? 0),
+                'pendentes_sistema' => (int) ($summary['pendentes_sistema'] ?? 0),
+                'para_mim_total' => 0,
+                'para_mim_pendentes' => 0,
+                'solicitadas_total' => 0,
+                'solicitadas_pendentes' => 0,
+                'autorizadas' => (int) ($summary['autorizadas'] ?? 0),
+                'negadas' => (int) ($summary['negadas'] ?? 0),
+            ];
+        }
+
+        $stmt = Database::connection()->prepare(
+            "SELECT
+                SUM(CASE WHEN coautor_usuario_id = :coautor_total_id THEN 1 ELSE 0 END) AS para_mim_total,
+                SUM(CASE WHEN coautor_usuario_id = :coautor_pendente_id AND status = 'pendente' THEN 1 ELSE 0 END) AS para_mim_pendentes,
+                SUM(CASE WHEN solicitante_usuario_id = :solicitante_total_id THEN 1 ELSE 0 END) AS solicitadas_total,
+                SUM(CASE WHEN solicitante_usuario_id = :solicitante_pendente_id AND status = 'pendente' THEN 1 ELSE 0 END) AS solicitadas_pendentes,
+                SUM(CASE WHEN (coautor_usuario_id = :coautor_autorizado_id OR solicitante_usuario_id = :solicitante_autorizado_id) AND status = 'autorizado' THEN 1 ELSE 0 END) AS autorizadas,
+                SUM(CASE WHEN (coautor_usuario_id = :coautor_negado_id OR solicitante_usuario_id = :solicitante_negado_id) AND status = 'negado' THEN 1 ELSE 0 END) AS negadas
+             FROM coassinaturas_documentos
+             WHERE status IN ('pendente', 'autorizado', 'negado')
+               AND (coautor_usuario_id = :coautor_scope_id OR solicitante_usuario_id = :solicitante_scope_id)"
+        );
+        foreach ([
+            ':coautor_total_id',
+            ':coautor_pendente_id',
+            ':solicitante_total_id',
+            ':solicitante_pendente_id',
+            ':coautor_autorizado_id',
+            ':solicitante_autorizado_id',
+            ':coautor_negado_id',
+            ':solicitante_negado_id',
+            ':coautor_scope_id',
+            ':solicitante_scope_id',
+        ] as $param) {
+            $stmt->bindValue($param, $userId, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+
+        $summary = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return [
+            'para_mim_total' => (int) ($summary['para_mim_total'] ?? 0),
+            'para_mim_pendentes' => (int) ($summary['para_mim_pendentes'] ?? 0),
+            'solicitadas_total' => (int) ($summary['solicitadas_total'] ?? 0),
+            'solicitadas_pendentes' => (int) ($summary['solicitadas_pendentes'] ?? 0),
+            'total_sistema' => 0,
+            'pendentes_sistema' => 0,
+            'autorizadas' => (int) ($summary['autorizadas'] ?? 0),
+            'negadas' => (int) ($summary['negadas'] ?? 0),
+        ];
+    }
+
+    public function paginatedForUser(int $userId, array $filters, int $page = 1, int $perPage = 10, bool $includeAll = false): array
+    {
+        $perPage = min(10, max(1, $perPage));
+        $page = max(1, $page);
+        [$whereSql, $params] = $this->signatureSearchWhere($userId, $filters, $includeAll);
+
+        $countStmt = Database::connection()->prepare(
+            'SELECT COUNT(*)
+             FROM coassinaturas_documentos c
+             JOIN usuarios u ON u.id = c.coautor_usuario_id
+             JOIN usuarios s ON s.id = c.solicitante_usuario_id
+             ' . $whereSql
+        );
+        $this->bindSearchParams($countStmt, $params);
+        $countStmt->execute();
+
+        $total = (int) $countStmt->fetchColumn();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $totalPages);
+        $offset = ($page - 1) * $perPage;
+
+        $stmt = Database::connection()->prepare(
+            "SELECT c.*, u.nome AS coautor_nome, u.cpf AS coautor_cpf,
+                    s.nome AS solicitante_nome, s.cpf AS solicitante_cpf,
+                    CASE
+                        WHEN c.coautor_usuario_id = :vinculo_usuario_id THEN 'para_mim'
+                        ELSE 'solicitada'
+                    END AS vinculo
+             FROM coassinaturas_documentos c
+             JOIN usuarios u ON u.id = c.coautor_usuario_id
+             JOIN usuarios s ON s.id = c.solicitante_usuario_id
+             " . $whereSql . "
+             ORDER BY
+                CASE WHEN c.status = 'pendente' THEN 0 ELSE 1 END ASC,
+                COALESCE(c.atualizado_em, c.solicitado_em) DESC,
+                c.id DESC
+             LIMIT :limit OFFSET :offset"
+        );
+        $stmt->bindValue(':vinculo_usuario_id', $userId, PDO::PARAM_INT);
+        $this->bindSearchParams($stmt, $params);
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'data' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
+        ];
+    }
+
+    public function findForUser(int $id, int $userId, bool $includeAll = false): ?array
+    {
+        $accessSql = $includeAll
+            ? ''
+            : 'AND (c.coautor_usuario_id = :coautor_usuario_id OR c.solicitante_usuario_id = :solicitante_usuario_id)';
         $stmt = Database::connection()->prepare(
             'SELECT c.*, u.nome AS coautor_nome, u.cpf AS coautor_cpf, u.email AS coautor_email,
                     s.nome AS solicitante_nome, s.cpf AS solicitante_cpf
@@ -146,17 +272,42 @@ final class CoassinaturaRepository
              JOIN usuarios u ON u.id = c.coautor_usuario_id
              JOIN usuarios s ON s.id = c.solicitante_usuario_id
              WHERE c.id = :id
-               AND (c.coautor_usuario_id = :coautor_usuario_id OR c.solicitante_usuario_id = :solicitante_usuario_id)
+               ' . $accessSql . '
              LIMIT 1'
         );
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->bindValue(':coautor_usuario_id', $userId, PDO::PARAM_INT);
-        $stmt->bindValue(':solicitante_usuario_id', $userId, PDO::PARAM_INT);
+        if (!$includeAll) {
+            $stmt->bindValue(':coautor_usuario_id', $userId, PDO::PARAM_INT);
+            $stmt->bindValue(':solicitante_usuario_id', $userId, PDO::PARAM_INT);
+        }
         $stmt->execute();
 
         $request = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return is_array($request) ? $request : null;
+    }
+
+    public function canUserAccessDocument(string $documentType, string $documentKey, int $userId, bool $includeAll = false): bool
+    {
+        if ($includeAll) {
+            return true;
+        }
+
+        $stmt = Database::connection()->prepare(
+            "SELECT COUNT(*)
+             FROM coassinaturas_documentos
+             WHERE documento_tipo = :documento_tipo
+               AND documento_chave = :documento_chave
+               AND status IN ('pendente', 'autorizado', 'negado')
+               AND (coautor_usuario_id = :coautor_usuario_id OR solicitante_usuario_id = :solicitante_usuario_id)"
+        );
+        $stmt->bindValue(':documento_tipo', $documentType);
+        $stmt->bindValue(':documento_chave', $documentKey);
+        $stmt->bindValue(':coautor_usuario_id', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':solicitante_usuario_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn() > 0;
     }
 
     public function authorize(int $id, int $userId, array $user): bool
@@ -196,6 +347,26 @@ final class CoassinaturaRepository
                AND status = 'pendente'"
         );
         $stmt->bindValue(':motivo_negativa', mb_substr($reason, 0, 500));
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public function returnToSignature(int $id, int $userId): bool
+    {
+        $stmt = Database::connection()->prepare(
+            "UPDATE coassinaturas_documentos
+             SET status = 'pendente',
+                 negado_em = NULL,
+                 motivo_negativa = NULL,
+                 atualizado_em = NOW(),
+                 solicitante_notificado_em = NULL
+             WHERE id = :id
+               AND coautor_usuario_id = :usuario_id
+               AND status = 'negado'"
+        );
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
@@ -338,6 +509,68 @@ final class CoassinaturaRepository
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function signatureSearchWhere(int $userId, array $filters, bool $includeAll = false): array
+    {
+        $where = [
+            "c.status IN ('pendente', 'autorizado', 'negado')",
+        ];
+        $params = [];
+
+        $scope = (string) ($filters['escopo'] ?? 'todas');
+        if ($scope === 'para_mim') {
+            $where[] = 'c.coautor_usuario_id = :scope_coautor_id';
+            $params[':scope_coautor_id'] = [$userId, PDO::PARAM_INT];
+        } elseif ($scope === 'solicitadas') {
+            $where[] = 'c.solicitante_usuario_id = :scope_solicitante_id';
+            $params[':scope_solicitante_id'] = [$userId, PDO::PARAM_INT];
+        } elseif (!$includeAll) {
+            $where[] = '(c.coautor_usuario_id = :scope_coautor_id OR c.solicitante_usuario_id = :scope_solicitante_id)';
+            $params[':scope_coautor_id'] = [$userId, PDO::PARAM_INT];
+            $params[':scope_solicitante_id'] = [$userId, PDO::PARAM_INT];
+        }
+
+        $status = (string) ($filters['status'] ?? '');
+        if (in_array($status, ['pendente', 'autorizado', 'negado'], true)) {
+            $where[] = 'c.status = :status';
+            $params[':status'] = [$status, PDO::PARAM_STR];
+        }
+
+        $documentType = (string) ($filters['documento_tipo'] ?? '');
+        if (in_array($documentType, ['dti', 'prestacao_contas'], true)) {
+            $where[] = 'c.documento_tipo = :documento_tipo';
+            $params[':documento_tipo'] = [$documentType, PDO::PARAM_STR];
+        }
+
+        $dateStart = (string) ($filters['data_inicio'] ?? '');
+        if ($dateStart !== '') {
+            $where[] = 'DATE(c.solicitado_em) >= :data_inicio';
+            $params[':data_inicio'] = [$dateStart, PDO::PARAM_STR];
+        }
+
+        $dateEnd = (string) ($filters['data_fim'] ?? '');
+        if ($dateEnd !== '') {
+            $where[] = 'DATE(c.solicitado_em) <= :data_fim';
+            $params[':data_fim'] = [$dateEnd, PDO::PARAM_STR];
+        }
+
+        $search = trim((string) ($filters['busca'] ?? ''));
+        if ($search !== '') {
+            $where[] = '(c.titulo LIKE :busca_titulo OR c.descricao LIKE :busca_descricao OR c.documento_chave LIKE :busca_chave OR u.nome LIKE :busca_coautor OR s.nome LIKE :busca_solicitante)';
+            foreach ([':busca_titulo', ':busca_descricao', ':busca_chave', ':busca_coautor', ':busca_solicitante'] as $param) {
+                $params[$param] = ['%' . $search . '%', PDO::PARAM_STR];
+            }
+        }
+
+        return ['WHERE ' . implode(' AND ', $where), $params];
+    }
+
+    private function bindSearchParams(\PDOStatement $stmt, array $params): void
+    {
+        foreach ($params as $name => [$value, $type]) {
+            $stmt->bindValue($name, $value, $type);
+        }
     }
 
     private function userSnapshot(array $user): array
