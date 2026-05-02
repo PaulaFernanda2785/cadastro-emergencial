@@ -110,6 +110,8 @@ $router->get('/gestor/entregas/{id}/comprovante', [EntregaAjudaController::class
 $router->get('/gestor/familias/{id}/entregas/novo', [EntregaAjudaController::class, 'create'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/familias/{id}/entregas', [EntregaAjudaController::class, 'store'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/prestacao-contas', [PrestacaoContasController::class, 'index'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/prestacao-contas/assinar', [PrestacaoContasController::class, 'sign'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/prestacao-contas/remover-assinatura', [PrestacaoContasController::class, 'removeSignature'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/relatorios', [RelatorioController::class, 'index'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/relatorios/exportar', [RelatorioController::class, 'export'], ['auth', 'role:gestor,administrador']);
 $router->get('/acao/{token}/residencias/novo', [ResidenciaController::class, 'createFromAction'], ['auth', 'role:cadastrador,gestor,administrador']);

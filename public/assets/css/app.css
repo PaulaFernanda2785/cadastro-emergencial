@@ -4963,6 +4963,165 @@ button:disabled,
     font-weight: 800;
 }
 
+.accountability-page {
+    gap: 18px;
+}
+
+.accountability-header {
+    gap: 12px;
+}
+
+.accountability-header > div {
+    min-width: 0;
+}
+
+.accountability-header h1,
+.accountability-header p {
+    overflow-wrap: break-word;
+}
+
+.accountability-filter-form {
+    display: grid;
+    grid-template-columns: minmax(240px, 1.35fr) minmax(260px, 1.6fr) minmax(210px, 1.1fr) minmax(220px, 1.15fr);
+    gap: 12px;
+    align-items: end;
+}
+
+.accountability-filter-form > .field {
+    min-width: 0;
+}
+
+.accountability-filter-form > .field:nth-child(5),
+.accountability-filter-form > .field:nth-child(6) {
+    max-width: 190px;
+}
+
+.accountability-filter-form .delivery-history-filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 0;
+}
+
+.accountability-document {
+    margin-top: 4px;
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+    padding: 0;
+}
+
+.accountability-page-sheet {
+    width: min(100%, 210mm);
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding-bottom: 20mm;
+    overflow-wrap: normal;
+}
+
+.accountability-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.accountability-table-wrap {
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+}
+
+.accountability-info-table th {
+    width: 20%;
+}
+
+.accountability-info-table td {
+    overflow-wrap: break-word;
+}
+
+.accountability-list-table {
+    font-size: 11px;
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+}
+
+.accountability-list-table th,
+.accountability-list-table td {
+    vertical-align: middle;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.accountability-list-table thead th {
+    background: #eaf4f7;
+    color: #0f3c4c;
+    text-align: center;
+}
+
+.accountability-list-table th:nth-child(1),
+.accountability-list-table td:nth-child(1) {
+    width: 8%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.accountability-list-table th:nth-child(2),
+.accountability-list-table td:nth-child(2) {
+    width: 32%;
+}
+
+.accountability-list-table th:nth-child(3),
+.accountability-list-table td:nth-child(3) {
+    width: 17%;
+    white-space: nowrap;
+}
+
+.accountability-list-table th:nth-child(4),
+.accountability-list-table td:nth-child(4) {
+    width: 19%;
+    text-align: center;
+}
+
+.accountability-list-table th:nth-child(5),
+.accountability-list-table td:nth-child(5) {
+    width: 24%;
+}
+
+.manual-signature-cell {
+    height: 34px;
+    background: #ffffff;
+}
+
+.accountability-signature-sheet .dti-signature-card {
+    width: min(100%, 540px);
+    margin-inline: auto;
+    margin-bottom: 14px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+}
+
+.accountability-signature-section {
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+    text-align: center;
+}
+
+.accountability-signature-section > h3,
+.accountability-signature-section .dti-signature-pending,
+.accountability-signature-sheet .dti-cosigner-list {
+    width: min(100%, 540px);
+}
+
+.accountability-signature-sheet .dti-cosigner-list {
+    margin-inline: auto;
+    justify-items: stretch;
+    text-align: center;
+}
+
 .delivery-qr-panel {
     display: grid;
     gap: 14px;
@@ -5647,6 +5806,15 @@ button:disabled,
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .accountability-filter-form {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+
+    .accountability-filter-form > .field:nth-child(5),
+    .accountability-filter-form > .field:nth-child(6) {
+        max-width: none;
+    }
+
     .records-search-field,
     .action-search-field,
     .aid-type-search-field,
@@ -6001,6 +6169,37 @@ button:disabled,
         padding: 18px;
     }
 
+    .accountability-document {
+        justify-items: start;
+    }
+
+    .accountability-page-sheet {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .accountability-info-table,
+    .accountability-info-table tbody,
+    .accountability-info-table tr,
+    .accountability-info-table th,
+    .accountability-info-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .accountability-info-table tr {
+        border: 1px solid #b9c6d2;
+    }
+
+    .accountability-info-table th,
+    .accountability-info-table td {
+        border: 0;
+    }
+
+    .accountability-info-table td + th {
+        border-top: 1px solid #d8e1ea;
+    }
+
     .dti-table,
     .dti-table tbody,
     .dti-table caption,
@@ -6024,6 +6223,44 @@ button:disabled,
         border-top: 1px solid #d8e1ea;
     }
 
+    .accountability-list-table,
+    .accountability-list-table tbody,
+    .accountability-list-table caption,
+    .accountability-list-table tr,
+    .accountability-list-table th,
+    .accountability-list-table td {
+        display: table-cell;
+    }
+
+    .accountability-list-table {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        min-width: 0;
+        font-size: 10px;
+    }
+
+    .accountability-list-table thead {
+        display: table-header-group;
+    }
+
+    .accountability-list-table tbody {
+        display: table-row-group;
+    }
+
+    .accountability-list-table tr {
+        display: table-row;
+        border: 0;
+    }
+
+    .accountability-list-table th,
+    .accountability-list-table td {
+        display: table-cell;
+        border: 1px solid #b9c6d2;
+        padding: 5px 4px;
+        overflow-wrap: break-word;
+    }
+
     .dti-page-footer {
         position: static;
         margin-top: 18px;
@@ -6031,6 +6268,91 @@ button:disabled,
 }
 
 @media (max-width: 760px) {
+    .accountability-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .accountability-header .inline-form,
+    .accountability-header .primary-button,
+    .accountability-header .secondary-button,
+    .accountability-header .danger-button,
+    .accountability-header .limit-reached-pill {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .accountability-filter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-filter-form .delivery-history-filter-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .accountability-filter-form .delivery-history-filter-actions .primary-button,
+    .accountability-filter-form .delivery-history-filter-actions .secondary-button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .accountability-document {
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0;
+    }
+
+    .accountability-page-sheet {
+        width: 100%;
+        min-width: 0;
+        padding: 14px 10px;
+    }
+
+    .accountability-list-table {
+        font-size: 9px;
+    }
+
+    .accountability-list-table th,
+    .accountability-list-table td {
+        padding: 4px 3px;
+    }
+
+    .accountability-list-table th:nth-child(1),
+    .accountability-list-table td:nth-child(1) {
+        width: 9%;
+    }
+
+    .accountability-list-table th:nth-child(2),
+    .accountability-list-table td:nth-child(2) {
+        width: 31%;
+    }
+
+    .accountability-list-table th:nth-child(3),
+    .accountability-list-table td:nth-child(3) {
+        width: 18%;
+        white-space: normal;
+    }
+
+    .accountability-list-table th:nth-child(4),
+    .accountability-list-table td:nth-child(4) {
+        width: 18%;
+    }
+
+    .accountability-list-table th:nth-child(5),
+    .accountability-list-table td:nth-child(5) {
+        width: 24%;
+    }
+
+    .accountability-signature-sheet {
+        min-width: 0;
+    }
+
+    .accountability-signature-sheet .dti-signature-card {
+        grid-template-columns: 1fr;
+    }
+
     .delivery-section-nav {
         margin-left: -4px;
         margin-right: -4px;
@@ -6979,6 +7301,99 @@ button:disabled,
 
     .dti-table th {
         width: 22%;
+    }
+
+    .accountability-page {
+        display: block;
+    }
+
+    .accountability-document {
+        margin: 0;
+        overflow: visible;
+        padding: 0;
+    }
+
+    .accountability-page-sheet {
+        padding-bottom: 0;
+        max-width: none;
+        min-width: 0;
+    }
+
+    .accountability-table-wrap {
+        overflow: visible;
+    }
+
+    .accountability-info-table {
+        font-size: 9.5pt;
+    }
+
+    .accountability-list-table {
+        min-width: 0;
+        font-size: 9pt;
+        table-layout: fixed;
+    }
+
+    .accountability-list-table th,
+    .accountability-list-table td {
+        padding: 4px 5px;
+        overflow-wrap: break-word;
+        word-break: normal;
+    }
+
+    .accountability-list-table th:nth-child(1),
+    .accountability-list-table td:nth-child(1) {
+        width: 8%;
+    }
+
+    .accountability-list-table th:nth-child(2),
+    .accountability-list-table td:nth-child(2) {
+        width: 32%;
+    }
+
+    .accountability-list-table th:nth-child(3),
+    .accountability-list-table td:nth-child(3) {
+        width: 17%;
+        white-space: nowrap;
+    }
+
+    .accountability-list-table th:nth-child(4),
+    .accountability-list-table td:nth-child(4) {
+        width: 18%;
+        white-space: nowrap;
+    }
+
+    .accountability-list-table th:nth-child(5),
+    .accountability-list-table td:nth-child(5) {
+        width: 25%;
+    }
+
+    .manual-signature-cell {
+        height: 12mm;
+    }
+
+    .accountability-signature-sheet .dti-signature-card {
+        width: min(100%, 150mm);
+        margin-right: auto;
+        margin-left: auto;
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .accountability-signature-section {
+        justify-items: center;
+        text-align: center;
+    }
+
+    .accountability-signature-section > h3,
+    .accountability-signature-section .dti-signature-pending,
+    .accountability-signature-sheet .dti-cosigner-list {
+        width: min(100%, 150mm);
+        margin-right: auto;
+        margin-left: auto;
+        text-align: center;
     }
 
     .dti-photo-grid {
