@@ -5,6 +5,14 @@ $pagination = $pagination ?? ['page' => 1, 'pages' => 1, 'total' => 0];
 $acaoSelecionada = '';
 $residenciaSelecionada = '';
 $familiaSelecionada = '';
+$actionOptionLabel = static function (array $acao): string {
+    return trim(
+        (string) ($acao['municipio_nome'] ?? '') . '/' . (string) ($acao['uf'] ?? '')
+        . ' - ' . (string) ($acao['localidade'] ?? '')
+        . ' - ' . (string) ($acao['tipo_evento'] ?? '')
+        . ' - Acao #' . (string) ($acao['id'] ?? '')
+    );
+};
 $pageUrl = static function (int $page) use ($filters): string {
     $params = array_filter($filters, static fn (mixed $value): bool => (string) $value !== '');
     $params['pagina'] = $page;
@@ -14,7 +22,7 @@ $pageUrl = static function (int $page) use ($filters): string {
 
 foreach ($acoes ?? [] as $acao) {
     if ((string) ($filters['acao_id'] ?? '') === (string) $acao['id']) {
-        $acaoSelecionada = $acao['localidade'] . ' - ' . $acao['tipo_evento'];
+        $acaoSelecionada = $actionOptionLabel($acao);
         break;
     }
 }
@@ -82,6 +90,8 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                     <option value="<?= h($familia['protocolo']) ?>"></option>
                 <?php endforeach; ?>
                 <?php foreach ($acoes ?? [] as $acao): ?>
+                    <option value="<?= h($actionOptionLabel($acao)) ?>"></option>
+                    <option value="<?= h($acao['municipio_nome'] . '/' . $acao['uf']) ?>"></option>
                     <option value="<?= h($acao['localidade']) ?>"></option>
                     <option value="<?= h($acao['tipo_evento']) ?>"></option>
                 <?php endforeach; ?>
@@ -93,7 +103,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
             <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="historico_acao_id">
             <datalist id="historico-acoes-list">
                 <?php foreach ($acoes ?? [] as $acao): ?>
-                    <option value="<?= h($acao['localidade'] . ' - ' . $acao['tipo_evento']) ?>" data-id="<?= h($acao['id']) ?>"></option>
+                    <option value="<?= h($actionOptionLabel($acao)) ?>" data-id="<?= h($acao['id']) ?>"></option>
                 <?php endforeach; ?>
             </datalist>
         </label>

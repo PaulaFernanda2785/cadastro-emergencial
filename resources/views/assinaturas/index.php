@@ -11,6 +11,7 @@ $documentLabel = static function (mixed $type): string {
     return [
         'dti' => 'DTI',
         'prestacao_contas' => 'Prestacao de contas',
+        'recomecar' => 'Programa Recomecar',
     ][(string) $type] ?? (string) ($type ?: '-');
 };
 $scopeLabel = static function (mixed $scope): string {
@@ -163,6 +164,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
                     <option value="" <?= ($filters['documento_tipo'] ?? '') === '' ? 'selected' : '' ?>>Todos</option>
                     <option value="dti" <?= ($filters['documento_tipo'] ?? '') === 'dti' ? 'selected' : '' ?>>DTI</option>
                     <option value="prestacao_contas" <?= ($filters['documento_tipo'] ?? '') === 'prestacao_contas' ? 'selected' : '' ?>>Prestacao de contas</option>
+                    <option value="recomecar" <?= ($filters['documento_tipo'] ?? '') === 'recomecar' ? 'selected' : '' ?>>Programa Recomecar</option>
                 </select>
             </label>
 

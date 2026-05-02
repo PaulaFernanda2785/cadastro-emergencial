@@ -326,17 +326,21 @@ final class EntregaAjudaRepository
             $params['q_tipo'] = $search;
         }
 
-        if (($filters['acao_busca'] ?? '') !== '') {
+        if (($filters['acao_id'] ?? '') !== '') {
+            $where[] = 'a.id = :acao_id';
+            $params['acao_id'] = (int) $filters['acao_id'];
+        } elseif (($filters['acao_busca'] ?? '') !== '') {
             $where[] = '(a.localidade LIKE :acao_busca_localidade
                 OR a.tipo_evento LIKE :acao_busca_evento
-                OR CONCAT(a.localidade, " - ", a.tipo_evento) LIKE :acao_busca_completa)';
+                OR m.nome LIKE :acao_busca_municipio
+                OR CONCAT(m.nome, "/", m.uf, " - ", a.localidade, " - ", a.tipo_evento) LIKE :acao_busca_completa
+                OR CONCAT(m.nome, "/", m.uf, " - ", a.localidade, " - ", a.tipo_evento, " - Acao #", a.id) LIKE :acao_busca_com_id)';
             $actionSearch = '%' . $filters['acao_busca'] . '%';
             $params['acao_busca_localidade'] = $actionSearch;
             $params['acao_busca_evento'] = $actionSearch;
+            $params['acao_busca_municipio'] = $actionSearch;
             $params['acao_busca_completa'] = $actionSearch;
-        } elseif (($filters['acao_id'] ?? '') !== '') {
-            $where[] = 'a.id = :acao_id';
-            $params['acao_id'] = (int) $filters['acao_id'];
+            $params['acao_busca_com_id'] = $actionSearch;
         }
 
         if (($filters['residencia_id'] ?? '') !== '') {

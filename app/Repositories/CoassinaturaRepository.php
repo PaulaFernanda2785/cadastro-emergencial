@@ -730,7 +730,7 @@ final class CoassinaturaRepository
         }
 
         $documentType = (string) ($filters['documento_tipo'] ?? '');
-        if (in_array($documentType, ['dti', 'prestacao_contas'], true)) {
+        if (in_array($documentType, ['dti', 'prestacao_contas', 'recomecar'], true)) {
             $where[] = 'c.documento_tipo = :documento_tipo';
             $params[':documento_tipo'] = [$documentType, PDO::PARAM_STR];
         }

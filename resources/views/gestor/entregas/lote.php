@@ -4,10 +4,18 @@ $batchHasFilters = !empty($batchHasFilters);
 $acoesAbertas = array_values(array_filter($acoes ?? [], static fn (array $acao): bool => (string) ($acao['status'] ?? '') === 'aberta'));
 $acaoSelecionada = '';
 $residenciaSelecionada = '';
+$actionOptionLabel = static function (array $acao): string {
+    return trim(
+        (string) ($acao['municipio_nome'] ?? '') . '/' . (string) ($acao['uf'] ?? '')
+        . ' - ' . (string) ($acao['localidade'] ?? '')
+        . ' - ' . (string) ($acao['tipo_evento'] ?? '')
+        . ' - Acao #' . (string) ($acao['id'] ?? '')
+    );
+};
 
 foreach ($acoesAbertas as $acao) {
     if ((string) ($batchFilters['acao_id'] ?? '') === (string) $acao['id']) {
-        $acaoSelecionada = $acao['localidade'] . ' - ' . $acao['tipo_evento'];
+        $acaoSelecionada = $actionOptionLabel($acao);
         break;
     }
 }
@@ -47,7 +55,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                 <input type="hidden" name="lote_acao_id" value="<?= h($batchFilters['acao_id'] ?? '') ?>" data-smart-hidden="lote_acao_id">
                 <datalist id="acoes-abertas-list">
                     <?php foreach ($acoesAbertas as $acao): ?>
-                        <option value="<?= h($acao['localidade'] . ' - ' . $acao['tipo_evento']) ?>" data-id="<?= h($acao['id']) ?>"></option>
+                        <option value="<?= h($actionOptionLabel($acao)) ?>" data-id="<?= h($acao['id']) ?>"></option>
                     <?php endforeach; ?>
                 </datalist>
             </label>

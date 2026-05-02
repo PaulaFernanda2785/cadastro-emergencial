@@ -9,6 +9,7 @@ $statusLabel = [
 $documentTypeLabel = [
     'dti' => 'DTI',
     'prestacao_contas' => 'Prestacao de contas',
+    'recomecar' => 'Programa Recomecar',
 ][(string) ($assinatura['documento_tipo'] ?? '')] ?? (string) ($assinatura['documento_tipo'] ?? '-');
 $formatDateTime = static function (mixed $value): string {
     $timestamp = strtotime((string) $value);
@@ -41,7 +42,7 @@ $appendQueryParams = static function (string $url, array $params): string {
 if ($documentUrl !== '') {
     $documentEmbedParams = ['embed_document' => '1'];
 
-    if ((string) ($assinatura['documento_tipo'] ?? '') === 'prestacao_contas') {
+    if (in_array((string) ($assinatura['documento_tipo'] ?? ''), ['prestacao_contas', 'recomecar'], true)) {
         $documentEmbedParams = ['assinatura' => '1', 'embed_document' => '1'];
     }
 

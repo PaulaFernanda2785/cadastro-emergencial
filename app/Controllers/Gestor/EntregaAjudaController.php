@@ -299,10 +299,17 @@ final class EntregaAjudaController extends Controller
 
     private function filters(): array
     {
+        $acaoBusca = trim((string) ($_GET['acao_busca'] ?? ''));
+        $acaoId = $this->positiveInt($_GET['acao_id'] ?? '');
+
+        if ($acaoId === '' && preg_match('/Acao\s+#(\d+)/i', $acaoBusca, $matches) === 1) {
+            $acaoId = $this->positiveInt($matches[1]);
+        }
+
         return [
             'q' => trim((string) ($_GET['q'] ?? '')),
-            'acao_id' => trim((string) ($_GET['acao_id'] ?? '')),
-            'acao_busca' => trim((string) ($_GET['acao_busca'] ?? '')),
+            'acao_id' => $acaoId,
+            'acao_busca' => $acaoBusca,
             'residencia_id' => trim((string) ($_GET['residencia_id'] ?? '')),
             'residencia_busca' => trim((string) ($_GET['residencia_busca'] ?? '')),
             'familia_id' => trim((string) ($_GET['familia_id'] ?? '')),
@@ -315,10 +322,17 @@ final class EntregaAjudaController extends Controller
 
     private function batchFilters(): array
     {
+        $acaoBusca = trim((string) ($_GET['lote_acao_busca'] ?? ''));
+        $acaoId = $this->positiveInt($_GET['lote_acao_id'] ?? '');
+
+        if ($acaoId === '' && preg_match('/Acao\s+#(\d+)/i', $acaoBusca, $matches) === 1) {
+            $acaoId = $this->positiveInt($matches[1]);
+        }
+
         return [
             'q' => trim((string) ($_GET['lote_q'] ?? '')),
-            'acao_id' => trim((string) ($_GET['lote_acao_id'] ?? '')),
-            'acao_busca' => trim((string) ($_GET['lote_acao_busca'] ?? '')),
+            'acao_id' => $acaoId,
+            'acao_busca' => $acaoBusca,
             'residencia_id' => trim((string) ($_GET['lote_residencia_id'] ?? '')),
             'residencia_busca' => trim((string) ($_GET['lote_residencia_busca'] ?? '')),
             'data_inicio' => trim((string) ($_GET['lote_data_inicio'] ?? '')),
@@ -344,6 +358,17 @@ final class EntregaAjudaController extends Controller
         return array_values(array_unique(array_filter(array_map(static function (mixed $item): int {
             return max(0, (int) $item);
         }, $items))));
+    }
+
+    private function positiveInt(mixed $value): string
+    {
+        if (!is_string($value) && !is_int($value)) {
+            return '';
+        }
+
+        $value = trim((string) $value);
+
+        return filter_var($value, FILTER_VALIDATE_INT) !== false && (int) $value > 0 ? $value : '';
     }
 
     private function extractReceiptCode(string $value): string

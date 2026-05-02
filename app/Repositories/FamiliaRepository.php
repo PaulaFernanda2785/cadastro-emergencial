@@ -324,10 +324,17 @@ final class FamiliaRepository
             $params['status_aberta'] = 'aberta';
 
             if (($filters['acao_busca'] ?? '') !== '') {
-                $where[] = '(a.localidade LIKE :acao_busca_localidade OR a.tipo_evento LIKE :acao_busca_evento)';
+                $where[] = '(a.localidade LIKE :acao_busca_localidade
+                    OR a.tipo_evento LIKE :acao_busca_evento
+                    OR m.nome LIKE :acao_busca_municipio
+                    OR CONCAT(m.nome, "/", m.uf, " - ", a.localidade, " - ", a.tipo_evento) LIKE :acao_busca_completa
+                    OR CONCAT(m.nome, "/", m.uf, " - ", a.localidade, " - ", a.tipo_evento, " - Acao #", a.id) LIKE :acao_busca_com_id)';
                 $actionSearch = '%' . $filters['acao_busca'] . '%';
                 $params['acao_busca_localidade'] = $actionSearch;
                 $params['acao_busca_evento'] = $actionSearch;
+                $params['acao_busca_municipio'] = $actionSearch;
+                $params['acao_busca_completa'] = $actionSearch;
+                $params['acao_busca_com_id'] = $actionSearch;
             }
         }
 

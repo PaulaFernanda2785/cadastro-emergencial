@@ -4629,6 +4629,157 @@ button:disabled,
     background: #eef3f7;
 }
 
+.recomecar-delivery-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 92px;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.recomecar-delivery-status.is-delivered {
+    border: 1px solid #a7f3d0;
+    background: #dcfce7;
+    color: #166534;
+}
+
+.recomecar-delivery-status.is-pending {
+    border: 1px solid #fecaca;
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.recomecar-list-table tr.recomecar-row-pending td {
+    background: #fff7ed;
+}
+
+.recomecar-document-viewport {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    display: grid;
+    justify-items: center;
+}
+
+.recomecar-document {
+    width: 1123px;
+    max-width: none;
+    transform-origin: top center;
+    will-change: transform;
+}
+
+.recomecar-document .accountability-page-sheet {
+    width: 297mm;
+    min-width: 297mm;
+    max-width: 297mm;
+    min-height: 210mm;
+}
+
+.recomecar-list-table {
+    font-size: 9.2px;
+    table-layout: fixed;
+}
+
+.recomecar-list-table .recomecar-col-number {
+    width: 4%;
+}
+
+.recomecar-list-table .recomecar-col-protocol {
+    width: 16%;
+}
+
+.recomecar-list-table .recomecar-col-name {
+    width: 23%;
+}
+
+.recomecar-list-table .recomecar-col-sex {
+    width: 8%;
+}
+
+.recomecar-list-table .recomecar-col-birth {
+    width: 10%;
+}
+
+.recomecar-list-table .recomecar-col-cpf {
+    width: 11%;
+}
+
+.recomecar-list-table .recomecar-col-rg {
+    width: 8%;
+}
+
+.recomecar-list-table .recomecar-col-org {
+    width: 9%;
+}
+
+.recomecar-list-table .recomecar-col-status {
+    width: 11%;
+}
+
+.recomecar-list-table th,
+.recomecar-list-table td {
+    padding: 4px 3px;
+    line-height: 1.15;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.recomecar-list-table th:nth-child(1),
+.recomecar-list-table td:nth-child(1),
+.recomecar-list-table th:nth-child(4),
+.recomecar-list-table td:nth-child(4),
+.recomecar-list-table th:nth-child(5),
+.recomecar-list-table td:nth-child(5),
+.recomecar-list-table th:nth-child(6),
+.recomecar-list-table td:nth-child(6),
+.recomecar-list-table th:nth-child(7),
+.recomecar-list-table td:nth-child(7),
+.recomecar-list-table th:nth-child(8),
+.recomecar-list-table td:nth-child(8),
+.recomecar-list-table th:nth-child(9),
+.recomecar-list-table td:nth-child(9) {
+    text-align: center;
+}
+
+.recomecar-list-table th:nth-child(5),
+.recomecar-list-table td:nth-child(5),
+.recomecar-list-table th:nth-child(6),
+.recomecar-list-table td:nth-child(6),
+.recomecar-list-table th:nth-child(7),
+.recomecar-list-table td:nth-child(7) {
+    white-space: nowrap;
+}
+
+.recomecar-list-table th:nth-child(3),
+.recomecar-list-table td:nth-child(3) {
+    text-align: left;
+    overflow-wrap: break-word;
+}
+
+.document-embed-body .recomecar-document {
+    width: 1123px;
+}
+
+.document-embed-body .recomecar-document .accountability-page-sheet {
+    width: 297mm;
+    min-width: 297mm;
+    max-width: 297mm;
+    min-height: 210mm;
+}
+
+.recomecar-list-table .recomecar-delivery-status {
+    min-width: 0;
+    width: 100%;
+    padding: 3px 4px;
+    font-size: 8.5px;
+}
+
 .signature-document-stage iframe {
     width: 100%;
     min-height: 1120px;
@@ -8478,6 +8629,26 @@ button:disabled,
         min-height: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
+    }
+
+    .recomecar-document .accountability-page-sheet,
+    .document-embed-body .recomecar-document .accountability-page-sheet {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        min-height: 0 !important;
+    }
+
+    .recomecar-document-viewport {
+        display: block !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+    }
+
+    .recomecar-document {
+        width: auto !important;
+        transform: none !important;
+        transform-origin: initial !important;
     }
 
     body.is-printing-signature-document .app-shell,

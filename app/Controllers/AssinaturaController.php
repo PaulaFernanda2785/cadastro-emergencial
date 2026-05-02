@@ -368,7 +368,7 @@ final class AssinaturaController extends Controller
         }
 
         $documentType = (string) ($_GET['documento_tipo'] ?? '');
-        if (!in_array($documentType, ['', 'dti', 'prestacao_contas'], true)) {
+        if (!in_array($documentType, ['', 'dti', 'prestacao_contas', 'recomecar'], true)) {
             $documentType = '';
         }
 

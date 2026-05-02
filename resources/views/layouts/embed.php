@@ -1,7 +1,7 @@
 <?php
 $app = require BASE_PATH . '/config/app.php';
 $pageTitle = $title ?? $app['name'];
-$assetVersion = '20260502-124';
+$assetVersion = '20260502-126';
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -26,6 +26,8 @@ $assetVersion = '20260502-124';
                 if (!target || printing) {
                     return;
                 }
+
+                baseWidth = target.classList.contains('recomecar-document') ? 1123 : 794;
 
                 target.style.transform = '';
                 target.style.width = baseWidth + 'px';

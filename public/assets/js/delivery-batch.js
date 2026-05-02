@@ -51,23 +51,52 @@
         var hidden = document.querySelector('[data-smart-hidden="' + input.dataset.smartTarget + '"]');
         var list = input.getAttribute('list') ? document.getElementById(input.getAttribute('list')) : null;
 
+        function normalize(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toLowerCase();
+        }
+
         function syncHidden() {
             var value = input.value.trim();
+            var normalizedValue = normalize(value);
             var match = null;
+            var partialMatch = null;
 
             if (!hidden || !list) {
                 return;
             }
 
+            var idMatch = value.match(/acao\s*#\s*(\d+)/i);
+
             Array.prototype.slice.call(list.options || []).some(function (option) {
+                var optionId = option.dataset.id || '';
+                var normalizedOption = normalize(option.value);
+
+                if (idMatch && optionId === idMatch[1]) {
+                    match = option;
+                    return true;
+                }
+
                 if (option.value === value) {
                     match = option;
                     return true;
                 }
 
+                if (!partialMatch && normalizedValue !== '' && (
+                    normalizedOption.indexOf(normalizedValue) !== -1 ||
+                    normalizedValue.indexOf(normalizedOption) !== -1
+                )) {
+                    partialMatch = option;
+                }
+
                 return false;
             });
 
+            match = match || partialMatch;
             hidden.value = match ? match.dataset.id || '' : '';
         }
 

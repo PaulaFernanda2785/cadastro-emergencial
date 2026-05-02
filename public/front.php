@@ -33,6 +33,7 @@ use App\Controllers\Cadastro\FamiliaController;
 use App\Controllers\Cadastro\ResidenciaController;
 use App\Controllers\Gestor\EntregaAjudaController;
 use App\Controllers\Gestor\PrestacaoContasController;
+use App\Controllers\Gestor\RecomecarController;
 use App\Controllers\Gestor\RelatorioController;
 use App\Controllers\PublicAcaoController;
 use App\Core\Env;
@@ -120,6 +121,9 @@ $router->post('/gestor/prestacao-contas/assinar', [PrestacaoContasController::cl
 $router->post('/gestor/prestacao-contas/remover-assinatura', [PrestacaoContasController::class, 'removeSignature'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/relatorios', [RelatorioController::class, 'index'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/relatorios/exportar', [RelatorioController::class, 'export'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/recomecar', [RecomecarController::class, 'index'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/recomecar/assinar', [RecomecarController::class, 'sign'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/recomecar/remover-assinatura', [RecomecarController::class, 'removeSignature'], ['auth', 'role:gestor,administrador']);
 $router->get('/acao/{token}/residencias/novo', [ResidenciaController::class, 'createFromAction'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/acao/{token}/residencias', [ResidenciaController::class, 'storeFromAction'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/acao/{token}', [PublicAcaoController::class, 'show']);
