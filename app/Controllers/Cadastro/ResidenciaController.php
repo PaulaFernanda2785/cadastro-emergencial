@@ -9,6 +9,7 @@ use App\Core\Csrf;
 use App\Core\Session;
 use App\Core\Validator;
 use App\Repositories\AcaoEmergencialRepository;
+use App\Repositories\CoassinaturaRepository;
 use App\Repositories\DocumentoAnexoRepository;
 use App\Repositories\FamiliaRepository;
 use App\Repositories\LogRepository;
@@ -79,6 +80,7 @@ final class ResidenciaController extends Controller
     {
         $residencia = $this->findResidenciaForAccess((int) $id);
         $documentos = $this->documentos->byResidencia((int) $id);
+        $embedDocument = (string) ($_GET['embed_document'] ?? '') === '1';
 
         $this->view('cadastro.residencias.dti', [
             'title' => 'DTI ' . $residencia['protocolo'],
@@ -89,9 +91,11 @@ final class ResidenciaController extends Controller
             'fotosResidencia' => $this->dtiResidenceImageDocuments($documentos),
             'fotosDocumentos' => $this->dtiFamilyDocumentImages($documentos),
             'signature' => $this->latestDtiSignature((int) $id),
+            'coSignatureStatus' => $this->dtiCoSignatureStatus((int) $id),
             'signatureUsers' => (new UsuarioRepository())->activeExcept((int) (current_user()['id'] ?? 0)),
             'generatedAt' => new \DateTimeImmutable('now'),
-        ]);
+            'embedDocument' => $embedDocument,
+        ], $embedDocument ? 'embed' : 'app');
     }
 
     public function signDti(string $id): void
@@ -110,7 +114,14 @@ final class ResidenciaController extends Controller
             json_encode($signature, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
-        Session::flash('success', 'DTI assinada digitalmente com os usuarios selecionados.');
+        $this->createDtiCoSignatureRequests($residencia, $signature, $coSigners);
+
+        Session::flash(
+            'success',
+            $coSigners === []
+                ? 'DTI assinada digitalmente. A impressao esta liberada.'
+                : 'DTI assinada pelo usuario principal. A impressao sera liberada apos autorizacao dos coautores.'
+        );
         $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
     }
 
@@ -134,6 +145,8 @@ final class ResidenciaController extends Controller
                 'removed_at' => (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s'),
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
+
+        (new CoassinaturaRepository())->cancelDocument('dti', $this->dtiDocumentKey((int) $id));
 
         Session::flash('success', 'Assinatura da DTI removida. O documento pode ser assinado novamente.');
         $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
@@ -727,13 +740,15 @@ final class ResidenciaController extends Controller
         $decoded = json_decode((string) ($log['descricao'] ?? ''), true);
 
         if (is_array($decoded)) {
-            return $decoded + [
+            $signature = $decoded + [
                 'signed_at' => $log['criado_em'] ?? '',
                 'usuario_id' => $log['usuario_id'] ?? null,
             ];
+
+            return $this->enrichSignatureWithCoSignatures($signature, 'dti', $this->dtiDocumentKey($residenciaId));
         }
 
-        return [
+        return $this->enrichSignatureWithCoSignatures([
             'nome' => $log['usuario_nome'] ?? '',
             'cpf' => $log['usuario_cpf'] ?? '',
             'graduacao' => $log['usuario_graduacao'] ?? '',
@@ -741,7 +756,7 @@ final class ResidenciaController extends Controller
             'matricula_funcional' => $log['usuario_matricula_funcional'] ?? '',
             'signed_at' => $log['criado_em'] ?? '',
             'hash' => '',
-        ];
+        ], 'dti', $this->dtiDocumentKey($residenciaId));
     }
 
     private function selectedDtiCoSigners(): array
@@ -779,10 +794,7 @@ final class ResidenciaController extends Controller
         $signedAt = (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s');
         $assinantes = array_merge(
             [$this->signatureUserPayload($user, 'assinante_principal')],
-            array_map(
-                fn (array $coSigner): array => $this->signatureUserPayload($coSigner, 'coassinante'),
-                $coSigners
-            )
+            []
         );
         $familyIds = implode(',', array_map(
             static fn (array $familia): string => (string) ($familia['id'] ?? ''),
@@ -814,7 +826,63 @@ final class ResidenciaController extends Controller
             'documento' => 'DTI - Descricao Tecnica de Imovel',
             'protocolo' => (string) ($residencia['protocolo'] ?? ''),
             'assinantes' => $assinantes,
+            'coassinantes_solicitados' => array_map(
+                fn (array $coSigner): array => $this->signatureUserPayload($coSigner, 'coassinante'),
+                $coSigners
+            ),
         ];
+    }
+
+    private function dtiDocumentKey(int $residenciaId): string
+    {
+        return 'dti:' . $residenciaId;
+    }
+
+    private function dtiCoSignatureStatus(int $residenciaId): array
+    {
+        return (new CoassinaturaRepository())->statusSummary('dti', $this->dtiDocumentKey($residenciaId));
+    }
+
+    private function createDtiCoSignatureRequests(array $residencia, array $signature, array $coSigners): void
+    {
+        (new CoassinaturaRepository())->replacePendingRequests([
+            'documento_tipo' => 'dti',
+            'documento_chave' => $this->dtiDocumentKey((int) ($residencia['id'] ?? 0)),
+            'entidade' => 'residencias',
+            'entidade_id' => (int) ($residencia['id'] ?? 0),
+            'titulo' => 'DTI ' . (string) ($residencia['protocolo'] ?? ''),
+            'descricao' => trim((string) ($residencia['municipio_nome'] ?? '') . '/' . (string) ($residencia['uf'] ?? '') . ' - ' . (string) ($residencia['bairro_comunidade'] ?? '')),
+            'url_documento' => '/cadastros/residencias/' . (int) ($residencia['id'] ?? 0) . '/dti',
+            'solicitante_usuario_id' => (int) (current_user()['id'] ?? 0),
+            'payload' => [
+                'documento' => $signature['documento'] ?? 'DTI',
+                'protocolo' => $residencia['protocolo'] ?? '',
+                'hash' => $signature['hash'] ?? '',
+            ],
+        ], $coSigners);
+    }
+
+    private function enrichSignatureWithCoSignatures(array $signature, string $documentType, string $documentKey): array
+    {
+        $repository = new CoassinaturaRepository();
+        $status = $repository->statusSummary($documentType, $documentKey);
+        $primary = is_array($signature['assinantes'][0] ?? null) ? [$signature['assinantes'][0]] : [[
+            'tipo' => 'assinante_principal',
+            'usuario_id' => (int) ($signature['usuario_id'] ?? 0),
+            'nome' => (string) ($signature['nome'] ?? ''),
+            'cpf' => (string) ($signature['cpf'] ?? ''),
+            'graduacao' => (string) ($signature['graduacao'] ?? ''),
+            'nome_guerra' => (string) ($signature['nome_guerra'] ?? ''),
+            'matricula_funcional' => (string) ($signature['matricula_funcional'] ?? ''),
+            'orgao' => (string) ($signature['orgao'] ?? ''),
+            'unidade_setor' => (string) ($signature['unidade_setor'] ?? ''),
+        ]];
+
+        $signature['assinantes'] = array_merge($primary, $repository->authorizedSignerPayloads($documentType, $documentKey));
+        $signature['coassinatura_status'] = $status;
+        $signature['impressao_liberada'] = (bool) ($status['impressao_liberada'] ?? true);
+
+        return $signature;
     }
 
     private function guardPost(string $scope, string $failureRedirect): void

@@ -24,6 +24,7 @@ require BASE_PATH . '/app/Helpers/functions.php';
 send_security_headers();
 
 use App\Controllers\AuthController;
+use App\Controllers\AssinaturaController;
 use App\Controllers\DashboardController;
 use App\Controllers\Admin\AcaoEmergencialController;
 use App\Controllers\Admin\TipoAjudaController;
@@ -56,6 +57,10 @@ $router->post('/cadastro-qr', [AuthController::class, 'register'], ['guest']);
 $router->post('/logout', [AuthController::class, 'logout'], ['auth']);
 $router->get('/alterar-senha', [AuthController::class, 'showChangePassword'], ['auth']);
 $router->post('/alterar-senha', [AuthController::class, 'changePassword'], ['auth']);
+$router->get('/assinaturas', [AssinaturaController::class, 'index'], ['auth']);
+$router->get('/assinaturas/{id}', [AssinaturaController::class, 'show'], ['auth']);
+$router->post('/assinaturas/{id}/autorizar', [AssinaturaController::class, 'authorize'], ['auth']);
+$router->post('/assinaturas/{id}/negar', [AssinaturaController::class, 'reject'], ['auth']);
 $router->get('/admin', [DashboardController::class, 'admin'], ['auth', 'role:administrador']);
 $router->get('/admin/usuarios', [UsuarioController::class, 'index'], ['auth', 'role:administrador']);
 $router->get('/admin/usuarios/novo', [UsuarioController::class, 'create'], ['auth', 'role:administrador']);

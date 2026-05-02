@@ -16,10 +16,27 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260502-93';
+$assetVersion = '20260502-108';
+$signaturePendingCount = 0;
+$signatureRequesterNoticeCount = 0;
+$signatureRequestedPendingCount = 0;
+
+if ($user !== null) {
+    try {
+        $signatureRepository = new App\Repositories\CoassinaturaRepository();
+        $signaturePendingCount = $signatureRepository->pendingCountForUser((int) ($user['id'] ?? 0));
+        $signatureRequesterNoticeCount = $signatureRepository->pendingRequesterNoticeCount((int) ($user['id'] ?? 0));
+        $signatureRequestedPendingCount = $signatureRepository->pendingRequestedByUserCount((int) ($user['id'] ?? 0));
+    } catch (Throwable) {
+        $signaturePendingCount = 0;
+        $signatureRequesterNoticeCount = 0;
+        $signatureRequestedPendingCount = 0;
+    }
+}
 
 $menuItems = [
     ['group' => 'Operacao', 'label' => 'Painel situacional', 'abbr' => 'PS', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
+    ['group' => 'Operacao', 'label' => 'Assinaturas' . ($signaturePendingCount > 0 ? ' (' . $signaturePendingCount . ')' : ''), 'abbr' => 'AS', 'url' => '/assinaturas', 'match' => ['/assinaturas'], 'requires_signature' => true],
     ['group' => 'Operacao', 'label' => 'Novo cadastro', 'abbr' => 'NC', 'url' => $activeActionUrl, 'match' => ['/acao/'], 'roles' => ['cadastrador', 'gestor', 'administrador'], 'requires_action' => true],
     ['group' => 'Operacao', 'label' => 'Cadastros', 'abbr' => 'CD', 'url' => '/cadastros/residencias', 'match' => ['/cadastros/residencias']],
     ['group' => 'Operacao', 'label' => 'Familias', 'abbr' => 'FM', 'url' => '/gestor/familias', 'match' => ['/gestor/familias']],
@@ -99,6 +116,10 @@ $menuItems = [
                             continue;
                         }
 
+                        if (!empty($item['requires_signature']) && $signaturePendingCount <= 0 && $signatureRequestedPendingCount <= 0 && $signatureRequesterNoticeCount <= 0) {
+                            continue;
+                        }
+
                         if (($item['group'] ?? '') !== $currentGroup) {
                             $currentGroup = $item['group'] ?? '';
                             echo '<span class="sidebar-section-title">' . h($currentGroup) . '</span>';
@@ -164,6 +185,27 @@ $menuItems = [
 
                 <?php if ($warning): ?>
                     <div class="alert alert-warning" role="alert"><?= h($warning) ?></div>
+                <?php endif; ?>
+
+                <?php if ($signaturePendingCount > 0): ?>
+                    <div class="alert alert-warning signature-notice-alert" role="alert">
+                        Voce possui <?= h($signaturePendingCount) ?> documento(s) aguardando sua autorizacao como coautor.
+                        <a class="signature-alert-action" href="<?= h(url('/assinaturas')) ?>">Abrir assinaturas</a>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($signatureRequesterNoticeCount > 0): ?>
+                    <div class="alert alert-success signature-notice-alert" role="status">
+                        Ha atualizacao em assinatura(s) solicitada(s) por voce. Verifique se a impressao do documento foi liberada.
+                        <a class="signature-alert-action" href="<?= h(url('/assinaturas')) ?>">Ver atualizacoes</a>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($signatureRequestedPendingCount > 0): ?>
+                    <div class="alert alert-warning signature-notice-alert" role="status">
+                        Voce possui <?= h($signatureRequestedPendingCount) ?> coassinatura(s) solicitada(s) aguardando resposta de outros usuarios.
+                        <a class="signature-alert-action signature-alert-action-strong" href="<?= h(url('/assinaturas')) ?>">Acompanhar assinaturas</a>
+                    </div>
                 <?php endif; ?>
 
                 <?= $content ?>

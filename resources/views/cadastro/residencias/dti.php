@@ -30,6 +30,9 @@ $generatedAtText = $generatedAt instanceof DateTimeInterface ? $generatedAt->for
 $signedAtText = $signature !== null ? $formatDateTime($signature['signed_at'] ?? '') : '';
 $signatureHash = (string) ($signature['hash'] ?? '');
 $signatureUsers = $signatureUsers ?? [];
+$coSignatureStatus = is_array($signature['coassinatura_status'] ?? null) ? $signature['coassinatura_status'] : ($coSignatureStatus ?? ['total' => 0, 'pendentes' => 0, 'autorizados' => 0, 'negados' => 0, 'impressao_liberada' => true, 'solicitacoes' => []]);
+$printReady = $signature !== null && (bool) ($signature['impressao_liberada'] ?? $coSignatureStatus['impressao_liberada'] ?? true);
+$embedDocument = (bool) ($embedDocument ?? false);
 $signatureSigners = is_array($signature['assinantes'] ?? null) ? $signature['assinantes'] : [];
 if ($signature !== null && $signatureSigners === []) {
     $signatureSigners[] = [
@@ -81,7 +84,8 @@ $pageNumber = 1;
     }
 </style>
 
-<section class="records-page dti-preview-page">
+<section class="records-page dti-preview-page <?= $signature !== null && !$printReady ? 'is-print-blocked' : '' ?>">
+    <?php if (!$embedDocument): ?>
     <header class="action-form-header records-header no-print dti-screen-header">
         <div>
             <span class="eyebrow">Descricao Tecnica de Imovel</span>
@@ -98,16 +102,37 @@ $pageNumber = 1;
                 </form>
                 <a class="secondary-button residence-action-button" href="#dti-signature-form">Assinatura conjunta</a>
             <?php else: ?>
-                <span class="limit-reached-pill">Documento assinado</span>
+                <span class="limit-reached-pill"><?= $printReady ? 'Documento assinado' : 'Aguardando coautor' ?></span>
                 <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/dti/remover-assinatura')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Remover a assinatura ativa desta DTI? O historico da assinatura sera preservado no log.">
                     <?= csrf_field() ?>
                     <?= idempotency_field('cadastro.residencia.dti.remove_signature.' . $residencia['id']) ?>
                     <button type="submit" class="danger-button" data-loading-text="Removendo...">Remover assinatura</button>
                 </form>
-                <button type="button" class="primary-button" onclick="window.print()">Imprimir</button>
+                <?php if ($printReady): ?>
+                    <button type="button" class="primary-button" onclick="window.print()">Imprimir</button>
+                <?php else: ?>
+                    <span class="limit-reached-pill">Impressao bloqueada</span>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </header>
+
+    <?php if ($signature !== null && !$printReady): ?>
+        <section class="signature-flow-panel no-print">
+            <div>
+                <span class="eyebrow">Fluxo de coassinatura</span>
+                <h2>Impressao aguardando autorizacao</h2>
+                <p><?= h((int) ($coSignatureStatus['pendentes'] ?? 0)) ?> pendente(s), <?= h((int) ($coSignatureStatus['autorizados'] ?? 0)) ?> autorizado(s), <?= h((int) ($coSignatureStatus['negados'] ?? 0)) ?> nao autorizado(s).</p>
+            </div>
+            <a class="secondary-button signature-flow-action" href="<?= h(url('/assinaturas')) ?>">Acompanhar assinaturas</a>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($signature !== null && !$printReady): ?>
+        <div class="print-blocked-message print-only">
+            Impressao bloqueada. Este documento possui coassinatura pendente ou nao autorizada.
+        </div>
+    <?php endif; ?>
 
     <?php if ($signature === null): ?>
         <section class="dti-signature-setup no-print" id="dti-signature-form">
@@ -164,6 +189,7 @@ $pageNumber = 1;
                 <button type="submit" class="primary-button" data-loading-text="Assinando...">Assinar DTI</button>
             </form>
         </section>
+    <?php endif; ?>
     <?php endif; ?>
 
     <div class="dti-document" aria-label="Previa da DTI">
@@ -419,6 +445,17 @@ $pageNumber = 1;
                                             | MF: <?= h($assinante['matricula_funcional']) ?>
                                         <?php endif; ?>
                                     </p>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($coSignatureStatus['solicitacoes'])): ?>
+                        <div class="dti-cosigner-list no-print">
+                            <span>Status dos coassinantes</span>
+                            <?php foreach ($coSignatureStatus['solicitacoes'] as $solicitacao): ?>
+                                <div>
+                                    <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
+                                    <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>
                                 </div>
                             <?php endforeach; ?>
                         </div>

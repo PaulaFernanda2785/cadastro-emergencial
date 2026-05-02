@@ -208,3 +208,31 @@ CREATE TABLE IF NOT EXISTS logs_sistema (
     KEY idx_logs_entidade (entidade, entidade_id),
     KEY idx_logs_acao_data (acao, criado_em)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS coassinaturas_documentos (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    documento_tipo VARCHAR(60) NOT NULL,
+    documento_chave VARCHAR(128) NOT NULL,
+    entidade VARCHAR(100) NOT NULL,
+    entidade_id BIGINT UNSIGNED NOT NULL,
+    titulo VARCHAR(180) NOT NULL,
+    descricao TEXT NULL,
+    url_documento VARCHAR(255) NOT NULL,
+    solicitante_usuario_id BIGINT UNSIGNED NOT NULL,
+    coautor_usuario_id BIGINT UNSIGNED NOT NULL,
+    status ENUM('pendente', 'autorizado', 'negado', 'cancelado') NOT NULL DEFAULT 'pendente',
+    payload_json LONGTEXT NULL,
+    coautor_snapshot_json TEXT NULL,
+    hash_autorizacao CHAR(64) NULL,
+    motivo_negativa VARCHAR(500) NULL,
+    solicitado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    autorizado_em DATETIME NULL,
+    negado_em DATETIME NULL,
+    solicitante_notificado_em DATETIME NULL,
+    atualizado_em DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_coassinaturas_coautor_status (coautor_usuario_id, status),
+    KEY idx_coassinaturas_solicitante_status (solicitante_usuario_id, status),
+    KEY idx_coassinaturas_documento (documento_tipo, documento_chave),
+    CONSTRAINT fk_coassinaturas_solicitante FOREIGN KEY (solicitante_usuario_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_coassinaturas_coautor FOREIGN KEY (coautor_usuario_id) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

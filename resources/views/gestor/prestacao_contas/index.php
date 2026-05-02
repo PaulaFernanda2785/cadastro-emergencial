@@ -10,6 +10,9 @@ $documentCode = 'PC-' . ($generatedAt instanceof DateTimeInterface ? $generatedA
 $signedAtText = $signature !== null && !empty($signature['signed_at']) ? date('d/m/Y H:i', strtotime((string) $signature['signed_at'])) : '';
 $signatureHash = (string) ($signature['hash'] ?? '');
 $signatureSigners = is_array($signature['assinantes'] ?? null) ? $signature['assinantes'] : [];
+$coSignatureStatus = is_array($signature['coassinatura_status'] ?? null) ? $signature['coassinatura_status'] : ($coSignatureStatus ?? ['total' => 0, 'pendentes' => 0, 'autorizados' => 0, 'negados' => 0, 'impressao_liberada' => true, 'solicitacoes' => []]);
+$printReady = $signature !== null && (bool) ($signature['impressao_liberada'] ?? $coSignatureStatus['impressao_liberada'] ?? true);
+$embedDocument = (bool) ($embedDocument ?? false);
 if ($signature !== null && $signatureSigners === []) {
     $signatureSigners[] = [
         'tipo' => 'assinante_principal',
@@ -37,6 +40,20 @@ $valueOrDash = static function (mixed $value): string {
     $text = trim((string) $value);
 
     return $text !== '' ? $text : '-';
+};
+
+$softBreak = static function (mixed $value) use ($valueOrDash): string {
+    $text = $valueOrDash($value);
+
+    if ($text === '-') {
+        return h($text);
+    }
+
+    return str_replace(
+        ['@', '.', '/', '-'],
+        ['<wbr>@', '.<wbr>', '/<wbr>', '-<wbr>'],
+        h($text)
+    );
 };
 
 $formatQuantity = static function (mixed $value): string {
@@ -109,7 +126,8 @@ $renderFilterFields = static function (array $filters): void {
     }
 </style>
 
-<section class="records-page accountability-page">
+<section class="records-page accountability-page <?= $signature !== null && !$printReady ? 'is-print-blocked' : '' ?>">
+    <?php if (!$embedDocument): ?>
     <header class="dashboard-header deliveries-header accountability-header no-print">
         <div>
             <span class="eyebrow">Gestao operacional</span>
@@ -125,14 +143,18 @@ $renderFilterFields = static function (array $filters): void {
             </form>
             <a class="secondary-button" href="#prestacao-signature-form">Assinatura conjunta</a>
         <?php elseif ($hasAppliedFilters): ?>
-            <span class="limit-reached-pill">Documento assinado</span>
+            <span class="limit-reached-pill"><?= $printReady ? 'Documento assinado' : 'Aguardando conferencia' ?></span>
             <form method="post" action="<?= h(url('/gestor/prestacao-contas/remover-assinatura')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Remover a assinatura ativa desta prestacao de contas? O historico da assinatura sera preservado no log.">
                 <?= csrf_field() ?>
                 <?= idempotency_field('gestor.prestacao_contas.remove_signature.' . (int) ($documentIdentity['entity_id'] ?? 0)) ?>
                 <?php $renderFilterFields($filters); ?>
                 <button type="submit" class="danger-button" data-loading-text="Removendo...">Remover assinatura</button>
             </form>
-            <button type="button" class="primary-button" onclick="window.print()">Imprimir documento</button>
+            <?php if ($printReady): ?>
+                <button type="button" class="primary-button" onclick="window.print()">Imprimir documento</button>
+            <?php else: ?>
+                <span class="limit-reached-pill">Impressao bloqueada</span>
+            <?php endif; ?>
         <?php endif; ?>
     </header>
 
@@ -159,64 +181,70 @@ $renderFilterFields = static function (array $filters): void {
         </article>
     </section>
 
-    <section class="records-filter-panel delivery-filter-panel no-print">
+    <section class="records-filter-panel delivery-filter-panel accountability-filter-panel no-print">
         <div class="table-heading">
             <h2>Filtros inteligentes</h2>
             <span>Combine busca textual, acao, tipo de material, localidade e periodo.</span>
         </div>
         <form method="get" action="<?= h(url('/gestor/prestacao-contas')) ?>" class="accountability-filter-form">
-            <label class="field">
-                <span>Buscar</span>
-                <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" list="prestacao-busca-list" placeholder="Nome, CPF, comprovante ou protocolo">
-                <datalist id="prestacao-busca-list">
-                    <?php foreach ($details ?? [] as $item): ?>
-                        <option value="<?= h($item['beneficiario_nome'] ?? '') ?>"></option>
-                        <option value="<?= h($item['beneficiario_cpf'] ?? '') ?>"></option>
-                        <option value="<?= h($item['protocolo'] ?? '') ?>"></option>
-                    <?php endforeach; ?>
-                </datalist>
-            </label>
+            <div class="accountability-filter-main">
+                <label class="field">
+                    <span>Buscar</span>
+                    <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" list="prestacao-busca-list" placeholder="Nome, CPF, comprovante ou protocolo">
+                    <datalist id="prestacao-busca-list">
+                        <?php foreach ($details ?? [] as $item): ?>
+                            <option value="<?= h($item['beneficiario_nome'] ?? '') ?>"></option>
+                            <option value="<?= h($item['beneficiario_cpf'] ?? '') ?>"></option>
+                            <option value="<?= h($item['protocolo'] ?? '') ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                </label>
 
-            <label class="field smart-search-field">
-                <span>Acao</span>
-                <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="prestacao-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="prestacao_acao_id" autocomplete="off">
-                <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="prestacao_acao_id">
-                <datalist id="prestacao-acoes-list">
-                    <?php foreach ($acoes ?? [] as $acao): ?>
-                        <option value="<?= h($actionOptionLabel($acao)) ?>" data-id="<?= h($acao['id']) ?>"></option>
-                    <?php endforeach; ?>
-                </datalist>
-            </label>
+                <label class="field smart-search-field">
+                    <span>Acao</span>
+                    <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="prestacao-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="prestacao_acao_id" autocomplete="off">
+                    <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="prestacao_acao_id">
+                    <datalist id="prestacao-acoes-list">
+                        <?php foreach ($acoes ?? [] as $acao): ?>
+                            <option value="<?= h($actionOptionLabel($acao)) ?>" data-id="<?= h($acao['id']) ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                </label>
 
-            <label class="field smart-search-field">
-                <span>Tipo de material</span>
-                <input type="search" name="tipo_ajuda_busca" value="<?= h(($filters['tipo_ajuda_busca'] ?? '') !== '' ? $filters['tipo_ajuda_busca'] : $selectedTypeLabel) ?>" list="prestacao-tipos-list" placeholder="Digite para buscar o material" data-smart-search data-smart-target="prestacao_tipo_ajuda_id" autocomplete="off">
-                <input type="hidden" name="tipo_ajuda_id" value="<?= h($filters['tipo_ajuda_id'] ?? '') ?>" data-smart-hidden="prestacao_tipo_ajuda_id">
-                <datalist id="prestacao-tipos-list">
-                    <?php foreach ($tipos ?? [] as $tipo): ?>
-                        <option value="<?= h($tipo['nome'] . ' (' . $tipo['unidade_medida'] . ')') ?>" data-id="<?= h($tipo['id']) ?>"></option>
-                    <?php endforeach; ?>
-                </datalist>
-            </label>
+                <label class="field smart-search-field">
+                    <span>Tipo de material</span>
+                    <input type="search" name="tipo_ajuda_busca" value="<?= h(($filters['tipo_ajuda_busca'] ?? '') !== '' ? $filters['tipo_ajuda_busca'] : $selectedTypeLabel) ?>" list="prestacao-tipos-list" placeholder="Digite para buscar o material" data-smart-search data-smart-target="prestacao_tipo_ajuda_id" autocomplete="off">
+                    <input type="hidden" name="tipo_ajuda_id" value="<?= h($filters['tipo_ajuda_id'] ?? '') ?>" data-smart-hidden="prestacao_tipo_ajuda_id">
+                    <datalist id="prestacao-tipos-list">
+                        <?php foreach ($tipos ?? [] as $tipo): ?>
+                            <option value="<?= h($tipo['nome'] . ' (' . $tipo['unidade_medida'] . ')') ?>" data-id="<?= h($tipo['id']) ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                </label>
 
-            <label class="field">
-                <span>Localidade, bairro ou comunidade</span>
-                <input type="search" name="localidade_busca" value="<?= h($filters['localidade_busca'] ?? '') ?>" placeholder="Digite localidade, bairro ou comunidade">
-            </label>
+                <label class="field">
+                    <span>Localidade, bairro ou comunidade</span>
+                    <input type="search" name="localidade_busca" value="<?= h($filters['localidade_busca'] ?? '') ?>" placeholder="Digite localidade, bairro ou comunidade">
+                </label>
+            </div>
 
-            <label class="field">
-                <span>Inicio</span>
-                <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
-            </label>
+            <div class="accountability-filter-side">
+                <div class="accountability-date-range">
+                    <label class="field">
+                        <span>Inicio</span>
+                        <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
+                    </label>
 
-            <label class="field">
-                <span>Fim</span>
-                <input type="date" name="data_fim" value="<?= h($filters['data_fim'] ?? '') ?>">
-            </label>
+                    <label class="field">
+                        <span>Fim</span>
+                        <input type="date" name="data_fim" value="<?= h($filters['data_fim'] ?? '') ?>">
+                    </label>
+                </div>
 
-            <div class="records-filter-actions delivery-history-filter-actions">
-                <button type="submit" class="primary-button">Filtrar</button>
-                <a class="secondary-button" href="<?= h(url('/gestor/prestacao-contas')) ?>">Limpar</a>
+                <div class="records-filter-actions delivery-history-filter-actions accountability-filter-actions">
+                    <button type="submit" class="primary-button">Filtrar</button>
+                    <a class="secondary-button" href="<?= h(url('/gestor/prestacao-contas')) ?>">Limpar</a>
+                </div>
             </div>
         </form>
 
@@ -228,14 +256,32 @@ $renderFilterFields = static function (array $filters): void {
             </div>
         <?php endif; ?>
     </section>
+    <?php endif; ?>
 
-    <?php if (!$hasAppliedFilters): ?>
+    <?php if (!$hasAppliedFilters && !$embedDocument): ?>
         <section class="action-empty-panel records-empty-panel no-print">
             <h2>Aplique um filtro para gerar o documento</h2>
             <p>Use pelo menos um filtro operacional, como acao, tipo de material, localidade, periodo ou busca textual. A prestacao de contas nao e carregada automaticamente para evitar documento amplo sem recorte.</p>
         </section>
     <?php else: ?>
-        <?php if ($signature === null): ?>
+        <?php if ($signature !== null && !$printReady && !$embedDocument): ?>
+            <section class="signature-flow-panel no-print">
+                <div>
+                    <span class="eyebrow">Fluxo de coassinatura</span>
+                    <h2>Impressao aguardando autorizacao</h2>
+                    <p><?= h((int) ($coSignatureStatus['pendentes'] ?? 0)) ?> pendente(s), <?= h((int) ($coSignatureStatus['autorizados'] ?? 0)) ?> autorizado(s), <?= h((int) ($coSignatureStatus['negados'] ?? 0)) ?> nao autorizado(s).</p>
+                </div>
+                <a class="secondary-button signature-flow-action" href="<?= h(url('/assinaturas')) ?>">Acompanhar assinaturas</a>
+            </section>
+        <?php endif; ?>
+
+        <?php if ($signature !== null && !$printReady && !$embedDocument): ?>
+            <div class="print-blocked-message print-only">
+                Impressao bloqueada. Este documento possui coassinatura pendente ou nao autorizada.
+            </div>
+        <?php endif; ?>
+
+        <?php if ($signature === null && !$embedDocument): ?>
             <section class="dti-signature-setup no-print" id="prestacao-signature-form">
                 <div>
                     <span class="eyebrow">Assinatura digital conjunta</span>
@@ -311,33 +357,33 @@ $renderFilterFields = static function (array $filters): void {
                     <tbody>
                         <tr>
                             <th>Municipio</th>
-                            <td><?= h($municipioLabel) ?></td>
+                            <td class="accountability-info-value accountability-long-value"><?= $softBreak($municipioLabel) ?></td>
                             <th>Data da entrega</th>
-                            <td><?= h($documentDate) ?></td>
+                            <td class="accountability-info-value"><?= h($documentDate) ?></td>
                         </tr>
                         <tr>
                             <th>Responsavel pela distribuicao</th>
-                            <td><?= h($valueOrDash($currentUser['nome'] ?? '')) ?></td>
+                            <td class="accountability-info-value accountability-long-value"><?= $softBreak($currentUser['nome'] ?? '') ?></td>
                             <th>Telefone</th>
-                            <td><?= h($valueOrDash($currentUser['telefone'] ?? '')) ?></td>
+                            <td class="accountability-info-value"><?= h($valueOrDash($currentUser['telefone'] ?? '')) ?></td>
                         </tr>
                         <tr>
                             <th>E-mail</th>
-                            <td><?= h($valueOrDash($currentUser['email'] ?? '')) ?></td>
+                            <td class="accountability-info-value accountability-email-value"><?= $softBreak($currentUser['email'] ?? '') ?></td>
                             <th>Tipo de material distribuido</th>
-                            <td><?= h($materialLabel) ?></td>
+                            <td class="accountability-info-value accountability-long-value"><?= $softBreak($materialLabel) ?></td>
                         </tr>
                         <tr>
                             <th>Total de familias</th>
-                            <td><?= h((int) ($documentContext['total_familias'] ?? 0)) ?></td>
+                            <td class="accountability-info-value"><?= h((int) ($documentContext['total_familias'] ?? 0)) ?></td>
                             <th>Localidade, bairro ou comunidade</th>
-                            <td><?= h($localidadeLabel) ?></td>
+                            <td class="accountability-info-value accountability-long-value"><?= $softBreak($localidadeLabel) ?></td>
                         </tr>
                         <tr>
                             <th>Periodo filtrado</th>
-                            <td><?= h($periodo) ?></td>
+                            <td class="accountability-info-value"><?= h($periodo) ?></td>
                             <th>Codigo do documento</th>
-                            <td><?= h($documentCode) ?></td>
+                            <td class="accountability-info-value accountability-code-value"><?= $softBreak($documentCode) ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -437,6 +483,17 @@ $renderFilterFields = static function (array $filters): void {
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
+                    <?php if (!empty($coSignatureStatus['solicitacoes'])): ?>
+                        <div class="dti-cosigner-list no-print">
+                            <span>Status dos responsaveis pela conferencia</span>
+                            <?php foreach ($coSignatureStatus['solicitacoes'] as $solicitacao): ?>
+                                <div>
+                                    <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
+                                    <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </section>
 
@@ -448,7 +505,7 @@ $renderFilterFields = static function (array $filters): void {
     </section>
     <?php endif; ?>
 
-    <?php if ($hasAppliedFilters && $totalPages > 1): ?>
+    <?php if ($hasAppliedFilters && $totalPages > 1 && !$embedDocument): ?>
         <nav class="records-pagination delivery-pagination no-print" aria-label="Paginacao da prestacao de contas">
             <a class="secondary-button <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(max(1, $page - 1))) ?>">Anterior</a>
             <div class="pagination-pages">

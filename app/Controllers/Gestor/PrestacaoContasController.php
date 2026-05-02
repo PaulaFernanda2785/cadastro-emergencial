@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Core\Csrf;
 use App\Core\Session;
 use App\Repositories\AcaoEmergencialRepository;
+use App\Repositories\CoassinaturaRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\PrestacaoContasRepository;
 use App\Repositories\TipoAjudaRepository;
@@ -30,6 +31,7 @@ final class PrestacaoContasController extends Controller
     public function index(): void
     {
         $filters = $this->filters();
+        $embedDocument = (string) ($_GET['embed_document'] ?? '') === '1';
         $hasAppliedFilters = $this->hasAppliedFilters($filters);
         $page = max(1, (int) ($_GET['pagina'] ?? 1));
         $total = $hasAppliedFilters ? $this->prestacao->countDetails($filters) : 0;
@@ -40,6 +42,7 @@ final class PrestacaoContasController extends Controller
         $documentIdentity = $hasAppliedFilters ? $this->documentIdentity($filters) : null;
         $showSignature = $hasAppliedFilters && (string) ($_GET['assinatura'] ?? '') === '1';
         $signature = ($documentIdentity !== null && $showSignature) ? $this->latestSignature($documentIdentity) : null;
+        $coSignatureStatus = $documentIdentity !== null ? (new CoassinaturaRepository())->statusSummary('prestacao_contas', (string) $documentIdentity['document_key']) : $this->emptyCoSignatureStatus();
 
         $this->view('gestor.prestacao_contas.index', [
             'title' => 'Prestacao de contas',
@@ -54,6 +57,7 @@ final class PrestacaoContasController extends Controller
             'documentContext' => $hasAppliedFilters ? $this->prestacao->documentContext($filters) : [],
             'currentUser' => $currentUser,
             'signature' => $signature,
+            'coSignatureStatus' => $coSignatureStatus,
             'documentIdentity' => $documentIdentity,
             'pagination' => [
                 'page' => $page,
@@ -62,7 +66,8 @@ final class PrestacaoContasController extends Controller
                 'pages' => $totalPages,
             ],
             'generatedAt' => $generatedAt,
-        ]);
+            'embedDocument' => $embedDocument,
+        ], $embedDocument ? 'embed' : 'app');
     }
 
     public function sign(): void
@@ -92,7 +97,14 @@ final class PrestacaoContasController extends Controller
             json_encode($signature, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
-        Session::flash('success', 'Prestacao de contas assinada digitalmente com os usuarios selecionados.');
+        $this->createCoSignatureRequests($filters, $identity, $signature, $this->selectedCoSigners());
+
+        Session::flash(
+            'success',
+            empty($signature['coassinantes_solicitados'] ?? [])
+                ? 'Prestacao de contas assinada digitalmente. A impressao esta liberada.'
+                : 'Prestacao de contas assinada pelo usuario principal. A impressao sera liberada apos autorizacao dos responsaveis pela conferencia.'
+        );
         $this->redirect($this->filterUrl($filters, true));
     }
 
@@ -123,6 +135,8 @@ final class PrestacaoContasController extends Controller
                 'removed_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
+
+        (new CoassinaturaRepository())->cancelDocument('prestacao_contas', (string) $identity['document_key']);
 
         Session::flash('success', 'Assinatura da prestacao de contas removida. O documento pode ser assinado novamente.');
         $this->redirect($this->filterUrl($filters));
@@ -186,6 +200,18 @@ final class PrestacaoContasController extends Controller
         ];
     }
 
+    private function emptyCoSignatureStatus(): array
+    {
+        return [
+            'total' => 0,
+            'pendentes' => 0,
+            'autorizados' => 0,
+            'negados' => 0,
+            'impressao_liberada' => true,
+            'solicitacoes' => [],
+        ];
+    }
+
     private function selectedCoSigners(): array
     {
         $postedIds = is_array($_POST['assinantes_usuarios'] ?? null) ? $_POST['assinantes_usuarios'] : [];
@@ -216,10 +242,12 @@ final class PrestacaoContasController extends Controller
             return null;
         }
 
-        return $decoded + [
+        $signature = $decoded + [
             'signed_at' => $log['criado_em'] ?? '',
             'usuario_id' => $log['usuario_id'] ?? null,
         ];
+
+        return $this->enrichSignatureWithCoSignatures($signature, (string) $identity['document_key']);
     }
 
     private function documentIdentity(array $filters): array
@@ -266,10 +294,7 @@ final class PrestacaoContasController extends Controller
     ): array {
         $signers = array_merge(
             [$this->signatureUserPayload($currentUser, 'assinante_principal')],
-            array_map(
-                fn (array $coSigner): array => $this->signatureUserPayload($coSigner, 'responsavel_conferencia'),
-                $coSigners
-            )
+            []
         );
 
         $base = json_encode([
@@ -297,7 +322,62 @@ final class PrestacaoContasController extends Controller
             'documento' => 'Prestacao de contas de ajuda humanitaria',
             'document_key' => $identity['document_key'],
             'assinantes' => $signers,
+            'coassinantes_solicitados' => array_map(
+                fn (array $coSigner): array => $this->signatureUserPayload($coSigner, 'responsavel_conferencia'),
+                $coSigners
+            ),
         ];
+    }
+
+    private function createCoSignatureRequests(array $filters, array $identity, array $signature, array $coSigners): void
+    {
+        (new CoassinaturaRepository())->replacePendingRequests([
+            'documento_tipo' => 'prestacao_contas',
+            'documento_chave' => (string) $identity['document_key'],
+            'entidade' => 'prestacao_contas',
+            'entidade_id' => (int) $identity['entity_id'],
+            'titulo' => 'Prestacao de contas de ajuda humanitaria',
+            'descricao' => 'Documento gerado por filtros operacionais em ' . date('d/m/Y H:i'),
+            'url_documento' => $this->filterUrl($filters, true),
+            'solicitante_usuario_id' => (int) (current_user()['id'] ?? 0),
+            'payload' => [
+                'documento' => $signature['documento'] ?? 'Prestacao de contas',
+                'document_key' => $identity['document_key'],
+                'hash' => $signature['hash'] ?? '',
+                'filters' => $filters,
+            ],
+        ], $coSigners);
+    }
+
+    private function enrichSignatureWithCoSignatures(array $signature, string $documentKey): array
+    {
+        $repository = new CoassinaturaRepository();
+        $status = $repository->statusSummary('prestacao_contas', $documentKey);
+        $primary = is_array($signature['assinantes'][0] ?? null) ? [$signature['assinantes'][0]] : [[
+            'tipo' => 'assinante_principal',
+            'usuario_id' => (int) ($signature['usuario_id'] ?? 0),
+            'nome' => (string) ($signature['nome'] ?? ''),
+            'cpf' => (string) ($signature['cpf'] ?? ''),
+            'email' => (string) ($signature['email'] ?? ''),
+            'telefone' => (string) ($signature['telefone'] ?? ''),
+            'graduacao' => (string) ($signature['graduacao'] ?? ''),
+            'nome_guerra' => (string) ($signature['nome_guerra'] ?? ''),
+            'matricula_funcional' => (string) ($signature['matricula_funcional'] ?? ''),
+            'orgao' => (string) ($signature['orgao'] ?? ''),
+            'unidade_setor' => (string) ($signature['unidade_setor'] ?? ''),
+        ]];
+
+        $authorized = array_map(static function (array $payload): array {
+            $payload['tipo'] = 'responsavel_conferencia';
+
+            return $payload;
+        }, $repository->authorizedSignerPayloads('prestacao_contas', $documentKey));
+
+        $signature['assinantes'] = array_merge($primary, $authorized);
+        $signature['coassinatura_status'] = $status;
+        $signature['impressao_liberada'] = (bool) ($status['impressao_liberada'] ?? true);
+
+        return $signature;
     }
 
     private function signatureUserPayload(array $user, string $tipo): array
