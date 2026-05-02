@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var CACHE_NAME = 'cadastro-emergencial-v20260502-79';
+    var CACHE_NAME = 'cadastro-emergencial-v20260502-81';
 
     if (!('serviceWorker' in navigator)) {
         return;

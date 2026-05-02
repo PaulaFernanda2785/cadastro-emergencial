@@ -18,6 +18,7 @@ use App\Services\TerritorioService;
 final class AcaoEmergencialController extends Controller
 {
     private const STATUS = ['aberta', 'encerrada', 'cancelada'];
+    private const INDEX_PER_PAGE = 10;
 
     public function __construct(
         private readonly AcaoEmergencialRepository $acoes = new AcaoEmergencialRepository(),
@@ -28,9 +29,28 @@ final class AcaoEmergencialController extends Controller
 
     public function index(): void
     {
+        $filters = $this->indexFilters();
+        $total = $this->acoes->countSearch($filters);
+        $totalPages = max(1, (int) ceil($total / self::INDEX_PER_PAGE));
+        $page = min($this->requestedPage(), $totalPages);
+
         $this->view('admin.acoes.index', [
             'title' => 'Ações emergenciais',
-            'acoes' => $this->acoes->all(),
+            'acoes' => $this->acoes->search(
+                $filters,
+                self::INDEX_PER_PAGE,
+                ($page - 1) * self::INDEX_PER_PAGE
+            ),
+            'filters' => $filters,
+            'summary' => $this->acoes->searchSummary($filters),
+            'municipios' => $this->acoes->municipalityOptions(),
+            'eventos' => $this->acoes->eventOptions(),
+            'pagination' => [
+                'page' => $page,
+                'per_page' => self::INDEX_PER_PAGE,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
         ]);
     }
 
@@ -77,6 +97,11 @@ final class AcaoEmergencialController extends Controller
             $this->abort(404);
         }
 
+        if ((string) ($acao['status'] ?? '') !== 'aberta') {
+            Session::flash('warning', 'Acoes encerradas ou canceladas nao podem ser editadas. Ative a acao para editar novamente.');
+            $this->redirect('/admin/acoes');
+        }
+
         $acao['estado'] = $acao['uf'] ?? '';
         $acao['municipio_codigo_ibge'] = $acao['codigo_ibge'] ?? '';
         $acao['municipio_nome'] = $acao['municipio_nome'] ?? '';
@@ -93,9 +118,23 @@ final class AcaoEmergencialController extends Controller
 
         $this->guardPost('admin.acoes.update.' . (int) $id, '/admin/acoes/' . (int) $id . '/editar');
 
+        if ((string) ($acao['status'] ?? '') !== 'aberta') {
+            Session::flash('warning', 'Acoes encerradas ou canceladas nao podem ser editadas. Ative a acao para editar novamente.');
+            $this->redirect('/admin/acoes');
+        }
+
         $data = $this->input();
         $validator = $this->validator($data);
         $municipioId = $this->resolveMunicipioId($data, $validator);
+        $statusMessage = $this->statusTransitionMessage(
+            (string) ($acao['status'] ?? ''),
+            (string) ($data['status'] ?? ''),
+            $this->acoes->countActiveRecords((int) $id)
+        );
+
+        if ($statusMessage !== null) {
+            $validator->add('status', $statusMessage);
+        }
 
         if ($validator->fails() || $municipioId === null) {
             $data['id'] = (int) $id;
@@ -152,11 +191,47 @@ final class AcaoEmergencialController extends Controller
         }
 
         $this->guardPost('admin.acoes.status.' . $id . '.' . $status, '/admin/acoes');
+        $statusMessage = $this->statusTransitionMessage(
+            (string) ($acao['status'] ?? ''),
+            $status,
+            $this->acoes->countActiveRecords($id)
+        );
+
+        if ($statusMessage !== null) {
+            Session::flash('warning', $statusMessage);
+            $this->redirect('/admin/acoes');
+        }
+
         $this->acoes->updateStatus($id, $status);
         (new AuditLogService())->record('alterou_status_acao_emergencial', 'acoes_emergenciais', $id, $status);
         Session::flash('success', $message);
 
         $this->redirect('/admin/acoes');
+    }
+
+    private function statusTransitionMessage(string $currentStatus, string $targetStatus, int $activeRecords): ?string
+    {
+        if ($targetStatus === $currentStatus) {
+            return null;
+        }
+
+        if ($targetStatus === 'aberta') {
+            return null;
+        }
+
+        if ($currentStatus !== 'aberta') {
+            return 'Acoes encerradas ou canceladas devem ser ativadas antes de mudar para outro status.';
+        }
+
+        if ($targetStatus === 'cancelada' && $activeRecords > 0) {
+            return 'Nao e possivel cancelar uma acao que ja possui registros. Use encerrar.';
+        }
+
+        if ($targetStatus === 'encerrada' && $activeRecords === 0) {
+            return 'Nao e possivel encerrar uma acao sem registros. Use cancelar.';
+        }
+
+        return null;
     }
 
     private function form(string $title, array $acao, array $errors, string $action): void
@@ -185,6 +260,55 @@ final class AcaoEmergencialController extends Controller
             'data_evento' => trim((string) ($_POST['data_evento'] ?? '')),
             'status' => trim((string) ($_POST['status'] ?? 'aberta')),
         ];
+    }
+
+    private function indexFilters(): array
+    {
+        $status = trim((string) ($_GET['status'] ?? ''));
+
+        if (!in_array($status, self::STATUS, true)) {
+            $status = '';
+        }
+
+        return [
+            'q' => mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 120),
+            'status' => $status,
+            'municipio_id' => $this->integerFilter($_GET['municipio_id'] ?? null),
+            'municipio_busca' => mb_substr(trim((string) ($_GET['municipio_busca'] ?? '')), 0, 120),
+            'tipo_evento' => mb_substr(trim((string) ($_GET['tipo_evento'] ?? '')), 0, 120),
+            'data_inicio' => $this->validDateFilter($_GET['data_inicio'] ?? null),
+            'data_fim' => $this->validDateFilter($_GET['data_fim'] ?? null),
+        ];
+    }
+
+    private function requestedPage(): int
+    {
+        $page = filter_var($_GET['pagina'] ?? 1, FILTER_VALIDATE_INT);
+
+        return is_int($page) && $page > 0 ? $page : 1;
+    }
+
+    private function integerFilter(mixed $value): string
+    {
+        $id = filter_var($value, FILTER_VALIDATE_INT);
+
+        return is_int($id) && $id > 0 ? (string) $id : '';
+    }
+
+    private function validDateFilter(mixed $value): string
+    {
+        $date = trim((string) $value);
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return '';
+        }
+
+        $parsed = \DateTimeImmutable::createFromFormat('Y-m-d', $date);
+        $errors = \DateTimeImmutable::getLastErrors();
+
+        return $parsed && ($errors === false || ((int) $errors['warning_count'] === 0 && (int) $errors['error_count'] === 0))
+            ? $date
+            : '';
     }
 
     private function validator(array $data): Validator
