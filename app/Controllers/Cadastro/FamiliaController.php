@@ -117,6 +117,11 @@ final class FamiliaController extends Controller
             $this->abort(404);
         }
 
+        $mimeType = (string) ($documento['mime_type'] ?? '');
+        if (!in_array($mimeType, ['image/jpeg', 'image/png', 'application/pdf'], true)) {
+            $this->abort(404);
+        }
+
         $relativePath = str_replace('\\', '/', (string) $documento['caminho_arquivo']);
         $baseDir = realpath(BASE_PATH . '/storage/private_uploads');
         $filePath = realpath(BASE_PATH . '/' . ltrim($relativePath, '/'));
@@ -130,7 +135,7 @@ final class FamiliaController extends Controller
 
         $filename = str_replace(['"', "\r", "\n"], '', basename((string) $documento['nome_original']));
 
-        header('Content-Type: ' . (string) $documento['mime_type']);
+        header('Content-Type: ' . $mimeType);
         header('Content-Length: ' . (string) filesize($filePath));
         header('Content-Disposition: inline; filename="' . $filename . '"');
         header('X-Content-Type-Options: nosniff');

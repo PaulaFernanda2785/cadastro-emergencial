@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cadastro-emergencial-v20260502-159';
+const CACHE_NAME = 'cadastro-emergencial-v20260502-178';
 const CORE_ASSETS = [
     './manifest.webmanifest',
     './assets/css/app.css',

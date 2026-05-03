@@ -1,5 +1,5 @@
 <section class="error-page">
-    <h1>Pagina nao encontrada</h1>
-    <p>A rota solicitada nao existe ou ainda nao foi implementada.</p>
+    <h1>Página não encontrada</h1>
+    <p>A rota solicitada não existe ou ainda não foi implementada.</p>
     <a class="secondary-link" href="<?= h(url('/dashboard')) ?>">Voltar ao painel</a>
 </section>

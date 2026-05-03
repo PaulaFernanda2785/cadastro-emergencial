@@ -80,7 +80,7 @@ final class RelatorioController extends Controller
         ], ';');
 
         foreach ($rows as $row) {
-            fputcsv($output, [
+            fputcsv($output, array_map(fn (mixed $value): string => $this->csvCell($value), [
                 $row['protocolo'] ?? '',
                 $row['municipio'] ?? '',
                 $row['uf'] ?? '',
@@ -96,10 +96,17 @@ final class RelatorioController extends Controller
                 $row['telefone'] ?? '',
                 $row['quantidade_integrantes'] ?? '',
                 $row['status_entrega'] ?? '',
-            ], ';');
+            ]), ';');
         }
 
         fclose($output);
+    }
+
+    private function csvCell(mixed $value): string
+    {
+        $text = (string) $value;
+
+        return $text !== '' && preg_match('/^[=+\-@\t\r\n]/', $text) === 1 ? "'" . $text : $text;
     }
 
     private function filters(): array

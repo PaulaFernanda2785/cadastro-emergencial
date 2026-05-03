@@ -29,7 +29,7 @@ final class UploadService
 
         $tmpPath = (string) ($file['tmp_name'] ?? '');
         if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
-            throw new RuntimeException('Upload invalido.');
+            throw new RuntimeException('Upload inválido.');
         }
 
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -39,28 +39,29 @@ final class UploadService
             : array_intersect_key(self::ALLOWED, array_flip($allowedMimeTypes));
 
         if (!array_key_exists($mimeType, $allowed)) {
-            throw new RuntimeException('Tipo de arquivo nao permitido.');
+            throw new RuntimeException('Tipo de arquivo não permitido.');
         }
 
         $extension = $allowed[$mimeType];
-        $baseDir = BASE_PATH . '/storage/private_uploads/' . trim($subdirectory, '/');
+        $subdirectory = $this->safeSubdirectory($subdirectory);
+        $baseDir = BASE_PATH . '/storage/private_uploads/' . $subdirectory;
 
         if (!is_dir($baseDir) && !mkdir($baseDir, 0750, true)) {
-            throw new RuntimeException('Nao foi possivel preparar o diretorio de upload.');
+            throw new RuntimeException('Não foi possível preparar o diretório de upload.');
         }
 
         $storedName = bin2hex(random_bytes(20)) . '.' . $extension;
         $destination = $baseDir . '/' . $storedName;
 
         if (!move_uploaded_file($tmpPath, $destination)) {
-            throw new RuntimeException('Nao foi possivel salvar o arquivo enviado.');
+            throw new RuntimeException('Não foi possível salvar o arquivo enviado.');
         }
 
         chmod($destination, 0640);
 
         return [
             'nome_original' => basename((string) ($file['name'] ?? 'arquivo')),
-            'caminho_arquivo' => 'storage/private_uploads/' . trim($subdirectory, '/') . '/' . $storedName,
+            'caminho_arquivo' => 'storage/private_uploads/' . $subdirectory . '/' . $storedName,
             'mime_type' => $mimeType,
             'extensao' => $extension,
             'tamanho_bytes' => $size,
@@ -93,5 +94,16 @@ final class UploadService
         }
 
         return $normalized;
+    }
+
+    private function safeSubdirectory(string $subdirectory): string
+    {
+        $subdirectory = trim(str_replace('\\', '/', $subdirectory), '/');
+
+        if ($subdirectory === '' || str_contains($subdirectory, '..') || !preg_match('#^[a-zA-Z0-9_-]+(?:/[a-zA-Z0-9_-]+)*$#', $subdirectory)) {
+            throw new RuntimeException('Diretório de upload inválido.');
+        }
+
+        return $subdirectory;
     }
 }

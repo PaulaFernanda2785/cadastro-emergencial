@@ -207,7 +207,8 @@ final class ResidenciaController extends Controller
 
         $documento = $this->documentos->findForResidencia((int) $documentoId, (int) $id);
 
-        if ($documento === null || !str_starts_with((string) $documento['mime_type'], 'image/')) {
+        $mimeType = (string) ($documento['mime_type'] ?? '');
+        if ($documento === null || !in_array($mimeType, ['image/jpeg', 'image/png'], true)) {
             $this->abort(404);
         }
 
@@ -224,7 +225,7 @@ final class ResidenciaController extends Controller
 
         $filename = str_replace(['"', "\r", "\n"], '', basename((string) $documento['nome_original']));
 
-        header('Content-Type: ' . (string) $documento['mime_type']);
+        header('Content-Type: ' . $mimeType);
         header('Content-Length: ' . (string) filesize($filePath));
         header('Content-Disposition: inline; filename="' . $filename . '"');
         header('X-Content-Type-Options: nosniff');

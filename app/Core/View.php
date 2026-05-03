@@ -13,7 +13,7 @@ final class View
         $viewPath = BASE_PATH . '/resources/views/' . str_replace('.', '/', $view) . '.php';
 
         if (!is_file($viewPath)) {
-            throw new RuntimeException("View nao encontrada: {$view}");
+            throw new RuntimeException("View não encontrada: {$view}");
         }
 
         extract($data, EXTR_SKIP);
@@ -30,7 +30,7 @@ final class View
         $layoutPath = BASE_PATH . '/resources/views/layouts/' . $layout . '.php';
 
         if (!is_file($layoutPath)) {
-            throw new RuntimeException("Layout nao encontrado: {$layout}");
+            throw new RuntimeException("Layout não encontrado: {$layout}");
         }
 
         require $layoutPath;

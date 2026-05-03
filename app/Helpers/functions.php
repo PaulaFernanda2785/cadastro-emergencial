@@ -33,6 +33,11 @@ function current_request_base_url(array $app): ?string
         return null;
     }
 
+    $host = normalized_request_host((string) $_SERVER['HTTP_HOST']);
+    if ($host === null) {
+        return null;
+    }
+
     $scheme = app_is_secure_request() ? 'https' : 'http';
     $scriptDir = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
 
@@ -40,7 +45,26 @@ function current_request_base_url(array $app): ?string
         $scriptDir = '';
     }
 
-    return $scheme . '://' . $_SERVER['HTTP_HOST'] . rtrim($scriptDir, '/');
+    return $scheme . '://' . $host . rtrim($scriptDir, '/');
+}
+
+function normalized_request_host(string $host): ?string
+{
+    $host = trim($host);
+
+    if ($host === '' || strlen($host) > 255 || preg_match('/[\s\/\\\\@"\'<>]/', $host)) {
+        return null;
+    }
+
+    if (!preg_match('/^(?:localhost|[a-z0-9.-]+|\[[0-9a-f:.]+\])(?::([0-9]{1,5}))?$/i', $host, $matches)) {
+        return null;
+    }
+
+    if (isset($matches[1]) && ((int) $matches[1] < 1 || (int) $matches[1] > 65535)) {
+        return null;
+    }
+
+    return strtolower($host);
 }
 
 function app_is_secure_request(): bool
@@ -110,7 +134,7 @@ function flash(string $key, mixed $default = null): mixed
 function residencia_imovel_options(): array
 {
     return [
-        'proprio' => 'Proprio',
+        'proprio' => 'Próprio',
         'alugado' => 'Alugado',
         'cedido' => 'Cedido',
     ];
@@ -121,7 +145,7 @@ function residencia_condicao_options(): array
     return [
         'perda_total' => 'Perda total',
         'perda_parcial' => 'Perda parcial',
-        'nao_atingida' => 'Nao atingida',
+        'nao_atingida' => 'Não atingida',
     ];
 }
 
@@ -144,8 +168,8 @@ function residencia_condicao_label(mixed $value): string
 function familia_renda_label(mixed $value): string
 {
     $options = [
-        '0_3_salarios' => '0 a 3 salarios',
-        'acima_3_salarios' => 'Acima de 3 salarios',
+        '0_3_salarios' => '0 a 3 salários',
+        'acima_3_salarios' => 'Acima de 3 salários',
     ];
     $key = (string) $value;
 
@@ -158,7 +182,7 @@ function familia_situacao_label(mixed $value): string
         'desabrigado' => 'Desabrigado',
         'desalojado' => 'Desalojado',
         'aluguel_social' => 'Aluguel social',
-        'permanece_residencia' => 'Permanece na residencia',
+        'permanece_residencia' => 'Permanece na residência',
     ];
     $key = (string) $value;
 

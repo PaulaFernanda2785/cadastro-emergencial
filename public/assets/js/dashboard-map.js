@@ -22,6 +22,20 @@
         });
     }
 
+    function safeHref(value) {
+        try {
+            var parsed = new URL(value || '#', window.location.origin);
+
+            if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+                return parsed.href;
+            }
+        } catch (error) {
+            return '#';
+        }
+
+        return '#';
+    }
+
     function readPoints(element) {
         try {
             return JSON.parse(element.dataset.mapPoints || '[]').map(function (point) {
@@ -56,7 +70,7 @@
                     '<div><dt>Famílias</dt><dd>' + families + '</dd></div>' +
                     '<div><dt>Atendidas</dt><dd>' + delivered + '</dd></div>' +
                 '</dl>' +
-                '<a href="' + escapeHtml(point.url || '#') + '">Abrir residência</a>' +
+                '<a href="' + escapeHtml(safeHref(point.url)) + '">Abrir residência</a>' +
             '</article>';
     }
 
@@ -76,7 +90,7 @@
                 '<div><dt>Coordenadas</dt><dd>' + point.latitude.toFixed(6) + ', ' + point.longitude.toFixed(6) + '</dd></div>' +
                 '<div><dt>Ação</dt><dd>' + escapeHtml(point.acao || '-') + '</dd></div>' +
             '</dl>' +
-            '<a class="primary-link-button" href="' + escapeHtml(point.url || '#') + '">Abrir residência</a>';
+            '<a class="primary-link-button" href="' + escapeHtml(safeHref(point.url)) + '">Abrir residência</a>';
     }
 
     function buildTileLayers(L) {

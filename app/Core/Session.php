@@ -14,12 +14,16 @@ final class Session
 
         $config = require BASE_PATH . '/config/security.php';
         $isHttps = app_is_secure_request();
+        $sameSite = self::sameSite((string) ($config['session_same_site'] ?? 'Lax'));
+        if ($sameSite === 'None' && !$isHttps) {
+            $sameSite = 'Lax';
+        }
 
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
         ini_set('session.cookie_httponly', '1');
         ini_set('session.cookie_secure', $isHttps ? '1' : '0');
-        ini_set('session.cookie_samesite', $config['session_same_site']);
+        ini_set('session.cookie_samesite', $sameSite);
 
         $savePath = BASE_PATH . '/storage/cache';
         if (is_dir($savePath) && is_writable($savePath)) {
@@ -33,7 +37,7 @@ final class Session
             'domain' => '',
             'secure' => $isHttps,
             'httponly' => true,
-            'samesite' => (string) $config['session_same_site'],
+            'samesite' => $sameSite,
         ]);
         session_start();
     }
@@ -82,14 +86,24 @@ final class Session
             setcookie(
                 session_name(),
                 '',
-                time() - 42000,
-                $params['path'],
-                $params['domain'],
-                (bool) $params['secure'],
-                (bool) $params['httponly']
+                [
+                    'expires' => time() - 42000,
+                    'path' => (string) ($params['path'] ?? '/'),
+                    'domain' => (string) ($params['domain'] ?? ''),
+                    'secure' => (bool) ($params['secure'] ?? false),
+                    'httponly' => (bool) ($params['httponly'] ?? true),
+                    'samesite' => self::sameSite((string) ($params['samesite'] ?? 'Lax')),
+                ]
             );
         }
 
         session_destroy();
+    }
+
+    private static function sameSite(string $sameSite): string
+    {
+        $sameSite = ucfirst(strtolower($sameSite));
+
+        return in_array($sameSite, ['Lax', 'Strict', 'None'], true) ? $sameSite : 'Lax';
     }
 }

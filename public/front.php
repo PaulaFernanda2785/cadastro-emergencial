@@ -39,6 +39,7 @@ use App\Controllers\PublicAcaoController;
 use App\Core\Env;
 use App\Core\Router;
 use App\Core\Session;
+use App\Core\View;
 
 Env::load(BASE_PATH . '/.env');
 
@@ -128,4 +129,16 @@ $router->get('/acao/{token}/residencias/novo', [ResidenciaController::class, 'cr
 $router->post('/acao/{token}/residencias', [ResidenciaController::class, 'storeFromAction'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/acao/{token}', [PublicAcaoController::class, 'show']);
 
-$router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/');
+try {
+    $router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/');
+} catch (Throwable $exception) {
+    $appConfig = require BASE_PATH . '/config/app.php';
+
+    if (!empty($appConfig['debug'])) {
+        throw $exception;
+    }
+
+    error_log($exception->getMessage());
+    http_response_code(500);
+    View::render('errors.500', ['title' => 'Erro interno']);
+}
