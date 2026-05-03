@@ -207,7 +207,7 @@ $menuItems = [
                 <?php if ($signatureRequesterNoticeCount > 0): ?>
                     <div class="alert alert-success signature-notice-alert" role="status">
                         Há atualização em assinatura(s) solicitada(s) por você. Verifique se a impressão do documento foi liberada.
-                        <a class="signature-alert-action" href="<?= h(url('/assinaturas')) ?>">Ver atualizacoes</a>
+                        <a class="signature-alert-action" href="<?= h(url('/assinaturas')) ?>">Ver atualizações</a>
                     </div>
                 <?php endif; ?>
 
@@ -222,8 +222,8 @@ $menuItems = [
             </main>
 
             <footer class="app-footer">
-                <span><?= h($app['name']) ?> - versao 1.0.0 producao</span>
-                <span>2026 todos os direitos reservados.</span>
+                <span><?= h($app['name']) ?> - versão 1.0.0 produção</span>
+                <span>2026. Todos os direitos reservados.</span>
                 <span>Desenvolvido pela Divisão de Gestão de Risco - DGR/CEDEC-PA</span>
             </footer>
         </div>

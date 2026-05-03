@@ -34,6 +34,7 @@ public/uploads/
 public/assets/uploads/
 
 # Backups e dumps de banco
+deploy/
 *.sql.gz
 *.sql.zip
 *.dump
