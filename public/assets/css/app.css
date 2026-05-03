@@ -4609,7 +4609,8 @@ button:disabled,
 .family-edit-form select[name="responsavel_sexo"],
 .family-edit-form select[name="representante_sexo"],
 .family-edit-form select[name="renda_familiar"],
-.family-edit-form select[name="situacao_familia"] {
+.family-edit-form select[name="situacao_familia"],
+.family-edit-form .birth-date-picker select {
     appearance: none;
     min-height: 48px;
     border-color: #cbd8e3;
@@ -4636,6 +4637,7 @@ button:disabled,
 .family-edit-form select[name="representante_sexo"]:hover,
 .family-edit-form select[name="renda_familiar"]:hover,
 .family-edit-form select[name="situacao_familia"]:hover,
+.family-edit-form .birth-date-picker select:hover,
 .family-edit-form textarea[name="perdas_bens_moveis"]:hover,
 .family-edit-form textarea[name="conclusao_observacoes"]:hover,
 .completion-check:hover {
@@ -4918,6 +4920,21 @@ button:disabled,
     appearance: none;
     -webkit-appearance: none;
     box-sizing: border-box;
+}
+
+.birth-date-picker {
+    min-width: 0;
+}
+
+.birth-date-select-grid {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(72px, 0.7fr) minmax(76px, 0.75fr) minmax(92px, 1fr);
+    gap: 8px;
+}
+
+.birth-date-picker select {
+    min-width: 0;
 }
 
 .family-doc-info {
@@ -10634,6 +10651,10 @@ button:disabled,
     .date-field input[type="date"] {
         width: 100%;
         max-width: 100%;
+    }
+
+    .birth-date-select-grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .action-form-actions {

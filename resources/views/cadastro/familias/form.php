@@ -14,6 +14,58 @@ $familiaId = (int) ($familia['id'] ?? 0);
 $optionSelected = static function (array $familia, string $field, string $value): string {
     return (string) ($familia[$field] ?? '') === $value ? 'selected' : '';
 };
+
+$birthDateParts = static function (mixed $value): array {
+    $value = (string) $value;
+
+    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $matches) !== 1) {
+        return ['year' => '', 'month' => '', 'day' => ''];
+    }
+
+    return [
+        'year' => $matches[1],
+        'month' => $matches[2],
+        'day' => $matches[3],
+    ];
+};
+
+$birthDateField = static function (
+    string $name,
+    mixed $value,
+    bool $representative = false
+) use ($birthDateParts): void {
+    $parts = $birthDateParts($value);
+    $currentYear = (int) date('Y');
+    $minYear = $currentYear - 120;
+    $extraAttributes = $representative ? ' data-representative-input' : '';
+    ?>
+    <div class="birth-date-picker" data-birth-date-picker>
+        <input type="hidden" name="<?= h($name) ?>" value="<?= h((string) $value) ?>" data-birth-date-value<?= $extraAttributes ?>>
+        <div class="birth-date-select-grid">
+            <select aria-label="Dia" data-birth-date-day required<?= $extraAttributes ?>>
+                <option value="">Dia</option>
+                <?php for ($day = 1; $day <= 31; $day++): ?>
+                    <?php $dayValue = str_pad((string) $day, 2, '0', STR_PAD_LEFT); ?>
+                    <option value="<?= h($dayValue) ?>" <?= $parts['day'] === $dayValue ? 'selected' : '' ?>><?= h($dayValue) ?></option>
+                <?php endfor; ?>
+            </select>
+            <select aria-label="Mês" data-birth-date-month required<?= $extraAttributes ?>>
+                <option value="">Mês</option>
+                <?php for ($month = 1; $month <= 12; $month++): ?>
+                    <?php $monthValue = str_pad((string) $month, 2, '0', STR_PAD_LEFT); ?>
+                    <option value="<?= h($monthValue) ?>" <?= $parts['month'] === $monthValue ? 'selected' : '' ?>><?= h($monthValue) ?></option>
+                <?php endfor; ?>
+            </select>
+            <select aria-label="Ano" data-birth-date-year required<?= $extraAttributes ?>>
+                <option value="">Ano</option>
+                <?php for ($year = $currentYear; $year >= $minYear; $year--): ?>
+                    <option value="<?= h((string) $year) ?>" <?= $parts['year'] === (string) $year ? 'selected' : '' ?>><?= h((string) $year) ?></option>
+                <?php endfor; ?>
+            </select>
+        </div>
+    </div>
+    <?php
+};
 ?>
 
 <section class="records-page residence-edit-page family-edit-page">
@@ -153,7 +205,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
                 </label>
                 <label class="field date-field">
                     <span>Data de nascimento</span>
-                    <input type="date" name="data_nascimento" value="<?= h($familia['data_nascimento'] ?? '') ?>" required>
+                    <?php $birthDateField('data_nascimento', $familia['data_nascimento'] ?? ''); ?>
                     <?php if (!empty($errors['data_nascimento'])): ?>
                         <small class="field-error"><?= h($errors['data_nascimento'][0]) ?></small>
                     <?php endif; ?>
@@ -343,7 +395,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
                     </label>
                     <label class="field date-field">
                         <span>Data de nascimento</span>
-                        <input type="date" name="representante_data_nascimento" value="<?= h($familia['representante_data_nascimento'] ?? '') ?>" required data-representative-input>
+                        <?php $birthDateField('representante_data_nascimento', $familia['representante_data_nascimento'] ?? '', true); ?>
                         <?php if (!empty($errors['representante_data_nascimento'])): ?>
                             <small class="field-error"><?= h($errors['representante_data_nascimento'][0]) ?></small>
                         <?php endif; ?>

@@ -109,7 +109,7 @@ $filterLabels = [
     'acao_busca' => 'Ação',
     'localidade_busca' => 'Localidade/bairro',
     'aptidao' => 'Situação',
-    'status_entrega' => 'Status da entrega',
+    'status_entrega' => 'Entrega Recomeçar',
     'data_inicio' => 'Início',
     'data_fim' => 'Fim',
 ];
@@ -131,7 +131,7 @@ $renderFilterFields = static function (array $filters): void {
 };
 
 $deliveryStatusLabel = static function (mixed $status): string {
-    return (string) $status === 'entregue' ? 'Com entrega' : 'Sem entrega';
+    return (string) $status === 'entregue' ? 'Recomeçar entregue' : 'Sem Recomeçar';
 };
 
 $municipioLabel = $valueOrDash($documentContext['municipios'] ?? '');
@@ -242,11 +242,10 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                 </label>
 
                 <label class="field styled-field recomecar-filter-field recomecar-filter-field-compact">
-                    <span>Status da entrega</span>
+                    <span>Entrega do Recomeçar</span>
                     <select name="status_entrega">
                         <option value="" <?= ($filters['status_entrega'] ?? '') === '' ? 'selected' : '' ?>>Todos</option>
-                        <option value="entregue" <?= ($filters['status_entrega'] ?? '') === 'entregue' ? 'selected' : '' ?>>Com entrega</option>
-                        <option value="nao_entregue" <?= ($filters['status_entrega'] ?? '') === 'nao_entregue' ? 'selected' : '' ?>>Sem entrega</option>
+                        <option value="entregue" <?= ($filters['status_entrega'] ?? '') === 'entregue' ? 'selected' : '' ?>>Recomeçar entregue</option>
                     </select>
                 </label>
             </div>

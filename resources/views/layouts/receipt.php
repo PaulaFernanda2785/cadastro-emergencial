@@ -14,6 +14,8 @@ $assetVersion = '20260502-149';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
     <title><?= h($pageTitle) ?> | <?= h($app['name']) ?></title>
+    <link rel="icon" href="<?= h(asset('images/logo.cbmpa.ico') . '?v=' . $assetVersion) ?>" type="image/x-icon">
+    <link rel="shortcut icon" href="<?= h(asset('images/logo.cbmpa.ico') . '?v=' . $assetVersion) ?>" type="image/x-icon">
     <link rel="stylesheet" href="<?= h(asset('css/app.css') . '?v=' . $assetVersion) ?>">
     <script src="<?= h(asset('js/qrcode.bundle.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/family-receipt.js') . '?v=' . $assetVersion) ?>" defer></script>

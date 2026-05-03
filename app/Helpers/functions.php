@@ -14,7 +14,7 @@ function h(mixed $value): string
 function url(string $path = '/'): string
 {
     $app = require BASE_PATH . '/config/app.php';
-    $baseUrl = current_request_base_url($app) ?? rtrim((string) $app['url'], '/');
+    $baseUrl = current_request_base_url($app) ?? configured_app_url($app, 'url');
 
     return $baseUrl . '/' . ltrim($path, '/');
 }
@@ -22,7 +22,7 @@ function url(string $path = '/'): string
 function public_url(string $path = '/'): string
 {
     $app = require BASE_PATH . '/config/app.php';
-    $baseUrl = rtrim((string) ($app['public_url'] ?? $app['url']), '/');
+    $baseUrl = configured_app_url($app, 'public_url');
 
     return $baseUrl . '/' . ltrim($path, '/');
 }
@@ -48,6 +48,43 @@ function current_request_base_url(array $app): ?string
     return $scheme . '://' . $host . rtrim($scriptDir, '/');
 }
 
+function configured_app_url(array $app, string $key = 'url'): string
+{
+    $baseUrl = (string) ($app[$key] ?? $app['url'] ?? 'http://localhost');
+    $baseUrl = rtrim($baseUrl, '/');
+
+    if (should_force_https($app) && str_starts_with(strtolower($baseUrl), 'http://')) {
+        return 'https://' . substr($baseUrl, 7);
+    }
+
+    return $baseUrl;
+}
+
+function should_force_https(array $app): bool
+{
+    return ($app['env'] ?? null) === 'production' || !empty($app['force_https']);
+}
+
+function enforce_https_request(array $app): void
+{
+    if (headers_sent() || app_is_secure_request() || !should_force_https($app)) {
+        return;
+    }
+
+    $host = normalized_request_host((string) ($_SERVER['HTTP_HOST'] ?? ''));
+    if ($host === null) {
+        return;
+    }
+
+    $requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '/');
+    if ($requestUri === '' || preg_match('/[\r\n]/', $requestUri)) {
+        $requestUri = '/';
+    }
+
+    header('Location: https://' . $host . $requestUri, true, 308);
+    exit;
+}
+
 function normalized_request_host(string $host): ?string
 {
     $host = trim($host);
@@ -70,12 +107,20 @@ function normalized_request_host(string $host): ?string
 function app_is_secure_request(): bool
 {
     $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
+    $requestScheme = strtolower((string) ($_SERVER['REQUEST_SCHEME'] ?? ''));
     $forwardedProto = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    $forwardedSsl = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_SSL'] ?? ''));
+    $forwardedPort = (string) ($_SERVER['HTTP_X_FORWARDED_PORT'] ?? '');
+    $cloudflareVisitor = strtolower((string) ($_SERVER['HTTP_CF_VISITOR'] ?? ''));
     $serverPort = (string) ($_SERVER['SERVER_PORT'] ?? '');
 
     return $https === 'on'
         || $https === '1'
+        || $requestScheme === 'https'
         || $forwardedProto === 'https'
+        || $forwardedSsl === 'on'
+        || $forwardedPort === '443'
+        || str_contains($cloudflareVisitor, '"scheme":"https"')
         || $serverPort === '443';
 }
 
@@ -90,7 +135,6 @@ function send_security_headers(): void
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()');
     header('Feature-Policy: geolocation \'self\'; camera \'self\'; microphone \'none\'; payment \'none\'; usb \'none\'');
-    header('X-Robots-Tag: noindex, nofollow');
 
     if (app_is_secure_request()) {
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains');

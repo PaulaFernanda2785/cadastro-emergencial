@@ -191,11 +191,15 @@
         }
 
         function insecureLocalMessage() {
-            return 'Nao foi possivel obter a localizacao atual do dispositivo.';
+            return 'Abra o QR Code usando HTTPS. O navegador bloqueia localizacao em acesso sem certificado seguro.';
+        }
+
+        function isInsecureRemoteContext() {
+            return !window.isSecureContext && !/^(localhost|127\.0\.0\.1|::1|\[::1\])$/.test(window.location.hostname);
         }
 
         function geolocationErrorMessage(error) {
-            if (!window.isSecureContext && !/^(localhost|127\.0\.0\.1|::1|\[::1\])$/.test(window.location.hostname)) {
+            if (isInsecureRemoteContext()) {
                 return insecureLocalMessage();
             }
 
@@ -209,6 +213,14 @@
                 default:
                     return 'Nao foi possivel obter a localizacao atual.';
             }
+        }
+
+        if (isInsecureRemoteContext()) {
+            button.disabled = true;
+            if (status) {
+                status.textContent = insecureLocalMessage();
+            }
+            return;
         }
 
         if (!('geolocation' in navigator)) {

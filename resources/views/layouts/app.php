@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260502-178';
+$assetVersion = '20260503-181';
 $sessionTimeoutSeconds = 1800;
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
@@ -56,7 +56,6 @@ $menuItems = [
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="noindex,nofollow">
     <meta name="theme-color" content="#155e75">
     <title><?= h($pageTitle) ?> | <?= h($app['name']) ?></title>
     <script>
@@ -71,6 +70,8 @@ $menuItems = [
             }
         })();
     </script>
+    <link rel="icon" href="<?= h(asset('images/logo.cbmpa.ico') . '?v=' . $assetVersion) ?>" type="image/x-icon">
+    <link rel="shortcut icon" href="<?= h(asset('images/logo.cbmpa.ico') . '?v=' . $assetVersion) ?>" type="image/x-icon">
     <link rel="manifest" href="<?= h(url('/manifest.webmanifest') . '?v=' . $assetVersion) ?>">
     <link rel="apple-touch-icon" href="<?= h(asset('images/logo-cadastro-emergencial-app.png')) ?>">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">

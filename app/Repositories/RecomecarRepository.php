@@ -80,20 +80,26 @@ final class RecomecarRepository
                     (
                         SELECT COUNT(*)
                         FROM entregas_ajuda e
+                        INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
                         WHERE e.familia_id = f.id
                           AND e.deleted_at IS NULL
+                          AND " . $this->recomecarTypeSql('t') . "
                     ) AS total_entregas,
                     (
                         SELECT MAX(e.data_entrega)
                         FROM entregas_ajuda e
+                        INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
                         WHERE e.familia_id = f.id
                           AND e.deleted_at IS NULL
+                          AND " . $this->recomecarTypeSql('t') . "
                     ) AS ultima_entrega,
                     CASE WHEN EXISTS (
                         SELECT 1
                         FROM entregas_ajuda e
+                        INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
                         WHERE e.familia_id = f.id
                           AND e.deleted_at IS NULL
+                          AND " . $this->recomecarTypeSql('t') . "
                     ) THEN 'entregue' ELSE 'nao_entregue' END AS status_entrega,
                     CASE WHEN " . $this->eligibleSql() . " THEN 'apta' ELSE 'inapta' END AS aptidao,
                     CASE
@@ -150,6 +156,7 @@ final class RecomecarRepository
             'f.deleted_at IS NULL',
             'r.deleted_at IS NULL',
             'a.deleted_at IS NULL',
+            $this->recomecarDeliveryExistsSql(),
         ];
         $params = [];
 
@@ -197,20 +204,8 @@ final class RecomecarRepository
             $params['data_fim'] = $filters['data_fim'] . ' 23:59:59';
         }
 
-        if (($filters['status_entrega'] ?? '') === 'entregue') {
-            $conditions[] = 'EXISTS (
-                SELECT 1
-                FROM entregas_ajuda e_status
-                WHERE e_status.familia_id = f.id
-                  AND e_status.deleted_at IS NULL
-            )';
-        } elseif (($filters['status_entrega'] ?? '') === 'nao_entregue') {
-            $conditions[] = 'NOT EXISTS (
-                SELECT 1
-                FROM entregas_ajuda e_status
-                WHERE e_status.familia_id = f.id
-                  AND e_status.deleted_at IS NULL
-            )';
+        if (($filters['status_entrega'] ?? '') === 'nao_entregue') {
+            $conditions[] = 'NOT (' . $this->recomecarDeliveryExistsSql() . ')';
         }
 
         if ($applyEligibility) {
@@ -228,6 +223,23 @@ final class RecomecarRepository
     {
         return "(r.condicao_residencia IS NULL OR r.condicao_residencia <> 'nao_atingida')
             AND (f.renda_familiar IS NULL OR f.renda_familiar <> 'acima_3_salarios')";
+    }
+
+    private function recomecarDeliveryExistsSql(): string
+    {
+        return 'EXISTS (
+            SELECT 1
+            FROM entregas_ajuda e_recomecar
+            INNER JOIN tipos_ajuda t_recomecar ON t_recomecar.id = e_recomecar.tipo_ajuda_id
+            WHERE e_recomecar.familia_id = f.id
+              AND e_recomecar.deleted_at IS NULL
+              AND ' . $this->recomecarTypeSql('t_recomecar') . '
+        )';
+    }
+
+    private function recomecarTypeSql(string $alias): string
+    {
+        return '(' . $alias . ".nome LIKE '%Programa%Recome%' OR " . $alias . ".nome LIKE 'Recome%')";
     }
 
     private function bind(\PDOStatement $stmt, array $params): void

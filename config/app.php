@@ -8,6 +8,7 @@ return [
     'name' => Env::get('APP_NAME', 'Cadastro Emergencial'),
     'env' => Env::get('APP_ENV', 'local'),
     'debug' => filter_var(Env::get('APP_DEBUG', false), FILTER_VALIDATE_BOOL),
+    'force_https' => filter_var(Env::get('APP_FORCE_HTTPS', false), FILTER_VALIDATE_BOOL),
     'url' => Env::get('APP_URL', 'http://localhost/cadastro-emergencial/public'),
     'public_url' => Env::get('APP_PUBLIC_URL', Env::get('APP_URL', 'http://localhost/cadastro-emergencial/public')),
     'timezone' => Env::get('APP_TIMEZONE', 'America/Belem'),

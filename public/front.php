@@ -21,8 +21,6 @@ spl_autoload_register(static function (string $class): void {
 
 require BASE_PATH . '/app/Helpers/functions.php';
 
-send_security_headers();
-
 use App\Controllers\AuthController;
 use App\Controllers\AssinaturaController;
 use App\Controllers\DashboardController;
@@ -44,6 +42,8 @@ use App\Core\View;
 Env::load(BASE_PATH . '/.env');
 
 $app = require BASE_PATH . '/config/app.php';
+enforce_https_request($app);
+send_security_headers();
 date_default_timezone_set((string) $app['timezone']);
 
 Session::start();

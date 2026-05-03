@@ -333,6 +333,14 @@
             form.dataset.photoLocationSource = '';
         }
 
+        function isInsecureRemoteContext() {
+            return !window.isSecureContext && !/^(localhost|127\.0\.0\.1|::1|\[::1\])$/.test(window.location.hostname);
+        }
+
+        function secureLocationRequiredMessage() {
+            return 'Abra o QR Code usando HTTPS. O navegador bloqueia localizacao e a foto nao recebe coordenadas em acesso sem certificado seguro.';
+        }
+
         function requestCurrentPosition() {
             return new Promise(function (resolve) {
                 var resolved = false;
@@ -355,6 +363,12 @@
                         latitude: position.coords.latitude,
                         longitude: position.coords.longitude
                     };
+                }
+
+                if (isInsecureRemoteContext()) {
+                    setStatus(secureLocationRequiredMessage());
+                    finish(null);
+                    return;
                 }
 
                 function readPosition(options, onError) {
@@ -1722,7 +1736,9 @@
             return ensureLocation.then(function (foundLocation) {
                 if (foundLocation !== true && !hasMainPhotoCoordinates()) {
                     form.dataset.photoProcessed = '';
-                    setStatus('Não foi possível obter localização para esta foto. Capture a localização atual antes de salvar.');
+                    setStatus(isInsecureRemoteContext()
+                        ? secureLocationRequiredMessage()
+                        : 'Não foi possível obter localização para esta foto. Capture a localização atual antes de salvar.');
                     return false;
                 }
 

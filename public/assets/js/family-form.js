@@ -87,6 +87,43 @@
         });
     }
 
+    function setupBirthDatePickers(form) {
+        form.querySelectorAll('[data-birth-date-picker]').forEach(function (picker) {
+            var hidden = picker.querySelector('[data-birth-date-value]');
+            var day = picker.querySelector('[data-birth-date-day]');
+            var month = picker.querySelector('[data-birth-date-month]');
+            var year = picker.querySelector('[data-birth-date-year]');
+
+            if (!hidden || !day || !month || !year) {
+                return;
+            }
+
+            function selectedDateIsValid() {
+                var date = new Date(Number(year.value), Number(month.value) - 1, Number(day.value));
+
+                return date.getFullYear() === Number(year.value)
+                    && date.getMonth() === Number(month.value) - 1
+                    && date.getDate() === Number(day.value);
+            }
+
+            function syncDate() {
+                var complete = day.value !== '' && month.value !== '' && year.value !== '';
+                var valid = complete && selectedDateIsValid();
+                var message = complete && !valid ? 'Informe uma data válida.' : '';
+
+                hidden.value = valid ? year.value + '-' + month.value + '-' + day.value : '';
+                [day, month, year].forEach(function (select) {
+                    select.setCustomValidity(message);
+                });
+            }
+
+            day.addEventListener('change', syncDate);
+            month.addEventListener('change', syncDate);
+            year.addEventListener('change', syncDate);
+            syncDate();
+        });
+    }
+
     function setupDocumentUpload(form, wrapper) {
 
         if (!wrapper) {
@@ -369,6 +406,7 @@
         setupRepresentative(form);
         setupBenefit(form);
         setupQuantityStepper(form);
+        setupBirthDatePickers(form);
         setupDocumentUploads(form);
         setupExistingDocuments(form);
     });

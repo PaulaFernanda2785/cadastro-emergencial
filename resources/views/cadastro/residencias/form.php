@@ -109,7 +109,7 @@ $existingMainPhoto = $existingMainPhotos[0] ?? null;
                     </div>
                 <?php endif; ?>
 
-                <input class="file-input-native" id="foto-georreferenciada" type="file" name="foto_georreferenciada" accept="image/jpeg,image/png,image/*" data-photo-input>
+                <input class="file-input-native" id="foto-georreferenciada" type="file" name="foto_georreferenciada" accept="image/jpeg,image/png,image/*" capture="environment" data-photo-input>
                 <label class="photo-dropzone" for="foto-georreferenciada" data-photo-dropzone tabindex="0">
                     <strong data-photo-title><?= $existingMainPhoto !== null ? 'Substituir foto principal' : 'Selecionar foto' ?></strong>
                     <span data-photo-description>Arraste, cole, busque nos arquivos ou tire uma foto pela câmera do celular.</span>
