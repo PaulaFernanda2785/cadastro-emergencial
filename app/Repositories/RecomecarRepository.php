@@ -97,8 +97,8 @@ final class RecomecarRepository
                     ) THEN 'entregue' ELSE 'nao_entregue' END AS status_entrega,
                     CASE WHEN " . $this->eligibleSql() . " THEN 'apta' ELSE 'inapta' END AS aptidao,
                     CASE
-                        WHEN r.condicao_residencia = 'nao_atingida' THEN 'Imovel nao atingido'
-                        WHEN f.renda_familiar = 'acima_3_salarios' THEN 'Renda familiar acima de 3 salarios'
+                        WHEN r.condicao_residencia = 'nao_atingida' THEN 'Imóvel não atingido'
+                        WHEN f.renda_familiar = 'acima_3_salarios' THEN 'Renda familiar acima de 3 salários'
                         ELSE ''
                     END AS motivo_inaptidao
              FROM familias f

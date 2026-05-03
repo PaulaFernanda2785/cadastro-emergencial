@@ -798,14 +798,14 @@ final class CoassinaturaRepository
             'entidade_id' => (int) ($log['entidade_id'] ?? 0),
             'titulo' => $documentType === 'dti'
                 ? 'DTI ' . (string) ($decoded['protocolo'] ?? '')
-                : 'Prestacao de contas de ajuda humanitaria',
+                : 'Prestação de contas de ajuda humanitária',
             'descricao' => $documentType === 'dti'
-                ? 'Documento DTI assinado pelo usuario principal.'
-                : 'Documento de prestacao de contas assinado pelo usuario principal.',
+                ? 'Documento DTI assinado pelo usuário principal.'
+                : 'Documento de prestação de contas assinado pelo usuário principal.',
             'url_documento' => $url,
             'solicitante_usuario_id' => (int) $log['usuario_id'],
             'payload' => [
-                'documento' => $decoded['documento'] ?? ($documentType === 'dti' ? 'DTI' : 'Prestacao de contas'),
+                'documento' => $decoded['documento'] ?? ($documentType === 'dti' ? 'DTI' : 'Prestação de contas'),
                 'document_key' => $decoded['document_key'] ?? $documentKey,
                 'protocolo' => $decoded['protocolo'] ?? '',
                 'hash' => $decoded['hash'] ?? '',

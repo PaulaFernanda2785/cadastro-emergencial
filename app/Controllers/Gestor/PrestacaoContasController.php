@@ -46,7 +46,7 @@ final class PrestacaoContasController extends Controller
         $this->guardRestrictedProfileDocumentAccess($hasAppliedFilters, $showSignature, $documentIdentity);
 
         $this->view('gestor.prestacao_contas.index', [
-            'title' => 'Prestacao de contas',
+            'title' => 'Prestação de contas',
             'filters' => $filters,
             'acoes' => $this->acoes->all(),
             'tipos' => $this->tipos->all(),
@@ -76,7 +76,7 @@ final class PrestacaoContasController extends Controller
         $filters = $this->filtersFromArray($_POST);
 
         if (!$this->hasAppliedFilters($filters)) {
-            Session::flash('warning', 'Aplique pelo menos um filtro antes de assinar a prestacao de contas.');
+            Session::flash('warning', 'Aplique pelo menos um filtro antes de assinar a prestação de contas.');
             $this->redirect('/gestor/prestacao-contas');
         }
 
@@ -103,8 +103,8 @@ final class PrestacaoContasController extends Controller
         Session::flash(
             'success',
             empty($signature['coassinantes_solicitados'] ?? [])
-                ? 'Prestacao de contas assinada digitalmente. A impressao esta liberada.'
-                : 'Prestacao de contas assinada pelo usuario principal. A impressao sera liberada apos autorizacao dos responsaveis pela conferencia.'
+                ? 'Prestação de contas assinada digitalmente. A impressão está liberada.'
+                : 'Prestação de contas assinada pelo usuário principal. A impressão será liberada após autorização dos responsáveis pela conferência.'
         );
         $this->redirect($this->filterUrl($filters, true));
     }
@@ -124,7 +124,7 @@ final class PrestacaoContasController extends Controller
         $signature = $this->latestSignature($identity);
 
         if ($signature === null) {
-            Session::flash('warning', 'Esta prestacao de contas nao possui assinatura ativa para remover.');
+            Session::flash('warning', 'Esta prestação de contas não possui assinatura ativa para remover.');
             $this->redirect($this->filterUrl($filters));
         }
 
@@ -137,7 +137,7 @@ final class PrestacaoContasController extends Controller
         $removeCoSignatureIds = $this->postedCoSignatureRequestIds();
 
         if (!$removePrincipal && $removeCoSignatureIds === []) {
-            Session::flash('warning', 'Selecione a assinatura principal ou pelo menos um responsavel pela conferencia para remover.');
+            Session::flash('warning', 'Selecione a assinatura principal ou pelo menos um responsável pela conferência para remover.');
             $this->redirect($this->filterUrl($filters, true));
         }
 
@@ -166,7 +166,7 @@ final class PrestacaoContasController extends Controller
                 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
             );
 
-            Session::flash('success', 'Responsavel(is) pela conferencia removido(s). A assinatura principal foi mantida.');
+            Session::flash('success', 'Responsável(is) pela conferência removido(s). A assinatura principal foi mantida.');
             $this->redirect($this->filterUrl($filters, true));
         }
 
@@ -184,7 +184,7 @@ final class PrestacaoContasController extends Controller
 
         (new CoassinaturaRepository())->cancelDocument('prestacao_contas', (string) $identity['document_key']);
 
-        Session::flash('success', 'Assinatura da prestacao de contas removida. O documento pode ser assinado novamente.');
+        Session::flash('success', 'Assinatura da prestação de contas removida. O documento pode ser assinado novamente.');
         $this->redirect($this->filterUrl($filters));
     }
 
@@ -198,7 +198,7 @@ final class PrestacaoContasController extends Controller
         $acaoBusca = mb_substr(trim((string) ($source['acao_busca'] ?? '')), 0, 120);
         $acaoId = $this->positiveInt($source['acao_id'] ?? null);
 
-        if ($acaoId === '' && preg_match('/Acao\s+#(\d+)/i', $acaoBusca, $matches) === 1) {
+        if ($acaoId === '' && preg_match('/A[cç][aã]o\s+#(\d+)/iu', $acaoBusca, $matches) === 1) {
             $acaoId = $this->positiveInt($matches[1]);
         }
 
@@ -377,7 +377,7 @@ final class PrestacaoContasController extends Controller
         );
 
         $base = json_encode([
-            'documento' => 'Prestacao de contas de ajuda humanitaria',
+            'documento' => 'Prestação de contas de ajuda humanitária',
             'document_key' => $identity['document_key'],
             'filters' => $filters,
             'generated_at' => $generatedAt->format('Y-m-d H:i:s'),
@@ -398,7 +398,7 @@ final class PrestacaoContasController extends Controller
             'usuario_id' => (int) ($currentUser['id'] ?? 0),
             'signed_at' => $generatedAt->format('Y-m-d H:i:s'),
             'hash' => strtoupper(hash('sha256', (string) $base)),
-            'documento' => 'Prestacao de contas de ajuda humanitaria',
+            'documento' => 'Prestação de contas de ajuda humanitária',
             'document_key' => $identity['document_key'],
             'assinantes' => $signers,
             'coassinantes_solicitados' => array_map(
@@ -415,7 +415,7 @@ final class PrestacaoContasController extends Controller
             'documento_chave' => (string) $identity['document_key'],
             'entidade' => 'prestacao_contas',
             'entidade_id' => (int) $identity['entity_id'],
-            'titulo' => 'Prestacao de contas de ajuda humanitaria',
+            'titulo' => 'Prestação de contas de ajuda humanitária',
             'descricao' => 'Documento gerado por filtros operacionais em ' . date('d/m/Y H:i'),
             'url_documento' => $this->filterUrl($filters, true),
             'solicitante_usuario_id' => (int) (current_user()['id'] ?? 0),
@@ -428,7 +428,7 @@ final class PrestacaoContasController extends Controller
                 ]
             ),
             'payload' => [
-                'documento' => $signature['documento'] ?? 'Prestacao de contas',
+                'documento' => $signature['documento'] ?? 'Prestação de contas',
                 'document_key' => $identity['document_key'],
                 'hash' => $signature['hash'] ?? '',
                 'filters' => $filters,
@@ -487,7 +487,7 @@ final class PrestacaoContasController extends Controller
     private function guardPost(string $scope, string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
 

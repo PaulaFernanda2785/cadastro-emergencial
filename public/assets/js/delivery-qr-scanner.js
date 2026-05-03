@@ -77,7 +77,7 @@
 
             window.requestAnimationFrame(scanFrame);
         }).catch(function () {
-            setStatus('Nao foi possivel ler o QR Code. Tente aproximar o comprovante da camera.');
+            setStatus('Não foi possível ler o QR Code. Tente aproximar o comprovante da câmera.');
             window.requestAnimationFrame(scanFrame);
         });
     }
@@ -88,7 +88,7 @@
 
     if (!('BarcodeDetector' in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         startButton.disabled = true;
-        setStatus('Leitor automatico indisponivel neste navegador. Informe o codigo manualmente.');
+        setStatus('Leitor automático indisponível neste navegador. Informe o código manualmente.');
         return;
     }
 
@@ -96,13 +96,13 @@
         detector = new window.BarcodeDetector({ formats: ['qr_code'] });
     } catch (error) {
         startButton.disabled = true;
-        setStatus('Leitor automatico indisponivel neste navegador. Informe o codigo manualmente.');
+        setStatus('Leitor automático indisponível neste navegador. Informe o código manualmente.');
         return;
     }
 
     startButton.addEventListener('click', function () {
         startButton.disabled = true;
-        setStatus('Abrindo camera para leitura do QR Code...');
+        setStatus('Abrindo câmera para leitura do QR Code...');
 
         navigator.mediaDevices.getUserMedia({
             video: {
@@ -121,11 +121,11 @@
 
             return video.play();
         }).then(function () {
-            setStatus('Aponte a camera para o QR Code do comprovante.');
+            setStatus('Aponte a câmera para o QR Code do comprovante.');
             scanFrame();
         }).catch(function () {
             stopScanner();
-            setStatus('Nao foi possivel acessar a camera. Informe o codigo manualmente.');
+            setStatus('Não foi possível acessar a câmera. Informe o código manualmente.');
         });
     });
 

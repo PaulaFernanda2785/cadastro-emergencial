@@ -566,7 +566,7 @@ final class FamiliaController extends Controller
             $validator
                 ->required('representante_nome', $data['representante_nome'], 'Nome completo do representante')
                 ->required('representante_cpf', $data['representante_cpf'], 'CPF do representante')
-                ->required('representante_orgao_expedidor', $data['representante_orgao_expedidor'], 'Orgao expedidor do representante')
+                ->required('representante_orgao_expedidor', $data['representante_orgao_expedidor'], 'Órgão expedidor do representante')
                 ->required('representante_data_nascimento', $data['representante_data_nascimento'], 'Data de nascimento do representante')
                 ->required('representante_sexo', $data['representante_sexo'], 'Sexo do representante');
 

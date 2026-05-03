@@ -1,7 +1,7 @@
 <section class="dashboard-header no-print receipt-preview-header">
     <div>
         <span class="eyebrow">Comprovante de entrega</span>
-        <h1>Pre-visualizacao do ticket</h1>
+        <h1>Pré-visualização do ticket</h1>
         <p><?= h($entrega['responsavel_nome']) ?> - <?= h($entrega['comprovante_codigo']) ?></p>
     </div>
 </section>
@@ -9,7 +9,7 @@
 <section class="receipt-preview-shell">
     <section class="receipt-actions no-print">
         <a class="secondary-button" href="<?= h(url('/gestor/entregas')) ?>">Voltar para entregas</a>
-        <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $entrega['residencia_id'])) ?>">Ver residencia</a>
+        <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $entrega['residencia_id'])) ?>">Ver residência</a>
         <button
             type="button"
             class="secondary-button"
@@ -31,7 +31,7 @@
 
     <dl class="receipt-lines">
         <div>
-            <dt>Codigo</dt>
+            <dt>Código</dt>
             <dd><?= h($entrega['comprovante_codigo']) ?></dd>
         </div>
         <div>
@@ -43,7 +43,7 @@
             <dd><?= h($entrega['protocolo']) ?></dd>
         </div>
         <div>
-            <dt>Municipio</dt>
+            <dt>Município</dt>
             <dd><?= h($entrega['municipio_nome']) ?>/<?= h($entrega['uf']) ?></dd>
         </div>
         <div>
@@ -60,7 +60,7 @@
 
     <dl class="receipt-lines">
         <div>
-            <dt>Responsavel</dt>
+            <dt>Responsável</dt>
             <dd><?= h($entrega['responsavel_nome']) ?></dd>
         </div>
         <div>
@@ -72,7 +72,7 @@
             <dd><?= h($entrega['quantidade_integrantes']) ?></dd>
         </div>
         <div>
-            <dt>Endereco</dt>
+            <dt>Endereço</dt>
             <dd><?= h($entrega['endereco']) ?><?= !empty($entrega['complemento']) ? ' - ' . h($entrega['complemento']) : '' ?></dd>
         </div>
         <div>
@@ -120,12 +120,12 @@
 
     <div class="receipt-signature">
         <span></span>
-        <p>Assinatura do responsavel familiar</p>
+        <p>Assinatura do responsável familiar</p>
     </div>
 
     <footer class="receipt-footer">
         <span>Documento gerado pelo sistema Cadastro Emergencial.</span>
-        <span>Guarde este comprovante para conferencia.</span>
+        <span>Guarde este comprovante para conferência.</span>
     </footer>
 </article>
 </section>

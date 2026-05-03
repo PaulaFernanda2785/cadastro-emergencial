@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260502-174';
+$assetVersion = '20260502-176';
 $sessionTimeoutSeconds = 1800;
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
@@ -36,18 +36,18 @@ if ($user !== null) {
 }
 
 $menuItems = [
-    ['group' => 'Operacao', 'label' => 'Painel situacional', 'abbr' => 'PS', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
-    ['group' => 'Operacao', 'label' => 'Assinaturas' . ($signaturePendingCount > 0 ? ' (' . $signaturePendingCount . ')' : ''), 'abbr' => 'AS', 'url' => '/assinaturas', 'match' => ['/assinaturas']],
-    ['group' => 'Operacao', 'label' => 'Novo cadastro', 'abbr' => 'NC', 'url' => $activeActionUrl, 'match' => ['/acao/'], 'roles' => ['cadastrador', 'gestor', 'administrador'], 'requires_action' => true],
-    ['group' => 'Operacao', 'label' => 'Cadastros', 'abbr' => 'CD', 'url' => '/cadastros/residencias', 'match' => ['/cadastros/residencias']],
-    ['group' => 'Operacao', 'label' => 'Familias', 'abbr' => 'FM', 'url' => '/gestor/familias', 'match' => ['/gestor/familias']],
-    ['group' => 'Gestao', 'label' => 'Entregas', 'abbr' => 'EN', 'url' => '/gestor/entregas', 'match' => ['/gestor/entregas'], 'roles' => ['gestor', 'administrador']],
-    ['group' => 'Gestao', 'label' => 'Prestacao de contas', 'abbr' => 'PC', 'url' => '/gestor/prestacao-contas', 'match' => ['/gestor/prestacao-contas'], 'roles' => ['gestor', 'administrador']],
-    ['group' => 'Gestao', 'label' => 'Relatorios', 'abbr' => 'RL', 'url' => '/gestor/relatorios', 'match' => ['/gestor/relatorios'], 'roles' => ['gestor', 'administrador']],
-    ['group' => 'Gestao', 'label' => 'Recomecar', 'abbr' => 'RC', 'url' => '/gestor/recomecar', 'match' => ['/gestor/recomecar'], 'roles' => ['gestor', 'administrador']],
-    ['group' => 'Administracao', 'label' => 'Acoes emergenciais', 'abbr' => 'AE', 'url' => '/admin/acoes', 'match' => ['/admin/acoes'], 'roles' => ['gestor', 'administrador']],
-    ['group' => 'Administracao', 'label' => 'Tipos de ajuda', 'abbr' => 'TA', 'url' => '/admin/ajudas', 'match' => ['/admin/ajudas'], 'roles' => ['administrador']],
-    ['group' => 'Administracao', 'label' => 'Usuarios', 'abbr' => 'US', 'url' => '/admin/usuarios', 'match' => ['/admin/usuarios'], 'roles' => ['administrador']],
+    ['group' => 'Operação', 'label' => 'Painel situacional', 'abbr' => 'PS', 'url' => '/dashboard', 'match' => ['/dashboard', '/']],
+    ['group' => 'Operação', 'label' => 'Assinaturas' . ($signaturePendingCount > 0 ? ' (' . $signaturePendingCount . ')' : ''), 'abbr' => 'AS', 'url' => '/assinaturas', 'match' => ['/assinaturas']],
+    ['group' => 'Operação', 'label' => 'Novo cadastro', 'abbr' => 'NC', 'url' => $activeActionUrl, 'match' => ['/acao/'], 'roles' => ['cadastrador', 'gestor', 'administrador'], 'requires_action' => true],
+    ['group' => 'Operação', 'label' => 'Cadastros', 'abbr' => 'CD', 'url' => '/cadastros/residencias', 'match' => ['/cadastros/residencias']],
+    ['group' => 'Operação', 'label' => 'Famílias', 'abbr' => 'FM', 'url' => '/gestor/familias', 'match' => ['/gestor/familias']],
+    ['group' => 'Gestão', 'label' => 'Entregas', 'abbr' => 'EN', 'url' => '/gestor/entregas', 'match' => ['/gestor/entregas'], 'roles' => ['gestor', 'administrador']],
+    ['group' => 'Gestão', 'label' => 'Prestação de contas', 'abbr' => 'PC', 'url' => '/gestor/prestacao-contas', 'match' => ['/gestor/prestacao-contas'], 'roles' => ['gestor', 'administrador']],
+    ['group' => 'Gestão', 'label' => 'Relatórios', 'abbr' => 'RL', 'url' => '/gestor/relatorios', 'match' => ['/gestor/relatorios'], 'roles' => ['gestor', 'administrador']],
+    ['group' => 'Gestão', 'label' => 'Recomeçar', 'abbr' => 'RC', 'url' => '/gestor/recomecar', 'match' => ['/gestor/recomecar'], 'roles' => ['gestor', 'administrador']],
+    ['group' => 'Administração', 'label' => 'Ações emergenciais', 'abbr' => 'AE', 'url' => '/admin/acoes', 'match' => ['/admin/acoes'], 'roles' => ['gestor', 'administrador']],
+    ['group' => 'Administração', 'label' => 'Tipos de ajuda', 'abbr' => 'TA', 'url' => '/admin/ajudas', 'match' => ['/admin/ajudas'], 'roles' => ['administrador']],
+    ['group' => 'Administração', 'label' => 'Usuários', 'abbr' => 'US', 'url' => '/admin/usuarios', 'match' => ['/admin/usuarios'], 'roles' => ['administrador']],
     ['group' => 'Conta', 'label' => 'Alterar senha', 'abbr' => 'AS', 'url' => '/alterar-senha', 'match' => ['/alterar-senha']],
 ];
 ?>
@@ -173,7 +173,7 @@ $menuItems = [
                 <?php if ($user !== null): ?>
                     <div class="user-area">
                         <div class="user-summary">
-                            <strong><?= h($user['nome'] ?? 'Usuario') ?></strong>
+                            <strong><?= h($user['nome'] ?? 'Usuário') ?></strong>
                             <span><?= h($profileLabel) ?></span>
                         </div>
                         <form method="post" action="<?= h(url('/logout')) ?>" class="inline-form js-prevent-double-submit">
@@ -199,21 +199,21 @@ $menuItems = [
 
                 <?php if ($signaturePendingCount > 0): ?>
                     <div class="alert alert-warning signature-notice-alert" role="alert">
-                        Voce possui <?= h($signaturePendingCount) ?> documento(s) aguardando sua autorizacao como coautor.
+                        Você possui <?= h($signaturePendingCount) ?> documento(s) aguardando sua autorização como coautor.
                         <a class="signature-alert-action" href="<?= h(url('/assinaturas')) ?>">Abrir assinaturas</a>
                     </div>
                 <?php endif; ?>
 
                 <?php if ($signatureRequesterNoticeCount > 0): ?>
                     <div class="alert alert-success signature-notice-alert" role="status">
-                        Ha atualizacao em assinatura(s) solicitada(s) por voce. Verifique se a impressao do documento foi liberada.
+                        Há atualização em assinatura(s) solicitada(s) por você. Verifique se a impressão do documento foi liberada.
                         <a class="signature-alert-action" href="<?= h(url('/assinaturas')) ?>">Ver atualizacoes</a>
                     </div>
                 <?php endif; ?>
 
                 <?php if ($signatureRequestedPendingCount > 0): ?>
                     <div class="alert alert-warning signature-notice-alert" role="status">
-                        Voce possui <?= h($signatureRequestedPendingCount) ?> coassinatura(s) solicitada(s) aguardando resposta de outros usuarios.
+                        Você possui <?= h($signatureRequestedPendingCount) ?> coassinatura(s) solicitada(s) aguardando resposta de outros usuários.
                         <a class="signature-alert-action signature-alert-action-strong" href="<?= h(url('/assinaturas')) ?>">Acompanhar assinaturas</a>
                     </div>
                 <?php endif; ?>
@@ -224,7 +224,7 @@ $menuItems = [
             <footer class="app-footer">
                 <span><?= h($app['name']) ?> - versao 1.0.0 producao</span>
                 <span>2026 todos os direitos reservados.</span>
-                <span>Desenvolvido pela Divisao de Gestao de Risco - DGR/CEDEC-PA</span>
+                <span>Desenvolvido pela Divisão de Gestão de Risco - DGR/CEDEC-PA</span>
             </footer>
         </div>
     </div>

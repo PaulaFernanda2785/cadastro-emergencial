@@ -103,7 +103,7 @@ final class EntregaAjudaController extends Controller
         $code = $this->extractReceiptCode(trim((string) ($_GET['codigo'] ?? '')));
 
         if ($code === '') {
-            Session::flash('warning', 'Informe ou leia o codigo do comprovante de cadastro familiar.');
+            Session::flash('warning', 'Informe ou leia o código do comprovante de cadastro familiar.');
             $this->redirect('/gestor/entregas/validacao');
         }
 
@@ -116,7 +116,7 @@ final class EntregaAjudaController extends Controller
         $familia = $this->familias->findByReceiptCode($code);
 
         if ($familia === null) {
-            Session::flash('error', 'Comprovante de cadastro familiar invalido ou nao localizado.');
+            Session::flash('error', 'Comprovante de cadastro familiar inválido ou não localizado.');
             $this->redirect('/gestor/entregas/validacao');
         }
 
@@ -181,10 +181,10 @@ final class EntregaAjudaController extends Controller
         $validator = (new Validator())
             ->required('quantidade', $quantidade, 'Quantidade')
             ->decimalRange('quantidade', $quantidade, 0.01, 999999.99, 'Quantidade')
-            ->max('observacao', $observacao, 500, 'Observacao');
+            ->max('observacao', $observacao, 500, 'Observação');
 
         if ($familiaIds === []) {
-            $validator->add('familia_ids', 'Selecione pelo menos uma familia para entrega em lote.');
+            $validator->add('familia_ids', 'Selecione pelo menos uma família para entrega em lote.');
         }
 
         if ($tipoIds === []) {
@@ -232,7 +232,7 @@ final class EntregaAjudaController extends Controller
             }
         }
 
-        Session::flash('success', $created . ' item(ns) registrado(s) em lote, agrupados por familia no historico.');
+        Session::flash('success', $created . ' item(ns) registrado(s) em lote, agrupados por família no histórico.');
         $this->redirect('/gestor/entregas');
     }
 
@@ -283,7 +283,7 @@ final class EntregaAjudaController extends Controller
         $validator = (new Validator())
             ->required('quantidade', $data['quantidade'], 'Quantidade')
             ->decimalRange('quantidade', $data['quantidade'], 0.01, 999999.99, 'Quantidade')
-            ->max('observacao', $data['observacao'], 500, 'Observacao');
+            ->max('observacao', $data['observacao'], 500, 'Observação');
 
         if (($data['tipo_ajuda_ids'] ?? []) === []) {
             $validator->add('tipo_ajuda_ids', 'Selecione pelo menos um tipo de ajuda.');
@@ -303,7 +303,7 @@ final class EntregaAjudaController extends Controller
         $acaoId = $this->positiveInt($_GET['acao_id'] ?? '');
         $statusEntrega = $this->deliveryStatus($_GET['status_entrega'] ?? '');
 
-        if ($acaoId === '' && preg_match('/Acao\s+#(\d+)/i', $acaoBusca, $matches) === 1) {
+        if ($acaoId === '' && preg_match('/A[cç][aã]o\s+#(\d+)/iu', $acaoBusca, $matches) === 1) {
             $acaoId = $this->positiveInt($matches[1]);
         }
 
@@ -328,7 +328,7 @@ final class EntregaAjudaController extends Controller
         $acaoId = $this->positiveInt($_GET['lote_acao_id'] ?? '');
         $statusEntrega = $this->deliveryStatus($_GET['lote_status_entrega'] ?? '');
 
-        if ($acaoId === '' && preg_match('/Acao\s+#(\d+)/i', $acaoBusca, $matches) === 1) {
+        if ($acaoId === '' && preg_match('/A[cç][aã]o\s+#(\d+)/iu', $acaoBusca, $matches) === 1) {
             $acaoId = $this->positiveInt($matches[1]);
         }
 
@@ -404,7 +404,7 @@ final class EntregaAjudaController extends Controller
     private function guardPost(string $scope, string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
 

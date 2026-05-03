@@ -23,7 +23,7 @@ final class RelatorioController extends Controller
         $filters = $this->filters();
 
         $this->view('gestor.relatorios.index', [
-            'title' => 'Relatorios operacionais',
+            'title' => 'Relatórios operacionais',
             'filters' => $filters,
             'acoes' => $this->acoes->all(),
             'tiposAjuda' => $this->tiposAjuda->all(),
@@ -63,16 +63,16 @@ final class RelatorioController extends Controller
         fwrite($output, "\xEF\xBB\xBF");
         fputcsv($output, [
             'Protocolo',
-            'Municipio',
+            'Município',
             'UF',
             'Bairro/Comunidade',
-            'Endereco',
-            'Imovel',
-            'Condicao da residencia',
-            'Localidade da acao',
+            'Endereço',
+            'Imóvel',
+            'Condição da residência',
+            'Localidade da ação',
             'Tipo de evento',
             'Data do cadastro',
-            'Responsavel familiar',
+            'Responsável familiar',
             'CPF',
             'Telefone',
             'Integrantes',

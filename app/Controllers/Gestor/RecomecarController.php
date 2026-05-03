@@ -46,7 +46,7 @@ final class RecomecarController extends Controller
             : $this->emptyCoSignatureStatus();
 
         $this->view('gestor.recomecar.index', [
-            'title' => 'Recomecar',
+            'title' => 'Recomeçar',
             'filters' => $filters,
             'acoes' => $this->acoes->all(),
             'signatureUsers' => $this->signatureUsers((int) ($currentUser['id'] ?? 0)),
@@ -74,12 +74,12 @@ final class RecomecarController extends Controller
         $filters = $this->filtersFromArray($_POST);
 
         if (!$this->hasAppliedFilters($filters)) {
-            Session::flash('warning', 'Aplique pelo menos um filtro antes de assinar o documento do Programa Recomecar.');
+            Session::flash('warning', 'Aplique pelo menos um filtro antes de assinar o documento do Programa Recomeçar.');
             $this->redirect('/gestor/recomecar');
         }
 
         if (($filters['aptidao'] ?? 'apta') !== 'apta') {
-            Session::flash('warning', 'Somente a relacao de familias aptas pode ser assinada para pagamento do Programa Recomecar.');
+            Session::flash('warning', 'Somente a relação de famílias aptas pode ser assinada para pagamento do Programa Recomeçar.');
             $this->redirect($this->filterUrl($filters));
         }
 
@@ -100,8 +100,8 @@ final class RecomecarController extends Controller
         Session::flash(
             'success',
             $coSigners === []
-                ? 'Documento do Programa Recomecar assinado digitalmente. A impressao esta liberada.'
-                : 'Documento do Programa Recomecar assinado pelo usuario principal. A impressao sera liberada apos autorizacao dos responsaveis pela conferencia.'
+                ? 'Documento do Programa Recomeçar assinado digitalmente. A impressão está liberada.'
+                : 'Documento do Programa Recomeçar assinado pelo usuário principal. A impressão será liberada após autorização dos responsáveis pela conferência.'
         );
         $this->redirect($this->filterUrl($filters, true));
     }
@@ -120,7 +120,7 @@ final class RecomecarController extends Controller
         $signature = $this->latestSignature($identity);
 
         if ($signature === null) {
-            Session::flash('warning', 'Este documento nao possui assinatura ativa para remover.');
+            Session::flash('warning', 'Este documento não possui assinatura ativa para remover.');
             $this->redirect($this->filterUrl($filters));
         }
 
@@ -142,7 +142,7 @@ final class RecomecarController extends Controller
 
         (new CoassinaturaRepository())->cancelDocument(self::DOCUMENT_TYPE, (string) $identity['document_key']);
 
-        Session::flash('success', 'Assinatura do documento Recomecar removida. O documento pode ser assinado novamente.');
+        Session::flash('success', 'Assinatura do documento Recomeçar removida. O documento pode ser assinado novamente.');
         $this->redirect($this->filterUrl($filters));
     }
 
@@ -166,7 +166,7 @@ final class RecomecarController extends Controller
             $statusEntrega = '';
         }
 
-        if ($acaoId === '' && preg_match('/Acao\s+#(\d+)/i', $acaoBusca, $matches) === 1) {
+        if ($acaoId === '' && preg_match('/A[cç][aã]o\s+#(\d+)/iu', $acaoBusca, $matches) === 1) {
             $acaoId = $this->positiveInt($matches[1]);
         }
 
@@ -284,7 +284,7 @@ final class RecomecarController extends Controller
     {
         $signers = [$this->signatureUserPayload($currentUser, 'assinante_principal')];
         $base = json_encode([
-            'documento' => 'Programa Recomecar',
+            'documento' => 'Programa Recomeçar',
             'document_key' => $identity['document_key'],
             'filters' => $filters,
             'generated_at' => $generatedAt->format('Y-m-d H:i:s'),
@@ -302,7 +302,7 @@ final class RecomecarController extends Controller
             'usuario_id' => (int) ($currentUser['id'] ?? 0),
             'signed_at' => $generatedAt->format('Y-m-d H:i:s'),
             'hash' => strtoupper(hash('sha256', (string) $base)),
-            'documento' => 'Programa Recomecar',
+            'documento' => 'Programa Recomeçar',
             'document_key' => $identity['document_key'],
             'assinantes' => $signers,
             'coassinantes_solicitados' => array_map(
@@ -319,7 +319,7 @@ final class RecomecarController extends Controller
             'documento_chave' => (string) $identity['document_key'],
             'entidade' => self::DOCUMENT_TYPE,
             'entidade_id' => (int) $identity['entity_id'],
-            'titulo' => 'Programa Recomecar',
+            'titulo' => 'Programa Recomeçar',
             'descricao' => 'Documento de pagamento gerado por filtros operacionais em ' . date('d/m/Y H:i'),
             'url_documento' => $this->filterUrl($filters, true),
             'solicitante_usuario_id' => (int) (current_user()['id'] ?? 0),
@@ -332,7 +332,7 @@ final class RecomecarController extends Controller
                 ]
             ),
             'payload' => [
-                'documento' => $signature['documento'] ?? 'Programa Recomecar',
+                'documento' => $signature['documento'] ?? 'Programa Recomeçar',
                 'document_key' => $identity['document_key'],
                 'hash' => $signature['hash'] ?? '',
                 'filters' => $filters,
@@ -421,7 +421,7 @@ final class RecomecarController extends Controller
     private function guardPost(string $scope, string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
 

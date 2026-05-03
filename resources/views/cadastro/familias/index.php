@@ -263,7 +263,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                             <p><?= h($familia['responsavel_cpf']) ?><?= !empty($familia['telefone']) ? ' - ' . h($familia['telefone']) : '' ?></p>
                         </div>
 
-                        <div class="family-index-statuses" aria-label="Status da familia">
+                        <div class="family-index-statuses" aria-label="Status da família">
                             <span class="family-status-pill family-status-<?= $entregasRegistradas > 0 ? 'delivered' : 'pending' ?>">
                                 <?= $entregasRegistradas > 0 ? h($entregasRegistradas . ' entrega(s)') : 'Sem entrega' ?>
                             </span>

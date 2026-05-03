@@ -10,7 +10,7 @@ $actionOptionLabel = static function (array $acao): string {
         (string) ($acao['municipio_nome'] ?? '') . '/' . (string) ($acao['uf'] ?? '')
         . ' - ' . (string) ($acao['localidade'] ?? '')
         . ' - ' . (string) ($acao['tipo_evento'] ?? '')
-        . ' - Acao #' . (string) ($acao['id'] ?? '')
+        . ' - Ação #' . (string) ($acao['id'] ?? '')
     );
 };
 $pageUrl = static function (int $page) use ($filters): string {
@@ -45,9 +45,9 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
 
 <section class="dashboard-header deliveries-header">
     <div>
-        <span class="eyebrow">Gestao operacional</span>
-        <h1>Historico de entregas</h1>
-        <p>Consulte entregas registradas por familia, acao, residencia, tipo de ajuda e periodo.</p>
+        <span class="eyebrow">Gestão operacional</span>
+        <h1>Histórico de entregas</h1>
+        <p>Consulte entregas registradas por família, ação, residência, tipo de ajuda e período.</p>
     </div>
 </section>
 
@@ -58,9 +58,9 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
         <small>Registros encontrados.</small>
     </article>
     <article class="records-summary-card">
-        <span>Familias atendidas</span>
+        <span>Famílias atendidas</span>
         <strong><?= h($summary['familias_atendidas'] ?? 0) ?></strong>
-        <small>Familias unicas no filtro.</small>
+        <small>Famílias únicas no filtro.</small>
     </article>
     <article class="records-summary-card">
         <span>Quantidade total</span>
@@ -68,7 +68,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
         <small>Soma das quantidades.</small>
     </article>
     <article class="records-summary-card">
-        <span>Ultima entrega</span>
+        <span>Última entrega</span>
         <strong><?= !empty($summary['ultima_entrega']) ? h(date('d/m/Y', strtotime((string) $summary['ultima_entrega']))) : '-' ?></strong>
         <small><?= !empty($summary['ultima_entrega']) ? h(date('H:i', strtotime((string) $summary['ultima_entrega']))) : 'Sem registro' ?></small>
     </article>
@@ -77,7 +77,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
 <section class="records-filter-panel delivery-filter-panel delivery-history-filter-panel">
     <div class="table-heading">
         <h2>Filtros inteligentes</h2>
-        <span>Combine texto, acao, residencia, periodo e tipo de ajuda.</span>
+        <span>Combine texto, ação, residência, período e tipo de ajuda.</span>
     </div>
     <form method="get" action="<?= h(url('/gestor/entregas')) ?>" class="delivery-filter-form delivery-history-filter-form">
         <label class="field styled-field delivery-history-filter-field delivery-history-filter-field-wide">
@@ -98,8 +98,8 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
             </datalist>
         </label>
         <label class="field styled-field smart-search-field delivery-history-filter-field delivery-history-filter-field-wide">
-            <span>Acao</span>
-            <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $acaoSelecionada) ?>" list="historico-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="historico_acao_id" autocomplete="off">
+            <span>Ação</span>
+            <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $acaoSelecionada) ?>" list="historico-acoes-list" placeholder="Digite para buscar a ação" data-smart-search data-smart-target="historico_acao_id" autocomplete="off">
             <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="historico_acao_id">
             <datalist id="historico-acoes-list">
                 <?php foreach ($acoes ?? [] as $acao): ?>
@@ -108,7 +108,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
             </datalist>
         </label>
         <label class="field styled-field smart-search-field delivery-history-filter-field delivery-history-filter-field-medium">
-            <span>Residencia</span>
+            <span>Residência</span>
             <input type="search" name="residencia_busca" value="<?= h(($filters['residencia_busca'] ?? '') !== '' ? $filters['residencia_busca'] : $residenciaSelecionada) ?>" list="historico-residencias-list" placeholder="Digite protocolo ou bairro" data-smart-search data-smart-target="historico_residencia_id" autocomplete="off">
             <input type="hidden" name="residencia_id" value="<?= h($filters['residencia_id'] ?? '') ?>" data-smart-hidden="historico_residencia_id">
             <datalist id="historico-residencias-list">
@@ -118,7 +118,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
             </datalist>
         </label>
         <label class="field styled-field smart-search-field delivery-history-filter-field delivery-history-filter-field-medium">
-            <span>Familia</span>
+            <span>Família</span>
             <input type="search" name="familia_busca" value="<?= h(($filters['familia_busca'] ?? '') !== '' ? $filters['familia_busca'] : $familiaSelecionada) ?>" list="historico-familias-list" placeholder="Digite nome ou CPF" data-smart-search data-smart-target="historico_familia_id" autocomplete="off">
             <input type="hidden" name="familia_id" value="<?= h($filters['familia_id'] ?? '') ?>" data-smart-hidden="historico_familia_id">
             <datalist id="historico-familias-list">
@@ -147,7 +147,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
             </select>
         </label>
         <label class="field styled-field delivery-history-filter-field delivery-history-filter-field-date">
-            <span>Inicio</span>
+            <span>Início</span>
             <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
         </label>
         <label class="field styled-field delivery-history-filter-field delivery-history-filter-field-date">
@@ -177,7 +177,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                         <strong><?= h($entrega['comprovante_codigo']) ?></strong>
                     </div>
                     <div class="delivery-record-family">
-                        <span class="eyebrow">Familia</span>
+                        <span class="eyebrow">Família</span>
                         <strong><?= h($entrega['responsavel_nome']) ?></strong>
                         <small><?= h($entrega['responsavel_cpf']) ?></small>
                     </div>
@@ -191,7 +191,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                             <strong><?= h(number_format((float) ($entrega['quantidade_total'] ?? $entrega['quantidade'] ?? 0), 0, ',', '.')) ?></strong>
                         </span>
                         <span>
-                            <small>Residencia</small>
+                            <small>Residência</small>
                             <strong><a href="<?= h(url('/cadastros/residencias/' . $entrega['residencia_id'])) ?>"><?= h($entrega['protocolo']) ?></a></strong>
                             <em><?= h($entrega['bairro_comunidade']) ?> - <?= h($entrega['municipio_nome']) ?>/<?= h($entrega['uf']) ?></em>
                         </span>
@@ -208,7 +208,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
     <?php endif; ?>
 
     <?php if (($pagination['pages'] ?? 1) > 1): ?>
-        <nav class="records-pagination delivery-pagination" aria-label="Paginacao do historico de entregas">
+        <nav class="records-pagination delivery-pagination" aria-label="Paginação do histórico de entregas">
             <a class="secondary-button <?= (int) $pagination['page'] <= 1 ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(max(1, (int) $pagination['page'] - 1))) ?>">Anterior</a>
             <div class="pagination-pages">
                 <?php
@@ -233,7 +233,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                     <a href="<?= h($pageUrl($totalPages)) ?>"><?= h($totalPages) ?></a>
                 <?php endif; ?>
             </div>
-            <a class="secondary-button <?= (int) $pagination['page'] >= (int) $pagination['pages'] ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(min((int) $pagination['pages'], (int) $pagination['page'] + 1))) ?>">Proxima</a>
+            <a class="secondary-button <?= (int) $pagination['page'] >= (int) $pagination['pages'] ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(min((int) $pagination['pages'], (int) $pagination['page'] + 1))) ?>">Próxima</a>
         </nav>
     <?php endif; ?>
 </section>

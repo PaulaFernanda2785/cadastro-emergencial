@@ -217,7 +217,7 @@ $renderFilterFields = static function (array $filters): void {
             <small>Famílias únicas no filtro.</small>
         </article>
         <article class="records-summary-card">
-            <span>Tipos distribuidos</span>
+            <span>Tipos distribuídos</span>
             <strong><?= h($summary['tipos_distribuidos'] ?? 0) ?></strong>
             <small>Materiais distintos.</small>
         </article>

@@ -70,7 +70,7 @@
                 return;
             }
 
-            var idMatch = value.match(/acao\s*#\s*(\d+)/i);
+            var idMatch = value.match(/a[cç][aã]o\s*#\s*(\d+)/i);
 
             Array.prototype.slice.call(list.options || []).some(function (option) {
                 var optionId = option.dataset.id || '';

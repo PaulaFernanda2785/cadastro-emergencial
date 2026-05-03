@@ -9,28 +9,28 @@ $recentHistory = array_slice($historico, 0, 4);
         <div>
             <span class="eyebrow">Entrega de ajuda</span>
             <h1><?= h($title) ?></h1>
-            <p><?= h($familia['responsavel_nome']) ?> - residencia <?= h($familia['protocolo']) ?></p>
+            <p><?= h($familia['responsavel_nome']) ?> - residência <?= h($familia['protocolo']) ?></p>
         </div>
         <div class="header-actions">
             <a class="secondary-button" href="<?= h(url('/gestor/entregas')) ?>">Voltar para entregas</a>
-            <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $familia['residencia_id'])) ?>">Ver residencia</a>
+            <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $familia['residencia_id'])) ?>">Ver residência</a>
         </div>
     </section>
 
     <section class="detail-grid delivery-detail-grid">
         <article class="detail-panel">
-            <h2>Familia</h2>
+            <h2>Família</h2>
             <p><?= h($familia['responsavel_nome']) ?></p>
             <p>CPF: <?= h($familia['responsavel_cpf']) ?></p>
             <p>Integrantes: <?= h($familia['quantidade_integrantes']) ?></p>
         </article>
         <article class="detail-panel">
-            <h2>Localizacao</h2>
+            <h2>Localização</h2>
             <p><?= h($familia['bairro_comunidade']) ?> - <?= h($familia['municipio_nome']) ?>/<?= h($familia['uf']) ?></p>
             <p><?= h($familia['endereco']) ?></p>
         </article>
         <article class="detail-panel">
-            <h2>Acao</h2>
+            <h2>Ação</h2>
             <p><?= h($familia['localidade']) ?></p>
             <p><?= h($familia['tipo_evento']) ?></p>
         </article>
@@ -39,12 +39,12 @@ $recentHistory = array_slice($historico, 0, 4);
     <section class="delivery-family-alert <?= $hasPreviousDeliveries ? 'is-delivered' : 'is-clear' ?>">
         <div class="delivery-family-alert-heading">
             <div>
-                <span class="eyebrow">Situacao de entrega</span>
-                <h2><?= $hasPreviousDeliveries ? 'Familia ja teve entrega registrada' : 'Sem entrega anterior registrada' ?></h2>
+                <span class="eyebrow">Situação de entrega</span>
+                <h2><?= $hasPreviousDeliveries ? 'Família já teve entrega registrada' : 'Sem entrega anterior registrada' ?></h2>
                 <p>
                     <?= $hasPreviousDeliveries
-                        ? 'Confira os itens ja entregues antes de registrar uma nova baixa para esta familia.'
-                        : 'Nenhum comprovante de entrega foi localizado para esta familia.' ?>
+                        ? 'Confira os itens já entregues antes de registrar uma nova baixa para esta família.'
+                        : 'Nenhum comprovante de entrega foi localizado para esta família.' ?>
                 </p>
             </div>
             <strong class="delivery-family-alert-status">
@@ -65,7 +65,7 @@ $recentHistory = array_slice($historico, 0, 4);
                 <?php endforeach; ?>
             </div>
             <?php if (count($historico) > count($recentHistory)): ?>
-                <small class="delivery-family-alert-more">Mais <?= h(count($historico) - count($recentHistory)) ?> comprovante(s) no historico abaixo.</small>
+                <small class="delivery-family-alert-more">Mais <?= h(count($historico) - count($recentHistory)) ?> comprovante(s) no histórico abaixo.</small>
             <?php endif; ?>
         <?php endif; ?>
     </section>
@@ -107,7 +107,7 @@ $recentHistory = array_slice($historico, 0, 4);
                 <?php endif; ?>
             </label>
             <label class="field">
-                <span>Observacao</span>
+                <span>Observação</span>
                 <input type="text" name="observacao" maxlength="500" value="<?= h($entrega['observacao'] ?? '') ?>" placeholder="Opcional">
                 <?php if (!empty($errors['observacao'])): ?>
                     <small class="field-error"><?= h($errors['observacao'][0]) ?></small>
@@ -130,11 +130,11 @@ $recentHistory = array_slice($historico, 0, 4);
 
 <section class="table-panel delivery-table-panel delivery-family-history-panel">
     <div class="table-heading">
-        <h2>Historico da familia</h2>
+        <h2>Histórico da família</h2>
         <span><?= h(count($historico)) ?> entrega(s)</span>
     </div>
     <?php if ($historico === []): ?>
-        <div class="empty-state">Nenhuma entrega anterior para esta familia.</div>
+        <div class="empty-state">Nenhuma entrega anterior para esta família.</div>
     <?php else: ?>
         <div class="delivery-family-history-list">
             <?php foreach ($historico as $item): ?>
@@ -157,7 +157,7 @@ $recentHistory = array_slice($historico, 0, 4);
                             <strong><?= h(date('d/m/Y H:i', strtotime((string) $item['data_entrega']))) ?></strong>
                         </span>
                         <span>
-                            <small>Responsavel</small>
+                            <small>Responsável</small>
                             <strong><?= h($item['entregue_por_nome']) ?></strong>
                         </span>
                     </div>
