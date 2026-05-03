@@ -50,9 +50,9 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
 <section class="records-page aid-types-page">
     <header class="action-form-header records-header">
         <div>
-            <span class="eyebrow">Administracao</span>
-            <h1>Tipos de ajuda humanitaria</h1>
-            <p>Materiais que podem ser vinculados as entregas, comprovantes e prestacao de contas.</p>
+            <span class="eyebrow">Administração</span>
+            <h1>Tipos de ajuda humanitária</h1>
+            <p>Materiais que podem ser vinculados às entregas, comprovantes e prestação de contas.</p>
         </div>
         <a class="primary-link-button" href="<?= h(url('/admin/ajudas/novo')) ?>">Novo tipo</a>
     </header>
@@ -66,7 +66,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
         <article class="records-summary-card">
             <span>Ativos</span>
             <strong><?= h($totalAtivos) ?></strong>
-            <small>Disponiveis para registro de entrega.</small>
+            <small>Disponíveis para registro de entrega.</small>
         </article>
         <article class="records-summary-card">
             <span>Inativos</span>
@@ -136,7 +136,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
     <?php if ($tipos === []): ?>
         <section class="action-empty-panel records-empty-panel">
             <h2><?= $activeFilters === [] ? 'Nenhum tipo de ajuda cadastrado' : 'Nenhum tipo de ajuda encontrado' ?></h2>
-            <p><?= $activeFilters === [] ? 'Cadastre os materiais que serao utilizados nas entregas e comprovantes.' : 'Revise os filtros aplicados ou limpe a busca para voltar a lista completa.' ?></p>
+            <p><?= $activeFilters === [] ? 'Cadastre os materiais que serão utilizados nas entregas e comprovantes.' : 'Revise os filtros aplicados ou limpe a busca para voltar à lista completa.' ?></p>
             <?php if ($activeFilters !== []): ?>
                 <a class="primary-link-button" href="<?= h(url('/admin/ajudas')) ?>">Limpar filtros</a>
             <?php else: ?>
@@ -157,7 +157,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                         <div class="aid-type-title">
                             <span class="status <?= $ativo ? 'status-aberta' : 'status-cancelada' ?>"><?= $ativo ? 'Ativo' : 'Inativo' ?></span>
                             <h2><?= h($tipo['nome']) ?></h2>
-                            <p><?= $ativo ? 'Disponivel para novas entregas.' : 'Indisponivel para novas entregas.' ?></p>
+                            <p><?= $ativo ? 'Disponível para novas entregas.' : 'Indisponível para novas entregas.' ?></p>
                         </div>
 
                         <dl class="aid-type-meta">
@@ -176,11 +176,11 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                         </dl>
                     </div>
 
-                    <aside class="aid-type-actions" aria-label="Acoes do tipo de ajuda">
+                    <aside class="aid-type-actions" aria-label="Ações do tipo de ajuda">
                         <a class="secondary-button action-card-button" href="<?= h(url('/admin/ajudas/' . $tipo['id'] . '/editar')) ?>">Editar</a>
 
                         <?php if ($ativo): ?>
-                            <form method="post" action="<?= h(url('/admin/ajudas/' . $tipo['id'] . '/inativar')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Inativar este tipo de ajuda? Ele nao aparecera em novas entregas.">
+                            <form method="post" action="<?= h(url('/admin/ajudas/' . $tipo['id'] . '/inativar')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Inativar este tipo de ajuda? Ele não aparecerá em novas entregas.">
                                 <?= csrf_field() ?>
                                 <?= idempotency_field('admin.ajudas.status.' . $tipo['id'] . '.inativar') ?>
                                 <button type="submit" class="secondary-button action-card-button" data-loading-text="Inativando...">Inativar</button>
@@ -200,7 +200,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                                 <button type="submit" class="danger-button action-card-button" data-loading-text="Excluindo...">Excluir</button>
                             </form>
                         <?php else: ?>
-                            <span class="action-card-disabled">Exclusao bloqueada</span>
+                            <span class="action-card-disabled">Exclusão bloqueada</span>
                         <?php endif; ?>
                     </aside>
                 </article>
@@ -209,7 +209,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
     <?php endif; ?>
 
     <?php if ($totalPages > 1): ?>
-        <nav class="records-pagination" aria-label="Paginacao dos tipos de ajuda">
+        <nav class="records-pagination" aria-label="Paginação dos tipos de ajuda">
             <a class="pagination-link <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= h($page > 1 ? $pageUrl($page - 1) : '#') ?>" aria-disabled="<?= $page <= 1 ? 'true' : 'false' ?>">Anterior</a>
 
             <div class="pagination-pages">
@@ -222,7 +222,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 <?php endfor; ?>
             </div>
 
-            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Proxima</a>
+            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Próxima</a>
         </nav>
     <?php endif; ?>
 </section>

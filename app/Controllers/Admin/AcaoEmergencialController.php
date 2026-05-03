@@ -98,7 +98,7 @@ final class AcaoEmergencialController extends Controller
         }
 
         if ((string) ($acao['status'] ?? '') !== 'aberta') {
-            Session::flash('warning', 'Acoes encerradas ou canceladas nao podem ser editadas. Ative a acao para editar novamente.');
+            Session::flash('warning', 'Ações encerradas ou canceladas não podem ser editadas. Ative a ação para editar novamente.');
             $this->redirect('/admin/acoes');
         }
 
@@ -119,7 +119,7 @@ final class AcaoEmergencialController extends Controller
         $this->guardPost('admin.acoes.update.' . (int) $id, '/admin/acoes/' . (int) $id . '/editar');
 
         if ((string) ($acao['status'] ?? '') !== 'aberta') {
-            Session::flash('warning', 'Acoes encerradas ou canceladas nao podem ser editadas. Ative a acao para editar novamente.');
+            Session::flash('warning', 'Ações encerradas ou canceladas não podem ser editadas. Ative a ação para editar novamente.');
             $this->redirect('/admin/acoes');
         }
 
@@ -220,15 +220,15 @@ final class AcaoEmergencialController extends Controller
         }
 
         if ($currentStatus !== 'aberta') {
-            return 'Acoes encerradas ou canceladas devem ser ativadas antes de mudar para outro status.';
+            return 'Ações encerradas ou canceladas devem ser ativadas antes de mudar para outro status.';
         }
 
         if ($targetStatus === 'cancelada' && $activeRecords > 0) {
-            return 'Nao e possivel cancelar uma acao que ja possui registros. Use encerrar.';
+            return 'Não é possível cancelar uma ação que já possui registros. Use encerrar.';
         }
 
         if ($targetStatus === 'encerrada' && $activeRecords === 0) {
-            return 'Nao e possivel encerrar uma acao sem registros. Use cancelar.';
+            return 'Não é possível encerrar uma ação sem registros. Use cancelar.';
         }
 
         return null;
@@ -351,7 +351,7 @@ final class AcaoEmergencialController extends Controller
     private function guardPost(string $scope, string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
 

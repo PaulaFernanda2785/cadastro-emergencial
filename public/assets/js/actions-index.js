@@ -38,7 +38,7 @@
     }
 
     function shareText(link) {
-        return 'Acesse o cadastro web desta acao emergencial:\n' + link;
+        return 'Acesse o cadastro web desta ação emergencial:\n' + link;
     }
 
     document.querySelectorAll('[data-action-qr-open]').forEach(function (button) {
@@ -116,7 +116,7 @@
             var link = currentRegisterUrl();
 
             if (!link || link === '#') {
-                setCopyStatus('Link indisponivel.');
+                setCopyStatus('Link indisponível.');
                 return;
             }
 
@@ -124,12 +124,12 @@
                 navigator.clipboard.writeText(link).then(function () {
                     setCopyStatus('Link copiado.');
                 }).catch(function () {
-                    setCopyStatus(fallbackCopy(link) ? 'Link copiado.' : 'Nao foi possivel copiar automaticamente.');
+                    setCopyStatus(fallbackCopy(link) ? 'Link copiado.' : 'Não foi possível copiar automaticamente.');
                 });
                 return;
             }
 
-            setCopyStatus(fallbackCopy(link) ? 'Link copiado.' : 'Nao foi possivel copiar automaticamente.');
+            setCopyStatus(fallbackCopy(link) ? 'Link copiado.' : 'Não foi possível copiar automaticamente.');
         });
     }
 
@@ -138,14 +138,14 @@
             var link = currentRegisterUrl();
 
             if (!link || link === '#') {
-                setCopyStatus('Link indisponivel.');
+                setCopyStatus('Link indisponível.');
                 return;
             }
 
             if (navigator.share) {
                 navigator.share({
-                    title: title.textContent || 'Acao emergencial',
-                    text: 'Acesse o cadastro web desta acao emergencial.',
+                    title: title.textContent || 'Ação emergencial',
+                    text: 'Acesse o cadastro web desta ação emergencial.',
                     url: link
                 }).catch(function () {});
                 return;

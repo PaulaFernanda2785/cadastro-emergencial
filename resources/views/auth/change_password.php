@@ -3,7 +3,7 @@
         <div>
             <span class="eyebrow">Conta</span>
             <h1>Alterar senha</h1>
-            <p>Atualize sua senha de acesso usando a senha atual para confirmar a operacao.</p>
+            <p>Atualize sua senha de acesso usando a senha atual para confirmar a operação.</p>
         </div>
         <a class="secondary-button action-back-link" href="<?= h(url('/dashboard')) ?>">Voltar ao painel</a>
     </header>
@@ -16,7 +16,7 @@
             <div class="form-block-heading">
                 <span>1</span>
                 <div>
-                    <h2>Confirmacao</h2>
+                    <h2>Confirmação</h2>
                     <p>Informe sua senha atual antes de definir uma nova senha.</p>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                 <span>2</span>
                 <div>
                     <h2>Nova senha</h2>
-                    <p>A nova senha deve ter no minimo 8 caracteres.</p>
+                    <p>A nova senha deve ter no mínimo 8 caracteres.</p>
                 </div>
             </div>
 

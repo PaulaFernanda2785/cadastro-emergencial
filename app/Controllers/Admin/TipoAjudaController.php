@@ -157,13 +157,13 @@ final class TipoAjudaController extends Controller
         $this->guardPost('admin.ajudas.delete.' . (int) $id, '/admin/ajudas');
 
         if ($this->tipos->countDeliveries((int) $id) > 0) {
-            Session::flash('warning', 'Nao e possivel excluir um tipo de ajuda que ja possui entregas registradas. Inative o tipo para impedir novas entregas.');
+            Session::flash('warning', 'Não é possível excluir um tipo de ajuda que já possui entregas registradas. Inative o tipo para impedir novas entregas.');
             $this->redirect('/admin/ajudas');
         }
 
         $this->tipos->delete((int) $id);
         (new AuditLogService())->record('excluiu_tipo_ajuda', 'tipos_ajuda', (int) $id, $tipo['nome']);
-        Session::flash('success', 'Tipo de ajuda excluido.');
+        Session::flash('success', 'Tipo de ajuda excluído.');
 
         $this->redirect('/admin/ajudas');
     }
@@ -213,7 +213,7 @@ final class TipoAjudaController extends Controller
     private function guardPost(string $scope, string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
 

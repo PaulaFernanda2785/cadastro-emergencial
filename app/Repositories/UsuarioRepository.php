@@ -279,7 +279,7 @@ final class UsuarioRepository
         $info = password_get_info($hash);
 
         if (($info['algoName'] ?? 'unknown') === 'unknown') {
-            throw new \InvalidArgumentException('Hash de senha invalido.');
+            throw new \InvalidArgumentException('Hash de senha inválido.');
         }
 
         $stmt = Database::connection()->prepare(

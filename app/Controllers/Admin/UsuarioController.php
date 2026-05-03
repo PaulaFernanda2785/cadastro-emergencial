@@ -30,7 +30,7 @@ final class UsuarioController extends Controller
         $page = min($this->requestedPage(), $totalPages);
 
         $this->view('admin.usuarios.index', [
-            'title' => 'Usuarios',
+            'title' => 'Usuários',
             'usuarios' => $this->usuarios->search($filters, self::INDEX_PER_PAGE, ($page - 1) * self::INDEX_PER_PAGE),
             'filters' => $filters,
             'summary' => $this->usuarios->searchSummary($filters),
@@ -47,7 +47,7 @@ final class UsuarioController extends Controller
 
     public function create(): void
     {
-        $this->form('Novo usuario', $this->emptyInput(), [], '/admin/usuarios');
+        $this->form('Novo usuário', $this->emptyInput(), [], '/admin/usuarios');
     }
 
     public function store(): void
@@ -58,13 +58,13 @@ final class UsuarioController extends Controller
         $validator = $this->validator($data, true);
 
         if ($validator->fails()) {
-            $this->form('Novo usuario', $data, $validator->errors(), '/admin/usuarios');
+            $this->form('Novo usuário', $data, $validator->errors(), '/admin/usuarios');
             return;
         }
 
         $id = $this->usuarios->create($data);
         (new AuditLogService())->record('criou_usuario', 'usuarios', $id, $data['email']);
-        Session::flash('success', 'Usuario cadastrado.');
+        Session::flash('success', 'Usuário cadastrado.');
 
         $this->redirect('/admin/usuarios');
     }
@@ -76,7 +76,7 @@ final class UsuarioController extends Controller
         $usuario['senha'] = '';
         $usuario['confirmar_senha'] = '';
 
-        $this->form('Editar usuario', $usuario, [], '/admin/usuarios/' . (int) $id);
+        $this->form('Editar usuário', $usuario, [], '/admin/usuarios/' . (int) $id);
     }
 
     public function update(string $id): void
@@ -89,12 +89,12 @@ final class UsuarioController extends Controller
         $isCurrentUser = (int) (current_user()['id'] ?? 0) === (int) $id;
 
         if ($isCurrentUser && ($data['perfil'] !== 'administrador' || empty($data['ativo']))) {
-            $validator->add('perfil', 'Voce nao pode remover seu proprio acesso administrativo ou inativar sua conta.');
+            $validator->add('perfil', 'Você não pode remover seu próprio acesso administrativo ou inativar sua conta.');
         }
 
         if ($validator->fails()) {
             $data['id'] = (int) $id;
-            $this->form('Editar usuario', $data, $validator->errors(), '/admin/usuarios/' . (int) $id);
+            $this->form('Editar usuário', $data, $validator->errors(), '/admin/usuarios/' . (int) $id);
             return;
         }
 
@@ -105,7 +105,7 @@ final class UsuarioController extends Controller
         }
 
         (new AuditLogService())->record('atualizou_usuario', 'usuarios', (int) $id, $usuario['email']);
-        Session::flash('success', 'Usuario atualizado.');
+        Session::flash('success', 'Usuário atualizado.');
 
         $this->redirect('/admin/usuarios');
     }
@@ -154,7 +154,7 @@ final class UsuarioController extends Controller
 
         $this->usuarios->setActive((int) $id, true);
         (new AuditLogService())->record('ativou_usuario', 'usuarios', (int) $id, $usuario['email']);
-        Session::flash('success', 'Usuario ativado.');
+        Session::flash('success', 'Usuário ativado.');
 
         $this->redirect('/admin/usuarios');
     }
@@ -165,13 +165,13 @@ final class UsuarioController extends Controller
         $this->guardPost('admin.usuarios.status.' . (int) $id . '.inativar', '/admin/usuarios');
 
         if ((int) (current_user()['id'] ?? 0) === (int) $id) {
-            Session::flash('warning', 'Voce nao pode inativar sua propria conta.');
+            Session::flash('warning', 'Você não pode inativar sua própria conta.');
             $this->redirect('/admin/usuarios');
         }
 
         $this->usuarios->setActive((int) $id, false);
         (new AuditLogService())->record('inativou_usuario', 'usuarios', (int) $id, $usuario['email']);
-        Session::flash('success', 'Usuario inativado.');
+        Session::flash('success', 'Usuário inativado.');
 
         $this->redirect('/admin/usuarios');
     }
@@ -293,33 +293,33 @@ final class UsuarioController extends Controller
             ->email('email', $data['email'], 'E-mail')
             ->max('email', $data['email'], 180, 'E-mail')
             ->max('telefone', $data['telefone'], 30, 'Telefone')
-            ->max('orgao', $data['orgao'], 180, 'Orgao')
+            ->max('orgao', $data['orgao'], 180, 'Órgão')
             ->max('unidade_setor', $data['unidade_setor'], 180, 'Unidade/setor')
-            ->max('graduacao', $data['graduacao'], 80, 'Graduacao')
+            ->max('graduacao', $data['graduacao'], 80, 'Graduação')
             ->max('nome_guerra', $data['nome_guerra'], 120, 'Nome de guerra')
-            ->max('matricula_funcional', $data['matricula_funcional'], 60, 'Matricula funcional')
+            ->max('matricula_funcional', $data['matricula_funcional'], 60, 'Matrícula funcional')
             ->in('perfil', $data['perfil'], self::PROFILES, 'Perfil');
 
         if ($passwordRequired || $data['senha'] !== '') {
             $validator->required('senha', $data['senha'], 'Senha');
 
             if (strlen((string) $data['senha']) < 8) {
-                $validator->add('senha', 'Senha deve ter no minimo 8 caracteres.');
+                $validator->add('senha', 'Senha deve ter no mínimo 8 caracteres.');
             }
 
             if ($data['senha'] !== $data['confirmar_senha']) {
-                $validator->add('confirmar_senha', 'Confirmacao nao confere com a senha.');
+                $validator->add('confirmar_senha', 'Confirmação não confere com a senha.');
             }
         }
 
         $sameEmailUser = $data['email'] !== '' ? $this->usuarios->findByEmail($data['email']) : null;
         if ($sameEmailUser !== null && (int) $sameEmailUser['id'] !== (int) $ignoreId) {
-            $validator->add('email', 'E-mail ja cadastrado para outro usuario.');
+            $validator->add('email', 'E-mail já cadastrado para outro usuário.');
         }
 
         $sameCpfUser = $data['cpf'] !== '' ? $this->usuarios->findByCpf($data['cpf']) : null;
         if ($sameCpfUser !== null && (int) $sameCpfUser['id'] !== (int) $ignoreId) {
-            $validator->add('cpf', 'CPF ja cadastrado para outro usuario.');
+            $validator->add('cpf', 'CPF já cadastrado para outro usuário.');
         }
 
         return $validator;
@@ -331,11 +331,11 @@ final class UsuarioController extends Controller
         $validator->required('senha', $data['senha'], 'Senha');
 
         if (strlen((string) $data['senha']) < 8) {
-            $validator->add('senha', 'Senha deve ter no minimo 8 caracteres.');
+            $validator->add('senha', 'Senha deve ter no mínimo 8 caracteres.');
         }
 
         if ($data['senha'] !== $data['confirmar_senha']) {
-            $validator->add('confirmar_senha', 'Confirmacao nao confere com a senha.');
+            $validator->add('confirmar_senha', 'Confirmação não confere com a senha.');
         }
 
         return $validator;
@@ -362,7 +362,7 @@ final class UsuarioController extends Controller
     private function guardPost(string $scope, string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
 

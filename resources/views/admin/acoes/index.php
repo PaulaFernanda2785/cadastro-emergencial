@@ -50,9 +50,9 @@ unset($activeFilters['municipio_id']);
 $filterLabels = [
     'q' => 'Busca',
     'status' => 'Status',
-    'municipio_busca' => 'Municipio',
+    'municipio_busca' => 'Município',
     'tipo_evento' => 'Evento',
-    'data_inicio' => 'Inicio',
+    'data_inicio' => 'Início',
     'data_fim' => 'Fim',
 ];
 
@@ -79,16 +79,16 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
 <section class="records-page actions-page actions-index-page">
     <header class="action-form-header records-header">
         <div>
-            <span class="eyebrow">Administracao</span>
-            <h1>Acoes emergenciais</h1>
-            <p>Gerencie acoes, controle o status de atendimento e compartilhe o cadastro por QR Code somente em acoes abertas.</p>
+            <span class="eyebrow">Administração</span>
+            <h1>Ações emergenciais</h1>
+            <p>Gerencie ações, controle o status de atendimento e compartilhe o cadastro por QR Code somente em ações abertas.</p>
         </div>
-        <a class="primary-link-button" href="<?= h(url('/admin/acoes/novo')) ?>">Nova acao</a>
+        <a class="primary-link-button" href="<?= h(url('/admin/acoes/novo')) ?>">Nova ação</a>
     </header>
 
-    <section class="records-summary-grid action-summary-grid" aria-label="Resumo das acoes emergenciais">
+    <section class="records-summary-grid action-summary-grid" aria-label="Resumo das ações emergenciais">
         <article class="records-summary-card">
-            <span>Acoes</span>
+            <span>Ações</span>
             <strong><?= h($totalAcoes) ?></strong>
             <small><?= $activeFilters === [] ? 'Total registrado.' : 'Total encontrado pelos filtros.' ?></small>
         </article>
@@ -100,20 +100,20 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
         <article class="records-summary-card">
             <span>Cadastros</span>
             <strong><?= h($totalResidencias) ?> / <?= h($totalFamilias) ?></strong>
-            <small>Residencias / familias vinculadas.</small>
+            <small>Residências / famílias vinculadas.</small>
         </article>
         <article class="records-summary-card">
-            <span>Ultima acao</span>
+            <span>Última ação</span>
             <strong><?= $ultimaAtualizacao !== null ? h(date('d/m/Y', $ultimaAtualizacao)) : '-' ?></strong>
             <small><?= $ultimaAtualizacao !== null ? h(date('H:i', $ultimaAtualizacao)) : 'Sem registros' ?></small>
         </article>
     </section>
 
-    <section class="records-filter-panel action-filter-panel action-filter-modern-panel" aria-label="Filtros de acoes emergenciais">
+    <section class="records-filter-panel action-filter-panel action-filter-modern-panel" aria-label="Filtros de ações emergenciais">
         <form method="get" action="<?= h(url('/admin/acoes')) ?>" class="action-filter-form action-filter-modern-form">
             <label class="field styled-field action-search-field action-filter-field action-filter-field-wide">
                 <span>Buscar</span>
-                <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" list="acoes-busca-list" placeholder="Localidade, evento, municipio, UF ou IBGE">
+                <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" list="acoes-busca-list" placeholder="Localidade, evento, município, UF ou IBGE">
                 <datalist id="acoes-busca-list">
                     <?php foreach ($acoes as $acao): ?>
                         <option value="<?= h($acao['localidade']) ?>"></option>
@@ -127,8 +127,8 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
             </label>
 
             <label class="field styled-field smart-search-field action-filter-field action-filter-field-wide">
-                <span>Municipio</span>
-                <input type="search" name="municipio_busca" value="<?= h(($filters['municipio_busca'] ?? '') !== '' ? $filters['municipio_busca'] : $municipioSelecionado) ?>" list="acoes-municipios-list" placeholder="Digite para buscar municipio" data-smart-search data-smart-target="acoes_municipio_id" autocomplete="off">
+                <span>Município</span>
+                <input type="search" name="municipio_busca" value="<?= h(($filters['municipio_busca'] ?? '') !== '' ? $filters['municipio_busca'] : $municipioSelecionado) ?>" list="acoes-municipios-list" placeholder="Digite para buscar município" data-smart-search data-smart-target="acoes_municipio_id" autocomplete="off">
                 <input type="hidden" name="municipio_id" value="<?= h($filters['municipio_id'] ?? '') ?>" data-smart-hidden="acoes_municipio_id">
                 <datalist id="acoes-municipios-list">
                     <?php foreach ($municipios ?? [] as $municipio): ?>
@@ -183,22 +183,22 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
     </section>
 
     <div class="records-list-toolbar">
-        <span><?= h($totalAcoes) ?> acao(oes) encontrada(s)</span>
+        <span><?= h($totalAcoes) ?> ação(ões) encontrada(s)</span>
         <strong><?= h($firstRecord) ?>-<?= h($lastRecord) ?> de <?= h($totalAcoes) ?></strong>
     </div>
 
     <?php if ($acoes === []): ?>
         <section class="action-empty-panel records-empty-panel">
-            <h2><?= $activeFilters === [] ? 'Nenhuma acao emergencial cadastrada' : 'Nenhuma acao encontrada' ?></h2>
-            <p><?= $activeFilters === [] ? 'Crie uma nova acao para liberar o cadastro de residencias e familias.' : 'Revise os filtros aplicados ou limpe a busca para voltar a lista completa.' ?></p>
+            <h2><?= $activeFilters === [] ? 'Nenhuma ação emergencial cadastrada' : 'Nenhuma ação encontrada' ?></h2>
+            <p><?= $activeFilters === [] ? 'Crie uma nova ação para liberar o cadastro de residências e famílias.' : 'Revise os filtros aplicados ou limpe a busca para voltar à lista completa.' ?></p>
             <?php if ($activeFilters !== []): ?>
                 <a class="primary-link-button" href="<?= h(url('/admin/acoes')) ?>">Limpar filtros</a>
             <?php else: ?>
-                <a class="primary-link-button" href="<?= h(url('/admin/acoes/novo')) ?>">Criar primeira acao</a>
+                <a class="primary-link-button" href="<?= h(url('/admin/acoes/novo')) ?>">Criar primeira ação</a>
             <?php endif; ?>
         </section>
     <?php else: ?>
-        <section class="action-card-grid" aria-label="Lista de acoes emergenciais">
+        <section class="action-card-grid" aria-label="Lista de ações emergenciais">
             <?php foreach ($acoes as $acao): ?>
                 <?php
                 $status = (string) $acao['status'];
@@ -237,7 +237,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                                 <dd><?= $dataCriacao !== false ? h(date('d/m/Y H:i', $dataCriacao)) : '-' ?></dd>
                             </div>
                             <div>
-                                <dt>Residencias</dt>
+                                <dt>Residências</dt>
                                 <dd><?= h((int) ($acao['residencias_cadastradas'] ?? 0)) ?></dd>
                             </div>
                             <div>
@@ -253,8 +253,8 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                         <div class="action-qr-state action-qr-state-<?= $isOpen ? 'available' : 'blocked' ?>">
                             <div>
                                 <span>Cadastro via QR Code</span>
-                                <strong><?= $isOpen ? 'Disponivel' : 'Indisponivel' ?></strong>
-                                <small><?= $isOpen ? 'Link liberado para novos cadastros.' : 'Disponivel novamente somente ao ativar a acao.' ?></small>
+                                <strong><?= $isOpen ? 'Disponível' : 'Indisponível' ?></strong>
+                                <small><?= $isOpen ? 'Link liberado para novos cadastros.' : 'Disponível novamente somente ao ativar a ação.' ?></small>
                             </div>
                             <div class="record-progress" aria-hidden="true">
                                 <span style="width: <?= h((string) $atendimentoPercentual) ?>%"></span>
@@ -274,13 +274,13 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                                 Link e QR Code
                             </button>
                         <?php else: ?>
-                            <span class="action-card-disabled">QR indisponivel</span>
+                            <span class="action-card-disabled">QR indisponível</span>
                         <?php endif; ?>
 
                         <?php if ($canEdit): ?>
                             <a class="secondary-button action-card-button" href="<?= h(url('/admin/acoes/' . $acao['id'] . '/editar')) ?>">Editar</a>
                         <?php else: ?>
-                            <span class="action-card-disabled">Edicao bloqueada</span>
+                            <span class="action-card-disabled">Edição bloqueada</span>
                         <?php endif; ?>
 
                         <?php if ($canActivate): ?>
@@ -292,27 +292,27 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                         <?php endif; ?>
 
                         <?php if ($canClose): ?>
-                            <form method="post" action="<?= h(url('/admin/acoes/' . $acao['id'] . '/encerrar')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Encerrar esta acao? Novos cadastros pelo QR Code serao bloqueados.">
+                            <form method="post" action="<?= h(url('/admin/acoes/' . $acao['id'] . '/encerrar')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Encerrar esta ação? Novos cadastros pelo QR Code serão bloqueados.">
                                 <?= csrf_field() ?>
                                 <?= idempotency_field('admin.acoes.status.' . $acao['id'] . '.encerrada') ?>
                                 <button type="submit" class="secondary-button action-card-button" data-loading-text="Encerrando...">Encerrar</button>
                             </form>
                         <?php elseif ($isOpen): ?>
-                            <span class="action-card-disabled">Encerrar indisponivel</span>
+                            <span class="action-card-disabled">Encerrar indisponível</span>
                         <?php endif; ?>
 
                         <?php if ($canCancel): ?>
-                            <form method="post" action="<?= h(url('/admin/acoes/' . $acao['id'] . '/cancelar')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Cancelar esta acao? Novos cadastros pelo QR Code serao bloqueados.">
+                            <form method="post" action="<?= h(url('/admin/acoes/' . $acao['id'] . '/cancelar')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Cancelar esta ação? Novos cadastros pelo QR Code serão bloqueados.">
                                 <?= csrf_field() ?>
                                 <?= idempotency_field('admin.acoes.status.' . $acao['id'] . '.cancelada') ?>
                                 <button type="submit" class="secondary-button action-card-button" data-loading-text="Cancelando...">Cancelar</button>
                             </form>
                         <?php elseif ($isOpen): ?>
-                            <span class="action-card-disabled">Cancelar indisponivel</span>
+                            <span class="action-card-disabled">Cancelar indisponível</span>
                         <?php endif; ?>
 
                         <?php if ($isAdmin): ?>
-                            <form method="post" action="<?= h(url('/admin/acoes/' . $acao['id'] . '/excluir')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Excluir esta acao da listagem? O registro continuara preservado no banco.">
+                            <form method="post" action="<?= h(url('/admin/acoes/' . $acao['id'] . '/excluir')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Excluir esta ação da listagem? O registro continuará preservado no banco.">
                                 <?= csrf_field() ?>
                                 <?= idempotency_field('admin.acoes.delete.' . $acao['id']) ?>
                                 <button type="submit" class="danger-button action-card-button" data-loading-text="Excluindo...">Excluir</button>
@@ -325,7 +325,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
     <?php endif; ?>
 
     <?php if ($totalPages > 1): ?>
-        <nav class="records-pagination" aria-label="Paginacao de acoes emergenciais">
+        <nav class="records-pagination" aria-label="Paginação de ações emergenciais">
             <a class="pagination-link <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= h($page > 1 ? $pageUrl($page - 1) : '#') ?>" aria-disabled="<?= $page <= 1 ? 'true' : 'false' ?>">Anterior</a>
 
             <div class="pagination-pages">
@@ -338,7 +338,7 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 <?php endfor; ?>
             </div>
 
-            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Proxima</a>
+            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Próxima</a>
         </nav>
     <?php endif; ?>
 </section>
@@ -349,17 +349,17 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
     </form>
     <div class="qr-modal-content">
         <span class="eyebrow">Aplicativo de cadastro</span>
-        <h2 id="qr-modal-title" data-action-qr-title>QR Code da acao</h2>
-        <p>Compartilhe este link personalizado ou leia o QR Code para abrir o cadastro web desta acao no computador, celular ou tablet.</p>
+        <h2 id="qr-modal-title" data-action-qr-title>QR Code da ação</h2>
+        <p>Compartilhe este link personalizado ou leia o QR Code para abrir o cadastro web desta ação no computador, celular ou tablet.</p>
         <canvas class="qr-modal-image" data-action-qr-canvas aria-label="QR Code do aplicativo de cadastro"></canvas>
         <label class="qr-modal-link-field">
-            <span>Link compartilhavel da acao</span>
+            <span>Link compartilhável da ação</span>
             <input type="text" value="" readonly data-action-qr-link>
         </label>
-        <p class="qr-modal-rule">Para usuarios com perfil cadastrador, o acesso por este link ou QR Code fica atrelado somente a esta acao aberta. O cadastrador visualiza apenas os proprios registros desta acao e nao acessa dados de outras acoes ou de outros usuarios.</p>
+        <p class="qr-modal-rule">Para usuários com perfil cadastrador, o acesso por este link ou QR Code fica atrelado somente a esta ação aberta. O cadastrador visualiza apenas os próprios registros desta ação e não acessa dados de outras ações ou de outros usuários.</p>
         <span class="qr-modal-copy-status" data-action-qr-copy-status></span>
         <div class="qr-modal-actions">
-            <a class="primary-link-button" href="#" target="_blank" rel="noopener" data-action-qr-register>Abrir link da acao</a>
+            <a class="primary-link-button" href="#" target="_blank" rel="noopener" data-action-qr-register>Abrir link da ação</a>
             <button type="button" class="secondary-button" data-action-qr-copy>Copiar link</button>
             <button type="button" class="secondary-button" data-action-qr-share>Compartilhar</button>
         </div>

@@ -32,7 +32,7 @@ final class PublicAcaoController extends Controller
         }
 
         $this->view('public.acao', [
-            'title' => 'Acao emergencial',
+            'title' => 'Ação emergencial',
             'acao' => $acao,
         ]);
     }

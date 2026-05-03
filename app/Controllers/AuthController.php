@@ -188,21 +188,21 @@ final class AuthController extends Controller
         $validator = (new Validator())
             ->required('senha_atual', $currentPassword, 'Senha atual')
             ->required('nova_senha', $newPassword, 'Nova senha')
-            ->required('confirmar_senha', $confirmation, 'Confirmacao de senha');
+            ->required('confirmar_senha', $confirmation, 'Confirmação de senha');
 
         if ($newPassword !== '' && strlen($newPassword) < 8) {
-            $validator->add('nova_senha', 'Nova senha deve ter no minimo 8 caracteres.');
+            $validator->add('nova_senha', 'Nova senha deve ter no mínimo 8 caracteres.');
         }
 
         if ($newPassword !== $confirmation) {
-            $validator->add('confirmar_senha', 'Confirmacao nao confere com a nova senha.');
+            $validator->add('confirmar_senha', 'Confirmação não confere com a nova senha.');
         }
 
         $userId = (int) (current_user()['id'] ?? 0);
         $user = (new UsuarioRepository())->find($userId);
 
         if ($user === null || !password_verify($currentPassword, (string) $user['senha_hash'])) {
-            $validator->add('senha_atual', 'Senha atual invalida.');
+            $validator->add('senha_atual', 'Senha atual inválida.');
         }
 
         if ($validator->fails()) {
@@ -214,8 +214,8 @@ final class AuthController extends Controller
         }
 
         (new UsuarioRepository())->updatePassword($userId, $newPassword);
-        (new AuditLogService())->record('alterou_senha', 'usuarios', $userId, 'Usuario alterou a propria senha.');
-        Session::flash('success', 'Senha alterada com seguranca.');
+        (new AuditLogService())->record('alterou_senha', 'usuarios', $userId, 'Usuário alterou a própria senha.');
+        Session::flash('success', 'Senha alterada com segurança.');
 
         $this->redirect('/dashboard');
     }
@@ -223,7 +223,7 @@ final class AuthController extends Controller
     private function guardPost(string $scope, string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
 

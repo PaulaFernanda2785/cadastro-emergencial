@@ -6,9 +6,9 @@ $ativo = (int) ($tipo['ativo'] ?? 1) === 1;
 <section class="action-form-page aid-type-form-page">
     <header class="action-form-header">
         <div>
-            <span class="eyebrow">Administracao</span>
+            <span class="eyebrow">Administração</span>
             <h1><?= h($title) ?></h1>
-            <p>Use nomes objetivos, pois eles aparecem nas entregas, comprovantes, historico e prestacao de contas.</p>
+            <p>Use nomes objetivos, pois eles aparecem nas entregas, comprovantes, histórico e prestação de contas.</p>
         </div>
         <a class="secondary-button action-back-link" href="<?= h(url('/admin/ajudas')) ?>">Voltar para tipos</a>
     </header>
@@ -21,7 +21,7 @@ $ativo = (int) ($tipo['ativo'] ?? 1) === 1;
             <div class="form-block-heading">
                 <span>1</span>
                 <div>
-                    <h2>Identificacao do material</h2>
+                    <h2>Identificação do material</h2>
                     <p>Informe o nome exibido nas entregas e a unidade usada para quantificar o item.</p>
                 </div>
             </div>
@@ -29,7 +29,7 @@ $ativo = (int) ($tipo['ativo'] ?? 1) === 1;
             <div class="form-grid aid-type-fields-grid">
                 <label class="field styled-field">
                     <span>Nome do material</span>
-                    <input type="text" name="nome" value="<?= h($tipo['nome'] ?? '') ?>" maxlength="180" placeholder="Ex.: Cesta basica, kit higiene, colchao" required autofocus>
+                    <input type="text" name="nome" value="<?= h($tipo['nome'] ?? '') ?>" maxlength="180" placeholder="Ex.: Cesta básica, kit higiene, colchão" required autofocus>
                     <?php if (!empty($errors['nome'])): ?>
                         <small class="field-error"><?= h($errors['nome'][0]) ?></small>
                     <?php endif; ?>
@@ -59,7 +59,7 @@ $ativo = (int) ($tipo['ativo'] ?? 1) === 1;
                     <span>2</span>
                     <div>
                         <h2>Disponibilidade</h2>
-                        <p>Tipos inativos deixam de aparecer em novas entregas, mas continuam preservados no historico.</p>
+                        <p>Tipos inativos deixam de aparecer em novas entregas, mas continuam preservados no histórico.</p>
                     </div>
                 </div>
 

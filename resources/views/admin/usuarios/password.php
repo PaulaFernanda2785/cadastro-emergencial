@@ -1,11 +1,11 @@
 <section class="action-form-page user-form-page">
     <header class="action-form-header">
         <div>
-            <span class="eyebrow">Administracao</span>
+            <span class="eyebrow">Administração</span>
             <h1>Alterar senha</h1>
-            <p><?= h($usuario['nome'] ?? 'Usuario') ?> - <?= h($usuario['email'] ?? '') ?></p>
+            <p><?= h($usuario['nome'] ?? 'Usuário') ?> - <?= h($usuario['email'] ?? '') ?></p>
         </div>
-        <a class="secondary-button action-back-link" href="<?= h(url('/admin/usuarios')) ?>">Voltar para usuarios</a>
+        <a class="secondary-button action-back-link" href="<?= h(url('/admin/usuarios')) ?>">Voltar para usuários</a>
     </header>
 
     <form method="post" action="<?= h(url($action)) ?>" class="form action-form-card user-form-card js-prevent-double-submit" novalidate>
@@ -17,7 +17,7 @@
                 <span>1</span>
                 <div>
                     <h2>Nova senha</h2>
-                    <p>Defina uma nova senha com no minimo 8 caracteres.</p>
+                    <p>Defina uma nova senha com no mínimo 8 caracteres.</p>
                 </div>
             </div>
 

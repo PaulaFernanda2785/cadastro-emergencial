@@ -10,11 +10,11 @@ $profileLabels = [
 <section class="action-form-page user-form-page">
     <header class="action-form-header">
         <div>
-            <span class="eyebrow">Administracao</span>
+            <span class="eyebrow">Administração</span>
             <h1><?= h($title) ?></h1>
-            <p>Defina identificacao, dados institucionais, perfil de acesso e status da conta.</p>
+            <p>Defina identificação, dados institucionais, perfil de acesso e status da conta.</p>
         </div>
-        <a class="secondary-button action-back-link" href="<?= h(url('/admin/usuarios')) ?>">Voltar para usuarios</a>
+        <a class="secondary-button action-back-link" href="<?= h(url('/admin/usuarios')) ?>">Voltar para usuários</a>
     </header>
 
     <form method="post" action="<?= h(url($action)) ?>" class="form action-form-card user-form-card js-prevent-double-submit" novalidate>
@@ -25,7 +25,7 @@ $profileLabels = [
             <div class="form-block-heading">
                 <span>1</span>
                 <div>
-                    <h2>Identificacao</h2>
+                    <h2>Identificação</h2>
                     <p>Dados principais utilizados para login, auditoria e assinaturas digitais.</p>
                 </div>
             </div>
@@ -61,14 +61,14 @@ $profileLabels = [
             <div class="form-block-heading">
                 <span>2</span>
                 <div>
-                    <h2>Vinculo institucional</h2>
-                    <p>Informe orgao, setor e dados militares quando aplicavel.</p>
+                    <h2>Vínculo institucional</h2>
+                    <p>Informe órgão, setor e dados militares quando aplicável.</p>
                 </div>
             </div>
 
             <div class="form-grid two-columns">
                 <label class="field styled-field">
-                    <span>Orgao/instituicao</span>
+                    <span>Órgão/instituição</span>
                     <input type="text" name="orgao" value="<?= h($usuario['orgao'] ?? '') ?>" maxlength="180">
                     <?php if (!empty($errors['orgao'])): ?><small class="field-error"><?= h($errors['orgao'][0]) ?></small><?php endif; ?>
                 </label>
@@ -83,17 +83,17 @@ $profileLabels = [
             <section class="form-block user-military-block">
                 <div class="military-toggle">
                     <div>
-                        <span>Secao militar</span>
-                        <strong>Graduacao, nome de guerra e MF</strong>
+                        <span>Seção militar</span>
+                        <strong>Graduação, nome de guerra e MF</strong>
                     </div>
-                    <label class="switch-control" aria-label="Usuario militar">
+                    <label class="switch-control" aria-label="Usuário militar">
                         <input type="checkbox" name="militar" value="1" data-military-toggle <?= !empty($usuario['militar']) ? 'checked' : '' ?>>
                     </label>
                 </div>
 
                 <div class="form-grid three-columns military-fields" data-military-fields <?= !empty($usuario['militar']) ? '' : 'hidden' ?>>
                     <label class="field styled-field">
-                        <span>Graduacao</span>
+                        <span>Graduação</span>
                         <input type="text" name="graduacao" value="<?= h($usuario['graduacao'] ?? '') ?>" maxlength="80" data-military-input>
                         <?php if (!empty($errors['graduacao'])): ?><small class="field-error"><?= h($errors['graduacao'][0]) ?></small><?php endif; ?>
                     </label>
@@ -105,7 +105,7 @@ $profileLabels = [
                     </label>
 
                     <label class="field styled-field">
-                        <span>Matricula Funcional - MF</span>
+                        <span>Matrícula funcional - MF</span>
                         <input type="text" name="matricula_funcional" value="<?= h($usuario['matricula_funcional'] ?? '') ?>" maxlength="60" data-military-input>
                         <?php if (!empty($errors['matricula_funcional'])): ?><small class="field-error"><?= h($errors['matricula_funcional'][0]) ?></small><?php endif; ?>
                     </label>
@@ -118,7 +118,7 @@ $profileLabels = [
                 <span>3</span>
                 <div>
                     <h2>Acesso ao sistema</h2>
-                    <p>Defina o perfil e a situacao da conta.</p>
+                    <p>Defina o perfil e a situação da conta.</p>
                 </div>
             </div>
 
@@ -149,7 +149,7 @@ $profileLabels = [
                     <span>4</span>
                     <div>
                         <h2>Senha inicial</h2>
-                        <p>A senha deve ter no minimo 8 caracteres.</p>
+                        <p>A senha deve ter no mínimo 8 caracteres.</p>
                     </div>
                 </div>
 
@@ -171,7 +171,7 @@ $profileLabels = [
 
         <div class="form-actions action-form-actions">
             <button type="submit" class="primary-button" data-loading-text="Salvando...">
-                <span class="button-label">Salvar usuario</span>
+                <span class="button-label">Salvar usuário</span>
                 <span class="button-spinner" aria-hidden="true"></span>
             </button>
             <?php if ($isEditing): ?>
