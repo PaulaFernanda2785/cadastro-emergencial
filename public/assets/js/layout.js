@@ -3,12 +3,36 @@
 
     var shell = document.querySelector('[data-layout-shell]');
     var toggle = document.querySelector('[data-sidebar-toggle]');
+    var scrollToMainKey = 'cadastroEmergencial.scrollToMainAfterNavigation';
+
+    function scrollToMainContent() {
+        var main = document.querySelector('.main');
+
+        if (!main) {
+            return;
+        }
+
+        main.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+
+    if (window.sessionStorage.getItem(scrollToMainKey) === 'true') {
+        window.sessionStorage.removeItem(scrollToMainKey);
+        window.setTimeout(scrollToMainContent, 120);
+    }
 
     if (shell && toggle) {
         var storageKey = 'cadastroEmergencial.sidebarCollapsed';
         var storedPreference = window.localStorage.getItem(storageKey);
-        var startsOnSmallScreen = window.matchMedia('(max-width: 760px)').matches;
+        var smallScreenQuery = window.matchMedia('(max-width: 760px)');
+        var startsOnSmallScreen = smallScreenQuery.matches;
         var collapsed = storedPreference === null ? startsOnSmallScreen : storedPreference === 'true';
+
+        function isSmallScreen() {
+            return smallScreenQuery.matches;
+        }
 
         function applyState(isCollapsed) {
             shell.classList.toggle('is-sidebar-collapsed', isCollapsed);
@@ -23,6 +47,26 @@
             collapsed = !shell.classList.contains('is-sidebar-collapsed');
             window.localStorage.setItem(storageKey, String(collapsed));
             applyState(collapsed);
+        });
+
+        document.querySelectorAll('.sidebar-link[href]').forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                var targetUrl;
+
+                if (!isSmallScreen() || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+
+                targetUrl = new URL(link.href, window.location.href);
+                if (targetUrl.origin !== window.location.origin) {
+                    return;
+                }
+
+                window.localStorage.setItem(storageKey, 'true');
+                window.sessionStorage.setItem(scrollToMainKey, 'true');
+                collapsed = true;
+                applyState(true);
+            });
         });
     }
 
