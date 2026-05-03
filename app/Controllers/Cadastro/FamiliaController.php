@@ -94,6 +94,7 @@ final class FamiliaController extends Controller
             'Codigo: ' . $receiptCode,
             'Validação: ' . $validationUrl,
         ]);
+        $whatsappDestino = familia_whatsapp_destino($familia);
 
         $this->view('cadastro.familias.receipt', [
             'title' => 'Comprovante ' . $receiptCode,
@@ -101,7 +102,11 @@ final class FamiliaController extends Controller
             'familia' => $familia,
             'receiptCode' => $receiptCode,
             'validationUrl' => $validationUrl,
-            'whatsappUrl' => 'https://wa.me/?text=' . rawurlencode($whatsappText),
+            'whatsappAppUrl' => whatsapp_app_url($whatsappDestino['telefone'], $whatsappText),
+            'whatsappUrl' => whatsapp_direct_url($whatsappDestino['telefone'], $whatsappText),
+            'whatsappFallbackAppUrl' => whatsapp_app_url($whatsappDestino['fallback_telefone'], $whatsappText),
+            'whatsappFallbackUrl' => whatsapp_direct_url($whatsappDestino['fallback_telefone'], $whatsappText),
+            'whatsappTarget' => $whatsappDestino,
             'whatsappText' => $whatsappText,
             'generatedAt' => new \DateTimeImmutable(),
         ]);
@@ -432,7 +437,7 @@ final class FamiliaController extends Controller
             'responsavel_sexo' => trim((string) ($_POST['responsavel_sexo'] ?? '')),
             'responsavel_orgao_expedidor' => trim((string) ($_POST['responsavel_orgao_expedidor'] ?? '')),
             'data_nascimento' => trim((string) ($_POST['data_nascimento'] ?? '')),
-            'telefone' => trim((string) ($_POST['telefone'] ?? '')),
+            'telefone' => telefone_cadastro_format($_POST['telefone'] ?? ''),
             'email' => trim((string) ($_POST['email'] ?? '')),
             'quantidade_integrantes' => trim((string) ($_POST['quantidade_integrantes'] ?? '1')),
             'renda_familiar' => trim((string) ($_POST['renda_familiar'] ?? '')),
@@ -453,7 +458,7 @@ final class FamiliaController extends Controller
             'representante_orgao_expedidor' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_orgao_expedidor'] ?? '')) : '',
             'representante_data_nascimento' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_data_nascimento'] ?? '')) : '',
             'representante_sexo' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_sexo'] ?? '')) : '',
-            'representante_telefone' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_telefone'] ?? '')) : '',
+            'representante_telefone' => isset($_POST['registrar_representante']) ? telefone_cadastro_format($_POST['representante_telefone'] ?? '') : '',
         ];
     }
 
@@ -553,6 +558,9 @@ final class FamiliaController extends Controller
             ->date('representante_data_nascimento', $data['representante_data_nascimento'], 'Data de nascimento do representante')
             ->max('representante_telefone', $data['representante_telefone'], 30, 'Telefone do representante');
 
+        $this->validateWhatsappPhone($validator, 'telefone', $data['telefone'], 'Telefone do responsável');
+        $this->validateWhatsappPhone($validator, 'representante_telefone', $data['representante_telefone'], 'Telefone do representante');
+
         $validator->required('responsavel_sexo', $data['responsavel_sexo'], 'Sexo do responsável');
 
         if ($data['responsavel_sexo'] !== '') {
@@ -581,6 +589,17 @@ final class FamiliaController extends Controller
         }
 
         return $validator;
+    }
+
+    private function validateWhatsappPhone(Validator $validator, string $field, string $value, string $label): void
+    {
+        if (trim($value) === '') {
+            return;
+        }
+
+        if (telefone_cadastro_digits($value) === '') {
+            $validator->add($field, $label . ' deve conter DDD e numero valido para WhatsApp. Exemplo: (85) 99999-9999.');
+        }
     }
 
     private function ensureFamilyCapacity(array $residencia): void

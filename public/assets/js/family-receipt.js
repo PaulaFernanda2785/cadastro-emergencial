@@ -6,9 +6,21 @@
     var shareButton = document.querySelector('[data-family-receipt-share]');
     var shareStatus = document.querySelector('[data-family-receipt-share-status]');
 
-    function setStatus(text) {
+    function setStatus(text, fallback) {
         if (shareStatus) {
-            shareStatus.textContent = text;
+            shareStatus.textContent = '';
+            shareStatus.appendChild(document.createTextNode(text));
+
+            if (fallback && fallback.url) {
+                shareStatus.appendChild(document.createTextNode(' '));
+
+                var fallbackLink = document.createElement('a');
+                fallbackLink.href = fallback.appUrl || fallback.url;
+                fallbackLink.target = '_blank';
+                fallbackLink.rel = 'noopener';
+                fallbackLink.textContent = fallback.label || 'Enviar ao responsavel';
+                shareStatus.appendChild(fallbackLink);
+            }
         }
     }
 
@@ -274,20 +286,79 @@
         });
     }
 
-    function openWhatsappWeb() {
-        window.open('https://web.whatsapp.com/', '_blank', 'noopener');
+    function whatsappFallbackData() {
+        if (!ticket || !ticket.dataset.whatsappFallbackUrl) {
+            return null;
+        }
+
+        return {
+            appUrl: ticket.dataset.whatsappFallbackAppUrl || '',
+            url: ticket.dataset.whatsappFallbackUrl,
+            label: 'Enviar ao responsavel' + (ticket.dataset.whatsappFallbackName ? ' (' + ticket.dataset.whatsappFallbackName + ')' : '')
+        };
+    }
+
+    function whatsappTargetDescription() {
+        if (!ticket || !ticket.dataset.whatsappTargetLabel) {
+            return 'destinatario selecionado';
+        }
+
+        if (!ticket.dataset.whatsappTargetName) {
+            return ticket.dataset.whatsappTargetLabel;
+        }
+
+        return ticket.dataset.whatsappTargetLabel + ' (' + ticket.dataset.whatsappTargetName + ')';
+    }
+
+    function openWhatsappConversation(appUrl, webUrl) {
+        if (appUrl) {
+            window.location.href = appUrl;
+
+            if (webUrl) {
+                window.setTimeout(function () {
+                    if (document.visibilityState !== 'hidden') {
+                        window.open(webUrl, '_blank', 'noopener');
+                    }
+                }, 1200);
+            }
+
+            return;
+        }
+
+        if (webUrl) {
+            window.open(webUrl, '_blank', 'noopener');
+        }
     }
 
     function handleUnavailableDirectShare(blob, filename) {
         copyImageToClipboard(blob).then(function (copied) {
             if (copied) {
                 setStatus('Envio direto indisponivel neste navegador. A imagem foi copiada; cole no WhatsApp.');
-                openWhatsappWeb();
                 return;
             }
 
             downloadBlob(blob, filename);
-            setStatus('Envio direto indisponível neste navegador. A imagem foi baixada; anexe o PNG no WhatsApp.');
+            setStatus('Envio direto indisponivel neste navegador. A imagem foi baixada; anexe o PNG no WhatsApp.');
+        });
+    }
+
+    function handleTargetedWhatsappShare(blob, filename) {
+        var fallback = whatsappFallbackData();
+
+        copyImageToClipboard(blob).then(function (copied) {
+            if (copied) {
+                setStatus(
+                    'WhatsApp aberto para ' + whatsappTargetDescription() + '. A imagem foi copiada; cole no atendimento.',
+                    fallback
+                );
+                return;
+            }
+
+            downloadBlob(blob, filename);
+            setStatus(
+                'WhatsApp aberto para ' + whatsappTargetDescription() + '. A imagem foi baixada; anexe o PNG no atendimento.',
+                fallback
+            );
         });
     }
 
@@ -296,7 +367,18 @@
             return;
         }
 
-        setStatus('Preparando imagem do comprovante...');
+        var directWhatsappAppUrl = ticket.dataset.whatsappAppUrl || '';
+        var directWhatsappUrl = ticket.dataset.whatsappUrl || '';
+
+        if (!directWhatsappAppUrl && !directWhatsappUrl) {
+            setStatus('Nao ha telefone valido no cadastro para abrir uma conversa direta no WhatsApp.');
+            return;
+        }
+
+        if (directWhatsappAppUrl || directWhatsappUrl) {
+            openWhatsappConversation(directWhatsappAppUrl, directWhatsappUrl);
+            setStatus('WhatsApp aberto para ' + whatsappTargetDescription() + '. Preparando imagem do comprovante...', whatsappFallbackData());
+        }
 
         renderQr(function () {
             renderTicketImage().toBlob(function (blob) {
@@ -304,7 +386,12 @@
                 var filename = (ticket.dataset.receiptCode || 'comprovante') + '.png';
 
                 if (!blob) {
-                    setStatus('Não foi possível gerar a imagem do comprovante.');
+                    setStatus('Nao foi possivel gerar a imagem do comprovante.', whatsappFallbackData());
+                    return;
+                }
+
+                if (directWhatsappUrl) {
+                    handleTargetedWhatsappShare(blob, filename);
                     return;
                 }
 

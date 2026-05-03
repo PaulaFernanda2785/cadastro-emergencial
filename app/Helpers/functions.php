@@ -241,3 +241,106 @@ function familia_comprovante_codigo(array $familia): string
 
     return 'FAM-' . str_pad((string) $familiaId, 6, '0', STR_PAD_LEFT) . '-' . $hash;
 }
+
+function whatsapp_phone_digits(mixed $phone): string
+{
+    $digits = telefone_cadastro_digits($phone);
+
+    if ($digits === '') {
+        return '';
+    }
+
+    return '55' . $digits;
+}
+
+function telefone_cadastro_digits(mixed $phone): string
+{
+    $digits = preg_replace('/\D+/', '', (string) $phone) ?? '';
+
+    if ($digits === '') {
+        return '';
+    }
+
+    if (str_starts_with($digits, '55') && (strlen($digits) === 12 || strlen($digits) === 13)) {
+        $digits = substr($digits, 2);
+    } elseif (str_starts_with($digits, '0') && (strlen($digits) === 13 || strlen($digits) === 14)) {
+        $digits = substr($digits, 3);
+    } elseif (str_starts_with($digits, '0') && (strlen($digits) === 11 || strlen($digits) === 12)) {
+        $digits = substr($digits, 1);
+    }
+
+    if (strlen($digits) === 10 || strlen($digits) === 11) {
+        return $digits;
+    }
+
+    return '';
+}
+
+function telefone_cadastro_format(mixed $phone): string
+{
+    $original = trim((string) $phone);
+    $digits = telefone_cadastro_digits($original);
+
+    if ($digits === '') {
+        return $original;
+    }
+
+    $ddd = substr($digits, 0, 2);
+    $number = substr($digits, 2);
+
+    if (strlen($number) === 9) {
+        return '(' . $ddd . ') ' . substr($number, 0, 5) . '-' . substr($number, 5);
+    }
+
+    return '(' . $ddd . ') ' . substr($number, 0, 4) . '-' . substr($number, 4);
+}
+
+function whatsapp_direct_url(mixed $phone, string $text): string
+{
+    $digits = whatsapp_phone_digits($phone);
+
+    if ($digits === '') {
+        return '';
+    }
+
+    return 'https://api.whatsapp.com/send?phone=' . $digits . '&text=' . rawurlencode($text);
+}
+
+function whatsapp_app_url(mixed $phone, string $text): string
+{
+    $digits = whatsapp_phone_digits($phone);
+
+    if ($digits === '') {
+        return '';
+    }
+
+    return 'whatsapp://send?phone=' . $digits . '&text=' . rawurlencode($text);
+}
+
+function familia_whatsapp_destino(array $familia): array
+{
+    $responsavelPhone = whatsapp_phone_digits($familia['telefone'] ?? '');
+    $responsavelName = trim((string) ($familia['responsavel_nome'] ?? ''));
+    $representanteName = trim((string) ($familia['representante_nome'] ?? ''));
+    $representanteCpf = trim((string) ($familia['representante_cpf'] ?? ''));
+    $hasRepresentante = $representanteName !== '' || $representanteCpf !== '';
+    $representantePhone = $hasRepresentante ? whatsapp_phone_digits($familia['representante_telefone'] ?? '') : '';
+    $primaryPhone = $representantePhone !== '' ? $representantePhone : $responsavelPhone;
+    $primaryType = $representantePhone !== '' ? 'representante' : 'responsavel';
+    $primaryName = $representantePhone !== '' ? $representanteName : $responsavelName;
+    $fallbackPhone = '';
+    $fallbackName = '';
+
+    if ($representantePhone !== '' && $responsavelPhone !== '' && $representantePhone !== $responsavelPhone) {
+        $fallbackPhone = $responsavelPhone;
+        $fallbackName = $responsavelName;
+    }
+
+    return [
+        'telefone' => $primaryPhone,
+        'nome' => $primaryName,
+        'tipo' => $primaryType,
+        'fallback_telefone' => $fallbackPhone,
+        'fallback_nome' => $fallbackName,
+    ];
+}

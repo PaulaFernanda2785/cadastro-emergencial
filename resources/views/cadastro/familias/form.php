@@ -228,7 +228,10 @@ $birthDateField = static function (
             <div class="form-grid three-columns">
                 <label class="field">
                     <span>Telefone</span>
-                    <input type="text" name="telefone" value="<?= h($familia['telefone'] ?? '') ?>" maxlength="30">
+                    <input type="tel" name="telefone" value="<?= h($familia['telefone'] ?? '') ?>" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="(85) 99999-9999" data-phone-input>
+                    <?php if (!empty($errors['telefone'])): ?>
+                        <small class="field-error"><?= h($errors['telefone'][0]) ?></small>
+                    <?php endif; ?>
                 </label>
                 <label class="field">
                     <span>E-mail</span>
@@ -417,7 +420,10 @@ $birthDateField = static function (
 
                 <label class="field">
                     <span>Telefone</span>
-                    <input type="text" name="representante_telefone" value="<?= h($familia['representante_telefone'] ?? '') ?>" maxlength="30" data-representative-input>
+                    <input type="tel" name="representante_telefone" value="<?= h($familia['representante_telefone'] ?? '') ?>" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="(85) 99999-9999" data-phone-input data-representative-input>
+                    <?php if (!empty($errors['representante_telefone'])): ?>
+                        <small class="field-error"><?= h($errors['representante_telefone'][0]) ?></small>
+                    <?php endif; ?>
                 </label>
             </div>
         </section>

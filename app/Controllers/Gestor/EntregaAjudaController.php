@@ -91,9 +91,28 @@ final class EntregaAjudaController extends Controller
             $this->abort(404);
         }
 
+        $itens = array_map(
+            static fn (array $item): string => '- ' . (string) $item['tipo_ajuda_nome'] . ': ' . number_format((float) $item['quantidade'], 2, ',', '.') . ' ' . (string) $item['unidade_medida'],
+            $entrega['itens'] ?? []
+        );
+        $whatsappText = implode("\n", array_filter([
+            'Comprovante de entrega - Cadastro Emergencial',
+            'Responsavel: ' . (string) $entrega['responsavel_nome'],
+            'CPF: ' . (string) $entrega['responsavel_cpf'],
+            'Codigo: ' . (string) $entrega['comprovante_codigo'],
+            $itens !== [] ? 'Itens:' . "\n" . implode("\n", $itens) : '',
+        ]));
+        $whatsappDestino = familia_whatsapp_destino($entrega);
+
         $this->view('gestor.entregas.receipt', [
             'title' => 'Comprovante ' . $entrega['comprovante_codigo'],
             'entrega' => $entrega,
+            'whatsappAppUrl' => whatsapp_app_url($whatsappDestino['telefone'], $whatsappText),
+            'whatsappUrl' => whatsapp_direct_url($whatsappDestino['telefone'], $whatsappText),
+            'whatsappFallbackAppUrl' => whatsapp_app_url($whatsappDestino['fallback_telefone'], $whatsappText),
+            'whatsappFallbackUrl' => whatsapp_direct_url($whatsappDestino['fallback_telefone'], $whatsappText),
+            'whatsappTarget' => $whatsappDestino,
+            'whatsappText' => $whatsappText,
             'generatedAt' => new \DateTimeImmutable(),
         ]);
     }

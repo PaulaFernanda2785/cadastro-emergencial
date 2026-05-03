@@ -19,7 +19,23 @@
     <span class="receipt-share-status" data-family-receipt-share-status></span>
 </section>
 
-<article class="receipt-ticket family-receipt-ticket" data-family-receipt-ticket data-receipt-code="<?= h($receiptCode) ?>">
+<?php
+$whatsappTargetType = (string) ($whatsappTarget['tipo'] ?? '');
+$whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante familiar' : 'responsavel familiar';
+?>
+
+<article
+    class="receipt-ticket family-receipt-ticket"
+    data-family-receipt-ticket
+    data-receipt-code="<?= h($receiptCode) ?>"
+    data-whatsapp-app-url="<?= h($whatsappAppUrl ?? '') ?>"
+    data-whatsapp-url="<?= h($whatsappUrl ?? '') ?>"
+    data-whatsapp-target-label="<?= h($whatsappTargetLabel) ?>"
+    data-whatsapp-target-name="<?= h($whatsappTarget['nome'] ?? '') ?>"
+    data-whatsapp-fallback-app-url="<?= h($whatsappFallbackAppUrl ?? '') ?>"
+    data-whatsapp-fallback-url="<?= h($whatsappFallbackUrl ?? '') ?>"
+    data-whatsapp-fallback-name="<?= h($whatsappTarget['fallback_nome'] ?? '') ?>"
+>
     <div class="receipt-paper-edge" aria-hidden="true"></div>
     <header class="receipt-header">
         <strong>Cadastro Emergencial</strong>

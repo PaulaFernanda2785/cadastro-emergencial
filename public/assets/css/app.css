@@ -2072,11 +2072,11 @@ button:disabled,
 }
 
 .ops-leaflet-house {
-    width: 36px;
-    height: 34px;
+    width: 22px;
+    height: 20px;
     position: relative;
     display: block;
-    filter: drop-shadow(0 10px 8px rgba(15, 23, 42, 0.26));
+    filter: drop-shadow(0 6px 4px rgba(15, 23, 42, 0.2));
 }
 
 .ops-leaflet-house::before {
@@ -2085,15 +2085,15 @@ button:disabled,
     inset: 0;
     clip-path: polygon(50% 0, 100% 38%, 82% 38%, 82% 100%, 18% 100%, 18% 38%, 0 38%);
     background: #64748b;
-    border: 3px solid #ffffff;
+    border: 1px solid #ffffff;
 }
 
 .ops-leaflet-house span {
     position: absolute;
     left: 50%;
-    bottom: 3px;
-    width: 9px;
-    height: 13px;
+    bottom: 1px;
+    width: 6px;
+    height: 10px;
     border-radius: 2px 2px 0 0;
     background: rgba(255, 255, 255, 0.76);
     transform: translateX(-50%);

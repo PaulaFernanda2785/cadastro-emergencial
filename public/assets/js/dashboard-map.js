@@ -114,9 +114,9 @@
         var icon = L.divIcon({
             className: 'ops-leaflet-marker',
             html: markerHtml(point.condicao),
-            iconSize: [36, 38],
-            iconAnchor: [18, 34],
-            popupAnchor: [0, -32]
+            iconSize: [24, 24],
+            iconAnchor: [12, 21],
+            popupAnchor: [0, -16]
         });
 
         return L.marker([point.latitude, point.longitude], {
