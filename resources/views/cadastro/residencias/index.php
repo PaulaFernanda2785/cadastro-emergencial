@@ -43,14 +43,14 @@ $lastRecord = min($totalResidencias, $page * $perPage);
 $familiaFilterLabels = [
     'completas' => 'Completas',
     'pendentes' => 'Pendentes',
-    'sem_familias' => 'Sem familias',
+    'sem_familias' => 'Sem famílias',
 ];
 $filterLabels = [
     'q' => 'Busca',
-    'imovel' => 'Imovel',
-    'condicao' => 'Condicao',
-    'familias' => 'Familias',
-    'data_inicio' => 'Inicio',
+    'imovel' => 'Imóvel',
+    'condicao' => 'Condição',
+    'familias' => 'Famílias',
+    'data_inicio' => 'Início',
     'data_fim' => 'Fim',
 ];
 $filterValueLabel = static function (string $key, string $value) use ($familiaFilterLabels): string {
@@ -85,8 +85,8 @@ $filterAction = url('/cadastros/residencias');
     <header class="action-form-header records-header">
         <div>
             <span class="eyebrow">Cadastros</span>
-            <h1>Residencias cadastradas</h1>
-            <p>Acompanhe casas atingidas, familias vinculadas e situacao dos imoveis por acao emergencial.</p>
+            <h1>Residências cadastradas</h1>
+            <p>Acompanhe casas atingidas, famílias vinculadas e situação dos imóveis por ação emergencial.</p>
         </div>
         <?php if ($novoCadastroUrl !== null): ?>
             <a class="primary-link-button" href="<?= h(url($novoCadastroUrl)) ?>">Novo cadastro</a>
@@ -95,22 +95,22 @@ $filterAction = url('/cadastros/residencias');
 
     <section class="records-summary-grid" aria-label="Resumo dos cadastros">
         <article class="records-summary-card">
-            <span>Residencias</span>
+            <span>Residências</span>
             <strong><?= h($totalResidencias) ?></strong>
             <small><?= $activeFilters === [] ? 'Total registrado no escopo atual.' : 'Total encontrado pelos filtros.' ?></small>
         </article>
         <article class="records-summary-card">
-            <span>Familias</span>
+            <span>Famílias</span>
             <strong><?= h($totalFamilias) ?> / <?= h($totalCapacidade) ?></strong>
-            <small>Familias cadastradas sobre a capacidade informada.</small>
+            <small>Famílias cadastradas sobre a capacidade informada.</small>
         </article>
         <article class="records-summary-card">
-            <span>Condicao predominante</span>
+            <span>Condição predominante</span>
             <strong><?= h($condicaoPrincipal) ?></strong>
-            <small>Classificacao mais recorrente na listagem.</small>
+            <small>Classificação mais recorrente na listagem.</small>
         </article>
         <article class="records-summary-card">
-            <span>Ultimo cadastro</span>
+            <span>Último cadastro</span>
             <strong><?= $ultimaAtualizacao !== null ? h(date('d/m/Y', $ultimaAtualizacao)) : '-' ?></strong>
             <small><?= $ultimaAtualizacao !== null ? h(date('H:i', $ultimaAtualizacao)) : 'Sem registros' ?></small>
         </article>
@@ -120,11 +120,11 @@ $filterAction = url('/cadastros/residencias');
         <form method="get" action="<?= h($filterAction) ?>" class="records-filter-form cadastro-filter-modern-form">
             <label class="field styled-field records-search-field cadastro-filter-field cadastro-filter-field-wide">
                 <span>Busca inteligente</span>
-                <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" placeholder="Protocolo, bairro, endereco, acao, municipio ou cadastrador">
+                <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" placeholder="Protocolo, bairro, endereço, ação, município ou cadastrador">
             </label>
 
             <label class="field styled-field cadastro-filter-field cadastro-filter-field-compact">
-                <span>Imovel</span>
+                <span>Imóvel</span>
                 <select name="imovel">
                     <option value="">Todos</option>
                     <?php foreach (residencia_imovel_options() as $value => $label): ?>
@@ -134,7 +134,7 @@ $filterAction = url('/cadastros/residencias');
             </label>
 
             <label class="field styled-field cadastro-filter-field cadastro-filter-field-compact">
-                <span>Condicao</span>
+                <span>Condição</span>
                 <select name="condicao">
                     <option value="">Todas</option>
                     <?php foreach (residencia_condicao_options() as $value => $label): ?>
@@ -144,7 +144,7 @@ $filterAction = url('/cadastros/residencias');
             </label>
 
             <label class="field styled-field cadastro-filter-field cadastro-filter-field-compact">
-                <span>Familias</span>
+                <span>Famílias</span>
                 <select name="familias">
                     <option value="">Todas</option>
                     <?php foreach ($familiaFilterLabels as $value => $label): ?>
@@ -154,7 +154,7 @@ $filterAction = url('/cadastros/residencias');
             </label>
 
             <label class="field styled-field cadastro-filter-field cadastro-filter-field-date">
-                <span>Inicio</span>
+                <span>Início</span>
                 <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
             </label>
 
@@ -185,8 +185,8 @@ $filterAction = url('/cadastros/residencias');
 
     <?php if ($residencias === []): ?>
         <section class="action-empty-panel records-empty-panel">
-            <h2><?= $activeFilters === [] ? 'Nenhuma residencia cadastrada' : 'Nenhum cadastro encontrado' ?></h2>
-            <p><?= $activeFilters === [] ? 'Quando uma residencia for registrada pelo sistema ou pelo aplicativo via QR Code, ela aparecera aqui para acompanhamento.' : 'Revise os filtros aplicados ou limpe a busca para voltar a lista completa.' ?></p>
+            <h2><?= $activeFilters === [] ? 'Nenhuma residência cadastrada' : 'Nenhum cadastro encontrado' ?></h2>
+            <p><?= $activeFilters === [] ? 'Quando uma residência for registrada pelo sistema ou pelo aplicativo via QR Code, ela aparecerá aqui para acompanhamento.' : 'Revise os filtros aplicados ou limpe a busca para voltar à lista completa.' ?></p>
             <?php if ($activeFilters !== []): ?>
                 <a class="primary-link-button" href="<?= h(url('/cadastros/residencias')) ?>">Limpar filtros</a>
             <?php elseif ($novoCadastroUrl !== null): ?>
@@ -194,7 +194,7 @@ $filterAction = url('/cadastros/residencias');
             <?php endif; ?>
         </section>
     <?php else: ?>
-        <section class="records-card-grid" aria-label="Lista de residencias cadastradas">
+        <section class="records-card-grid" aria-label="Lista de residências cadastradas">
             <?php foreach ($residencias as $residencia): ?>
                 <?php
                 $familiasCadastradas = (int) ($residencia['familias_cadastradas'] ?? 0);
@@ -218,11 +218,11 @@ $filterAction = url('/cadastros/residencias');
                                 <dd><?= h($residencia['tipo_evento']) ?></dd>
                             </div>
                             <div>
-                                <dt>Imovel</dt>
+                                <dt>Imóvel</dt>
                                 <dd><?= h(residencia_imovel_label($residencia['imovel'] ?? null)) ?></dd>
                             </div>
                             <div>
-                                <dt>Condicao</dt>
+                                <dt>Condição</dt>
                                 <dd><span class="record-condition record-condition-<?= h($condicaoClass) ?>"><?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></span></dd>
                             </div>
                             <div>
@@ -232,10 +232,10 @@ $filterAction = url('/cadastros/residencias');
                         </dl>
                     </div>
 
-                    <aside class="record-card-side" aria-label="Resumo da residencia">
+                    <aside class="record-card-side" aria-label="Resumo da residência">
                         <div class="record-family-meter">
                             <div>
-                                <span>Familias</span>
+                                <span>Famílias</span>
                                 <strong><?= h($familiasCadastradas) ?> / <?= h($familiasPrevistas) ?></strong>
                             </div>
                             <div class="record-progress" aria-hidden="true">
@@ -256,7 +256,7 @@ $filterAction = url('/cadastros/residencias');
     <?php endif; ?>
 
     <?php if ($totalPages > 1): ?>
-        <nav class="records-pagination" aria-label="Paginacao de cadastros">
+        <nav class="records-pagination" aria-label="Paginação de cadastros">
             <a class="pagination-link <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= h($page > 1 ? $pageUrl($page - 1) : '#') ?>" aria-disabled="<?= $page <= 1 ? 'true' : 'false' ?>">Anterior</a>
 
             <div class="pagination-pages">
@@ -269,7 +269,7 @@ $filterAction = url('/cadastros/residencias');
                 <?php endfor; ?>
             </div>
 
-            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Proxima</a>
+            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Próxima</a>
         </nav>
     <?php endif; ?>
 </section>

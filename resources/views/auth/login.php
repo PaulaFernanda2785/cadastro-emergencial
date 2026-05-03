@@ -10,14 +10,14 @@
             </div>
 
             <div class="auth-login-hero-copy">
-                <span class="eyebrow">Operacao integrada</span>
-                <h1>Gestao de cadastros, familias e entregas em situacoes emergenciais.</h1>
-                <p>Acesso seguro para equipes autorizadas acompanharem a resposta operacional, registros territoriais, documentos e prestacao de contas.</p>
+                <span class="eyebrow">Operação integrada</span>
+                <h1>Gestão de cadastros, famílias e entregas em situações emergenciais.</h1>
+                <p>Acesso seguro para equipes autorizadas acompanharem a resposta operacional, registros territoriais, documentos e prestação de contas.</p>
             </div>
 
             <div class="auth-login-highlights" aria-label="Recursos do sistema">
                 <span>Cadastros georreferenciados</span>
-                <span>Entregas e relatorios</span>
+                <span>Entregas e relatórios</span>
                 <span>Assinaturas digitais</span>
             </div>
         </aside>
@@ -32,7 +32,7 @@
             </div>
 
             <div class="section-heading auth-login-heading">
-                <span class="eyebrow">Autenticacao</span>
+                <span class="eyebrow">Autenticação</span>
                 <h2>Entrar com conta institucional</h2>
                 <p>Informe suas credenciais para acessar o painel operacional.</p>
             </div>
@@ -80,11 +80,11 @@
             <?php if (!empty($canRegister)): ?>
                 <div class="auth-secondary-action auth-login-secondary">
                     <span>Vai cadastrar pelo QR Code?</span>
-                    <a class="secondary-button auth-secondary-button" href="<?= h(url('/cadastro-qr')) ?>">Nao tenho cadastro</a>
+                    <a class="secondary-button auth-secondary-button" href="<?= h(url('/cadastro-qr')) ?>">Não tenho cadastro</a>
                 </div>
             <?php endif; ?>
 
-            <p class="auth-login-footnote">Uso exclusivo de usuarios autorizados. Todas as operacoes podem ser auditadas.</p>
+            <p class="auth-login-footnote">Uso exclusivo de usuários autorizados. Todas as operações podem ser auditadas.</p>
         </div>
     </div>
 </section>

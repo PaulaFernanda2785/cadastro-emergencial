@@ -38,10 +38,10 @@ $perPage = max(1, (int) ($pagination['per_page'] ?? 10));
 $firstRecord = (int) (($page - 1) * $perPage) + 1;
 $totalRecords = (int) ($pagination['total'] ?? count($details ?? []));
 $lastRecord = min($totalRecords, $page * $perPage);
-$periodo = 'Todo o periodo';
+$periodo = 'Todo o período';
 
 if (($filters['data_inicio'] ?? '') !== '' || ($filters['data_fim'] ?? '') !== '') {
-    $periodo = ($filters['data_inicio'] ?: 'inicio') . ' a ' . ($filters['data_fim'] ?: 'hoje');
+    $periodo = ($filters['data_inicio'] ?: 'início') . ' a ' . ($filters['data_fim'] ?: 'hoje');
 }
 
 $valueOrDash = static function (mixed $value): string {
@@ -77,7 +77,7 @@ $actionOptionLabel = static function (array $acao): string {
         (string) ($acao['municipio_nome'] ?? '') . '/' . (string) ($acao['uf'] ?? '')
         . ' - ' . (string) ($acao['localidade'] ?? '')
         . ' - ' . (string) ($acao['tipo_evento'] ?? '')
-        . ' - Acao #' . (string) ($acao['id'] ?? '')
+        . ' - Ação #' . (string) ($acao['id'] ?? '')
     );
 };
 foreach ($acoes ?? [] as $acao) {
@@ -100,10 +100,10 @@ unset($activeFilters['acao_id'], $activeFilters['tipo_ajuda_id']);
 
 $filterLabels = [
     'q' => 'Busca',
-    'acao_busca' => 'Acao',
+    'acao_busca' => 'Ação',
     'tipo_ajuda_busca' => 'Tipo de material',
     'localidade_busca' => 'Localidade/bairro',
-    'data_inicio' => 'Inicio',
+    'data_inicio' => 'Início',
     'data_fim' => 'Fim',
 ];
 
@@ -138,9 +138,9 @@ $renderFilterFields = static function (array $filters): void {
     <?php if (!$embedDocument): ?>
     <header class="dashboard-header deliveries-header accountability-header no-print">
         <div>
-            <span class="eyebrow">Gestao operacional</span>
-            <h1>Prestacao de contas</h1>
-            <p>Gere o documento nominal de distribuicao por acao, material, localidade e periodo.</p>
+            <span class="eyebrow">Gestão operacional</span>
+            <h1>Prestação de contas</h1>
+            <p>Gere o documento nominal de distribuição por ação, material, localidade e período.</p>
         </div>
         <?php if ($hasAppliedFilters && $signature === null): ?>
             <form method="post" action="<?= h(url('/gestor/prestacao-contas/assinar')) ?>" class="inline-form js-prevent-double-submit">
@@ -151,14 +151,14 @@ $renderFilterFields = static function (array $filters): void {
             </form>
             <a class="secondary-button" href="#prestacao-signature-form">Assinatura conjunta</a>
         <?php elseif ($hasAppliedFilters): ?>
-            <span class="limit-reached-pill"><?= $printReady ? 'Documento assinado' : 'Aguardando conferencia' ?></span>
+            <span class="limit-reached-pill"><?= $printReady ? 'Documento assinado' : 'Aguardando conferência' ?></span>
             <?php if ($canManageSignature): ?>
                 <a class="danger-button" href="#prestacao-signature-removal">Gerenciar assinaturas</a>
             <?php endif; ?>
             <?php if ($printReady): ?>
                 <button type="button" class="primary-button" onclick="window.print()">Imprimir documento</button>
             <?php else: ?>
-                <span class="limit-reached-pill">Impressao bloqueada</span>
+                <span class="limit-reached-pill">Impressão bloqueada</span>
             <?php endif; ?>
         <?php endif; ?>
     </header>
@@ -168,9 +168,9 @@ $renderFilterFields = static function (array $filters): void {
             <div>
                 <span class="eyebrow">Gerenciamento de assinaturas</span>
                 <h2>Remover assinaturas</h2>
-                <p>Somente o assinante principal pode remover a assinatura principal ou remover responsaveis pela conferencia selecionados.</p>
+                <p>Somente o assinante principal pode remover a assinatura principal ou remover responsáveis pela conferência selecionados.</p>
             </div>
-            <form method="post" action="<?= h(url('/gestor/prestacao-contas/remover-assinatura')) ?>" class="js-prevent-double-submit" data-confirm="Confirmar a remocao das assinaturas selecionadas?">
+            <form method="post" action="<?= h(url('/gestor/prestacao-contas/remover-assinatura')) ?>" class="js-prevent-double-submit" data-confirm="Confirmar a remoção das assinaturas selecionadas?">
                 <?= csrf_field() ?>
                 <?= idempotency_field('gestor.prestacao_contas.remove_signature.' . (int) ($documentIdentity['entity_id'] ?? 0)) ?>
                 <?php $renderFilterFields($filters); ?>
@@ -179,24 +179,24 @@ $renderFilterFields = static function (array $filters): void {
                     <strong><?= h($valueOrDash($signature['nome'] ?? current_user()['nome'] ?? '')) ?></strong>
                     <small>
                         <input type="checkbox" name="remover_assinatura_principal" value="1">
-                        Remover assinatura principal e cancelar todos os responsaveis pela conferencia deste documento.
+                        Remover assinatura principal e cancelar todos os responsáveis pela conferência deste documento.
                     </small>
                 </label>
 
                 <div class="dti-cosigner-panel">
-                    <span>Responsaveis pela conferencia</span>
+                    <span>Responsáveis pela conferência</span>
                     <?php if ($coSignatureRequests !== []): ?>
                         <?php foreach ($coSignatureRequests as $solicitacao): ?>
                             <label class="dti-primary-signer">
                                 <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
                                 <small>
                                     <input type="checkbox" name="remover_coassinaturas[]" value="<?= h((int) ($solicitacao['id'] ?? 0)) ?>">
-                                    <?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?>
+                                    <?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Não autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?>
                                 </small>
                             </label>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <small>Nao ha responsaveis pela conferencia ativos neste documento.</small>
+                        <small>Não há responsáveis pela conferência ativos neste documento.</small>
                     <?php endif; ?>
                 </div>
 
@@ -212,9 +212,9 @@ $renderFilterFields = static function (array $filters): void {
             <small>Registros considerados.</small>
         </article>
         <article class="records-summary-card">
-            <span>Familias atendidas</span>
+            <span>Famílias atendidas</span>
             <strong><?= h($summary['familias_atendidas'] ?? 0) ?></strong>
-            <small>Familias unicas no filtro.</small>
+            <small>Famílias únicas no filtro.</small>
         </article>
         <article class="records-summary-card">
             <span>Tipos distribuidos</span>
@@ -231,7 +231,7 @@ $renderFilterFields = static function (array $filters): void {
     <section class="records-filter-panel delivery-filter-panel accountability-filter-panel prestacao-filter-panel no-print">
         <div class="table-heading">
             <h2>Filtros inteligentes</h2>
-            <span>Combine busca textual, acao, tipo de material, localidade e periodo.</span>
+            <span>Combine busca textual, ação, tipo de material, localidade e período.</span>
         </div>
         <form method="get" action="<?= h(url('/gestor/prestacao-contas')) ?>" class="accountability-filter-form prestacao-filter-form">
             <div class="accountability-filter-main prestacao-filter-main">
@@ -248,8 +248,8 @@ $renderFilterFields = static function (array $filters): void {
                 </label>
 
                 <label class="field styled-field smart-search-field prestacao-filter-field prestacao-filter-field-wide">
-                    <span>Acao</span>
-                    <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="prestacao-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="prestacao_acao_id" autocomplete="off">
+                    <span>Ação</span>
+                    <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="prestacao-acoes-list" placeholder="Digite para buscar a ação" data-smart-search data-smart-target="prestacao_acao_id" autocomplete="off">
                     <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="prestacao_acao_id">
                     <datalist id="prestacao-acoes-list">
                         <?php foreach ($acoes ?? [] as $acao): ?>
@@ -278,7 +278,7 @@ $renderFilterFields = static function (array $filters): void {
             <div class="accountability-filter-side prestacao-filter-side">
                 <div class="accountability-date-range">
                     <label class="field styled-field prestacao-filter-field prestacao-filter-field-date">
-                        <span>Inicio</span>
+                        <span>Início</span>
                         <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
                     </label>
 
@@ -308,15 +308,15 @@ $renderFilterFields = static function (array $filters): void {
     <?php if (!$hasAppliedFilters && !$embedDocument): ?>
         <section class="action-empty-panel records-empty-panel no-print">
             <h2>Aplique um filtro para gerar o documento</h2>
-            <p>Use pelo menos um filtro operacional, como acao, tipo de material, localidade, periodo ou busca textual. A prestacao de contas nao e carregada automaticamente para evitar documento amplo sem recorte.</p>
+            <p>Use pelo menos um filtro operacional, como ação, tipo de material, localidade, período ou busca textual. A prestação de contas não é carregada automaticamente para evitar documento amplo sem recorte.</p>
         </section>
     <?php else: ?>
         <?php if ($signature !== null && !$printReady && !$embedDocument): ?>
             <section class="signature-flow-panel no-print">
                 <div>
                     <span class="eyebrow">Fluxo de coassinatura</span>
-                    <h2>Impressao aguardando autorizacao</h2>
-                    <p><?= h((int) ($coSignatureStatus['pendentes'] ?? 0)) ?> pendente(s), <?= h((int) ($coSignatureStatus['autorizados'] ?? 0)) ?> autorizado(s), <?= h((int) ($coSignatureStatus['negados'] ?? 0)) ?> nao autorizado(s).</p>
+                    <h2>Impressão aguardando autorização</h2>
+                    <p><?= h((int) ($coSignatureStatus['pendentes'] ?? 0)) ?> pendente(s), <?= h((int) ($coSignatureStatus['autorizados'] ?? 0)) ?> autorizado(s), <?= h((int) ($coSignatureStatus['negados'] ?? 0)) ?> não autorizado(s).</p>
                 </div>
                 <a class="secondary-button signature-flow-action" href="<?= h(url('/assinaturas')) ?>">Acompanhar assinaturas</a>
             </section>
@@ -324,7 +324,7 @@ $renderFilterFields = static function (array $filters): void {
 
         <?php if ($signature !== null && !$printReady && !$embedDocument): ?>
             <div class="print-blocked-message print-only">
-                Impressao bloqueada. Este documento possui coassinatura pendente ou nao autorizada.
+                Impressão bloqueada. Este documento possui coassinatura pendente ou não autorizada.
             </div>
         <?php endif; ?>
 
@@ -332,8 +332,8 @@ $renderFilterFields = static function (array $filters): void {
             <section class="dti-signature-setup no-print" id="prestacao-signature-form">
                 <div>
                     <span class="eyebrow">Assinatura digital conjunta</span>
-                    <h2>Assinar prestacao de contas</h2>
-                    <p>O usuario logado assina primeiro. Responsaveis pela conferencia sao opcionais; pesquise e selecione outros usuarios apenas quando o documento precisar de conferencia conjunta.</p>
+                    <h2>Assinar prestação de contas</h2>
+                    <p>O usuário logado assina primeiro. Responsáveis pela conferência são opcionais; pesquise e selecione outros usuários apenas quando o documento precisar de conferência conjunta.</p>
                 </div>
                 <form method="post" action="<?= h(url('/gestor/prestacao-contas/assinar')) ?>" class="js-prevent-double-submit">
                     <?= csrf_field() ?>
@@ -341,23 +341,23 @@ $renderFilterFields = static function (array $filters): void {
                     <?php $renderFilterFields($filters); ?>
                     <div class="dti-primary-signer">
                         <span>1. Assinante principal</span>
-                        <strong><?= h(current_user()['nome'] ?? 'Usuario logado') ?></strong>
+                        <strong><?= h(current_user()['nome'] ?? 'Usuário logado') ?></strong>
                         <small><?= h(current_user()['cpf'] ?? '') ?><?= !empty(current_user()['graduacao']) ? ' - ' . h(current_user()['graduacao']) : '' ?><?= !empty(current_user()['nome_guerra']) ? ' ' . h(current_user()['nome_guerra']) : '' ?><?= !empty(current_user()['matricula_funcional']) ? ' | MF ' . h(current_user()['matricula_funcional']) : '' ?></small>
                     </div>
                     <div class="dti-cosigner-panel">
-                        <span>2. Responsaveis pela conferencia</span>
+                        <span>2. Responsáveis pela conferência</span>
                         <?php if (($signatureUsers ?? []) === []): ?>
-                            <div class="dti-empty">Nenhum outro usuario ativo disponivel para coassinar.</div>
+                            <div class="dti-empty">Nenhum outro usuário ativo disponível para coassinar.</div>
                         <?php else: ?>
                             <div class="dti-cosigner-picker" data-dti-cosigner-picker>
                                 <label class="field smart-search-field">
-                                    <span>Buscar usuario</span>
-                                    <input type="search" placeholder="Digite nome, CPF, MF, graduacao ou nome de guerra" autocomplete="off" data-dti-cosigner-search>
+                                    <span>Buscar usuário</span>
+                                    <input type="search" placeholder="Digite nome, CPF, MF, graduação ou nome de guerra" autocomplete="off" data-dti-cosigner-search>
                                 </label>
                                 <div class="dti-cosigner-selected" data-dti-cosigner-selected aria-live="polite">
-                                    <span>Nenhum responsavel pela conferencia selecionado.</span>
+                                    <span>Nenhum responsável pela conferência selecionado.</span>
                                 </div>
-                                <div class="dti-cosigner-hint" data-dti-cosigner-status>Digite para buscar usuarios do sistema.</div>
+                                <div class="dti-cosigner-hint" data-dti-cosigner-status>Digite para buscar usuários do sistema.</div>
                                 <div class="dti-cosigner-options" data-dti-cosigner-options>
                                 <?php foreach ($signatureUsers ?? [] as $usuarioAssinante): ?>
                                     <?php
@@ -386,14 +386,14 @@ $renderFilterFields = static function (array $filters): void {
             </section>
         <?php endif; ?>
 
-    <section class="accountability-document dti-document" aria-label="Documento de prestacao de contas">
+    <section class="accountability-document dti-document" aria-label="Documento de prestação de contas">
         <article class="dti-page accountability-page-sheet">
             <header class="dti-institutional-header">
                 <img src="<?= h(asset('images/logo-cedec.png')) ?>" alt="CEDEC-PA">
                 <div>
-                    <strong>Corpo de Bombeiros Militar do Para</strong>
-                    <span>Coordenadoria Estadual de Protecao e Defesa Civil</span>
-                    <h2>Prestacao de contas de ajuda humanitaria</h2>
+                    <strong>Corpo de Bombeiros Militar do Pará</strong>
+                    <span>Coordenadoria Estadual de Proteção e Defesa Civil</span>
+                    <h2>Prestação de contas de ajuda humanitária</h2>
                 </div>
             </header>
 
@@ -403,13 +403,13 @@ $renderFilterFields = static function (array $filters): void {
                 <table class="dti-table accountability-info-table">
                     <tbody>
                         <tr>
-                            <th>Municipio</th>
+                            <th>Município</th>
                             <td class="accountability-info-value accountability-long-value"><?= $softBreak($municipioLabel) ?></td>
                             <th>Data da entrega</th>
                             <td class="accountability-info-value"><?= h($documentDate) ?></td>
                         </tr>
                         <tr>
-                            <th>Responsavel pela distribuicao</th>
+                            <th>Responsável pela distribuição</th>
                             <td class="accountability-info-value accountability-long-value"><?= $softBreak($currentUser['nome'] ?? '') ?></td>
                             <th>Telefone</th>
                             <td class="accountability-info-value"><?= h($valueOrDash($currentUser['telefone'] ?? '')) ?></td>
@@ -417,19 +417,19 @@ $renderFilterFields = static function (array $filters): void {
                         <tr>
                             <th>E-mail</th>
                             <td class="accountability-info-value accountability-email-value"><?= $softBreak($currentUser['email'] ?? '') ?></td>
-                            <th>Tipo de material distribuido</th>
+                            <th>Tipo de material distribuído</th>
                             <td class="accountability-info-value accountability-long-value"><?= $softBreak($materialLabel) ?></td>
                         </tr>
                         <tr>
-                            <th>Total de familias</th>
+                            <th>Total de famílias</th>
                             <td class="accountability-info-value"><?= h((int) ($documentContext['total_familias'] ?? 0)) ?></td>
                             <th>Localidade, bairro ou comunidade</th>
                             <td class="accountability-info-value accountability-long-value"><?= $softBreak($localidadeLabel) ?></td>
                         </tr>
                         <tr>
-                            <th>Periodo filtrado</th>
+                            <th>Período filtrado</th>
                             <td class="accountability-info-value"><?= h($periodo) ?></td>
-                            <th>Codigo do documento</th>
+                            <th>Código do documento</th>
                             <td class="accountability-info-value accountability-code-value"><?= $softBreak($documentCode) ?></td>
                         </tr>
                     </tbody>
@@ -438,13 +438,13 @@ $renderFilterFields = static function (array $filters): void {
             </section>
 
             <section class="dti-section accountability-section">
-                <h3>2. Dados sobre a distribuicao</h3>
+                <h3>2. Dados sobre a distribuição</h3>
                 <div class="accountability-table-wrap">
                 <table class="dti-table accountability-list-table">
                     <thead>
                         <tr>
                             <th>N.</th>
-                            <th>Nome do beneficiario</th>
+                            <th>Nome do beneficiário</th>
                             <th>CPF</th>
                             <th>Quantidade recebida</th>
                             <th>Assinatura</th>
@@ -479,7 +479,7 @@ $renderFilterFields = static function (array $filters): void {
 
         <article class="dti-page accountability-page-sheet accountability-signature-sheet">
             <header class="dti-page-heading">
-                <strong>Prestacao de contas de ajuda humanitaria</strong>
+                <strong>Prestação de contas de ajuda humanitária</strong>
                 <span><?= h($documentCode) ?></span>
             </header>
 
@@ -487,13 +487,13 @@ $renderFilterFields = static function (array $filters): void {
                 <h3>3. Assinaturas</h3>
                 <?php if ($signature === null): ?>
                     <div class="dti-signature-pending">
-                        Documento ainda nao assinado. Use a acao "Assinar documento" na previa antes da impressao oficial.
+                        Documento ainda não assinado. Use a ação "Assinar documento" na prévia antes da impressão oficial.
                     </div>
                 <?php else: ?>
                     <div class="dti-signature-card">
                         <img class="dti-signature-logo" src="<?= h(asset('images/logo-cedec.png')) ?>" alt="CEDEC-PA">
                         <div>
-                            <span>Visto do responsavel pela distribuicao</span>
+                            <span>Visto do responsável pela distribuição</span>
                             <strong><?= h($valueOrDash($primarySigner['nome'] ?? ($signature['nome'] ?? ''))) ?></strong>
                             <p>
                                 <?= h($valueOrDash($primarySigner['graduacao'] ?? ($signature['graduacao'] ?? ''))) ?>
@@ -510,7 +510,7 @@ $renderFilterFields = static function (array $filters): void {
                     </div>
                     <?php if (count($signatureSigners) > 1): ?>
                         <div class="dti-cosigner-list">
-                            <span>Responsaveis pela conferencia</span>
+                            <span>Responsáveis pela conferência</span>
                             <?php foreach (array_slice($signatureSigners, 1) as $assinante): ?>
                                 <div>
                                     <strong><?= h($valueOrDash($assinante['nome'] ?? '')) ?></strong>
@@ -532,11 +532,11 @@ $renderFilterFields = static function (array $filters): void {
                     <?php endif; ?>
                     <?php if ($coSignatureRequests !== [] && !$printReady): ?>
                         <div class="dti-cosigner-list no-print">
-                            <span>Status dos responsaveis pela conferencia</span>
+                            <span>Status dos responsáveis pela conferência</span>
                             <?php foreach ($coSignatureRequests as $solicitacao): ?>
                                 <div>
                                     <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
-                                    <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>
+                                    <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Não autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -553,7 +553,7 @@ $renderFilterFields = static function (array $filters): void {
     <?php endif; ?>
 
     <?php if ($hasAppliedFilters && $totalPages > 1 && !$embedDocument): ?>
-        <nav class="records-pagination delivery-pagination no-print" aria-label="Paginacao da prestacao de contas">
+        <nav class="records-pagination delivery-pagination no-print" aria-label="Paginação da prestação de contas">
             <a class="secondary-button <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(max(1, $page - 1))) ?>">Anterior</a>
             <div class="pagination-pages">
                 <?php
@@ -576,7 +576,7 @@ $renderFilterFields = static function (array $filters): void {
                     <a href="<?= h($pageUrl($totalPages)) ?>"><?= h($totalPages) ?></a>
                 <?php endif; ?>
             </div>
-            <a class="secondary-button <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(min($totalPages, $page + 1))) ?>">Proxima</a>
+            <a class="secondary-button <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(min($totalPages, $page + 1))) ?>">Próxima</a>
         </nav>
     <?php endif; ?>
 </section>

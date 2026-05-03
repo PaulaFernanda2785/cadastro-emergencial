@@ -48,15 +48,15 @@
 
         return '' +
             '<article class="ops-map-popup">' +
-                '<strong>' + escapeHtml(point.protocolo || 'Residencia') + '</strong>' +
+                '<strong>' + escapeHtml(point.protocolo || 'Residência') + '</strong>' +
                 '<span>' + escapeHtml(point.bairro || '-') + ' - ' + escapeHtml(point.municipio || '-') + '</span>' +
                 '<dl>' +
-                    '<div><dt>Condicao</dt><dd>' + escapeHtml(point.condicao_label || '-') + '</dd></div>' +
-                    '<div><dt>Imovel</dt><dd>' + escapeHtml(point.imovel || '-') + '</dd></div>' +
-                    '<div><dt>Familias</dt><dd>' + families + '</dd></div>' +
+                    '<div><dt>Condição</dt><dd>' + escapeHtml(point.condicao_label || '-') + '</dd></div>' +
+                    '<div><dt>Imóvel</dt><dd>' + escapeHtml(point.imovel || '-') + '</dd></div>' +
+                    '<div><dt>Famílias</dt><dd>' + families + '</dd></div>' +
                     '<div><dt>Atendidas</dt><dd>' + delivered + '</dd></div>' +
                 '</dl>' +
-                '<a href="' + escapeHtml(point.url || '#') + '">Abrir residencia</a>' +
+                '<a href="' + escapeHtml(point.url || '#') + '">Abrir residência</a>' +
             '</article>';
     }
 
@@ -66,17 +66,17 @@
 
         return '' +
             '<span class="eyebrow">Ponto selecionado</span>' +
-            '<h3>' + escapeHtml(point.protocolo || 'Residencia') + '</h3>' +
+            '<h3>' + escapeHtml(point.protocolo || 'Residência') + '</h3>' +
             '<p>' + escapeHtml(point.bairro || '-') + ' - ' + escapeHtml(point.municipio || '-') + '</p>' +
             '<dl>' +
-                '<div><dt>Condicao</dt><dd>' + escapeHtml(point.condicao_label || '-') + '</dd></div>' +
-                '<div><dt>Imovel</dt><dd>' + escapeHtml(point.imovel || '-') + '</dd></div>' +
-                '<div><dt>Familias</dt><dd>' + families + '</dd></div>' +
+                '<div><dt>Condição</dt><dd>' + escapeHtml(point.condicao_label || '-') + '</dd></div>' +
+                '<div><dt>Imóvel</dt><dd>' + escapeHtml(point.imovel || '-') + '</dd></div>' +
+                '<div><dt>Famílias</dt><dd>' + families + '</dd></div>' +
                 '<div><dt>Atendidas</dt><dd>' + delivered + '</dd></div>' +
                 '<div><dt>Coordenadas</dt><dd>' + point.latitude.toFixed(6) + ', ' + point.longitude.toFixed(6) + '</dd></div>' +
-                '<div><dt>Acao</dt><dd>' + escapeHtml(point.acao || '-') + '</dd></div>' +
+                '<div><dt>Ação</dt><dd>' + escapeHtml(point.acao || '-') + '</dd></div>' +
             '</dl>' +
-            '<a class="primary-link-button" href="' + escapeHtml(point.url || '#') + '">Abrir residencia</a>';
+            '<a class="primary-link-button" href="' + escapeHtml(point.url || '#') + '">Abrir residência</a>';
     }
 
     function buildTileLayers(L) {
@@ -89,7 +89,7 @@
                 maxZoom: 19,
                 attribution: '&copy; OpenStreetMap, Humanitarian OpenStreetMap Team'
             }),
-            'Satelite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            'Satélite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 19,
                 attribution: 'Tiles &copy; Esri'
             })
@@ -107,7 +107,7 @@
 
         return L.marker([point.latitude, point.longitude], {
             icon: icon,
-            title: (point.protocolo || 'Residencia') + ' - ' + (point.condicao_label || ''),
+            title: (point.protocolo || 'Residência') + ' - ' + (point.condicao_label || ''),
             keyboard: true,
             riseOnHover: true
         }).bindPopup(popupHtml(point), {
@@ -150,10 +150,10 @@
             if (empty) {
                 empty.hidden = false;
                 if (empty.querySelector('strong')) {
-                    empty.querySelector('strong').textContent = 'Biblioteca Leaflet nao carregada.';
+                    empty.querySelector('strong').textContent = 'Biblioteca Leaflet não carregada.';
                 }
                 if (empty.querySelector('span')) {
-                    empty.querySelector('span').textContent = 'Verifique a conexao com a internet ou o bloqueio do CDN.';
+                    empty.querySelector('span').textContent = 'Verifique a conexão com a internet ou o bloqueio do CDN.';
                 }
             }
             return;
@@ -168,7 +168,7 @@
 
         placeholder = document.createElement('div');
         placeholder.className = 'ops-map-placeholder';
-        placeholder.innerHTML = '<div><strong>Carregando mapa operacional</strong><span>Preparando camadas, zoom e residencias georreferenciadas.</span></div>';
+        placeholder.innerHTML = '<div><strong>Carregando mapa operacional</strong><span>Preparando camadas, zoom e residências georreferenciadas.</span></div>';
         stage.appendChild(placeholder);
 
         canvas = document.createElement('div');
@@ -231,7 +231,7 @@
             });
         }
 
-        L.control.layers(layers, { 'Residencias': markerGroup }, {
+        L.control.layers(layers, { 'Residências': markerGroup }, {
             collapsed: true,
             position: 'topright'
         }).addTo(map);

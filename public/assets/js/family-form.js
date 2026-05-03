@@ -147,7 +147,7 @@
 
                 previewUrls.push(url);
                 image.src = url;
-                image.alt = 'Previa de ' + file.name;
+                image.alt = 'Prévia de ' + file.name;
                 preview.appendChild(image);
                 return preview;
             }
@@ -166,7 +166,7 @@
             if (files.length === 0) {
                 list.hidden = true;
                 dropzone.classList.remove('has-file');
-                setStatus('JPG, PNG ou PDF. Tamanho maximo por arquivo: 5 MB.');
+                setStatus('JPG, PNG ou PDF. Tamanho máximo por arquivo: 5 MB.');
                 syncInput();
                 return;
             }

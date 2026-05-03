@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260502-170';
+$assetVersion = '20260502-174';
 $sessionTimeoutSeconds = 1800;
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
@@ -165,8 +165,8 @@ $menuItems = [
                         <?php if ($user === null): ?>
                             <img src="<?= h(asset('images/logo-cedec.png')) ?>" alt="CEDEC-PA" class="public-header-logo">
                         <?php endif; ?>
-                        <strong>Corpo de Bombeiros Militar do Para</strong>
-                        <span>Coordenadoria Estadual de Protecao e Defesa Civil</span>
+                        <strong>Corpo de Bombeiros Militar do Pará</strong>
+                        <span>Coordenadoria Estadual de Proteção e Defesa Civil</span>
                     </div>
                 </div>
 

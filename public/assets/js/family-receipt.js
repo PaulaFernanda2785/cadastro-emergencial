@@ -287,7 +287,7 @@
             }
 
             downloadBlob(blob, filename);
-            setStatus('Envio direto indisponivel neste navegador. A imagem foi baixada; anexe o PNG no WhatsApp.');
+            setStatus('Envio direto indisponível neste navegador. A imagem foi baixada; anexe o PNG no WhatsApp.');
         });
     }
 
@@ -304,7 +304,7 @@
                 var filename = (ticket.dataset.receiptCode || 'comprovante') + '.png';
 
                 if (!blob) {
-                    setStatus('Nao foi possivel gerar a imagem do comprovante.');
+                    setStatus('Não foi possível gerar a imagem do comprovante.');
                     return;
                 }
 

@@ -14,13 +14,13 @@ $valueOrDash = static function (mixed $value): string {
 
     return $text !== '' ? $text : '-';
 };
-$yesNo = static fn (mixed $value): string => (int) $value === 1 ? 'Sim' : 'Nao';
+$yesNo = static fn (mixed $value): string => (int) $value === 1 ? 'Sim' : 'Não';
 $sexLabel = static function (mixed $value): string {
     $options = [
         'feminino' => 'Feminino',
         'masculino' => 'Masculino',
         'outro' => 'Outro',
-        'nao_informado' => 'Nao informado',
+        'nao_informado' => 'Não informado',
     ];
     $key = (string) $value;
 
@@ -59,13 +59,13 @@ $fotosDocumentos = $fotosDocumentos ?? [];
 $photoBlocks = [];
 foreach ([
     [
-        'title' => 'Fotos da residencia',
-        'empty' => 'Nenhuma foto da residencia anexada ao cadastro.',
+        'title' => 'Fotos da residência',
+        'empty' => 'Nenhuma foto da residência anexada ao cadastro.',
         'photos' => $fotosResidencia,
     ],
     [
         'title' => 'Fotos dos documentos',
-        'empty' => 'Nenhuma imagem de documento anexada as familias.',
+        'empty' => 'Nenhuma imagem de documento anexada às famílias.',
         'photos' => $fotosDocumentos,
     ],
 ] as $sectionIndex => $photoSection) {
@@ -96,12 +96,12 @@ $pageNumber = 1;
     <?php if (!$embedDocument): ?>
     <header class="action-form-header records-header no-print dti-screen-header">
         <div>
-            <span class="eyebrow">Descricao Tecnica de Imovel</span>
+            <span class="eyebrow">Descrição Técnica de Imóvel</span>
             <h1>DTI <?= h($residencia['protocolo']) ?></h1>
             <p><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
         </div>
         <div class="header-actions">
-            <a class="secondary-button residence-action-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Voltar para residencia</a>
+            <a class="secondary-button residence-action-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Voltar para residência</a>
             <?php if ($signature === null): ?>
                 <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/dti/assinar')) ?>" class="inline-form js-prevent-double-submit">
                     <?= csrf_field() ?>
@@ -117,7 +117,7 @@ $pageNumber = 1;
                 <?php if ($printReady): ?>
                     <button type="button" class="primary-button" onclick="window.print()">Imprimir</button>
                 <?php else: ?>
-                    <span class="limit-reached-pill">Impressao bloqueada</span>
+                    <span class="limit-reached-pill">Impressão bloqueada</span>
                 <?php endif; ?>
             <?php endif; ?>
         </div>
@@ -127,8 +127,8 @@ $pageNumber = 1;
         <section class="signature-flow-panel no-print">
             <div>
                 <span class="eyebrow">Fluxo de coassinatura</span>
-                <h2>Impressao aguardando autorizacao</h2>
-                <p><?= h((int) ($coSignatureStatus['pendentes'] ?? 0)) ?> pendente(s), <?= h((int) ($coSignatureStatus['autorizados'] ?? 0)) ?> autorizado(s), <?= h((int) ($coSignatureStatus['negados'] ?? 0)) ?> nao autorizado(s).</p>
+                <h2>Impressão aguardando autorização</h2>
+                <p><?= h((int) ($coSignatureStatus['pendentes'] ?? 0)) ?> pendente(s), <?= h((int) ($coSignatureStatus['autorizados'] ?? 0)) ?> autorizado(s), <?= h((int) ($coSignatureStatus['negados'] ?? 0)) ?> não autorizado(s).</p>
             </div>
             <a class="secondary-button signature-flow-action" href="<?= h(url('/assinaturas')) ?>">Acompanhar assinaturas</a>
         </section>
@@ -141,7 +141,7 @@ $pageNumber = 1;
                 <h2>Remover assinaturas</h2>
                 <p>Somente o assinante principal pode remover a assinatura principal ou remover coautores selecionados deste documento.</p>
             </div>
-            <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/dti/remover-assinatura')) ?>" class="js-prevent-double-submit" data-confirm="Confirmar a remocao das assinaturas selecionadas?">
+            <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/dti/remover-assinatura')) ?>" class="js-prevent-double-submit" data-confirm="Confirmar a remoção das assinaturas selecionadas?">
                 <?= csrf_field() ?>
                 <?= idempotency_field('cadastro.residencia.dti.remove_signature.' . $residencia['id']) ?>
                 <label class="dti-primary-signer">
@@ -161,12 +161,12 @@ $pageNumber = 1;
                                 <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
                                 <small>
                                     <input type="checkbox" name="remover_coassinaturas[]" value="<?= h((int) ($solicitacao['id'] ?? 0)) ?>">
-                                    <?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?>
+                                    <?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Não autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?>
                                 </small>
                             </label>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <small>Nao ha coautores ativos neste documento.</small>
+                        <small>Não há coautores ativos neste documento.</small>
                     <?php endif; ?>
                 </div>
 
@@ -177,7 +177,7 @@ $pageNumber = 1;
 
     <?php if ($signature !== null && !$printReady): ?>
         <div class="print-blocked-message print-only">
-            Impressao bloqueada. Este documento possui coassinatura pendente ou nao autorizada.
+            Impressão bloqueada. Este documento possui coassinatura pendente ou não autorizada.
         </div>
     <?php endif; ?>
 
@@ -186,30 +186,30 @@ $pageNumber = 1;
             <div>
                 <span class="eyebrow">Assinatura digital conjunta</span>
                 <h2>Assinar DTI</h2>
-                <p>O usuario logado assina primeiro. Coassinantes sao opcionais; pesquise e selecione outros usuarios apenas quando a DTI precisar de assinatura conjunta.</p>
+                <p>O usuário logado assina primeiro. Coassinantes são opcionais; pesquise e selecione outros usuários apenas quando a DTI precisar de assinatura conjunta.</p>
             </div>
             <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/dti/assinar')) ?>" class="js-prevent-double-submit">
                 <?= csrf_field() ?>
                 <?= idempotency_field('cadastro.residencia.dti.sign.' . $residencia['id']) ?>
                 <div class="dti-primary-signer">
                     <span>1. Assinante principal</span>
-                    <strong><?= h(current_user()['nome'] ?? 'Usuario logado') ?></strong>
+                    <strong><?= h(current_user()['nome'] ?? 'Usuário logado') ?></strong>
                     <small><?= h(current_user()['cpf'] ?? '') ?><?= !empty(current_user()['graduacao']) ? ' - ' . h(current_user()['graduacao']) : '' ?><?= !empty(current_user()['nome_guerra']) ? ' ' . h(current_user()['nome_guerra']) : '' ?><?= !empty(current_user()['matricula_funcional']) ? ' | MF ' . h(current_user()['matricula_funcional']) : '' ?></small>
                 </div>
                 <div class="dti-cosigner-panel">
                     <span>2. Coassinantes do sistema</span>
                     <?php if ($signatureUsers === []): ?>
-                        <div class="dti-empty">Nenhum outro usuario ativo disponivel para coassinar.</div>
+                        <div class="dti-empty">Nenhum outro usuário ativo disponível para coassinar.</div>
                     <?php else: ?>
                         <div class="dti-cosigner-picker" data-dti-cosigner-picker>
                             <label class="field smart-search-field">
-                                <span>Buscar usuario</span>
-                                <input type="search" placeholder="Digite nome, CPF, MF, graduacao ou nome de guerra" autocomplete="off" data-dti-cosigner-search>
+                                <span>Buscar usuário</span>
+                                <input type="search" placeholder="Digite nome, CPF, MF, graduação ou nome de guerra" autocomplete="off" data-dti-cosigner-search>
                             </label>
                             <div class="dti-cosigner-selected" data-dti-cosigner-selected aria-live="polite">
                                 <span>Nenhum coassinante selecionado.</span>
                             </div>
-                            <div class="dti-cosigner-hint" data-dti-cosigner-status>Digite para buscar usuarios do sistema.</div>
+                            <div class="dti-cosigner-hint" data-dti-cosigner-status>Digite para buscar usuários do sistema.</div>
                             <div class="dti-cosigner-options" data-dti-cosigner-options>
                             <?php foreach ($signatureUsers as $usuarioAssinante): ?>
                                 <?php
@@ -239,23 +239,23 @@ $pageNumber = 1;
     <?php endif; ?>
     <?php endif; ?>
 
-    <div class="dti-document" aria-label="Previa da DTI">
+    <div class="dti-document" aria-label="Prévia da DTI">
         <article class="dti-page">
             <header class="dti-institutional-header">
                 <img src="<?= h(asset('images/logo-cedec.png')) ?>" alt="CEDEC-PA">
                 <div>
-                    <strong>Corpo de Bombeiros Militar do Para</strong>
-                    <span>Coordenadoria Estadual de Protecao e Defesa Civil</span>
-                    <h2>DTI - Descricao Tecnica de Imovel</h2>
+                    <strong>Corpo de Bombeiros Militar do Pará</strong>
+                    <span>Coordenadoria Estadual de Proteção e Defesa Civil</span>
+                    <h2>DTI - Descrição Técnica de Imóvel</h2>
                 </div>
             </header>
 
             <section class="dti-section">
-                <h3>1. Identificacao do documento</h3>
+                <h3>1. Identificação do documento</h3>
                 <table class="dti-table">
                     <tbody>
                         <tr>
-                            <th>Codigo DTI</th>
+                            <th>Código DTI</th>
                             <td><?= h($documentCode) ?></td>
                             <th>Gerado em</th>
                             <td><?= h($generatedAtText) ?></td>
@@ -267,7 +267,7 @@ $pageNumber = 1;
                             <td><?= h($valueOrDash($residencia['cadastrador_nome'] ?? '')) ?></td>
                         </tr>
                         <tr>
-                            <th>Acao</th>
+                            <th>Ação</th>
                             <td colspan="3"><?= h($valueOrDash(($residencia['localidade'] ?? '') . ' - ' . ($residencia['tipo_evento'] ?? ''))) ?></td>
                         </tr>
                     </tbody>
@@ -275,17 +275,17 @@ $pageNumber = 1;
             </section>
 
             <section class="dti-section">
-                <h3>2. Dados do imovel e da residencia</h3>
+                <h3>2. Dados do imóvel e da residência</h3>
                 <table class="dti-table">
                     <tbody>
                         <tr>
-                            <th>Municipio/UF</th>
+                            <th>Município/UF</th>
                             <td><?= h($residencia['municipio_nome']) ?> / <?= h($residencia['uf']) ?></td>
                             <th class="dti-neighborhood-label">Bairro/comunidade</th>
                             <td class="dti-wrap-value dti-neighborhood-value"><?= h($valueOrDash($residencia['bairro_comunidade'] ?? '')) ?></td>
                         </tr>
                         <tr>
-                            <th>Endereco</th>
+                            <th>Endereço</th>
                             <td colspan="3"><?= h($valueOrDash($residencia['endereco'] ?? '')) ?></td>
                         </tr>
                         <tr>
@@ -295,9 +295,9 @@ $pageNumber = 1;
                             <td><?= h($formatDateTime($residencia['data_cadastro'] ?? '')) ?></td>
                         </tr>
                         <tr>
-                            <th>Tipo de imovel</th>
+                            <th>Tipo de imóvel</th>
                             <td><?= h(residencia_imovel_label($residencia['imovel'] ?? null)) ?></td>
-                            <th>Condicao</th>
+                            <th>Condição</th>
                             <td><?= h(residencia_condicao_label($residencia['condicao_residencia'] ?? null)) ?></td>
                         </tr>
                         <tr>
@@ -307,9 +307,9 @@ $pageNumber = 1;
                             <td><?= h($valueOrDash($residencia['longitude'] ?? '')) ?></td>
                         </tr>
                         <tr>
-                            <th>Familias informadas</th>
+                            <th>Famílias informadas</th>
                             <td><?= h((int) ($residencia['quantidade_familias'] ?? 0)) ?></td>
-                            <th>Familias cadastradas</th>
+                            <th>Famílias cadastradas</th>
                             <td><?= h(count($familias)) ?></td>
                         </tr>
                     </tbody>
@@ -325,36 +325,36 @@ $pageNumber = 1;
         <?php foreach ($familyPages as $familyPageIndex => $familiasPagina): ?>
         <article class="dti-page">
             <header class="dti-page-heading">
-                <strong>DTI - Descricao Tecnica de Imovel</strong>
+                <strong>DTI - Descrição Técnica de Imóvel</strong>
                 <span><?= h($residencia['protocolo']) ?></span>
             </header>
 
             <section class="dti-section">
-                <h3>3. Familias vinculadas a residencia<?= count($familyPages) > 1 ? ' - parte ' . h($familyPageIndex + 1) : '' ?></h3>
+                <h3>3. Famílias vinculadas à residência<?= count($familyPages) > 1 ? ' - parte ' . h($familyPageIndex + 1) : '' ?></h3>
                 <?php if ($familiasPagina === []): ?>
-                    <div class="dti-empty">Nenhuma familia vinculada ao cadastro da residencia.</div>
+                    <div class="dti-empty">Nenhuma família vinculada ao cadastro da residência.</div>
                 <?php else: ?>
                     <?php foreach ($familiasPagina as $localFamilyIndex => $familia): ?>
                         <?php
                         $index = $familyPageIndex + $localFamilyIndex;
                         $vulnerabilidades = array_values(array_filter([
-                            (int) ($familia['possui_criancas'] ?? 0) === 1 ? 'Criancas' : '',
+                            (int) ($familia['possui_criancas'] ?? 0) === 1 ? 'Crianças' : '',
                             (int) ($familia['possui_idosos'] ?? 0) === 1 ? 'Idosos' : '',
                             (int) ($familia['possui_pcd'] ?? 0) === 1 ? 'PCD' : '',
                             (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '',
                         ]));
                         ?>
                         <table class="dti-table dti-family-table">
-                            <caption>Familia <?= h($index + 1) ?> - <?= h($familia['responsavel_nome']) ?></caption>
+                            <caption>Família <?= h($index + 1) ?> - <?= h($familia['responsavel_nome']) ?></caption>
                             <tbody>
                                 <tr>
-                                    <th>Responsavel</th>
+                                    <th>Responsável</th>
                                     <td><?= h($familia['responsavel_nome']) ?></td>
                                     <th>CPF</th>
                                     <td><?= h($familia['responsavel_cpf']) ?></td>
                                 </tr>
                                 <tr>
-                                    <th>RG / Orgao</th>
+                                    <th>RG / Órgão</th>
                                     <td><?= h($valueOrDash($familia['responsavel_rg'] ?? '')) ?> / <?= h($valueOrDash($familia['responsavel_orgao_expedidor'] ?? '')) ?></td>
                                     <th>Sexo / Nascimento</th>
                                     <td><?= h($sexLabel($familia['responsavel_sexo'] ?? null)) ?> / <?= h($formatDate($familia['data_nascimento'] ?? '')) ?></td>
@@ -372,23 +372,23 @@ $pageNumber = 1;
                                     <td><?= h(familia_renda_label($familia['renda_familiar'] ?? null)) ?></td>
                                 </tr>
                                 <tr>
-                                    <th>Situacao</th>
+                                    <th>Situação</th>
                                     <td><?= h(familia_situacao_label($familia['situacao_familia'] ?? null)) ?></td>
                                     <th>Vulnerabilidades</th>
                                     <td><?= h($vulnerabilidades !== [] ? implode(', ', $vulnerabilidades) : '-') ?></td>
                                 </tr>
                                 <tr>
-                                    <th>Beneficio social</th>
+                                    <th>Benefício social</th>
                                     <td><?= h($yesNo($familia['recebe_beneficio_social'] ?? 0)) ?> - <?= h($valueOrDash($familia['beneficio_social_nome'] ?? '')) ?></td>
-                                    <th>Cadastro concluido</th>
+                                    <th>Cadastro concluído</th>
                                     <td><?= h($yesNo($familia['cadastro_concluido'] ?? 0)) ?></td>
                                 </tr>
                                 <tr>
-                                    <th>Perdas de bens moveis</th>
+                                    <th>Perdas de bens móveis</th>
                                     <td colspan="3"><?= h($valueOrDash($familia['perdas_bens_moveis'] ?? '')) ?></td>
                                 </tr>
                                 <tr>
-                                    <th>Observacoes finais</th>
+                                    <th>Observações finais</th>
                                     <td colspan="3"><?= h($valueOrDash($familia['conclusao_observacoes'] ?? '')) ?></td>
                                 </tr>
                                 <tr>
@@ -398,7 +398,7 @@ $pageNumber = 1;
                                     <td><?= h($valueOrDash($familia['representante_cpf'] ?? '')) ?> / <?= h($valueOrDash($familia['representante_rg'] ?? '')) ?></td>
                                 </tr>
                                 <tr>
-                                    <th>Orgao expedidor</th>
+                                    <th>Órgão expedidor</th>
                                     <td><?= h($valueOrDash($familia['representante_orgao_expedidor'] ?? '')) ?></td>
                                     <th>Sexo / Nascimento</th>
                                     <td><?= h($sexLabel($familia['representante_sexo'] ?? null)) ?> / <?= h($formatDate($familia['representante_data_nascimento'] ?? '')) ?></td>
@@ -423,7 +423,7 @@ $pageNumber = 1;
         ?>
         <article class="dti-page dti-photo-page">
             <header class="dti-page-heading">
-                <strong><?= $isLastPhotoPage ? 'Relatorio fotografico e assinatura' : 'Relatorio fotografico' ?></strong>
+                <strong><?= $isLastPhotoPage ? 'Relatório fotográfico e assinatura' : 'Relatório fotográfico' ?></strong>
                 <span><?= h($residencia['protocolo']) ?></span>
             </header>
 
@@ -439,7 +439,7 @@ $pageNumber = 1;
                                 <img src="<?= h($fotoUrl) ?>" alt="<?= h($foto['nome_original']) ?>">
                                 <figcaption>
                                     <strong><?= h($foto['nome_original']) ?></strong>
-                                    <span><?= h($foto['responsavel_nome'] ?? 'Residencia') ?> - <?= h($formatDateTime($foto['criado_em'] ?? '')) ?></span>
+                                    <span><?= h($foto['responsavel_nome'] ?? 'Residência') ?> - <?= h($formatDateTime($foto['criado_em'] ?? '')) ?></span>
                                 </figcaption>
                             </figure>
                         <?php endforeach; ?>
@@ -452,7 +452,7 @@ $pageNumber = 1;
                 <h3>5. Assinatura digital</h3>
                 <?php if ($signature === null): ?>
                     <div class="dti-signature-pending">
-                        Documento ainda nao assinado. Use a acao "Assinar documento" na previa antes da impressao oficial.
+                        Documento ainda não assinado. Use a ação "Assinar documento" na prévia antes da impressão oficial.
                     </div>
                 <?php else: ?>
                     <div class="dti-signature-card">
@@ -502,7 +502,7 @@ $pageNumber = 1;
                             <?php foreach ($coSignatureRequests as $solicitacao): ?>
                                 <div>
                                     <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
-                                    <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>
+                                    <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Não autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>
                                 </div>
                             <?php endforeach; ?>
                         </div>

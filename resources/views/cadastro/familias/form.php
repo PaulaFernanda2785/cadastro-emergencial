@@ -19,28 +19,28 @@ $optionSelected = static function (array $familia, string $field, string $value)
 <section class="records-page residence-edit-page family-edit-page">
     <div class="action-form-header records-header">
         <div>
-            <span class="eyebrow">Cadastro de familia</span>
-            <h1><?= h($title ?? 'Nova familia') ?></h1>
-            <p>Residencia <?= h($residencia['protocolo']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
+            <span class="eyebrow">Cadastro de família</span>
+            <h1><?= h($title ?? 'Nova família') ?></h1>
+            <p>Residência <?= h($residencia['protocolo']) ?> - <?= h($residencia['bairro_comunidade']) ?></p>
         </div>
-        <a class="secondary-button action-back-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Voltar para residencia</a>
+        <a class="secondary-button action-back-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Voltar para residência</a>
     </div>
 
-    <div class="records-summary-grid family-summary-grid" aria-label="Resumo da familia">
+    <div class="records-summary-grid family-summary-grid" aria-label="Resumo da família">
         <div class="records-summary-card">
-            <span>Residencia</span>
+            <span>Residência</span>
             <strong><?= h($residencia['protocolo']) ?></strong>
             <small><?= h($residencia['bairro_comunidade'] ?? 'Sem bairro') ?></small>
         </div>
         <div class="records-summary-card">
-            <span>Responsavel</span>
+            <span>Responsável</span>
             <strong><?= h($familia['responsavel_nome'] ?: 'Novo cadastro') ?></strong>
             <small><?= h($familia['responsavel_cpf'] ?: 'CPF pendente') ?></small>
         </div>
         <div class="records-summary-card">
             <span>Integrantes</span>
             <strong><?= h($familia['quantidade_integrantes'] ?? '1') ?></strong>
-            <small>pessoa(s) na familia</small>
+            <small>pessoa(s) na família</small>
         </div>
         <div class="records-summary-card">
             <span>Arquivos</span>
@@ -100,11 +100,11 @@ $optionSelected = static function (array $familia, string $field, string $value)
                 <div class="family-doc-upload photo-upload" data-family-doc-upload data-doc-target="responsavel">
                     <input class="file-input-native" id="documentos-responsavel" type="file" name="documentos[]" accept="image/jpeg,image/png,application/pdf,image/*" capture="environment" multiple data-family-doc-input>
                     <label class="photo-dropzone family-doc-dropzone" for="documentos-responsavel" tabindex="0" data-family-doc-dropzone>
-                        <strong>Documentos do responsavel</strong>
+                        <strong>Documentos do responsável</strong>
                         <span>Anexe ou fotografe RG, CPF ou documento equivalente.</span>
                     </label>
                     <div class="family-doc-list" data-family-doc-list hidden></div>
-                    <small class="field-hint" data-family-doc-status>JPG, PNG ou PDF. Tamanho maximo por arquivo: 5 MB.</small>
+                    <small class="field-hint" data-family-doc-status>JPG, PNG ou PDF. Tamanho máximo por arquivo: 5 MB.</small>
                 </div>
             </div>
             <?php if (!empty($errors['documentos'])): ?>
@@ -114,8 +114,8 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
         <section class="form-block residence-form-block family-form-block">
             <div class="form-block-heading">
-                <span>Responsavel</span>
-                <strong>Identificacao familiar</strong>
+                <span>Responsável</span>
+                <strong>Identificação familiar</strong>
             </div>
 
             <label class="field">
@@ -145,7 +145,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
             <div class="form-grid three-columns">
                 <label class="field">
-                    <span>Orgao expedidor</span>
+                    <span>Órgão expedidor</span>
                     <input type="text" name="responsavel_orgao_expedidor" value="<?= h($familia['responsavel_orgao_expedidor'] ?? '') ?>" maxlength="30" required>
                     <?php if (!empty($errors['responsavel_orgao_expedidor'])): ?>
                         <small class="field-error"><?= h($errors['responsavel_orgao_expedidor'][0]) ?></small>
@@ -165,7 +165,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
                         <option value="feminino" <?= $optionSelected($familia, 'responsavel_sexo', 'feminino') ?>>Feminino</option>
                         <option value="masculino" <?= $optionSelected($familia, 'responsavel_sexo', 'masculino') ?>>Masculino</option>
                         <option value="outro" <?= $optionSelected($familia, 'responsavel_sexo', 'outro') ?>>Outro</option>
-                        <option value="nao_informado" <?= $optionSelected($familia, 'responsavel_sexo', 'nao_informado') ?>>Nao informado</option>
+                        <option value="nao_informado" <?= $optionSelected($familia, 'responsavel_sexo', 'nao_informado') ?>>Não informado</option>
                     </select>
                     <?php if (!empty($errors['responsavel_sexo'])): ?>
                         <small class="field-error"><?= h($errors['responsavel_sexo'][0]) ?></small>
@@ -201,7 +201,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
         <section class="form-block residence-form-block family-form-block">
             <div class="form-block-heading">
-                <span>Condicao</span>
+                <span>Condição</span>
                 <strong>Perfil familiar</strong>
             </div>
 
@@ -210,21 +210,21 @@ $optionSelected = static function (array $familia, string $field, string $value)
                     <span>Renda familiar</span>
                     <select name="renda_familiar" required>
                         <option value="">Selecione</option>
-                        <option value="0_3_salarios" <?= $optionSelected($familia, 'renda_familiar', '0_3_salarios') ?>>0 a 3 salarios</option>
-                        <option value="acima_3_salarios" <?= $optionSelected($familia, 'renda_familiar', 'acima_3_salarios') ?>>Acima de 3 salarios</option>
+                        <option value="0_3_salarios" <?= $optionSelected($familia, 'renda_familiar', '0_3_salarios') ?>>0 a 3 salários</option>
+                        <option value="acima_3_salarios" <?= $optionSelected($familia, 'renda_familiar', 'acima_3_salarios') ?>>Acima de 3 salários</option>
                     </select>
                     <?php if (!empty($errors['renda_familiar'])): ?>
                         <small class="field-error"><?= h($errors['renda_familiar'][0]) ?></small>
                     <?php endif; ?>
                 </label>
                 <label class="field">
-                    <span>Situacao da familia</span>
+                    <span>Situação da família</span>
                     <select name="situacao_familia" required>
                         <option value="">Selecione</option>
                         <option value="desabrigado" <?= $optionSelected($familia, 'situacao_familia', 'desabrigado') ?>>Desabrigado</option>
                         <option value="desalojado" <?= $optionSelected($familia, 'situacao_familia', 'desalojado') ?>>Desalojado</option>
                         <option value="aluguel_social" <?= $optionSelected($familia, 'situacao_familia', 'aluguel_social') ?>>Aluguel social</option>
-                        <option value="permanece_residencia" <?= $optionSelected($familia, 'situacao_familia', 'permanece_residencia') ?>>Permanece na residencia</option>
+                        <option value="permanece_residencia" <?= $optionSelected($familia, 'situacao_familia', 'permanece_residencia') ?>>Permanece na residência</option>
                     </select>
                     <?php if (!empty($errors['situacao_familia'])): ?>
                         <small class="field-error"><?= h($errors['situacao_familia'][0]) ?></small>
@@ -233,7 +233,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
             </div>
 
             <label class="field">
-                <span>Perdas de bens moveis</span>
+                <span>Perdas de bens móveis</span>
                 <textarea name="perdas_bens_moveis" rows="3" maxlength="1000"><?= h($familia['perdas_bens_moveis'] ?? '') ?></textarea>
                 <?php if (!empty($errors['perdas_bens_moveis'])): ?>
                     <small class="field-error"><?= h($errors['perdas_bens_moveis'][0]) ?></small>
@@ -242,8 +242,8 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
             <div class="representative-toggle family-benefit-toggle">
                 <div>
-                    <span>Beneficio social</span>
-                    <strong>Recebe beneficio social?</strong>
+                    <span>Benefício social</span>
+                    <strong>Recebe benefício social?</strong>
                 </div>
                 <label class="switch-control">
                     <input type="checkbox" name="recebe_beneficio_social" value="1" data-benefit-toggle <?= $hasBeneficio ? 'checked' : '' ?>>
@@ -262,14 +262,14 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
         <section class="form-block residence-form-block family-form-block">
             <div class="form-block-heading">
-                <span>Selecao multipla</span>
+                <span>Seleção múltipla</span>
                 <strong>Vulnerabilidades</strong>
             </div>
 
             <div class="vulnerability-picker">
                 <label>
                     <input type="checkbox" name="possui_criancas" value="1" <?= !empty($familia['possui_criancas']) ? 'checked' : '' ?>>
-                    <span>Criancas</span>
+                    <span>Crianças</span>
                 </label>
                 <label>
                     <input type="checkbox" name="possui_idosos" value="1" <?= !empty($familia['possui_idosos']) ? 'checked' : '' ?>>
@@ -305,7 +305,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
                         <span>Anexe RG, CPF ou documento equivalente.</span>
                     </label>
                     <div class="family-doc-list" data-family-doc-list hidden></div>
-                    <small class="field-hint" data-family-doc-status>JPG, PNG ou PDF. Tamanho maximo por arquivo: 5 MB.</small>
+                    <small class="field-hint" data-family-doc-status>JPG, PNG ou PDF. Tamanho máximo por arquivo: 5 MB.</small>
                 </div>
 
                 <label class="field">
@@ -335,7 +335,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
                 <div class="form-grid three-columns">
                     <label class="field">
-                        <span>Orgao expedidor</span>
+                    <span>Órgão expedidor</span>
                         <input type="text" name="representante_orgao_expedidor" value="<?= h($familia['representante_orgao_expedidor'] ?? '') ?>" maxlength="30" required data-representative-input>
                         <?php if (!empty($errors['representante_orgao_expedidor'])): ?>
                             <small class="field-error"><?= h($errors['representante_orgao_expedidor'][0]) ?></small>
@@ -355,7 +355,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
                             <option value="feminino" <?= $optionSelected($familia, 'representante_sexo', 'feminino') ?>>Feminino</option>
                             <option value="masculino" <?= $optionSelected($familia, 'representante_sexo', 'masculino') ?>>Masculino</option>
                             <option value="outro" <?= $optionSelected($familia, 'representante_sexo', 'outro') ?>>Outro</option>
-                            <option value="nao_informado" <?= $optionSelected($familia, 'representante_sexo', 'nao_informado') ?>>Nao informado</option>
+                            <option value="nao_informado" <?= $optionSelected($familia, 'representante_sexo', 'nao_informado') ?>>Não informado</option>
                         </select>
                         <?php if (!empty($errors['representante_sexo'])): ?>
                             <small class="field-error"><?= h($errors['representante_sexo'][0]) ?></small>
@@ -372,20 +372,20 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
         <section class="form-block residence-form-block family-form-block family-conclusion-block">
             <div class="form-block-heading">
-                <span>Conclusao</span>
+                <span>Conclusão</span>
                 <strong>Fechamento do cadastro</strong>
             </div>
 
             <label class="completion-check">
                 <input type="checkbox" name="cadastro_concluido" value="1" required <?= !empty($familia['cadastro_concluido']) ? 'checked' : '' ?>>
-                <span>Cadastro familiar revisado e concluido</span>
+                <span>Cadastro familiar revisado e concluído</span>
             </label>
             <?php if (!empty($errors['cadastro_concluido'])): ?>
                 <small class="field-error"><?= h($errors['cadastro_concluido'][0]) ?></small>
             <?php endif; ?>
 
             <label class="field">
-                <span>Observacoes finais</span>
+                <span>Observações finais</span>
                 <textarea name="conclusao_observacoes" rows="3" maxlength="1000" required><?= h($familia['conclusao_observacoes'] ?? '') ?></textarea>
                 <?php if (!empty($errors['conclusao_observacoes'])): ?>
                     <small class="field-error"><?= h($errors['conclusao_observacoes'][0]) ?></small>
@@ -395,7 +395,7 @@ $optionSelected = static function (array $familia, string $field, string $value)
 
         <div class="form-actions">
             <button type="submit" class="primary-button" data-loading-text="Processando...">
-                <span class="button-label"><?= h($submitLabel ?? 'Salvar familia') ?></span>
+                <span class="button-label"><?= h($submitLabel ?? 'Salvar família') ?></span>
                 <span class="button-spinner" aria-hidden="true"></span>
             </button>
             <a class="secondary-link" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Cancelar</a>

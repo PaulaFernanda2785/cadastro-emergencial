@@ -3,15 +3,15 @@ $statusLabel = static function (mixed $status): string {
     return [
         'pendente' => 'Pendente',
         'autorizado' => 'Autorizado',
-        'negado' => 'Nao autorizado',
+        'negado' => 'Não autorizado',
         'cancelado' => 'Cancelado',
     ][(string) $status] ?? '-';
 };
 $documentLabel = static function (mixed $type): string {
     return [
         'dti' => 'DTI',
-        'prestacao_contas' => 'Prestacao de contas',
-        'recomecar' => 'Programa Recomecar',
+        'prestacao_contas' => 'Prestação de contas',
+        'recomecar' => 'Programa Recomeçar',
     ][(string) $type] ?? (string) ($type ?: '-');
 };
 $scopeLabel = static function (mixed $scope): string {
@@ -74,7 +74,7 @@ $documentReference = static function (array $assinatura) use ($signaturePayload,
 
     $primary = $acaoBusca !== ''
         ? $acaoBusca
-        : ($acaoId !== '' ? 'Acao #' . $acaoId : 'Acao nao informada no filtro');
+        : ($acaoId !== '' ? 'Ação #' . $acaoId : 'Ação não informada no filtro');
 
     $items = [];
 
@@ -91,9 +91,9 @@ $documentReference = static function (array $assinatura) use ($signaturePayload,
     }
 
     if ($type === 'recomecar') {
-        $items[] = 'Programa: pagamento de 1 salario minimo';
+        $items[] = 'Programa: pagamento de 1 salário mínimo';
         if ($aptidao !== '') {
-            $items[] = 'Situacao: ' . ([
+            $items[] = 'Situação: ' . ([
                 'apta' => 'Aptas para pagamento',
                 'inapta' => 'Inaptas',
                 'todas' => 'Todas',
@@ -109,11 +109,11 @@ $documentReference = static function (array $assinatura) use ($signaturePayload,
     }
 
     if ($dataInicio !== '' || $dataFim !== '') {
-        $items[] = 'Periodo: ' . ($dataInicio !== '' ? $formatDate($dataInicio) : 'inicio') . ' a ' . ($dataFim !== '' ? $formatDate($dataFim) : 'hoje');
+        $items[] = 'Período: ' . ($dataInicio !== '' ? $formatDate($dataInicio) : 'início') . ' a ' . ($dataFim !== '' ? $formatDate($dataFim) : 'hoje');
     }
 
     return [
-        'label' => $type === 'recomecar' ? 'Referencia da acao no Programa Recomecar' : 'Referencia da acao na Prestacao de contas',
+        'label' => $type === 'recomecar' ? 'Referência da ação no Programa Recomeçar' : 'Referência da ação na Prestação de contas',
         'primary' => $primary,
         'items' => $items,
     ];
@@ -174,7 +174,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
         <div>
             <span class="eyebrow">Assinaturas digitais</span>
             <h1>Assinaturas</h1>
-            <p><?= $isAdmin ? 'Historico geral de documentos gerados, assinados e coassinados por todos os usuarios do sistema.' : 'Historico dos documentos que voce gerou, assinou ou recebeu como coautor.' ?></p>
+            <p><?= $isAdmin ? 'Histórico geral de documentos gerados, assinados e coassinados por todos os usuários do sistema.' : 'Histórico dos documentos que você gerou, assinou ou recebeu como coautor.' ?></p>
         </div>
     </header>
 
@@ -182,12 +182,12 @@ $lastRecord = min($totalRecords, $page * $perPage);
         <article class="records-summary-card">
             <span><?= $isAdmin ? 'Total no sistema' : 'Para minha assinatura' ?></span>
             <strong><?= h((int) ($isAdmin ? ($summary['total_sistema'] ?? 0) : ($summary['para_mim_total'] ?? 0))) ?></strong>
-            <small><?= h((int) ($isAdmin ? ($summary['pendentes_sistema'] ?? 0) : ($summary['para_mim_pendentes'] ?? 0))) ?> pendente(s) de decisao.</small>
+            <small><?= h((int) ($isAdmin ? ($summary['pendentes_sistema'] ?? 0) : ($summary['para_mim_pendentes'] ?? 0))) ?> pendente(s) de decisão.</small>
         </article>
         <article class="records-summary-card">
             <span><?= $isAdmin ? 'Controle total' : 'Solicitadas por mim' ?></span>
             <strong><?= h((int) ($isAdmin ? ($summary['total_sistema'] ?? 0) : ($summary['solicitadas_total'] ?? 0))) ?></strong>
-            <small><?= $isAdmin ? 'Todos os registros e documentos disponiveis.' : h((int) ($summary['solicitadas_pendentes'] ?? 0)) . ' aguardando coautor.' ?></small>
+            <small><?= $isAdmin ? 'Todos os registros e documentos disponíveis.' : h((int) ($summary['solicitadas_pendentes'] ?? 0)) . ' aguardando coautor.' ?></small>
         </article>
         <article class="records-summary-card">
             <span>Autorizadas</span>
@@ -195,7 +195,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
             <small>Assinaturas liberadas para o fluxo do documento.</small>
         </article>
         <article class="records-summary-card">
-            <span>Nao autorizadas</span>
+            <span>Não autorizadas</span>
             <strong><?= h((int) ($summary['negadas'] ?? 0)) ?></strong>
             <small>Assinaturas recusadas por coautores.</small>
         </article>
@@ -204,11 +204,11 @@ $lastRecord = min($totalRecords, $page * $perPage);
     <?php if (($pendentes ?? []) !== []): ?>
         <section class="signature-alert-panel" role="alert">
             <div>
-                <span class="eyebrow">Pendencias</span>
-                <h2>Voce possui <?= h(count($pendentes)) ?> documento(s) aguardando sua decisao</h2>
-                <p>Use os filtros ou abra diretamente os itens pendentes para autorizar ou nao autorizar.</p>
+                <span class="eyebrow">Pendências</span>
+                <h2>Você possui <?= h(count($pendentes)) ?> documento(s) aguardando sua decisão</h2>
+                <p>Use os filtros ou abra diretamente os itens pendentes para autorizar ou não autorizar.</p>
             </div>
-            <a class="primary-button" href="<?= h(url('/assinaturas?escopo=para_mim&status=pendente')) ?>">Ver pendencias</a>
+            <a class="primary-button" href="<?= h(url('/assinaturas?escopo=para_mim&status=pendente')) ?>">Ver pendências</a>
         </section>
     <?php endif; ?>
 
@@ -216,7 +216,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
         <div class="table-heading">
             <div>
                 <h2>Filtros inteligentes</h2>
-                <span><?= $isAdmin ? 'Administrador visualiza todos os registros. Use os filtros para localizar documentos por usuario, status, tipo ou periodo.' : 'Seu perfil visualiza apenas documentos vinculados ao seu usuario como solicitante ou coautor.' ?></span>
+                <span><?= $isAdmin ? 'Administrador visualiza todos os registros. Use os filtros para localizar documentos por usuário, status, tipo ou período.' : 'Seu perfil visualiza apenas documentos vinculados ao seu usuário como solicitante ou coautor.' ?></span>
             </div>
         </div>
 
@@ -227,7 +227,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
             </label>
 
             <label class="field styled-field signatures-filter-field signatures-filter-field-compact">
-                <span>Vinculo</span>
+                <span>Vínculo</span>
                 <select name="escopo">
                     <option value="todas" <?= ($filters['escopo'] ?? 'todas') === 'todas' ? 'selected' : '' ?>><?= $isAdmin ? 'Todos do sistema' : 'Todas' ?></option>
                     <option value="para_mim" <?= ($filters['escopo'] ?? '') === 'para_mim' ? 'selected' : '' ?>>Para minha assinatura</option>
@@ -241,7 +241,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
                     <option value="" <?= ($filters['status'] ?? '') === '' ? 'selected' : '' ?>>Todos</option>
                     <option value="pendente" <?= ($filters['status'] ?? '') === 'pendente' ? 'selected' : '' ?>>Pendente</option>
                     <option value="autorizado" <?= ($filters['status'] ?? '') === 'autorizado' ? 'selected' : '' ?>>Autorizado</option>
-                    <option value="negado" <?= ($filters['status'] ?? '') === 'negado' ? 'selected' : '' ?>>Nao autorizado</option>
+                    <option value="negado" <?= ($filters['status'] ?? '') === 'negado' ? 'selected' : '' ?>>Não autorizado</option>
                 </select>
             </label>
 
@@ -250,8 +250,8 @@ $lastRecord = min($totalRecords, $page * $perPage);
                 <select name="documento_tipo">
                     <option value="" <?= ($filters['documento_tipo'] ?? '') === '' ? 'selected' : '' ?>>Todos</option>
                     <option value="dti" <?= ($filters['documento_tipo'] ?? '') === 'dti' ? 'selected' : '' ?>>DTI</option>
-                    <option value="prestacao_contas" <?= ($filters['documento_tipo'] ?? '') === 'prestacao_contas' ? 'selected' : '' ?>>Prestacao de contas</option>
-                    <option value="recomecar" <?= ($filters['documento_tipo'] ?? '') === 'recomecar' ? 'selected' : '' ?>>Programa Recomecar</option>
+                    <option value="prestacao_contas" <?= ($filters['documento_tipo'] ?? '') === 'prestacao_contas' ? 'selected' : '' ?>>Prestação de contas</option>
+                    <option value="recomecar" <?= ($filters['documento_tipo'] ?? '') === 'recomecar' ? 'selected' : '' ?>>Programa Recomeçar</option>
                 </select>
             </label>
 
@@ -277,7 +277,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
                 <?php if (($filters['escopo'] ?? 'todas') !== 'todas'): ?><span><?= h($scopeLabel($filters['escopo'])) ?></span><?php endif; ?>
                 <?php if (($filters['status'] ?? '') !== ''): ?><span>Status: <?= h($statusLabel($filters['status'])) ?></span><?php endif; ?>
                 <?php if (($filters['documento_tipo'] ?? '') !== ''): ?><span>Documento: <?= h($documentLabel($filters['documento_tipo'])) ?></span><?php endif; ?>
-                <?php if (($filters['data_inicio'] ?? '') !== ''): ?><span>Inicio: <?= h($formatDate($filters['data_inicio'])) ?></span><?php endif; ?>
+                <?php if (($filters['data_inicio'] ?? '') !== ''): ?><span>Início: <?= h($formatDate($filters['data_inicio'])) ?></span><?php endif; ?>
                 <?php if (($filters['data_fim'] ?? '') !== ''): ?><span>Fim: <?= h($formatDate($filters['data_fim'])) ?></span><?php endif; ?>
             </div>
         <?php endif; ?>
@@ -286,7 +286,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
     <section class="table-panel signatures-list-panel">
         <div class="records-list-toolbar">
             <strong><?= h($totalRecords) ?> documento(s)</strong>
-            <span>Exibindo <?= h($firstRecord) ?>-<?= h($lastRecord) ?> de <?= h($totalRecords) ?>, maximo de 10 por pagina</span>
+            <span>Exibindo <?= h($firstRecord) ?>-<?= h($lastRecord) ?> de <?= h($totalRecords) ?>, máximo de 10 por página</span>
         </div>
 
         <div class="signatures-list">
@@ -329,7 +329,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
 
                         <div class="signature-list-meta">
                             <div>
-                                <span>Vinculo</span>
+                                <span>Vínculo</span>
                                 <strong><?= h($isAdmin ? 'Controle administrativo' : ($isPrincipalHistory ? 'Assinado por mim' : ($isMine ? 'Para minha assinatura' : 'Solicitada por mim'))) ?></strong>
                             </div>
                             <div>
@@ -347,7 +347,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
                                 <strong><?= h($formatDateTime($assinatura['solicitado_em'] ?? '')) ?></strong>
                             </div>
                             <div>
-                                <span>Atualizacao</span>
+                                <span>Atualização</span>
                                 <strong><?= h($formatDateTime($assinatura['atualizado_em'] ?? $assinatura['solicitado_em'] ?? '')) ?></strong>
                             </div>
                         </div>
@@ -366,14 +366,14 @@ $lastRecord = min($totalRecords, $page * $perPage);
             <?php if (($assinaturas ?? []) === []): ?>
                 <div class="records-empty-panel signatures-empty-panel">
                     <h2>Nenhuma assinatura encontrada</h2>
-                    <p>Ajuste os filtros para localizar documentos pendentes, autorizados ou nao autorizados.</p>
+                    <p>Ajuste os filtros para localizar documentos pendentes, autorizados ou não autorizados.</p>
                 </div>
             <?php endif; ?>
         </div>
     </section>
 
     <?php if ($totalPages > 1): ?>
-        <nav class="records-pagination" aria-label="Paginacao das assinaturas">
+        <nav class="records-pagination" aria-label="Paginação das assinaturas">
             <a class="pagination-link <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= h($page > 1 ? $pageUrl($page - 1) : '#') ?>" aria-disabled="<?= $page <= 1 ? 'true' : 'false' ?>">Anterior</a>
             <div class="pagination-pages">
                 <?php foreach ($visiblePages($page, $totalPages) as $item): ?>
@@ -384,7 +384,7 @@ $lastRecord = min($totalRecords, $page * $perPage);
                     <?php endif; ?>
                 <?php endforeach; ?>
             </div>
-            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Proxima</a>
+            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Próxima</a>
         </nav>
     <?php endif; ?>
 </section>

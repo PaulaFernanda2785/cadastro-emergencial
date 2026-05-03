@@ -14,7 +14,7 @@ $generatedAt = $generatedAt ?? date('d/m/Y H:i');
 $selectedActionLabel = '';
 foreach ($actions as $action) {
     if ((int) ($action['id'] ?? 0) === (int) ($filters['acao_id'] ?? 0)) {
-        $selectedActionLabel = trim((string) ($action['municipio_nome'] ?? '') . '/' . (string) ($action['uf'] ?? '') . ' - ' . (string) ($action['localidade'] ?? '') . ' - ' . (string) ($action['tipo_evento'] ?? '') . ' - acao #' . (string) ($action['id'] ?? ''));
+        $selectedActionLabel = trim((string) ($action['municipio_nome'] ?? '') . '/' . (string) ($action['uf'] ?? '') . ' - ' . (string) ($action['localidade'] ?? '') . ' - ' . (string) ($action['tipo_evento'] ?? '') . ' - ação #' . (string) ($action['id'] ?? ''));
         break;
     }
 }
@@ -36,7 +36,7 @@ $conditionClass = static function (mixed $value): string {
 $conditionLabel = static function (mixed $value): string {
     $key = (string) ($value ?? '');
 
-    return $key !== '' && $key !== 'sem_condicao' ? residencia_condicao_label($key) : 'Sem condicao';
+    return $key !== '' && $key !== 'sem_condicao' ? residencia_condicao_label($key) : 'Sem condição';
 };
 $mapPoints = array_map(static function (array $row) {
     return [
@@ -45,7 +45,7 @@ $mapPoints = array_map(static function (array $row) {
         'bairro' => (string) ($row['bairro_comunidade'] ?? ''),
         'endereco' => (string) ($row['endereco'] ?? ''),
         'condicao' => (string) (($row['condicao_residencia'] ?? '') !== '' ? $row['condicao_residencia'] : 'sem_condicao'),
-        'condicao_label' => ($row['condicao_residencia'] ?? '') !== '' ? residencia_condicao_label($row['condicao_residencia']) : 'Sem condicao',
+        'condicao_label' => ($row['condicao_residencia'] ?? '') !== '' ? residencia_condicao_label($row['condicao_residencia']) : 'Sem condição',
         'imovel' => residencia_imovel_label($row['imovel'] ?? null),
         'latitude' => (float) ($row['latitude'] ?? 0),
         'longitude' => (float) ($row['longitude'] ?? 0),
@@ -68,12 +68,12 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
         <div>
             <span class="eyebrow">Centro operacional</span>
             <h1><?= h($title) ?></h1>
-            <p>Painel georreferenciado para acompanhar residencias, familias, entregas e criticidade por condicao da residencia.</p>
+            <p>Painel georreferenciado para acompanhar residências, famílias, entregas e criticidade por condição da residência.</p>
         </div>
         <div class="ops-hero-status">
             <span>Atualizado em</span>
             <strong><?= h($generatedAt) ?></strong>
-            <small><?= ($scope['is_cadastrador'] ?? false) ? 'Escopo restrito ao cadastrador e acao ativa.' : 'Visao consolidada conforme perfil logado.' ?></small>
+            <small><?= ($scope['is_cadastrador'] ?? false) ? 'Escopo restrito ao cadastrador e ação ativa.' : 'Visão consolidada conforme perfil logado.' ?></small>
         </div>
     </header>
 
@@ -83,29 +83,29 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
                 <span class="eyebrow">Filtros inteligentes</span>
                 <h2>Recorte operacional</h2>
             </div>
-            <small><?= h(count($mapResidences)) ?> residencia(s) plotada(s) no mapa</small>
+            <small><?= h(count($mapResidences)) ?> residência(s) plotada(s) no mapa</small>
         </div>
 
         <form method="get" action="<?= h(url('/dashboard')) ?>" class="report-filter-modern-form ops-filter-form">
             <label class="field styled-field report-filter-field report-filter-field-wide">
                 <span>Busca geral</span>
-                <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" placeholder="Protocolo, bairro, endereco, municipio ou evento">
+                <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" placeholder="Protocolo, bairro, endereço, município ou evento">
             </label>
 
             <label class="field styled-field smart-search-field report-filter-field report-filter-field-wide">
-                <span>Acao emergencial</span>
-                <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="dashboard-acoes-list" placeholder="Digite municipio, localidade, evento, status ou acao #ID" data-smart-search data-smart-target="dashboard_acao_id" autocomplete="off">
+                <span>Ação emergencial</span>
+                <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="dashboard-acoes-list" placeholder="Digite município, localidade, evento, status ou ação #ID" data-smart-search data-smart-target="dashboard_acao_id" autocomplete="off">
                 <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="dashboard_acao_id">
                 <datalist id="dashboard-acoes-list">
                     <?php foreach ($actions as $action): ?>
-                        <?php $actionLabel = trim((string) ($action['municipio_nome'] ?? '') . '/' . (string) ($action['uf'] ?? '') . ' - ' . (string) ($action['localidade'] ?? '') . ' - ' . (string) ($action['tipo_evento'] ?? '') . ' - ' . (string) ($action['status'] ?? '') . ' - acao #' . (string) ($action['id'] ?? '')); ?>
+                        <?php $actionLabel = trim((string) ($action['municipio_nome'] ?? '') . '/' . (string) ($action['uf'] ?? '') . ' - ' . (string) ($action['localidade'] ?? '') . ' - ' . (string) ($action['tipo_evento'] ?? '') . ' - ' . (string) ($action['status'] ?? '') . ' - ação #' . (string) ($action['id'] ?? '')); ?>
                         <option value="<?= h($actionLabel) ?>" data-id="<?= h($action['id'] ?? '') ?>"></option>
                     <?php endforeach; ?>
                 </datalist>
             </label>
 
             <label class="field styled-field report-filter-field report-filter-field-compact">
-                <span>Condicao</span>
+                <span>Condição</span>
                 <select name="condicao">
                     <option value="">Todas</option>
                     <?php foreach (residencia_condicao_options() as $value => $label): ?>
@@ -115,7 +115,7 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
             </label>
 
             <label class="field styled-field report-filter-field report-filter-field-compact">
-                <span>Imovel</span>
+                <span>Imóvel</span>
                 <select name="imovel">
                     <option value="">Todos</option>
                     <?php foreach (residencia_imovel_options() as $value => $label): ?>
@@ -146,13 +146,13 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
                 <span>Cadastro</span>
                 <select name="cadastro">
                     <option value="">Todos</option>
-                    <option value="concluido" <?= ($filters['cadastro'] ?? '') === 'concluido' ? 'selected' : '' ?>>Concluido</option>
+                    <option value="concluido" <?= ($filters['cadastro'] ?? '') === 'concluido' ? 'selected' : '' ?>>Concluído</option>
                     <option value="pendente" <?= ($filters['cadastro'] ?? '') === 'pendente' ? 'selected' : '' ?>>Pendente</option>
                 </select>
             </label>
 
             <label class="field styled-field report-filter-field report-filter-field-date">
-                <span>Inicio</span>
+                <span>Início</span>
                 <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
             </label>
 
@@ -170,32 +170,32 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
 
     <section class="ops-kpi-grid" aria-label="Indicadores operacionais">
         <article class="ops-kpi-card ops-kpi-card-critical">
-            <span>Residencias</span>
+            <span>Residências</span>
             <strong><?= h($formatInt($totalResidencias)) ?></strong>
             <small><?= h($formatInt($totalGeoref)) ?> com ponto no mapa</small>
         </article>
         <article class="ops-kpi-card">
-            <span>Familias</span>
+            <span>Famílias</span>
             <strong><?= h($formatInt($indicators['familias'] ?? 0)) ?></strong>
             <small><?= h($formatInt($indicators['pessoas'] ?? 0)) ?> pessoa(s) declarada(s)</small>
         </article>
         <article class="ops-kpi-card">
             <span>Entregas</span>
             <strong><?= h($formatInt($indicators['entregas'] ?? 0)) ?></strong>
-            <small><?= h($formatInt($indicators['familias_atendidas'] ?? 0)) ?> familia(s) atendida(s)</small>
+            <small><?= h($formatInt($indicators['familias_atendidas'] ?? 0)) ?> família(s) atendida(s)</small>
         </article>
         <article class="ops-kpi-card">
-            <span>Georreferencia</span>
+            <span>Georreferência</span>
             <strong><?= h($percent($totalGeoref, $totalResidencias)) ?></strong>
-            <small><?= h($formatInt($semGeo)) ?> residencia(s) sem coordenada</small>
+            <small><?= h($formatInt($semGeo)) ?> residência(s) sem coordenada</small>
         </article>
         <article class="ops-kpi-card">
             <span>Cadastros pendentes</span>
             <strong><?= h($formatInt($indicators['cadastros_pendentes'] ?? 0)) ?></strong>
-            <small><?= h($formatInt($indicators['cadastros_concluidos'] ?? 0)) ?> concluido(s)</small>
+            <small><?= h($formatInt($indicators['cadastros_concluidos'] ?? 0)) ?> concluído(s)</small>
         </article>
         <article class="ops-kpi-card">
-            <span>Acoes abertas</span>
+            <span>Ações abertas</span>
             <strong><?= h($formatInt($indicators['acoes_abertas'] ?? 0)) ?></strong>
             <small><?= h($tiposAjudaAtivos) ?> tipo(s) de ajuda ativo(s)</small>
         </article>
@@ -205,21 +205,21 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
         <div class="ops-map-head">
             <div>
                 <span class="eyebrow">Mapa interativo</span>
-                <h2>Residencias georreferenciadas</h2>
-                <p>Os marcadores em formato de casa mudam de cor conforme a condicao da residencia.</p>
+                <h2>Residências georreferenciadas</h2>
+                <p>Os marcadores em formato de casa mudam de cor conforme a condição da residência.</p>
             </div>
             <div class="ops-map-legend" aria-label="Legenda do mapa">
                 <span><i class="ops-dot ops-dot-perda_total"></i>Perda total</span>
                 <span><i class="ops-dot ops-dot-perda_parcial"></i>Perda parcial</span>
-                <span><i class="ops-dot ops-dot-nao_atingida"></i>Nao atingida</span>
-                <span><i class="ops-dot ops-dot-sem_condicao"></i>Sem condicao</span>
+                <span><i class="ops-dot ops-dot-nao_atingida"></i>Não atingida</span>
+                <span><i class="ops-dot ops-dot-sem_condicao"></i>Sem condição</span>
             </div>
         </div>
 
         <div class="ops-map-layout">
             <div class="ops-map-stage" data-dashboard-map data-map-points="<?= h($mapJson) ?>">
                 <div class="ops-map-empty" data-map-empty>
-                    <strong>Nenhuma residencia georreferenciada neste recorte.</strong>
+                    <strong>Nenhuma residência georreferenciada neste recorte.</strong>
                     <span>Ajuste os filtros ou revise cadastros sem latitude/longitude.</span>
                 </div>
             </div>
@@ -228,7 +228,7 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
                 <article class="ops-map-details" data-map-details>
                     <span class="eyebrow">Ponto selecionado</span>
                     <h3>Selecione uma casa no mapa</h3>
-                    <p>Ao clicar em um marcador, o painel mostra protocolo, bairro, acao, familias e status de atendimento.</p>
+                    <p>Ao clicar em um marcador, o painel mostra protocolo, bairro, ação, famílias e status de atendimento.</p>
                 </article>
 
                 <div class="ops-map-list" data-map-list>
@@ -250,7 +250,7 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
         <article class="ops-panel-card">
             <div class="ops-panel-head">
                 <span class="eyebrow">Criticidade</span>
-                <h2>Condicao da residencia</h2>
+                <h2>Condição da residência</h2>
             </div>
             <div class="ops-condition-list">
                 <?php if ($conditionBreakdown === []): ?>
@@ -261,7 +261,7 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
                     <div class="ops-condition-row">
                         <span class="ops-condition-label"><i class="ops-dot ops-dot-<?= h($key) ?>"></i><?= h($conditionLabel($row['condicao'] ?? '')) ?></span>
                         <strong><?= h($formatInt($row['residencias'] ?? 0)) ?></strong>
-                        <small><?= h($formatInt($row['familias'] ?? 0)) ?> familia(s)</small>
+                        <small><?= h($formatInt($row['familias'] ?? 0)) ?> família(s)</small>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -269,7 +269,7 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
 
         <article class="ops-panel-card">
             <div class="ops-panel-head">
-                <span class="eyebrow">Territorio</span>
+                <span class="eyebrow">Território</span>
                 <h2>Bairros mais impactados</h2>
             </div>
             <div class="ops-ranking-list">
@@ -291,8 +291,8 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
 
         <article class="ops-panel-card ops-recent-card">
             <div class="ops-panel-head">
-                <span class="eyebrow">Ultimas entradas</span>
-                <h2>Residencias cadastradas</h2>
+                <span class="eyebrow">Últimas entradas</span>
+                <h2>Residências cadastradas</h2>
             </div>
             <div class="ops-recent-list">
                 <?php if ($recentResidences === []): ?>

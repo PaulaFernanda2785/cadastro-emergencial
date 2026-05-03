@@ -61,7 +61,7 @@
             var visibleCount = 0;
 
             if (status && term === '') {
-                status.textContent = 'Digite para buscar usuarios do sistema.';
+                status.textContent = 'Digite para buscar usuários do sistema.';
             }
 
             options.forEach(function (button) {
@@ -78,8 +78,8 @@
 
             if (status && term !== '') {
                 status.textContent = visibleCount > 0
-                    ? visibleCount + ' usuario(s) encontrado(s).'
-                    : 'Nenhum usuario encontrado para esta busca.';
+                    ? visibleCount + ' usuário(s) encontrado(s).'
+                    : 'Nenhum usuário encontrado para esta busca.';
             }
         }
 

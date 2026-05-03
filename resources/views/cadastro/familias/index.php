@@ -38,24 +38,24 @@ $situacaoOptions = [
     'desabrigado' => 'Desabrigado',
     'desalojado' => 'Desalojado',
     'aluguel_social' => 'Aluguel social',
-    'permanece_residencia' => 'Permanece na residencia',
+    'permanece_residencia' => 'Permanece na residência',
 ];
 $entregaOptions = [
     'com_entrega' => 'Com entrega',
     'sem_entrega' => 'Sem entrega',
 ];
 $cadastroOptions = [
-    'concluido' => 'Concluido',
+    'concluido' => 'Concluído',
     'pendente' => 'Pendente',
 ];
 $filterLabels = [
     'q' => 'Busca',
-    'acao_busca' => 'Acao',
-    'residencia_busca' => 'Residencia',
-    'situacao' => 'Situacao',
+    'acao_busca' => 'Ação',
+    'residencia_busca' => 'Residência',
+    'situacao' => 'Situação',
     'entregas' => 'Entregas',
     'cadastro' => 'Cadastro',
-    'data_inicio' => 'Inicio',
+    'data_inicio' => 'Início',
     'data_fim' => 'Fim',
 ];
 
@@ -109,14 +109,14 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
     <header class="action-form-header records-header">
         <div>
             <span class="eyebrow">Cadastro emergencial</span>
-            <h1>Familias cadastradas</h1>
-            <p>Consulta operacional das familias vinculadas as residencias, com filtros por acao, residencia, status e periodo.</p>
+            <h1>Famílias cadastradas</h1>
+            <p>Consulta operacional das famílias vinculadas às residências, com filtros por ação, residência, status e período.</p>
         </div>
     </header>
 
-    <section class="records-summary-grid family-summary-grid" aria-label="Resumo das familias">
+    <section class="records-summary-grid family-summary-grid" aria-label="Resumo das famílias">
         <article class="records-summary-card">
-            <span>Familias</span>
+            <span>Famílias</span>
             <strong><?= h($totalFamilias) ?></strong>
             <small><?= $activeFilters === [] ? 'Total registrado no escopo atual.' : 'Total encontrado pelos filtros.' ?></small>
         </article>
@@ -131,17 +131,17 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             <small>Com entrega / sem entrega registrada.</small>
         </article>
         <article class="records-summary-card">
-            <span>Revisao</span>
+            <span>Revisão</span>
             <strong><?= h($cadastroConcluido) ?> / <?= h($cadastroPendente) ?></strong>
-            <small>Concluido / pendente de revisao.</small>
+            <small>Concluído / pendente de revisão.</small>
         </article>
     </section>
 
-    <section class="records-filter-panel family-filter-panel family-filter-modern-panel" aria-label="Filtros de familias">
+    <section class="records-filter-panel family-filter-panel family-filter-modern-panel" aria-label="Filtros de famílias">
         <form method="get" action="<?= h(url('/gestor/familias')) ?>" class="family-filter-form family-filter-modern-form">
             <label class="field styled-field family-search-field family-filter-field family-filter-field-wide">
                 <span>Buscar</span>
-                <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" list="familias-busca-list" placeholder="Nome, CPF, telefone, protocolo, bairro ou municipio">
+                <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" maxlength="120" list="familias-busca-list" placeholder="Nome, CPF, telefone, protocolo, bairro ou município">
                 <datalist id="familias-busca-list">
                     <?php foreach ($familias as $familia): ?>
                         <option value="<?= h($familia['responsavel_nome']) ?>"></option>
@@ -156,8 +156,8 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             </label>
 
             <label class="field styled-field smart-search-field family-filter-field family-filter-field-wide">
-                <span>Acao</span>
-                <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $acaoSelecionada) ?>" list="familias-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="familias_acao_id" autocomplete="off">
+                <span>Ação</span>
+                <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $acaoSelecionada) ?>" list="familias-acoes-list" placeholder="Digite para buscar a ação" data-smart-search data-smart-target="familias_acao_id" autocomplete="off">
                 <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="familias_acao_id">
                 <datalist id="familias-acoes-list">
                     <?php foreach ($acoes ?? [] as $acao): ?>
@@ -167,7 +167,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             </label>
 
             <label class="field styled-field smart-search-field family-filter-field family-filter-field-wide">
-                <span>Residencia</span>
+                <span>Residência</span>
                 <input type="search" name="residencia_busca" value="<?= h(($filters['residencia_busca'] ?? '') !== '' ? $filters['residencia_busca'] : $residenciaSelecionada) ?>" list="familias-residencias-list" placeholder="Digite protocolo ou bairro" data-smart-search data-smart-target="familias_residencia_id" autocomplete="off">
                 <input type="hidden" name="residencia_id" value="<?= h($filters['residencia_id'] ?? '') ?>" data-smart-hidden="familias_residencia_id">
                 <datalist id="familias-residencias-list">
@@ -178,7 +178,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             </label>
 
             <label class="field styled-field family-filter-field family-filter-field-compact">
-                <span>Situacao</span>
+                <span>Situação</span>
                 <select name="situacao">
                     <option value="">Todas</option>
                     <?php foreach ($situacaoOptions as $value => $label): ?>
@@ -208,7 +208,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             </label>
 
             <label class="field styled-field family-filter-field family-filter-field-date">
-                <span>Inicio</span>
+                <span>Início</span>
                 <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
             </label>
 
@@ -233,20 +233,20 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
     </section>
 
     <div class="records-list-toolbar">
-        <span><?= h($totalFamilias) ?> familia(s) encontrada(s)</span>
+        <span><?= h($totalFamilias) ?> família(s) encontrada(s)</span>
         <strong><?= h($firstRecord) ?>-<?= h($lastRecord) ?> de <?= h($totalFamilias) ?></strong>
     </div>
 
     <?php if ($familias === []): ?>
         <section class="action-empty-panel records-empty-panel">
-            <h2><?= $activeFilters === [] ? 'Nenhuma familia cadastrada' : 'Nenhuma familia encontrada' ?></h2>
-            <p><?= $activeFilters === [] ? 'Quando uma familia for vinculada a uma residencia cadastrada, ela aparecera aqui.' : 'Revise os filtros aplicados ou limpe a busca para voltar a lista completa.' ?></p>
+            <h2><?= $activeFilters === [] ? 'Nenhuma família cadastrada' : 'Nenhuma família encontrada' ?></h2>
+            <p><?= $activeFilters === [] ? 'Quando uma família for vinculada a uma residência cadastrada, ela aparecerá aqui.' : 'Revise os filtros aplicados ou limpe a busca para voltar à lista completa.' ?></p>
             <?php if ($activeFilters !== []): ?>
                 <a class="primary-link-button" href="<?= h(url('/gestor/familias')) ?>">Limpar filtros</a>
             <?php endif; ?>
         </section>
     <?php else: ?>
-        <section class="family-card-list" aria-label="Lista de familias cadastradas">
+        <section class="family-card-list" aria-label="Lista de famílias cadastradas">
             <?php foreach ($familias as $familia): ?>
                 <?php
                 $entregasRegistradas = (int) ($familia['entregas_registradas'] ?? 0);
@@ -268,7 +268,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                                 <?= $entregasRegistradas > 0 ? h($entregasRegistradas . ' entrega(s)') : 'Sem entrega' ?>
                             </span>
                             <span class="family-status-pill family-status-<?= $cadastroOk ? 'reviewed' : 'open' ?>">
-                                <?= $cadastroOk ? 'Cadastro concluido' : 'Revisao pendente' ?>
+                                <?= $cadastroOk ? 'Cadastro concluído' : 'Revisão pendente' ?>
                             </span>
                             <span class="family-status-pill family-status-situacao family-status-<?= h($situacaoClass) ?>">
                                 <?= h(familia_situacao_label($familia['situacao_familia'] ?? null)) ?>
@@ -285,7 +285,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                                 <dd><?= h(familia_renda_label($familia['renda_familiar'] ?? null)) ?></dd>
                             </div>
                             <div>
-                                <dt>Residencia</dt>
+                                <dt>Residência</dt>
                                 <dd><a href="<?= h(url('/cadastros/residencias/' . $familia['residencia_id'])) ?>"><?= h($familia['protocolo']) ?></a></dd>
                             </div>
                             <div>
@@ -293,7 +293,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                                 <dd><?= h($familia['bairro_comunidade']) ?> - <?= h($familia['municipio_nome']) ?>/<?= h($familia['uf']) ?></dd>
                             </div>
                             <div>
-                                <dt>Acao</dt>
+                                <dt>Ação</dt>
                                 <dd><?= h($familia['localidade']) ?> - <?= h($familia['tipo_evento']) ?></dd>
                             </div>
                             <div>
@@ -304,16 +304,16 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
 
                         <?php if ($entregasRegistradas > 0): ?>
                             <div class="family-delivery-summary">
-                                <span>Itens ja entregues</span>
+                                <span>Itens já entregues</span>
                                 <strong><?= h($familia['entregas_itens_resumo'] ?: 'Entrega registrada') ?></strong>
                                 <?php if (!empty($familia['ultima_entrega'])): ?>
-                                    <small>Ultima entrega em <?= h(date('d/m/Y H:i', strtotime((string) $familia['ultima_entrega']))) ?></small>
+                                    <small>Última entrega em <?= h(date('d/m/Y H:i', strtotime((string) $familia['ultima_entrega']))) ?></small>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
                     </div>
 
-                    <aside class="family-index-actions" aria-label="Acoes da familia">
+                    <aside class="family-index-actions" aria-label="Ações da família">
                         <a class="primary-link-button" href="<?= h(url('/cadastros/residencias/' . $familia['residencia_id'] . '/familias/' . $familia['id'])) ?>">Ver detalhe</a>
                         <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $familia['residencia_id'] . '/familias/' . $familia['id'] . '/comprovante')) ?>">Comprovante</a>
                         <?php if ($canRegisterDelivery): ?>
@@ -326,7 +326,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
     <?php endif; ?>
 
     <?php if ($totalPages > 1): ?>
-        <nav class="records-pagination" aria-label="Paginacao de familias">
+        <nav class="records-pagination" aria-label="Paginação de famílias">
             <a class="pagination-link <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= h($page > 1 ? $pageUrl($page - 1) : '#') ?>" aria-disabled="<?= $page <= 1 ? 'true' : 'false' ?>">Anterior</a>
 
             <div class="pagination-pages">
@@ -339,7 +339,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                 <?php endfor; ?>
             </div>
 
-            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Proxima</a>
+            <a class="pagination-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($page < $totalPages ? $pageUrl($page + 1) : '#') ?>" aria-disabled="<?= $page >= $totalPages ? 'true' : 'false' ?>">Próxima</a>
         </nav>
     <?php endif; ?>
 </section>

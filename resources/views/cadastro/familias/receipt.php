@@ -1,15 +1,15 @@
 <section class="dashboard-header no-print receipt-preview-header">
     <div>
         <span class="eyebrow">Comprovante de cadastro familiar</span>
-        <h1>Pre-visualizacao do ticket</h1>
-        <p><?= h($familia['responsavel_nome']) ?> - residencia <?= h($familia['protocolo']) ?></p>
+        <h1>Pré-visualização do ticket</h1>
+        <p><?= h($familia['responsavel_nome']) ?> - residência <?= h($familia['protocolo']) ?></p>
     </div>
 </section>
 
 <section class="receipt-preview-shell">
 <section class="receipt-actions no-print">
-    <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Voltar para residencia</a>
-    <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'])) ?>">Ver familia</a>
+    <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Voltar para residência</a>
+    <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'])) ?>">Ver família</a>
     <button
         type="button"
         class="secondary-button"
@@ -31,7 +31,7 @@
 
     <dl class="receipt-lines">
         <div>
-            <dt>Codigo</dt>
+            <dt>Código</dt>
             <dd><?= h($receiptCode) ?></dd>
         </div>
         <div>
@@ -43,7 +43,7 @@
             <dd><?= h($familia['protocolo']) ?></dd>
         </div>
         <div>
-            <dt>Municipio</dt>
+            <dt>Município</dt>
             <dd><?= h($familia['municipio_nome']) ?>/<?= h($familia['uf']) ?></dd>
         </div>
         <div>
@@ -60,7 +60,7 @@
 
     <dl class="receipt-lines">
         <div>
-            <dt>Responsavel</dt>
+            <dt>Responsável</dt>
             <dd><?= h($familia['responsavel_nome']) ?></dd>
         </div>
         <div>
@@ -76,7 +76,7 @@
             <dd><?= h($familia['quantidade_integrantes']) ?></dd>
         </div>
         <div>
-            <dt>Situacao</dt>
+            <dt>Situação</dt>
             <dd><?= h(familia_situacao_label($familia['situacao_familia'] ?? null)) ?></dd>
         </div>
         <div>
@@ -103,7 +103,7 @@
 
     <dl class="receipt-lines">
         <div>
-            <dt>Endereco</dt>
+            <dt>Endereço</dt>
             <dd>
                 <?= h($familia['endereco']) ?>
                 <?php if (!empty($familia['complemento'])): ?>
@@ -116,11 +116,11 @@
             <dd><?= h($familia['bairro_comunidade']) ?></dd>
         </div>
         <div>
-            <dt>Imovel</dt>
+            <dt>Imóvel</dt>
             <dd><?= h(residencia_imovel_label($familia['imovel'] ?? null)) ?></dd>
         </div>
         <div>
-            <dt>Condicao</dt>
+            <dt>Condição</dt>
             <dd><?= h(residencia_condicao_label($familia['condicao_residencia'] ?? null)) ?></dd>
         </div>
     </dl>
@@ -128,9 +128,9 @@
     <div class="receipt-separator"></div>
 
     <div class="receipt-qr">
-        <canvas data-family-receipt-qr data-qr-value="<?= h($validationUrl) ?>" aria-label="QR Code de validacao do cadastro familiar"></canvas>
+        <canvas data-family-receipt-qr data-qr-value="<?= h($validationUrl) ?>" aria-label="QR Code de validação do cadastro familiar"></canvas>
         <strong><?= h($receiptCode) ?></strong>
-        <span>Leia este QR na pagina de entregas para validar o cadastro e registrar a baixa.</span>
+        <span>Leia este QR na página de entregas para validar o cadastro e registrar a baixa.</span>
     </div>
 
     <div class="receipt-separator"></div>
@@ -144,7 +144,7 @@
 
     <footer class="receipt-footer">
         <span>Documento gerado pelo sistema Cadastro Emergencial.</span>
-        <span>Apresente este comprovante na retirada da ajuda humanitaria.</span>
+        <span>Apresente este comprovante na retirada da ajuda humanitária.</span>
     </footer>
 </article>
 </section>

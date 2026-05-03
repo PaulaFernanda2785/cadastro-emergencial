@@ -41,7 +41,7 @@ final class FamiliaController extends Controller
         $page = min($this->requestedPage(), $totalPages);
 
         $this->view('cadastro.familias.index', [
-            'title' => 'Familias cadastradas',
+            'title' => 'Famílias cadastradas',
             'familias' => $this->familias->search(
                 $ownedUserId,
                 $queryFilters,
@@ -66,7 +66,7 @@ final class FamiliaController extends Controller
         $residencia = $this->findResidenciaForCadastro((int) $residenciaId);
         $this->ensureFamilyCapacity($residencia);
 
-        $this->form('Nova familia', $residencia, $this->emptyInput(), [], '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar familia');
+        $this->form('Nova família', $residencia, $this->emptyInput(), [], '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar família');
     }
 
     public function show(string $residenciaId, string $familiaId): void
@@ -75,7 +75,7 @@ final class FamiliaController extends Controller
         $familia = $this->findFamiliaForResidencia((int) $familiaId, (int) $residenciaId);
 
         $this->view('cadastro.familias.show', [
-            'title' => 'Familia ' . $familia['responsavel_nome'],
+            'title' => 'Família ' . $familia['responsavel_nome'],
             'residencia' => $residencia,
             'familia' => $familia,
         ]);
@@ -89,10 +89,10 @@ final class FamiliaController extends Controller
         $validationUrl = public_url('/gestor/entregas/validar/' . rawurlencode($receiptCode));
         $whatsappText = implode("\n", [
             'Comprovante de cadastro familiar - Cadastro Emergencial',
-            'Responsavel: ' . (string) $familia['responsavel_nome'],
+            'Responsável: ' . (string) $familia['responsavel_nome'],
             'CPF: ' . (string) $familia['responsavel_cpf'],
             'Codigo: ' . $receiptCode,
-            'Validacao: ' . $validationUrl,
+            'Validação: ' . $validationUrl,
         ]);
 
         $this->view('cadastro.familias.receipt', [
@@ -144,12 +144,12 @@ final class FamiliaController extends Controller
         $familia = $this->findFamiliaForResidencia((int) $familiaId, (int) $residenciaId);
 
         $this->form(
-            'Editar familia',
+            'Editar família',
             $residencia,
             $familia,
             [],
             '/cadastros/residencias/' . (int) $residenciaId . '/familias/' . (int) $familiaId,
-            'Salvar alteracoes',
+            'Salvar alterações',
             $this->documentos->byFamilia((int) $familiaId)
         );
     }
@@ -169,7 +169,7 @@ final class FamiliaController extends Controller
         }
 
         if ($validator->fails()) {
-            $this->form('Nova familia', $residencia, $data, $validator->errors(), '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar familia');
+            $this->form('Nova família', $residencia, $data, $validator->errors(), '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar família');
             return;
         }
 
@@ -187,7 +187,7 @@ final class FamiliaController extends Controller
             } catch (RuntimeException $exception) {
                 $errors = $validator->errors();
                 $errors['documentos'][] = $exception->getMessage();
-                $this->form('Nova familia', $residencia, $data, $errors, '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar familia');
+                $this->form('Nova família', $residencia, $data, $errors, '/cadastros/residencias/' . (int) $residenciaId . '/familias', 'Salvar família');
                 return;
             }
         }
@@ -205,7 +205,7 @@ final class FamiliaController extends Controller
         }
 
         (new AuditLogService())->record('criou_familia', 'familias', $id, $data['responsavel_nome']);
-        Session::flash('success', 'Familia cadastrada.');
+        Session::flash('success', 'Família cadastrada.');
 
         $this->redirect('/cadastros/residencias/' . (int) $residenciaId . '/familias/' . $id . '/comprovante');
     }
@@ -225,7 +225,7 @@ final class FamiliaController extends Controller
         }
 
         if ($validator->fails()) {
-            $this->form('Editar familia', $residencia, $data + ['id' => $familia['id']], $validator->errors(), $action, 'Salvar alteracoes', $this->documentos->byFamilia((int) $familiaId));
+            $this->form('Editar família', $residencia, $data + ['id' => $familia['id']], $validator->errors(), $action, 'Salvar alterações', $this->documentos->byFamilia((int) $familiaId));
             return;
         }
 
@@ -244,7 +244,7 @@ final class FamiliaController extends Controller
             } catch (RuntimeException $exception) {
                 $errors = $validator->errors();
                 $errors['documentos'][] = $exception->getMessage();
-                $this->form('Editar familia', $residencia, $data + ['id' => $familia['id']], $errors, $action, 'Salvar alteracoes', $this->documentos->byFamilia((int) $familiaId));
+                $this->form('Editar família', $residencia, $data + ['id' => $familia['id']], $errors, $action, 'Salvar alterações', $this->documentos->byFamilia((int) $familiaId));
                 return;
             }
         }
@@ -265,7 +265,7 @@ final class FamiliaController extends Controller
         }
 
         (new AuditLogService())->record('alterou_familia', 'familias', (int) $familiaId, $data['responsavel_nome']);
-        Session::flash('success', 'Familia atualizada.');
+        Session::flash('success', 'Família atualizada.');
 
         $this->redirect('/cadastros/residencias/' . (int) $residenciaId . '/familias/' . (int) $familiaId . '/comprovante');
     }
@@ -278,7 +278,7 @@ final class FamiliaController extends Controller
 
         $this->familias->softDelete((int) $familiaId);
         (new AuditLogService())->record('excluiu_familia', 'familias', (int) $familiaId, $familia['responsavel_nome']);
-        Session::flash('success', 'Familia removida da listagem.');
+        Session::flash('success', 'Família removida da listagem.');
 
         $this->redirect('/cadastros/residencias/' . (int) $residenciaId);
     }
@@ -299,7 +299,7 @@ final class FamiliaController extends Controller
         $residencia = $this->findResidencia($id);
 
         if (($residencia['acao_status'] ?? null) !== 'aberta') {
-            Session::flash('warning', 'Esta acao nao esta aberta para novos cadastros.');
+            Session::flash('warning', 'Esta ação não está aberta para novos cadastros.');
             $this->redirect('/cadastros/residencias/' . $id);
         }
 
@@ -517,14 +517,14 @@ final class FamiliaController extends Controller
     private function validator(array $data): Validator
     {
         $validator = (new Validator())
-            ->required('responsavel_nome', $data['responsavel_nome'], 'Responsavel familiar')
-            ->max('responsavel_nome', $data['responsavel_nome'], 180, 'Responsavel familiar')
-            ->required('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsavel')
-            ->max('responsavel_cpf', $data['responsavel_cpf'], 14, 'CPF do responsavel')
-            ->cpf('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsavel')
+            ->required('responsavel_nome', $data['responsavel_nome'], 'Responsável familiar')
+            ->max('responsavel_nome', $data['responsavel_nome'], 180, 'Responsável familiar')
+            ->required('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsável')
+            ->max('responsavel_cpf', $data['responsavel_cpf'], 14, 'CPF do responsável')
+            ->cpf('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsável')
             ->max('responsavel_rg', $data['responsavel_rg'], 30, 'RG')
-            ->required('responsavel_orgao_expedidor', $data['responsavel_orgao_expedidor'], 'Orgao expedidor do responsavel')
-            ->max('responsavel_orgao_expedidor', $data['responsavel_orgao_expedidor'], 30, 'Orgao expedidor')
+            ->required('responsavel_orgao_expedidor', $data['responsavel_orgao_expedidor'], 'Órgão expedidor do responsável')
+            ->max('responsavel_orgao_expedidor', $data['responsavel_orgao_expedidor'], 30, 'Órgão expedidor')
             ->required('data_nascimento', $data['data_nascimento'], 'Data de nascimento')
             ->date('data_nascimento', $data['data_nascimento'], 'Data de nascimento')
             ->max('telefone', $data['telefone'], 30, 'Telefone')
@@ -535,23 +535,23 @@ final class FamiliaController extends Controller
             ->minInt('quantidade_integrantes', $data['quantidade_integrantes'], 1, 'Quantidade de integrantes')
             ->max('perdas_bens_moveis', $data['perdas_bens_moveis'], 1000, 'Perdas de bens moveis')
             ->required('renda_familiar', $data['renda_familiar'], 'Renda familiar')
-            ->required('situacao_familia', $data['situacao_familia'], 'Situacao da familia')
-            ->max('beneficio_social_nome', $data['beneficio_social_nome'], 180, 'Beneficio social')
-            ->required('cadastro_concluido', $data['cadastro_concluido'], 'Cadastro familiar revisado e concluido')
-            ->required('conclusao_observacoes', $data['conclusao_observacoes'], 'Observacoes finais')
-            ->max('conclusao_observacoes', $data['conclusao_observacoes'], 1000, 'Observacoes da conclusao')
+            ->required('situacao_familia', $data['situacao_familia'], 'Situação da família')
+            ->max('beneficio_social_nome', $data['beneficio_social_nome'], 180, 'Benefício social')
+            ->required('cadastro_concluido', $data['cadastro_concluido'], 'Cadastro familiar revisado e concluído')
+            ->required('conclusao_observacoes', $data['conclusao_observacoes'], 'Observações finais')
+            ->max('conclusao_observacoes', $data['conclusao_observacoes'], 1000, 'Observações da conclusão')
             ->max('representante_nome', $data['representante_nome'], 180, 'Representante')
             ->max('representante_cpf', $data['representante_cpf'], 14, 'CPF do representante')
             ->cpf('representante_cpf', $data['representante_cpf'], 'CPF do representante')
             ->max('representante_rg', $data['representante_rg'], 30, 'RG do representante')
-            ->max('representante_orgao_expedidor', $data['representante_orgao_expedidor'], 30, 'Orgao expedidor do representante')
+            ->max('representante_orgao_expedidor', $data['representante_orgao_expedidor'], 30, 'Órgão expedidor do representante')
             ->date('representante_data_nascimento', $data['representante_data_nascimento'], 'Data de nascimento do representante')
             ->max('representante_telefone', $data['representante_telefone'], 30, 'Telefone do representante');
 
-        $validator->required('responsavel_sexo', $data['responsavel_sexo'], 'Sexo do responsavel');
+        $validator->required('responsavel_sexo', $data['responsavel_sexo'], 'Sexo do responsável');
 
         if ($data['responsavel_sexo'] !== '') {
-            $validator->in('responsavel_sexo', $data['responsavel_sexo'], ['feminino', 'masculino', 'outro', 'nao_informado'], 'Sexo do responsavel');
+            $validator->in('responsavel_sexo', $data['responsavel_sexo'], ['feminino', 'masculino', 'outro', 'nao_informado'], 'Sexo do responsável');
         }
 
         if ($data['renda_familiar'] !== '') {
@@ -559,7 +559,7 @@ final class FamiliaController extends Controller
         }
 
         if ($data['situacao_familia'] !== '') {
-            $validator->in('situacao_familia', $data['situacao_familia'], ['desabrigado', 'desalojado', 'aluguel_social', 'permanece_residencia'], 'Situacao da familia');
+            $validator->in('situacao_familia', $data['situacao_familia'], ['desabrigado', 'desalojado', 'aluguel_social', 'permanece_residencia'], 'Situação da família');
         }
 
         if ($data['registrar_representante'] !== '') {
@@ -581,7 +581,7 @@ final class FamiliaController extends Controller
     private function ensureFamilyCapacity(array $residencia): void
     {
         if (!$this->hasFamilyCapacity($residencia)) {
-            Session::flash('warning', 'A quantidade de familias definida para esta residencia ja foi atingida.');
+            Session::flash('warning', 'A quantidade de famílias definida para esta residência já foi atingida.');
             $this->redirect('/cadastros/residencias/' . (int) $residencia['id']);
         }
     }
@@ -589,7 +589,7 @@ final class FamiliaController extends Controller
     private function validateFamilyCapacity(Validator $validator, array $residencia): void
     {
         if (!$this->hasFamilyCapacity($residencia)) {
-            $validator->add('quantidade_integrantes', 'A quantidade de familias definida para esta residencia ja foi atingida.');
+            $validator->add('quantidade_integrantes', 'A quantidade de famílias definida para esta residência já foi atingida.');
         }
     }
 
@@ -622,7 +622,7 @@ final class FamiliaController extends Controller
             $this->normalizeCpf((string) ($conflict['responsavel_cpf'] ?? '')),
             $this->normalizeCpf((string) ($conflict['representante_cpf'] ?? '')),
         ]);
-        $message = 'Este CPF ja esta vinculado a uma familia cadastrada nesta acao aberta.';
+        $message = 'Este CPF já está vinculado a uma família cadastrada nesta ação aberta.';
 
         if ($responsavelCpf !== '' && in_array($responsavelCpf, $conflictCpfs, true)) {
             $validator->add('responsavel_cpf', $message);
@@ -645,7 +645,7 @@ final class FamiliaController extends Controller
     private function guardPost(string $scope, string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
 

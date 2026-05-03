@@ -3,13 +3,13 @@ $status = (string) ($assinatura['status'] ?? 'pendente');
 $statusLabel = [
     'pendente' => 'Pendente',
     'autorizado' => 'Autorizado',
-    'negado' => 'Nao autorizado',
+    'negado' => 'Não autorizado',
     'cancelado' => 'Cancelado',
 ][$status] ?? '-';
 $documentTypeLabel = [
     'dti' => 'DTI',
-    'prestacao_contas' => 'Prestacao de contas',
-    'recomecar' => 'Programa Recomecar',
+    'prestacao_contas' => 'Prestação de contas',
+    'recomecar' => 'Programa Recomeçar',
 ][(string) ($assinatura['documento_tipo'] ?? '')] ?? (string) ($assinatura['documento_tipo'] ?? '-');
 $formatDateTime = static function (mixed $value): string {
     $timestamp = strtotime((string) $value);
@@ -74,30 +74,30 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
         <article>
             <span>Status</span>
             <strong><?= h($statusLabel) ?></strong>
-            <small>Situacao atual da coassinatura.</small>
+            <small>Situação atual da coassinatura.</small>
         </article>
         <article>
             <span>Documento</span>
             <strong><?= h($documentTypeLabel) ?></strong>
-            <small>Tipo de documento em analise.</small>
+            <small>Tipo de documento em análise.</small>
         </article>
         <article>
             <span>Solicitante</span>
             <strong><?= h($assinatura['solicitante_nome'] ?? '-') ?></strong>
-            <small>Usuario que solicitou a coassinatura.</small>
+            <small>Usuário que solicitou a coassinatura.</small>
         </article>
         <article>
             <span><?= $isPrincipalHistory ? 'Assinante principal' : 'Coautor' ?></span>
             <strong><?= h($assinatura['coautor_nome'] ?? '-') ?></strong>
-            <small><?= $isPrincipalHistory ? 'Usuario que assinou e gerou o documento.' : 'Usuario indicado para autorizar.' ?></small>
+            <small><?= $isPrincipalHistory ? 'Usuário que assinou e gerou o documento.' : 'Usuário indicado para autorizar.' ?></small>
         </article>
     </section>
 
     <article class="signature-request-panel">
         <div class="signature-panel-heading">
             <div>
-                <span class="eyebrow">Solicitacao</span>
-                <h2>Dados da solicitacao</h2>
+                <span class="eyebrow">Solicitação</span>
+                <h2>Dados da solicitação</h2>
             </div>
             <span class="status-pill status-<?= h($status) ?>"><?= h($statusLabel) ?></span>
         </div>
@@ -136,7 +136,7 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
                 <?php endif; ?>
                 <?php if ($status === 'negado'): ?>
                     <div>
-                        <dt>Nao autorizado em</dt>
+                        <dt>Não autorizado em</dt>
                         <dd><?= h($formatDateTime($assinatura['negado_em'] ?? '')) ?></dd>
                     </div>
                     <div class="signature-data-wide">
@@ -149,20 +149,20 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
             <aside class="signature-status-panel">
                 <span class="eyebrow">Fluxo</span>
                 <?php if ($status === 'pendente' && $isCoauthor): ?>
-                    <h3>Sua decisao esta pendente</h3>
+                    <h3>Sua decisão está pendente</h3>
                     <p>Confira o documento abaixo antes de autorizar ou negar a coassinatura.</p>
                 <?php elseif ($status === 'pendente' && $isRequester): ?>
                     <h3>Aguardando resposta</h3>
-                    <p>O documento permanecera bloqueado para impressao ate a decisao do coautor.</p>
+                    <p>O documento permanecerá bloqueado para impressão até a decisão do coautor.</p>
                 <?php elseif ($status === 'autorizado'): ?>
                     <h3><?= $isPrincipalHistory ? 'Assinatura principal registrada' : 'Coassinatura autorizada' ?></h3>
-                    <p><?= $isPrincipalHistory ? 'Este documento foi assinado pelo usuario principal e ficou registrado no historico.' : ($printReady ? 'Todas as assinaturas foram autorizadas. A impressao do documento esta liberada.' : 'Sua autorizacao foi registrada. O documento ainda pode depender de outros coautores.') ?></p>
+                    <p><?= $isPrincipalHistory ? 'Este documento foi assinado pelo usuário principal e ficou registrado no histórico.' : ($printReady ? 'Todas as assinaturas foram autorizadas. A impressão do documento está liberada.' : 'Sua autorização foi registrada. O documento ainda pode depender de outros coautores.') ?></p>
                 <?php elseif ($status === 'negado'): ?>
-                    <h3>Coassinatura nao autorizada</h3>
+                    <h3>Coassinatura não autorizada</h3>
                     <p>O documento permanece bloqueado enquanto houver negativa ativa.</p>
                 <?php else: ?>
-                    <h3>Solicitacao encerrada</h3>
-                    <p>Consulte o documento original para conferir a situacao atual.</p>
+                    <h3>Solicitação encerrada</h3>
+                    <p>Consulte o documento original para conferir a situação atual.</p>
                 <?php endif; ?>
                 <?php if ($isAdmin): ?>
                     <p>Perfil administrador: acesso completo ao registro e ao documento para auditoria.</p>
@@ -184,7 +184,7 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
                         <article>
                             <span><?= h($isPrimarySigner ? 'Assinante principal' : 'Coautor') ?></span>
                             <strong><?= h($documentSignature['coautor_nome'] ?? '-') ?></strong>
-                            <small><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$documentSignature['status'] ?? ''] ?? '-') ?></small>
+                            <small><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Não autorizado'][$documentSignature['status'] ?? ''] ?? '-') ?></small>
                         </article>
                     <?php endforeach; ?>
                 </div>
@@ -199,14 +199,14 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
                     <button type="submit" class="primary-button" data-loading-text="Autorizando...">Autorizar assinatura</button>
                 </form>
 
-                <form method="post" action="<?= h(url('/assinaturas/' . (int) $assinatura['id'] . '/negar')) ?>" class="js-prevent-double-submit" data-confirm="Confirmar que voce nao autoriza esta assinatura?">
+                <form method="post" action="<?= h(url('/assinaturas/' . (int) $assinatura['id'] . '/negar')) ?>" class="js-prevent-double-submit" data-confirm="Confirmar que você não autoriza esta assinatura?">
                     <?= csrf_field() ?>
                     <?= idempotency_field('assinaturas.reject.' . (int) $assinatura['id']) ?>
                     <label class="field">
-                        <span>Motivo obrigatorio</span>
-                        <textarea name="motivo_negativa" rows="3" maxlength="500" required placeholder="Descreva o motivo da nao autorizacao"></textarea>
+                        <span>Motivo obrigatório</span>
+                        <textarea name="motivo_negativa" rows="3" maxlength="500" required placeholder="Descreva o motivo da não autorização"></textarea>
                     </label>
-                    <button type="submit" class="danger-button" data-loading-text="Registrando...">Nao autorizar</button>
+                    <button type="submit" class="danger-button" data-loading-text="Registrando...">Não autorizar</button>
                 </form>
             </div>
         <?php endif; ?>
@@ -214,9 +214,9 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
         <?php if ($isCoauthor && $status === 'negado'): ?>
             <div class="signature-return-panel">
                 <div>
-                    <span class="eyebrow">Revisao da decisao</span>
+                    <span class="eyebrow">Revisão da decisão</span>
                     <h3>Retornar para assinatura</h3>
-                    <p>Use esta acao para voltar a solicitacao ao status pendente e registrar uma nova decisao.</p>
+                    <p>Use esta ação para voltar a solicitação ao status pendente e registrar uma nova decisão.</p>
                 </div>
                 <form method="post" action="<?= h(url('/assinaturas/' . (int) $assinatura['id'] . '/retornar-assinatura')) ?>" class="js-prevent-double-submit">
                     <?= csrf_field() ?>
@@ -231,7 +231,7 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
                 <div>
                     <span class="eyebrow">Documento liberado</span>
                     <h3>Assinaturas autorizadas</h3>
-                    <p>Usuario principal e coautores concluiram a assinatura. A impressao e o salvamento em PDF estao disponiveis para usuarios autorizados.</p>
+                    <p>Usuário principal e coautores concluíram a assinatura. A impressão e o salvamento em PDF estão disponíveis para usuários autorizados.</p>
                 </div>
                 <button type="button" class="primary-button" data-signature-print-document>Imprimir / baixar PDF</button>
             </div>
@@ -242,7 +242,7 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
         <div class="signature-panel-heading">
             <div>
                 <span class="eyebrow">Documento</span>
-                <h2>Conferencia do documento</h2>
+                <h2>Conferência do documento</h2>
             </div>
         </div>
 
@@ -252,7 +252,7 @@ $hasDocumentPreview = $inlineDocumentHtml !== '' || $documentEmbedSrc !== '';
             <?php elseif ($documentEmbedSrc !== ''): ?>
                 <iframe src="<?= h($documentEmbedSrc) ?>" title="Documento para assinatura" scrolling="no" data-signature-document-frame></iframe>
             <?php else: ?>
-                <div class="empty-state">Documento sem URL de visualizacao.</div>
+                <div class="empty-state">Documento sem URL de visualização.</div>
             <?php endif; ?>
         </div>
     </article>

@@ -46,7 +46,7 @@ final class ResidenciaController extends Controller
         $page = min($this->requestedPage(), $totalPages);
 
         $this->view('cadastro.residencias.index', [
-            'title' => 'Cadastros de residencias',
+            'title' => 'Cadastros de residências',
             'residencias' => $this->residencias->search(
                 $ownedUserId,
                 $queryFilters,
@@ -69,7 +69,7 @@ final class ResidenciaController extends Controller
         $residencia = $this->findResidenciaForAccess((int) $id);
 
         $this->view('cadastro.residencias.show', [
-            'title' => 'Residencia ' . $residencia['protocolo'],
+            'title' => 'Residência ' . $residencia['protocolo'],
             'residencia' => $residencia,
             'familias' => $this->familias->byResidencia((int) $id),
             'documentos' => $this->documentos->byResidencia((int) $id),
@@ -119,8 +119,8 @@ final class ResidenciaController extends Controller
         Session::flash(
             'success',
             $coSigners === []
-                ? 'DTI assinada digitalmente. A impressao esta liberada.'
-                : 'DTI assinada pelo usuario principal. A impressao sera liberada apos autorizacao dos coautores.'
+                ? 'DTI assinada digitalmente. A impressão está liberada.'
+                : 'DTI assinada pelo usuário principal. A impressão será liberada após autorização dos coautores.'
         );
         $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
     }
@@ -133,7 +133,7 @@ final class ResidenciaController extends Controller
         $signature = $this->latestDtiSignature((int) $id);
 
         if ($signature === null) {
-            Session::flash('warning', 'Esta DTI nao possui assinatura ativa para remover.');
+            Session::flash('warning', 'Esta DTI não possui assinatura ativa para remover.');
             $this->redirect('/cadastros/residencias/' . (int) $id . '/dti');
         }
 
@@ -240,9 +240,9 @@ final class ResidenciaController extends Controller
             $this->actionFromResidencia($residencia),
             $residencia,
             [],
-            'Editar residencia',
+            'Editar residência',
             '/cadastros/residencias/' . (int) $id,
-            'Salvar alteracoes',
+            'Salvar alterações',
             '/cadastros/residencias/' . (int) $id,
             false
         );
@@ -267,7 +267,7 @@ final class ResidenciaController extends Controller
         $familiasCadastradas = $this->familias->countByResidencia((int) $id);
 
         if (!$validator->fails() && (int) $data['quantidade_familias'] < $familiasCadastradas) {
-            $validator->add('quantidade_familias', 'A quantidade de familias nao pode ser menor que as familias ja cadastradas nesta residencia.');
+            $validator->add('quantidade_familias', 'A quantidade de famílias não pode ser menor que as famílias já cadastradas nesta residência.');
         }
 
         if ($validator->fails()) {
@@ -275,9 +275,9 @@ final class ResidenciaController extends Controller
                 $this->actionFromResidencia($residencia),
                 $data + ['id' => $residencia['id'], 'protocolo' => $residencia['protocolo']],
                 $validator->errors(),
-                'Editar residencia',
+                'Editar residência',
                 '/cadastros/residencias/' . (int) $id,
-                'Salvar alteracoes',
+                'Salvar alterações',
                 '/cadastros/residencias/' . (int) $id,
                 false
             );
@@ -300,9 +300,9 @@ final class ResidenciaController extends Controller
                     $this->actionFromResidencia($residencia),
                     $data + ['id' => $residencia['id'], 'protocolo' => $residencia['protocolo']],
                     $errors,
-                    'Editar residencia',
+                    'Editar residência',
                     '/cadastros/residencias/' . (int) $id,
-                    'Salvar alteracoes',
+                    'Salvar alterações',
                     '/cadastros/residencias/' . (int) $id,
                     false
                 );
@@ -322,9 +322,9 @@ final class ResidenciaController extends Controller
                 $this->actionFromResidencia($residencia),
                 $data + ['id' => $residencia['id'], 'protocolo' => $residencia['protocolo']],
                 $errors,
-                'Editar residencia',
+                'Editar residência',
                 '/cadastros/residencias/' . (int) $id,
-                'Salvar alteracoes',
+                'Salvar alterações',
                 '/cadastros/residencias/' . (int) $id,
                 false
             );
@@ -347,7 +347,7 @@ final class ResidenciaController extends Controller
         $this->createExtraResidencePhotoDocuments((int) $id, $extraPhotoMetadata);
 
         (new AuditLogService())->record('alterou_residencia', 'residencias', (int) $id, (string) $residencia['protocolo']);
-        Session::flash('success', 'Residencia atualizada.');
+        Session::flash('success', 'Residência atualizada.');
 
         $this->redirect('/cadastros/residencias/' . (int) $id);
     }
@@ -429,7 +429,7 @@ final class ResidenciaController extends Controller
         $this->createExtraResidencePhotoDocuments($id, $extraPhotoMetadata);
 
         (new AuditLogService())->record('criou_residencia', 'residencias', $id, $data['protocolo']);
-        Session::flash('success', 'Residencia cadastrada. Agora cadastre as familias vinculadas.');
+        Session::flash('success', 'Residência cadastrada. Agora cadastre as famílias vinculadas.');
 
         $this->redirect('/cadastros/residencias/' . $id);
     }
@@ -438,9 +438,9 @@ final class ResidenciaController extends Controller
         array $acao,
         array $residencia,
         array $errors,
-        string $title = 'Nova residencia',
+        string $title = 'Nova residência',
         ?string $action = null,
-        string $submitLabel = 'Salvar residencia',
+        string $submitLabel = 'Salvar residência',
         ?string $cancelUrl = null,
         bool $useOfflineQueue = true
     ): void
@@ -528,7 +528,7 @@ final class ResidenciaController extends Controller
         }
 
         if ($acao['status'] !== 'aberta') {
-            Session::flash('warning', 'Esta acao nao esta aberta para novos cadastros.');
+            Session::flash('warning', 'Esta ação não está aberta para novos cadastros.');
             $this->redirect('/acao/' . $token);
         }
 
@@ -540,7 +540,7 @@ final class ResidenciaController extends Controller
         $residencia = $this->findResidenciaForAccess($id);
 
         if (($residencia['acao_status'] ?? null) !== 'aberta') {
-            Session::flash('warning', 'Esta acao nao esta aberta para editar residencias.');
+            Session::flash('warning', 'Esta ação não está aberta para editar residências.');
             $this->redirect('/cadastros/residencias/' . $id);
         }
 
@@ -706,15 +706,15 @@ final class ResidenciaController extends Controller
         return (new Validator())
             ->required('bairro_comunidade', $data['bairro_comunidade'], 'Bairro/comunidade')
             ->max('bairro_comunidade', $data['bairro_comunidade'], 180, 'Bairro/comunidade')
-            ->required('endereco', $data['endereco'], 'Endereco')
-            ->max('endereco', $data['endereco'], 255, 'Endereco')
+            ->required('endereco', $data['endereco'], 'Endereço')
+            ->max('endereco', $data['endereco'], 255, 'Endereço')
             ->max('complemento', $data['complemento'], 180, 'Complemento')
-            ->required('imovel', $data['imovel'], 'Imovel')
-            ->in('imovel', $data['imovel'], self::IMOVEL_OPTIONS, 'Imovel')
-            ->required('condicao_residencia', $data['condicao_residencia'], 'Condicao da residencia')
-            ->in('condicao_residencia', $data['condicao_residencia'], self::CONDICAO_RESIDENCIA_OPTIONS, 'Condicao da residencia')
-            ->integer('quantidade_familias', $data['quantidade_familias'], 'Quantidade de familias')
-            ->minInt('quantidade_familias', $data['quantidade_familias'], 1, 'Quantidade de familias')
+            ->required('imovel', $data['imovel'], 'Imóvel')
+            ->in('imovel', $data['imovel'], self::IMOVEL_OPTIONS, 'Imóvel')
+            ->required('condicao_residencia', $data['condicao_residencia'], 'Condição da residência')
+            ->in('condicao_residencia', $data['condicao_residencia'], self::CONDICAO_RESIDENCIA_OPTIONS, 'Condição da residência')
+            ->integer('quantidade_familias', $data['quantidade_familias'], 'Quantidade de famílias')
+            ->minInt('quantidade_familias', $data['quantidade_familias'], 1, 'Quantidade de famílias')
             ->decimalRange('latitude', $data['latitude'], -90, 90, 'Latitude')
             ->decimalRange('longitude', $data['longitude'], -180, 180, 'Longitude');
     }
@@ -737,7 +737,7 @@ final class ResidenciaController extends Controller
         }
 
         if ($existingCount + count($pendingFiles) > self::MAX_FOTOS_RESIDENCIA_EXTRAS) {
-            throw new RuntimeException('Limite maximo de 3 fotos extras da residencia atingido.');
+            throw new RuntimeException('Limite máximo de 3 fotos extras da residência atingido.');
         }
 
         $stored = [];
@@ -898,7 +898,7 @@ final class ResidenciaController extends Controller
             'usuario_id' => (int) ($user['id'] ?? 0),
             'signed_at' => $signedAt,
             'hash' => strtoupper(hash('sha256', $base)),
-            'documento' => 'DTI - Descricao Tecnica de Imovel',
+            'documento' => 'DTI - Descrição Técnica de Imóvel',
             'protocolo' => (string) ($residencia['protocolo'] ?? ''),
             'assinantes' => $assinantes,
             'coassinantes_solicitados' => array_map(
@@ -971,7 +971,7 @@ final class ResidenciaController extends Controller
     private function guardPost(string $scope, string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
 

@@ -73,7 +73,7 @@ final class AssinaturaController extends Controller
         }
 
         if ((string) ($request['status'] ?? '') !== 'pendente') {
-            Session::flash('warning', 'Esta solicitacao ja foi respondida.');
+            Session::flash('warning', 'Esta solicitação já foi respondida.');
             $this->redirect('/assinaturas/' . (int) $id);
         }
 
@@ -91,7 +91,7 @@ final class AssinaturaController extends Controller
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
-        Session::flash('success', 'Assinatura autorizada. O solicitante sera avisado da sua decisao.');
+        Session::flash('success', 'Assinatura autorizada. O solicitante será avisado da sua decisão.');
         $this->redirect('/assinaturas/' . (int) $id);
     }
 
@@ -106,14 +106,14 @@ final class AssinaturaController extends Controller
         }
 
         if ((string) ($request['status'] ?? '') !== 'pendente') {
-            Session::flash('warning', 'Esta solicitacao ja foi respondida.');
+            Session::flash('warning', 'Esta solicitação já foi respondida.');
             $this->redirect('/assinaturas/' . (int) $id);
         }
 
         $reason = mb_substr(trim((string) ($_POST['motivo_negativa'] ?? '')), 0, 500);
 
         if ($reason === '') {
-            Session::flash('error', 'Informe o motivo para nao autorizar a assinatura.');
+            Session::flash('error', 'Informe o motivo para não autorizar a assinatura.');
             $this->redirect($failureRedirect);
         }
 
@@ -132,7 +132,7 @@ final class AssinaturaController extends Controller
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
-        Session::flash('success', 'Assinatura nao autorizada. O solicitante sera avisado da sua decisao.');
+        Session::flash('success', 'Assinatura não autorizada. O solicitante será avisado da sua decisão.');
         $this->redirect('/assinaturas/' . (int) $id);
     }
 
@@ -147,7 +147,7 @@ final class AssinaturaController extends Controller
         }
 
         if ((string) ($request['status'] ?? '') !== 'negado') {
-            Session::flash('warning', 'Esta solicitacao nao esta marcada como nao autorizada.');
+            Session::flash('warning', 'Esta solicitação não está marcada como não autorizada.');
             $this->redirect($failureRedirect);
         }
 
@@ -164,7 +164,7 @@ final class AssinaturaController extends Controller
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
-        Session::flash('success', 'Solicitacao retornada para assinatura. Voce pode autorizar ou registrar nova decisao.');
+        Session::flash('success', 'Solicitação retornada para assinatura. Você pode autorizar ou registrar nova decisão.');
         $this->redirect($failureRedirect);
     }
 
@@ -293,7 +293,7 @@ final class AssinaturaController extends Controller
             'usuario_id' => (int) ($principal['usuario_id'] ?? $principal['id'] ?? $principalRequest['coautor_usuario_id'] ?? 0),
             'signed_at' => (string) ($principalRequest['autorizado_em'] ?? $principalRequest['solicitado_em'] ?? ''),
             'hash' => (string) ($principalRequest['hash_autorizacao'] ?? ''),
-            'documento' => 'DTI - Descricao Tecnica de Imovel',
+            'documento' => 'DTI - Descrição Técnica de Imóvel',
             'assinantes' => array_merge(
                 [$principal],
                 $this->coassinaturas->authorizedSignerPayloads('dti', (string) ($request['documento_chave'] ?? ''))
@@ -340,7 +340,7 @@ final class AssinaturaController extends Controller
     private function guardCsrf(string $failureRedirect): void
     {
         if (!Csrf::validate($_POST['_csrf_token'] ?? null)) {
-            Session::flash('error', 'Sessao expirada ou formulario invalido.');
+            Session::flash('error', 'Sessão expirada ou formulário inválido.');
             $this->redirect($failureRedirect);
         }
     }
