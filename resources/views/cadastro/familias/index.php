@@ -251,6 +251,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                 <?php
                 $entregasRegistradas = (int) ($familia['entregas_registradas'] ?? 0);
                 $cadastroOk = (int) ($familia['cadastro_concluido'] ?? 0) === 1;
+                $camposPendentes = familia_campos_pendentes($familia);
                 $situacaoKey = (string) ($familia['situacao_familia'] ?? '');
                 $situacaoClass = $situacaoKey !== '' ? preg_replace('/[^a-z0-9_-]+/i', '-', $situacaoKey) : 'sem-situacao';
                 $dataCadastro = strtotime((string) ($familia['criado_em'] ?? ''));
@@ -260,7 +261,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                         <div class="family-index-title">
                             <span class="record-protocol"><?= h(familia_comprovante_codigo($familia)) ?></span>
                             <h2><?= h($familia['responsavel_nome']) ?></h2>
-                            <p><?= h($familia['responsavel_cpf']) ?><?= !empty($familia['telefone']) ? ' - ' . h($familia['telefone']) : '' ?></p>
+                            <p><?= h($familia['responsavel_cpf'] ?: 'CPF pendente') ?><?= !empty($familia['telefone']) ? ' - ' . h($familia['telefone']) : '' ?></p>
                         </div>
 
                         <div class="family-index-statuses" aria-label="Status da família">
@@ -269,6 +270,9 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                             </span>
                             <span class="family-status-pill family-status-<?= $cadastroOk ? 'reviewed' : 'open' ?>">
                                 <?= $cadastroOk ? 'Cadastro concluído' : 'Revisão pendente' ?>
+                            </span>
+                            <span class="family-status-pill family-status-<?= $camposPendentes === [] ? 'reviewed' : 'open' ?>">
+                                <?= $camposPendentes === [] ? 'Sem campos pendentes' : h(count($camposPendentes) . ' campo(s) pendente(s)') ?>
                             </span>
                             <span class="family-status-pill family-status-situacao family-status-<?= h($situacaoClass) ?>">
                                 <?= h(familia_situacao_label($familia['situacao_familia'] ?? null)) ?>
@@ -309,6 +313,13 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                                 <?php if (!empty($familia['ultima_entrega'])): ?>
                                     <small>Última entrega em <?= h(date('d/m/Y H:i', strtotime((string) $familia['ultima_entrega']))) ?></small>
                                 <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($camposPendentes !== []): ?>
+                            <div class="family-pending-fields">
+                                <span>Campos pendentes</span>
+                                <strong><?= h(familia_campos_pendentes_resumo($familia)) ?></strong>
                             </div>
                         <?php endif; ?>
                     </div>

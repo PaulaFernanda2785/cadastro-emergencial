@@ -7,6 +7,7 @@ $vulnerabilidades = array_values(array_filter([
 ]));
 $dataNascimento = !empty($familia['data_nascimento']) ? date('d/m/Y', strtotime((string) $familia['data_nascimento'])) : '-';
 $representanteNascimento = !empty($familia['representante_data_nascimento']) ? date('d/m/Y', strtotime((string) $familia['representante_data_nascimento'])) : '-';
+$camposPendentes = familia_campos_pendentes($familia);
 ?>
 
 <section class="family-detail-page">
@@ -29,7 +30,7 @@ $representanteNascimento = !empty($familia['representante_data_nascimento']) ? d
         <article class="family-detail-profile">
             <span class="eyebrow">Responsável familiar</span>
             <h2><?= h($familia['responsavel_nome']) ?></h2>
-            <p><?= h($familia['responsavel_cpf']) ?><?= !empty($familia['responsavel_rg']) ? ' - RG ' . h($familia['responsavel_rg']) : '' ?></p>
+            <p><?= h($familia['responsavel_cpf'] ?: 'CPF pendente') ?><?= !empty($familia['responsavel_rg']) ? ' - RG ' . h($familia['responsavel_rg']) : '' ?></p>
             <div class="family-detail-tags">
                 <span><?= h((int) $familia['quantidade_integrantes']) ?> integrante(s)</span>
                 <span><?= h($vulnerabilidades !== [] ? implode(', ', $vulnerabilidades) : 'Sem vulnerabilidade marcada') ?></span>
@@ -43,6 +44,11 @@ $representanteNascimento = !empty($familia['representante_data_nascimento']) ? d
         </article>
     </section>
 
+    <section class="family-pending-fields family-detail-pending">
+        <span>Campos pendentes</span>
+        <strong><?= h(familia_campos_pendentes_resumo($familia, 8)) ?></strong>
+    </section>
+
     <section class="family-detail-grid">
         <article class="family-detail-card">
             <div class="family-detail-card-heading">
@@ -50,7 +56,7 @@ $representanteNascimento = !empty($familia['representante_data_nascimento']) ? d
                 <strong>Responsável</strong>
             </div>
             <dl class="family-detail-list">
-                <div><dt>CPF</dt><dd><?= h($familia['responsavel_cpf']) ?></dd></div>
+                <div><dt>CPF</dt><dd><?= h($familia['responsavel_cpf'] ?: '-') ?></dd></div>
                 <div><dt>RG</dt><dd><?= h($familia['responsavel_rg'] ?: '-') ?></dd></div>
                 <div><dt>Órgão exp.</dt><dd><?= h($familia['responsavel_orgao_expedidor'] ?: '-') ?></dd></div>
                 <div><dt>Sexo</dt><dd><?= h($familia['responsavel_sexo'] ?: '-') ?></dd></div>

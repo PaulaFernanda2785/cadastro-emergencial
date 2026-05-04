@@ -343,6 +343,7 @@ $pageNumber = 1;
                             (int) ($familia['possui_pcd'] ?? 0) === 1 ? 'PCD' : '',
                             (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '',
                         ]));
+                        $camposPendentes = familia_campos_pendentes($familia);
                         ?>
                         <table class="dti-table dti-family-table">
                             <caption>Família <?= h($index + 1) ?> - <?= h($familia['responsavel_nome']) ?></caption>
@@ -351,7 +352,7 @@ $pageNumber = 1;
                                     <th>Responsável</th>
                                     <td><?= h($familia['responsavel_nome']) ?></td>
                                     <th>CPF</th>
-                                    <td><?= h($familia['responsavel_cpf']) ?></td>
+                                    <td><?= h($familia['responsavel_cpf'] ?: '-') ?></td>
                                 </tr>
                                 <tr>
                                     <th>RG / Órgão</th>
@@ -382,6 +383,10 @@ $pageNumber = 1;
                                     <td><?= h($yesNo($familia['recebe_beneficio_social'] ?? 0)) ?> - <?= h($valueOrDash($familia['beneficio_social_nome'] ?? '')) ?></td>
                                     <th>Cadastro concluído</th>
                                     <td><?= h($yesNo($familia['cadastro_concluido'] ?? 0)) ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Campos pendentes</th>
+                                    <td colspan="3"><?= h($camposPendentes === [] ? 'Nenhum campo pendente' : implode(', ', $camposPendentes)) ?></td>
                                 </tr>
                                 <tr>
                                     <th>Perdas de bens móveis</th>

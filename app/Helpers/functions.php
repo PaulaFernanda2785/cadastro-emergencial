@@ -233,6 +233,77 @@ function familia_situacao_label(mixed $value): string
     return $options[$key] ?? '-';
 }
 
+function familia_tem_representante(array $familia): bool
+{
+    foreach ([
+        'representante_nome',
+        'representante_cpf',
+        'representante_rg',
+        'representante_orgao_expedidor',
+        'representante_data_nascimento',
+        'representante_sexo',
+        'representante_telefone',
+    ] as $field) {
+        if (trim((string) ($familia[$field] ?? '')) !== '') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function familia_campos_pendentes(array $familia): array
+{
+    $pending = [];
+    $fields = [
+        'responsavel_cpf' => 'CPF do responsável',
+        'responsavel_rg' => 'RG do responsável',
+        'responsavel_orgao_expedidor' => 'Órgão expedidor do responsável',
+        'telefone' => 'Telefone do responsável',
+        'perdas_bens_moveis' => 'Perdas de bens móveis',
+        'conclusao_observacoes' => 'Observações finais',
+    ];
+
+    foreach ($fields as $field => $label) {
+        if (trim((string) ($familia[$field] ?? '')) === '') {
+            $pending[] = $label;
+        }
+    }
+
+    if (empty($familia['recebe_beneficio_social'])) {
+        $pending[] = 'Recebe benefício social';
+    }
+
+    if (familia_tem_representante($familia)) {
+        foreach ([
+            'representante_cpf' => 'CPF do representante',
+            'representante_rg' => 'RG do representante',
+            'representante_orgao_expedidor' => 'Órgão expedidor do representante',
+            'representante_telefone' => 'Telefone do representante',
+        ] as $field => $label) {
+            if (trim((string) ($familia[$field] ?? '')) === '') {
+                $pending[] = $label;
+            }
+        }
+    }
+
+    return $pending;
+}
+
+function familia_campos_pendentes_resumo(array $familia, int $limit = 4): string
+{
+    $pending = familia_campos_pendentes($familia);
+
+    if ($pending === []) {
+        return 'Nenhum campo pendente';
+    }
+
+    $visible = array_slice($pending, 0, max(1, $limit));
+    $remaining = count($pending) - count($visible);
+
+    return implode(', ', $visible) . ($remaining > 0 ? ' +' . $remaining : '');
+}
+
 function familia_comprovante_codigo(array $familia): string
 {
     $familiaId = (int) ($familia['id'] ?? 0);

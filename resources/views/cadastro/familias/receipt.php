@@ -15,11 +15,12 @@
         class="secondary-button"
         data-family-receipt-share
     >Enviar para WhatsApp</button>
-    <button type="button" class="primary-button" onclick="window.print()">Imprimir</button>
+    <button type="button" class="primary-button" data-receipt-print>Imprimir ticket</button>
     <span class="receipt-share-status" data-family-receipt-share-status></span>
 </section>
 
 <?php
+$camposPendentes = familia_campos_pendentes($familia);
 $whatsappTargetType = (string) ($whatsappTarget['tipo'] ?? '');
 $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante familiar' : 'responsavel familiar';
 ?>
@@ -81,7 +82,7 @@ $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante 
         </div>
         <div>
             <dt>CPF</dt>
-            <dd><?= h($familia['responsavel_cpf']) ?></dd>
+            <dd><?= h($familia['responsavel_cpf'] ?: '-') ?></dd>
         </div>
         <div>
             <dt>RG</dt>
@@ -138,6 +139,15 @@ $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante 
         <div>
             <dt>Condição</dt>
             <dd><?= h(residencia_condicao_label($familia['condicao_residencia'] ?? null)) ?></dd>
+        </div>
+    </dl>
+
+    <div class="receipt-separator"></div>
+
+    <dl class="receipt-lines receipt-pending-lines">
+        <div>
+            <dt>Pendentes</dt>
+            <dd><?= h($camposPendentes === [] ? 'Nenhum campo pendente' : familia_campos_pendentes_resumo($familia, 6)) ?></dd>
         </div>
     </dl>
 

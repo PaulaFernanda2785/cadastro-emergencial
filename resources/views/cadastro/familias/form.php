@@ -181,7 +181,7 @@ $birthDateField = static function (
             <div class="form-grid two-columns">
                 <label class="field">
                     <span>CPF</span>
-                    <input type="text" name="responsavel_cpf" value="<?= h($familia['responsavel_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input required>
+                    <input type="text" name="responsavel_cpf" value="<?= h($familia['responsavel_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input>
                     <?php if (!empty($errors['responsavel_cpf'])): ?>
                         <small class="field-error"><?= h($errors['responsavel_cpf'][0]) ?></small>
                     <?php endif; ?>
@@ -198,7 +198,7 @@ $birthDateField = static function (
             <div class="form-grid three-columns">
                 <label class="field">
                     <span>Órgão expedidor</span>
-                    <input type="text" name="responsavel_orgao_expedidor" value="<?= h($familia['responsavel_orgao_expedidor'] ?? '') ?>" maxlength="30" required>
+                    <input type="text" name="responsavel_orgao_expedidor" value="<?= h($familia['responsavel_orgao_expedidor'] ?? '') ?>" maxlength="30">
                     <?php if (!empty($errors['responsavel_orgao_expedidor'])): ?>
                         <small class="field-error"><?= h($errors['responsavel_orgao_expedidor'][0]) ?></small>
                     <?php endif; ?>
@@ -374,7 +374,7 @@ $birthDateField = static function (
                 <div class="form-grid two-columns">
                     <label class="field">
                         <span>CPF</span>
-                        <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" required data-cpf-input data-representative-input>
+                        <input type="text" name="representante_cpf" value="<?= h($familia['representante_cpf'] ?? '') ?>" maxlength="14" inputmode="numeric" autocomplete="off" data-cpf-input data-representative-input>
                         <?php if (!empty($errors['representante_cpf'])): ?>
                             <small class="field-error"><?= h($errors['representante_cpf'][0]) ?></small>
                         <?php endif; ?>
@@ -391,7 +391,7 @@ $birthDateField = static function (
                 <div class="form-grid three-columns">
                     <label class="field">
                     <span>Órgão expedidor</span>
-                        <input type="text" name="representante_orgao_expedidor" value="<?= h($familia['representante_orgao_expedidor'] ?? '') ?>" maxlength="30" required data-representative-input>
+                        <input type="text" name="representante_orgao_expedidor" value="<?= h($familia['representante_orgao_expedidor'] ?? '') ?>" maxlength="30" data-representative-input>
                         <?php if (!empty($errors['representante_orgao_expedidor'])): ?>
                             <small class="field-error"><?= h($errors['representante_orgao_expedidor'][0]) ?></small>
                         <?php endif; ?>
@@ -444,7 +444,7 @@ $birthDateField = static function (
 
             <label class="field">
                 <span>Observações finais</span>
-                <textarea name="conclusao_observacoes" rows="3" maxlength="1000" required><?= h($familia['conclusao_observacoes'] ?? '') ?></textarea>
+                <textarea name="conclusao_observacoes" rows="3" maxlength="1000"><?= h($familia['conclusao_observacoes'] ?? '') ?></textarea>
                 <?php if (!empty($errors['conclusao_observacoes'])): ?>
                     <small class="field-error"><?= h($errors['conclusao_observacoes'][0]) ?></small>
                 <?php endif; ?>

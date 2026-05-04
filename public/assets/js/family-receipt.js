@@ -4,6 +4,7 @@
     var qrCanvas = document.querySelector('[data-family-receipt-qr]');
     var ticket = document.querySelector('[data-family-receipt-ticket]');
     var shareButton = document.querySelector('[data-family-receipt-share]');
+    var printButton = document.querySelector('[data-receipt-print]');
     var shareStatus = document.querySelector('[data-family-receipt-share-status]');
 
     function setStatus(text, fallback) {
@@ -400,9 +401,105 @@
         });
     }
 
+    function replaceCanvasWithImage(source, target) {
+        var sourceCanvases = source.querySelectorAll('canvas');
+        var targetCanvases = target.querySelectorAll('canvas');
+
+        sourceCanvases.forEach(function (canvas, index) {
+            var targetCanvas = targetCanvases[index];
+            var image;
+
+            if (!targetCanvas || canvas.width === 0 || canvas.height === 0) {
+                return;
+            }
+
+            image = document.createElement('img');
+            image.src = canvas.toDataURL('image/png');
+            image.alt = targetCanvas.getAttribute('aria-label') || 'QR Code';
+            image.className = 'receipt-print-qr-image';
+            targetCanvas.replaceWith(image);
+        });
+    }
+
+    function thermalPrintStyles() {
+        return [
+            '@page { size: 80mm auto; margin: 0; }',
+            'html, body { width: 80mm; margin: 0; padding: 0; background: #fff; color: #111; }',
+            'body { font-family: "Courier New", Courier, monospace; font-size: 9pt; line-height: 1.22; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
+            '.receipt-print-sheet { width: 72mm; margin: 0; padding: 3mm 4mm; background: #fff; }',
+            '.receipt-ticket { width: 72mm; max-width: 72mm; margin: 0; border: 0; border-radius: 0; padding: 0; background: #fff; color: #111; box-shadow: none; font-family: "Courier New", Courier, monospace; font-size: 9pt; line-height: 1.22; }',
+            '.receipt-paper-edge { display: none; }',
+            '.receipt-header, .receipt-footer { display: grid; gap: 1.5mm; text-align: center; }',
+            '.receipt-header strong { font-size: 11pt; text-transform: uppercase; }',
+            '.receipt-separator { border-top: 1px dashed #555; margin: 2mm 0; }',
+            '.receipt-lines { display: grid; gap: 1.2mm; margin: 0; }',
+            '.receipt-lines div { display: grid; grid-template-columns: 23mm minmax(0, 1fr); gap: 2mm; }',
+            '.receipt-lines dt { color: #333; font-weight: 700; }',
+            '.receipt-lines dd { margin: 0; overflow-wrap: anywhere; word-break: break-word; }',
+            '.receipt-items { width: 100%; border-collapse: collapse; }',
+            '.receipt-items th, .receipt-items td { border-bottom: 1px dashed #999; padding: 1.5mm 0; text-align: left; vertical-align: top; }',
+            '.receipt-items th:last-child, .receipt-items td:last-child { text-align: right; }',
+            '.receipt-note { margin: 0; overflow-wrap: anywhere; word-break: break-word; }',
+            '.receipt-qr { display: grid; justify-items: center; gap: 1.5mm; text-align: center; }',
+            '.receipt-qr canvas, .receipt-qr img, .receipt-print-qr-image { width: 31mm; height: 31mm; }',
+            '.receipt-signature { margin-top: 12mm; }',
+            '.receipt-signature span { display: block; border-top: 1px solid #111; }',
+            '.receipt-signature p { margin: 1.5mm 0 0; text-align: center; }',
+            '.receipt-footer { margin-top: 2mm; font-size: 8pt; }',
+            '.receipt-pending-lines { border-left: 1px solid #111; padding-left: 2mm; }'
+        ].join('\n');
+    }
+
+    function printThermalTicket() {
+        if (!ticket) {
+            return;
+        }
+
+        renderQr(function () {
+            var frame = document.createElement('iframe');
+            var clonedTicket = ticket.cloneNode(true);
+            var title = ticket.dataset.shareTitle || 'Comprovante';
+
+            replaceCanvasWithImage(ticket, clonedTicket);
+            frame.title = 'Impressao do ticket';
+            frame.setAttribute('aria-hidden', 'true');
+            frame.style.position = 'fixed';
+            frame.style.right = '0';
+            frame.style.bottom = '0';
+            frame.style.width = '0';
+            frame.style.height = '0';
+            frame.style.border = '0';
+            document.body.appendChild(frame);
+
+            frame.contentDocument.open();
+            frame.contentDocument.write(
+                '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">' +
+                '<title>' + title.replace(/[<>&"]/g, '') + '</title>' +
+                '<style>' + thermalPrintStyles() + '</style>' +
+                '</head><body><main class="receipt-print-sheet">' +
+                clonedTicket.outerHTML +
+                '</main></body></html>'
+            );
+            frame.contentDocument.close();
+
+            window.setTimeout(function () {
+                frame.contentWindow.focus();
+                frame.contentWindow.print();
+
+                window.setTimeout(function () {
+                    frame.remove();
+                }, 1200);
+            }, 120);
+        });
+    }
+
     renderQr();
 
     if (shareButton) {
         shareButton.addEventListener('click', shareTicket);
+    }
+
+    if (printButton) {
+        printButton.addEventListener('click', printThermalTicket);
     }
 })();

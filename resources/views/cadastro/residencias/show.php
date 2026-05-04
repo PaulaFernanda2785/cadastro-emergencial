@@ -184,12 +184,13 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                         (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '',
                     ]));
                     $entregasRegistradas = (int) ($familia['entregas_registradas'] ?? 0);
+                    $camposPendentes = familia_campos_pendentes($familia);
                     ?>
                     <article class="residence-family-card <?= $entregasRegistradas > 0 ? 'has-delivery' : 'without-delivery' ?>">
                         <div class="residence-family-main">
                             <span class="eyebrow">Responsável familiar</span>
                             <strong><?= h($familia['responsavel_nome']) ?></strong>
-                            <small><?= h($familia['responsavel_cpf']) ?></small>
+                            <small><?= h($familia['responsavel_cpf'] ?: 'CPF pendente') ?></small>
                         </div>
 
                         <div class="residence-family-status">
@@ -211,6 +212,13 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                                 <strong><?= h($vulnerabilidades !== [] ? implode(', ', $vulnerabilidades) : '-') ?></strong>
                             </span>
                         </div>
+
+                        <?php if ($camposPendentes !== []): ?>
+                            <div class="family-pending-fields residence-family-pending">
+                                <span>Campos pendentes</span>
+                                <strong><?= h(familia_campos_pendentes_resumo($familia)) ?></strong>
+                            </div>
+                        <?php endif; ?>
 
                         <div class="residence-family-actions">
                             <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'])) ?>">Ver detalhe</a>

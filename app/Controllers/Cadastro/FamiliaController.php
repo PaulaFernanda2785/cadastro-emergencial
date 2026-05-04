@@ -529,11 +529,9 @@ final class FamiliaController extends Controller
         $validator = (new Validator())
             ->required('responsavel_nome', $data['responsavel_nome'], 'Responsável familiar')
             ->max('responsavel_nome', $data['responsavel_nome'], 180, 'Responsável familiar')
-            ->required('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsável')
             ->max('responsavel_cpf', $data['responsavel_cpf'], 14, 'CPF do responsável')
             ->cpf('responsavel_cpf', $data['responsavel_cpf'], 'CPF do responsável')
             ->max('responsavel_rg', $data['responsavel_rg'], 30, 'RG')
-            ->required('responsavel_orgao_expedidor', $data['responsavel_orgao_expedidor'], 'Órgão expedidor do responsável')
             ->max('responsavel_orgao_expedidor', $data['responsavel_orgao_expedidor'], 30, 'Órgão expedidor')
             ->required('data_nascimento', $data['data_nascimento'], 'Data de nascimento')
             ->date('data_nascimento', $data['data_nascimento'], 'Data de nascimento')
@@ -548,7 +546,6 @@ final class FamiliaController extends Controller
             ->required('situacao_familia', $data['situacao_familia'], 'Situação da família')
             ->max('beneficio_social_nome', $data['beneficio_social_nome'], 180, 'Benefício social')
             ->required('cadastro_concluido', $data['cadastro_concluido'], 'Cadastro familiar revisado e concluído')
-            ->required('conclusao_observacoes', $data['conclusao_observacoes'], 'Observações finais')
             ->max('conclusao_observacoes', $data['conclusao_observacoes'], 1000, 'Observações da conclusão')
             ->max('representante_nome', $data['representante_nome'], 180, 'Representante')
             ->max('representante_cpf', $data['representante_cpf'], 14, 'CPF do representante')
@@ -578,8 +575,6 @@ final class FamiliaController extends Controller
         if ($data['registrar_representante'] !== '') {
             $validator
                 ->required('representante_nome', $data['representante_nome'], 'Nome completo do representante')
-                ->required('representante_cpf', $data['representante_cpf'], 'CPF do representante')
-                ->required('representante_orgao_expedidor', $data['representante_orgao_expedidor'], 'Órgão expedidor do representante')
                 ->required('representante_data_nascimento', $data['representante_data_nascimento'], 'Data de nascimento do representante')
                 ->required('representante_sexo', $data['representante_sexo'], 'Sexo do representante');
 

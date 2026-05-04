@@ -4018,6 +4018,41 @@ button:disabled,
     background: #fbfcfd;
 }
 
+.family-pending-fields {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+    border: 1px solid rgba(180, 83, 9, 0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #7c2d12;
+    background: #fff7ed;
+}
+
+.family-pending-fields span {
+    color: #9a3412;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.family-pending-fields strong {
+    font-size: 13px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.family-index-card .family-pending-fields,
+.residence-family-card .family-pending-fields,
+.family-detail-page > .family-pending-fields {
+    border-left: 4px solid #f59e0b;
+    box-shadow: 0 8px 18px rgba(146, 64, 14, 0.08);
+}
+
+.family-index-card .family-pending-fields {
+    margin-top: 2px;
+}
+
 .family-index-meta dt,
 .family-delivery-summary span {
     color: var(--muted);
@@ -5459,6 +5494,20 @@ button:disabled,
     overflow-wrap: anywhere;
 }
 
+.family-detail-pending {
+    margin-bottom: 16px;
+}
+
+.family-detail-page > .family-detail-pending {
+    margin-top: -2px;
+    margin-bottom: 18px;
+}
+
+.receipt-pending-lines {
+    border-left: 3px solid #111111;
+    padding-left: 8px;
+}
+
 .status-pill {
     width: fit-content;
     display: inline-flex;
@@ -6476,6 +6525,7 @@ button:disabled,
     grid-template-areas:
         "main status"
         "meta meta"
+        "pending pending"
         "actions actions";
     gap: 12px;
     align-items: start;
@@ -6552,6 +6602,10 @@ button:disabled,
     display: grid;
     grid-template-columns: minmax(130px, 0.75fr) minmax(110px, 0.45fr) minmax(220px, 1fr);
     gap: 10px;
+}
+
+.residence-family-pending {
+    grid-area: pending;
 }
 
 .residence-family-meta span {
@@ -11204,6 +11258,26 @@ button:disabled,
         page: receipt;
     }
 
+    body.receipt-page {
+        width: 80mm !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+    }
+
+    body.receipt-page * {
+        visibility: hidden !important;
+    }
+
+    body.receipt-page .receipt-main,
+    body.receipt-page .receipt-preview-shell,
+    body.receipt-page .receipt-ticket,
+    body.receipt-page .receipt-ticket * {
+        visibility: visible !important;
+    }
+
     .dti-preview-page {
         display: block;
         width: auto;
@@ -11983,9 +12057,17 @@ button:disabled,
 
     .receipt-page,
     .receipt-main {
-        width: 100%;
+        width: 80mm;
         margin: 0;
+        padding: 0;
         background: #ffffff;
+    }
+
+    .receipt-preview-shell {
+        display: block;
+        width: 80mm;
+        margin: 0;
+        padding: 0;
     }
 
     .receipt-ticket {
@@ -12000,6 +12082,8 @@ button:disabled,
         box-shadow: none;
         break-inside: avoid;
         page-break-inside: avoid;
+        position: absolute;
+        inset: 0 auto auto 0;
     }
 
     .receipt-paper-edge {

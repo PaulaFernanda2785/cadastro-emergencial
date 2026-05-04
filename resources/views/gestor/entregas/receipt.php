@@ -15,7 +15,7 @@
             class="secondary-button"
             data-family-receipt-share
         >Enviar para WhatsApp</button>
-        <button type="button" class="primary-button" onclick="window.print()">Imprimir</button>
+        <button type="button" class="primary-button" data-receipt-print>Imprimir ticket</button>
         <span class="receipt-share-status" data-family-receipt-share-status></span>
     </section>
 
