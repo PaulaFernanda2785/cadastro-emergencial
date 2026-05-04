@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     'use strict';
 
     var forms = document.querySelectorAll('[data-residence-form]');
@@ -392,7 +392,7 @@
                         return;
                     }
 
-                    setStatus('Não foi possível obter alta precisão. Tentando localização aproximada...');
+                    setStatus('NÃ£o foi possÃ­vel obter alta precisÃ£o. Tentando localizaÃ§Ã£o aproximada...');
                     readPosition({
                         enableHighAccuracy: false,
                         timeout: 30000,
@@ -476,7 +476,7 @@
                         removeInput.checked = true;
                         card.hidden = true;
                         clearExistingMainPhotoLocationFields();
-                        setStatus('Foto principal atual marcada para remoção. Salve as alterações para confirmar.');
+                        setStatus('Foto principal atual marcada para remoÃ§Ã£o. Salve as alteraÃ§Ãµes para confirmar.');
                     });
                 }
             });
@@ -796,11 +796,11 @@
             var community = field('[data-community-input]');
 
             if (!window.CadastroGeo || typeof window.CadastroGeo.reverseGeocode !== 'function') {
-                setStatus(sourceLabel + ' encontrado. Endereço pode ser preenchido manualmente.');
+                setStatus(sourceLabel + ' encontrado. EndereÃ§o pode ser preenchido manualmente.');
                 return Promise.resolve();
             }
 
-            setStatus(sourceLabel + ' encontrado. Buscando endereço real...');
+            setStatus(sourceLabel + ' encontrado. Buscando endereÃ§o real...');
 
             return window.CadastroGeo.reverseGeocode(lat, lng).then(function (result) {
                 if (scanId && scanId !== metadataScanId) {
@@ -824,7 +824,7 @@
                     return;
                 }
 
-                setStatus(sourceLabel + ' encontrado. Endereço pode ser preenchido manualmente.');
+                setStatus(sourceLabel + ' encontrado. EndereÃ§o pode ser preenchido manualmente.');
             });
         }
 
@@ -1260,7 +1260,7 @@
 
             function applyCurrentLocationForPhoto() {
                 form.dataset.photoLocationSource = 'pending-device';
-                setStatus('Foto sem metadados ou coordenadas carimbadas. Buscando localização atual do aparelho...');
+                setStatus('Foto sem metadados ou coordenadas carimbadas. Buscando localizaÃ§Ã£o atual do aparelho...');
 
                 return requestCurrentPosition().then(function (coords) {
                     if (scanId !== metadataScanId) {
@@ -1269,11 +1269,11 @@
 
                     if (!coords || !validCoordinates(coords.latitude, coords.longitude)) {
                         form.dataset.photoLocationSource = 'missing';
-                        setStatus('Foto sem coordenadas legíveis e sem permissão de localização atual.');
+                        setStatus('Foto sem coordenadas legÃ­veis e sem permissÃ£o de localizaÃ§Ã£o atual.');
                         return false;
                     }
 
-                    return applyPhotoCoordinates(coords, 'photo-device-current', 'Localização atual do aparelho');
+                    return applyPhotoCoordinates(coords, 'photo-device-current', 'LocalizaÃ§Ã£o atual do aparelho');
                 });
             }
 
@@ -1339,7 +1339,7 @@
                 if (!coords) {
                     form.dataset.photoLocationSource = 'missing';
                     clearDeviceLocationFields();
-                    setStatus('Foto sem metadados de localização. Tentando ler coordenadas carimbadas na imagem...');
+                    setStatus('Foto sem metadados de localizaÃ§Ã£o. Tentando ler coordenadas carimbadas na imagem...');
 
                     return extractStampedCoordinates(file).then(function (ocrCoords) {
                         if (scanId !== metadataScanId) {
@@ -1408,9 +1408,9 @@
                     title.textContent = 'Selecionar foto';
                 }
                 if (description) {
-                    description.textContent = 'Arraste, cole, busque nos arquivos ou tire uma foto pela câmera do celular.';
+                    description.textContent = 'Arraste, cole, busque nos arquivos ou tire uma foto pela cÃ¢mera do celular.';
                 }
-                setStatus('Ao enviar, a foto receberá localidade, endereço, latitude, longitude, data e hora.');
+                setStatus('Ao enviar, a foto receberÃ¡ localidade, endereÃ§o, latitude, longitude, data e hora.');
                 return;
             }
 
@@ -1443,7 +1443,7 @@
             if (description) {
                 description.textContent = 'Clique para trocar a imagem ou cole outra foto no formulario.';
             }
-            setStatus('Foto selecionada. Os dados de localização serão gravados na imagem antes do envio.');
+            setStatus('Foto selecionada. Os dados de localizaÃ§Ã£o serÃ£o gravados na imagem antes do envio.');
         }
 
         function formatDateTimeInAppTimezone(date) {
@@ -1500,10 +1500,10 @@
 
             return [
                 'Cadastro Emergencial',
-                'Município: ' + [form.dataset.actionMunicipality, form.dataset.actionState].filter(Boolean).join(' / '),
+                'MunicÃ­pio: ' + [form.dataset.actionMunicipality, form.dataset.actionState].filter(Boolean).join(' / '),
                 'Localidade: ' + (metadata.bairro_comunidade || metadata.localidade_acao || '-'),
-                'Endereço: ' + (metadata.endereco || '-'),
-                'Imóvel: ' + (metadata.imovel || '-') + ' | Condição: ' + (metadata.condicao_residencia || '-'),
+                'EndereÃ§o: ' + (metadata.endereco || '-'),
+                'ImÃ³vel: ' + (metadata.imovel || '-') + ' | CondiÃ§Ã£o: ' + (metadata.condicao_residencia || '-'),
                 'Lat: ' + (metadata.latitude || '-') + ' | Long: ' + (metadata.longitude || '-'),
                 'Data/hora: ' + metadata.data_hora_br
             ];
@@ -1694,24 +1694,24 @@
             }
 
             form.dataset.photoProcessing = 'true';
-            setStatus('Gravando dados de localização na foto...');
+            setStatus('Gravando dados de localizaÃ§Ã£o na foto...');
 
             photoProcessingPromise = Promise.all([loadImage(file), loadLogoImage()]).then(function (items) {
                 return drawWatermark(items[0], file, items[1]);
             }).then(function (processedFile) {
                 if (!setInputFile(processedFile)) {
                     form.dataset.photoProcessing = '';
-                    setStatus('Não foi possível substituir a foto automaticamente. Tente anexar a imagem novamente.');
+                    setStatus('NÃ£o foi possÃ­vel substituir a foto automaticamente. Tente anexar a imagem novamente.');
                     return false;
                 }
 
                 form.dataset.photoProcessing = '';
                 form.dataset.photoProcessed = 'true';
-                setStatus('Foto georreferenciada pronta. Confira na prévia ampliada antes de salvar.');
+                setStatus('Foto georreferenciada pronta. Confira na prÃ©via ampliada antes de salvar.');
                 return true;
             }).catch(function () {
                 form.dataset.photoProcessing = '';
-                setStatus('Não foi possível gravar os dados na foto. Tente anexar a imagem novamente.');
+                setStatus('NÃ£o foi possÃ­vel gravar os dados na foto. Tente anexar a imagem novamente.');
                 return false;
             }).finally(function () {
                 photoProcessingPromise = null;
@@ -1738,7 +1738,7 @@
                     form.dataset.photoProcessed = '';
                     setStatus(isInsecureRemoteContext()
                         ? secureLocationRequiredMessage()
-                        : 'Não foi possível obter localização para esta foto. Capture a localização atual antes de salvar.');
+                        : 'NÃ£o foi possÃ­vel obter localizaÃ§Ã£o para esta foto. Capture a localizaÃ§Ã£o atual antes de salvar.');
                     return false;
                 }
 
@@ -1780,7 +1780,7 @@
                 });
             }).catch(function () {
                 clearSubmitBusy();
-                setStatus('Não foi possível enviar agora. Verifique a conexão e tente novamente.');
+                setStatus('NÃ£o foi possÃ­vel enviar agora. Verifique a conexÃ£o e tente novamente.');
             });
         }
 
@@ -1834,14 +1834,14 @@
 
             function defaultStatusText() {
                 if (existingFiles >= maxFiles) {
-                    return 'Limite máximo de 3 fotos extras da residência atingido.';
+                    return 'Limite mÃ¡ximo de 3 fotos extras da residÃªncia atingido.';
                 }
 
                 if (existingFiles > 0) {
-                    return existingFiles + ' de 3 fotos extras já cadastradas. Você pode anexar mais ' + (maxFiles - existingFiles) + '.';
+                    return existingFiles + ' de 3 fotos extras jÃ¡ cadastradas. VocÃª pode anexar mais ' + (maxFiles - existingFiles) + '.';
                 }
 
-                return 'Opcional. Limite de 3 fotos extras por residência.';
+                return 'Opcional. Limite de 3 fotos extras por residÃªncia.';
             }
 
             function syncExtraInput() {
@@ -1913,7 +1913,7 @@
 
                             removeInput.checked = true;
                             card.hidden = true;
-                            setExtraStatus('Foto extra marcada para remoção. Salve as alterações para confirmar.');
+                            setExtraStatus('Foto extra marcada para remoÃ§Ã£o. Salve as alteraÃ§Ãµes para confirmar.');
                             renderExtraPhotos();
                         });
                     }
@@ -1941,7 +1941,7 @@
                 previewUrls.push(url);
                 item.className = 'photo-preview extra-photo-item';
                 image.src = url;
-                image.alt = 'Prévia de ' + file.name;
+                image.alt = 'PrÃ©via de ' + file.name;
                 info.className = 'photo-preview-info';
                 name.textContent = file.name;
                 actions.className = 'photo-preview-actions';
@@ -1998,7 +1998,7 @@
                 wrapper.classList.toggle('is-limit-reached', !canAddMore());
                 extraDropzone.setAttribute('aria-disabled', canAddMore() ? 'false' : 'true');
                 setExtraStatus(!canAddMore()
-                    ? 'Limite máximo de 3 fotos extras atingido.'
+                    ? 'Limite mÃ¡ximo de 3 fotos extras atingido.'
                     : files.length + ' foto(s) extra(s) selecionada(s).');
                 syncExtraInput();
             }
@@ -2033,7 +2033,7 @@
                 });
 
                 if (reachedLimit) {
-                    setExtraStatus('Limite máximo de 3 fotos extras atingido.');
+                    setExtraStatus('Limite mÃ¡ximo de 3 fotos extras atingido.');
                 }
 
                 if (added) {
@@ -2052,7 +2052,7 @@
                     return Promise.resolve({});
                 }
 
-                setExtraStatus('Capturando localização atual para carimbar as fotos extras...');
+                setExtraStatus('Capturando localizaÃ§Ã£o atual para carimbar as fotos extras...');
 
                 return requestCurrentPosition().then(function (coords) {
                     if (!coords) {
@@ -2073,7 +2073,7 @@
                     return Promise.resolve();
                 }
 
-                setExtraStatus('Carimbando fotos extras para a prévia...');
+                setExtraStatus('Carimbando fotos extras para a prÃ©via...');
 
                 processingPromise = Promise.all([loadLogoImage(), extraMetadataOverrides()]).then(function (items) {
                     var logo = items[0];
@@ -2101,7 +2101,7 @@
                     form.dataset.extraPhotosProcessed = 'true';
                     renderExtraPhotos();
                     setExtraStatus(!canAddMore()
-                        ? 'Fotos extras carimbadas. Limite máximo de 3 fotos extras atingido.'
+                        ? 'Fotos extras carimbadas. Limite mÃ¡ximo de 3 fotos extras atingido.'
                         : 'Fotos extras carimbadas e prontas para envio.');
                 }).catch(function () {
                     if (version !== processingBatch) {
@@ -2119,7 +2119,7 @@
 
                     form.dataset.extraPhotosProcessed = '';
                     renderExtraPhotos();
-                    setExtraStatus('Não foi possível carimbar a prévia das fotos extras. Tente adicionar as imagens novamente.');
+                    setExtraStatus('NÃ£o foi possÃ­vel carimbar a prÃ©via das fotos extras. Tente adicionar as imagens novamente.');
                 }).finally(function () {
                     if (version === processingBatch) {
                         processingPromise = null;
@@ -2156,18 +2156,18 @@
                     if (!syncExtraInput()) {
                         renderExtraPhotos();
                         setExtraStatus(!canAddMore()
-                            ? 'Fotos extras prontas. Limite máximo de 3 fotos extras atingido.'
+                            ? 'Fotos extras prontas. Limite mÃ¡ximo de 3 fotos extras atingido.'
                             : 'Fotos extras prontas para envio.');
                         return;
                     }
 
                     renderExtraPhotos();
                     setExtraStatus(!canAddMore()
-                        ? 'Fotos extras prontas. Limite máximo de 3 fotos extras atingido.'
+                        ? 'Fotos extras prontas. Limite mÃ¡ximo de 3 fotos extras atingido.'
                         : 'Fotos extras prontas para envio.');
                 }).catch(function () {
                     form.dataset.extraPhotosProcessed = 'true';
-                    setExtraStatus('Não foi possível gravar os dados nas fotos extras. O envio seguirá com os arquivos originais.');
+                    setExtraStatus('NÃ£o foi possÃ­vel gravar os dados nas fotos extras. O envio seguirÃ¡ com os arquivos originais.');
                 }).finally(function () {
                     processingPromise = null;
                 });
@@ -2209,7 +2209,7 @@
             extraDropzone.addEventListener('keydown', function (event) {
                 if (!canAddMore()) {
                     event.preventDefault();
-                    setExtraStatus('Limite máximo de 3 fotos extras atingido.');
+                    setExtraStatus('Limite mÃ¡ximo de 3 fotos extras atingido.');
                     return;
                 }
 
@@ -2243,10 +2243,29 @@
                 addExtraFiles(event.dataTransfer ? event.dataTransfer.files : []);
             });
 
+            extraDropzone.addEventListener('paste', function (event) {
+                var files = event.clipboardData ? event.clipboardData.files : [];
+
+                if (!files || files.length === 0) {
+                    return;
+                }
+
+                if (!canAddMore()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setExtraStatus('Limite máximo de 3 fotos extras atingido.');
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                addExtraFiles(files);
+            });
+
             extraDropzone.addEventListener('click', function (event) {
                 if (!canAddMore()) {
                     event.preventDefault();
-                    setExtraStatus('Limite máximo de 3 fotos extras atingido.');
+                    setExtraStatus('Limite mÃ¡ximo de 3 fotos extras atingido.');
                 }
             });
 
@@ -2362,7 +2381,7 @@
             var file = firstImage(event.dataTransfer ? event.dataTransfer.files : []);
 
             if (!setInputFile(file)) {
-                setStatus('Não foi possível anexar a imagem arrastada neste navegador.');
+                setStatus('NÃ£o foi possÃ­vel anexar a imagem arrastada neste navegador.');
             }
         });
 
@@ -2370,7 +2389,7 @@
             var file = firstImage(event.clipboardData ? event.clipboardData.files : []);
 
             if (file && !setInputFile(file)) {
-                setStatus('Não foi possível colar a imagem neste navegador.');
+                setStatus('NÃ£o foi possÃ­vel colar a imagem neste navegador.');
             }
         });
 
@@ -2423,7 +2442,7 @@
                 }
             }).catch(function () {
                 clearSubmitBusy();
-                setStatus('Não foi possível preparar a foto para envio. Tente novamente.');
+                setStatus('NÃ£o foi possÃ­vel preparar a foto para envio. Tente novamente.');
             });
         }, true);
     }

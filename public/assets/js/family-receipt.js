@@ -390,31 +390,8 @@
                     return;
                 }
 
-                if (directWhatsappUrl) {
+                if (directWhatsappAppUrl || directWhatsappUrl) {
                     handleTargetedWhatsappShare(blob, filename);
-                    return;
-                }
-
-                file = new File([blob], filename, { type: 'image/png' });
-
-                if (navigator.canShare && navigator.share) {
-                    try {
-                        if (!navigator.canShare({ files: [file] })) {
-                            throw new Error('file-share-unavailable');
-                        }
-                    } catch (error) {
-                        handleUnavailableDirectShare(blob, filename);
-                        return;
-                    }
-
-                    navigator.share({
-                        files: [file],
-                        title: ticket.dataset.shareTitle || 'Comprovante'
-                    }).then(function () {
-                        setStatus('Comprovante enviado para compartilhamento.');
-                    }).catch(function () {
-                        setStatus('Envio cancelado.');
-                    });
                     return;
                 }
 
