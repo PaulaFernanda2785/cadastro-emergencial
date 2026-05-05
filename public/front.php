@@ -103,6 +103,7 @@ $router->get('/cadastros/residencias/{id}', [ResidenciaController::class, 'show'
 $router->get('/cadastros/residencias/{id}/familias/novo', [FamiliaController::class, 'create'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias', [FamiliaController::class, 'store'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/{familiaId}/comprovante', [FamiliaController::class, 'receipt'], ['auth', 'role:cadastrador,gestor,administrador']);
+$router->post('/cadastros/residencias/{id}/familias/{familiaId}/comprovante/email', [FamiliaController::class, 'emailReceipt'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/{familiaId}', [FamiliaController::class, 'show'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/{familiaId}/documentos/{documentoId}', [FamiliaController::class, 'viewDocument'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/cadastros/residencias/{id}/familias/{familiaId}/editar', [FamiliaController::class, 'edit'], ['auth', 'role:cadastrador,gestor,administrador']);
@@ -115,6 +116,7 @@ $router->post('/gestor/entregas/lote', [EntregaAjudaController::class, 'batchSto
 $router->get('/gestor/entregas/validar', [EntregaAjudaController::class, 'validateReceiptQuery'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/entregas/validar/{codigo}', [EntregaAjudaController::class, 'validateReceipt'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/entregas/{id}/comprovante', [EntregaAjudaController::class, 'receipt'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/entregas/{id}/comprovante/email', [EntregaAjudaController::class, 'emailReceipt'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/familias/{id}/entregas/novo', [EntregaAjudaController::class, 'create'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/familias/{id}/entregas', [EntregaAjudaController::class, 'store'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/prestacao-contas', [PrestacaoContasController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);

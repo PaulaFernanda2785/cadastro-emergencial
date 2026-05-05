@@ -415,3 +415,32 @@ function familia_whatsapp_destino(array $familia): array
         'fallback_nome' => $fallbackName,
     ];
 }
+
+function familia_email_destinos(array $familia): array
+{
+    $destinos = [];
+    $vistos = [];
+    $add = static function (mixed $email, mixed $nome, string $tipo) use (&$destinos, &$vistos): void {
+        $email = strtolower(trim((string) $email));
+
+        if ($email === '' || isset($vistos[$email]) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        $vistos[$email] = true;
+        $destinos[] = [
+            'email' => $email,
+            'nome' => trim((string) $nome),
+            'tipo' => $tipo,
+        ];
+    };
+
+    $add($familia['email'] ?? '', $familia['responsavel_nome'] ?? '', 'responsavel');
+
+    if (familia_tem_representante($familia)) {
+        $add($familia['representante_email'] ?? '', $familia['representante_nome'] ?? '', 'representante');
+        $add($familia['email_representante'] ?? '', $familia['representante_nome'] ?? '', 'representante');
+    }
+
+    return $destinos;
+}

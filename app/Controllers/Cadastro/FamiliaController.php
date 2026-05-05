@@ -13,8 +13,10 @@ use App\Repositories\FamiliaRepository;
 use App\Repositories\ResidenciaRepository;
 use App\Services\AuditLogService;
 use App\Services\IdempotenciaService;
+use App\Services\TicketEmailService;
 use App\Services\UploadService;
 use RuntimeException;
+use Throwable;
 
 final class FamiliaController extends Controller
 {
@@ -110,6 +112,34 @@ final class FamiliaController extends Controller
             'whatsappText' => $whatsappText,
             'generatedAt' => new \DateTimeImmutable(),
         ]);
+    }
+
+    public function emailReceipt(string $residenciaId, string $familiaId): void
+    {
+        $this->findResidencia((int) $residenciaId);
+        $familia = $this->findFamiliaForResidencia((int) $familiaId, (int) $residenciaId);
+        $redirect = '/cadastros/residencias/' . (int) $residenciaId . '/familias/' . (int) $familiaId . '/comprovante';
+        $this->guardPost('cadastro.familia.receipt.email.' . (int) $familiaId, $redirect);
+
+        $receiptCode = familia_comprovante_codigo($familia);
+        $validationUrl = public_url('/gestor/entregas/validar/' . rawurlencode($receiptCode));
+
+        try {
+            $result = (new TicketEmailService())->sendFamilyReceipt($familia, $receiptCode, $validationUrl, new \DateTimeImmutable());
+        } catch (Throwable $exception) {
+            error_log('Falha ao enviar comprovante familiar por e-mail: ' . $exception->getMessage());
+            Session::flash('error', 'Nao foi possivel enviar o comprovante por e-mail.');
+            $this->redirect($redirect);
+        }
+
+        if ($result['ok']) {
+            (new AuditLogService())->record('enviou_comprovante_familia_email', 'familias', (int) $familiaId, $receiptCode);
+            Session::flash('success', $result['message']);
+        } else {
+            Session::flash('warning', $result['message']);
+        }
+
+        $this->redirect($redirect);
     }
 
     public function viewDocument(string $residenciaId, string $familiaId, string $documentoId): void

@@ -3,6 +3,12 @@ $selectedTipos = array_map('strval', $entrega['tipo_ajuda_ids'] ?? []);
 $historico = $historico ?? [];
 $hasPreviousDeliveries = $historico !== [];
 $recentHistory = array_slice($historico, 0, 4);
+$itemInput = static function (array $entrega, mixed $tipoId, string $field, string $default = ''): string {
+    $tipoId = (int) $tipoId;
+    $items = is_array($entrega['itens'] ?? null) ? $entrega['itens'] : [];
+
+    return (string) ($items[$tipoId][$field] ?? $default);
+};
 ?>
 <section class="delivery-form-page">
     <section class="dashboard-header">
@@ -70,7 +76,7 @@ $recentHistory = array_slice($historico, 0, 4);
         <?php endif; ?>
     </section>
 
-    <form method="post" action="<?= h(url($action)) ?>" class="delivery-entry-panel js-prevent-double-submit" novalidate>
+    <form method="post" action="<?= h(url($action)) ?>" class="delivery-entry-panel js-prevent-double-submit" novalidate data-delivery-items-form>
         <?= csrf_field() ?>
         <?= idempotency_field($action) ?>
 
@@ -88,31 +94,36 @@ $recentHistory = array_slice($historico, 0, 4);
 
         <div class="delivery-type-grid">
             <?php foreach ($tipos as $tipo): ?>
-                <label class="delivery-type-option">
-                    <input type="checkbox" name="tipo_ajuda_ids[]" value="<?= h($tipo['id']) ?>" <?= in_array((string) $tipo['id'], $selectedTipos, true) ? 'checked' : '' ?>>
-                    <span>
-                        <strong><?= h($tipo['nome']) ?></strong>
-                        <small><?= h($tipo['unidade_medida']) ?></small>
-                    </span>
-                </label>
+                <?php
+                $tipoId = (int) $tipo['id'];
+                $isSelected = in_array((string) $tipoId, $selectedTipos, true);
+                ?>
+                <div class="delivery-type-option delivery-type-option-with-fields" data-delivery-type-option>
+                    <label class="delivery-type-check">
+                        <input type="checkbox" name="tipo_ajuda_ids[]" value="<?= h($tipoId) ?>" <?= $isSelected ? 'checked' : '' ?> data-delivery-type-toggle>
+                        <span>
+                            <strong><?= h($tipo['nome']) ?></strong>
+                            <small><?= h($tipo['unidade_medida']) ?></small>
+                        </span>
+                    </label>
+                    <div class="delivery-type-item-fields" data-delivery-type-fields <?= $isSelected ? '' : 'hidden' ?>>
+                        <label class="field">
+                            <span>Quantidade</span>
+                            <input type="number" name="itens[<?= h($tipoId) ?>][quantidade]" value="<?= h($itemInput($entrega, $tipoId, 'quantidade', '1')) ?>" min="0.01" step="0.01" data-delivery-type-input <?= $isSelected ? '' : 'disabled' ?>>
+                            <?php if (!empty($errors['item_quantidade_' . $tipoId])): ?>
+                                <small class="field-error"><?= h($errors['item_quantidade_' . $tipoId][0]) ?></small>
+                            <?php endif; ?>
+                        </label>
+                        <label class="field">
+                            <span>Observação do item</span>
+                            <input type="text" name="itens[<?= h($tipoId) ?>][observacao]" value="<?= h($itemInput($entrega, $tipoId, 'observacao')) ?>" maxlength="500" placeholder="Opcional" data-delivery-type-input <?= $isSelected ? '' : 'disabled' ?>>
+                            <?php if (!empty($errors['item_observacao_' . $tipoId])): ?>
+                                <small class="field-error"><?= h($errors['item_observacao_' . $tipoId][0]) ?></small>
+                            <?php endif; ?>
+                        </label>
+                    </div>
+                </div>
             <?php endforeach; ?>
-        </div>
-
-        <div class="delivery-batch-inputs">
-            <label class="field">
-                <span>Quantidade por tipo</span>
-                <input type="number" name="quantidade" value="<?= h($entrega['quantidade'] ?? '1') ?>" min="0.01" step="0.01" required>
-                <?php if (!empty($errors['quantidade'])): ?>
-                    <small class="field-error"><?= h($errors['quantidade'][0]) ?></small>
-                <?php endif; ?>
-            </label>
-            <label class="field">
-                <span>Observação</span>
-                <input type="text" name="observacao" maxlength="500" value="<?= h($entrega['observacao'] ?? '') ?>" placeholder="Opcional">
-                <?php if (!empty($errors['observacao'])): ?>
-                    <small class="field-error"><?= h($errors['observacao'][0]) ?></small>
-                <?php endif; ?>
-            </label>
         </div>
 
         <?php if ($tipos === []): ?>

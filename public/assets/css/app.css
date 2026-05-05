@@ -7262,6 +7262,16 @@ button:disabled,
     text-align: right;
 }
 
+.receipt-item-note {
+    display: block;
+    margin-top: 3px;
+    color: #333333;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
 .receipt-note {
     margin-bottom: 0;
     color: #111111;
@@ -8444,7 +8454,8 @@ button:disabled,
 
 .delivery-type-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    align-items: start;
     gap: 10px;
 }
 
@@ -8459,6 +8470,11 @@ button:disabled,
     border-radius: 8px;
     padding: 12px;
     background: #fbfcfd;
+}
+
+.delivery-type-option {
+    align-content: start;
+    align-self: start;
 }
 
 .delivery-type-option:has(input:checked),
@@ -8481,6 +8497,14 @@ button:disabled,
     min-width: 0;
     display: grid;
     gap: 3px;
+}
+
+.delivery-type-check {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
 }
 
 .delivery-type-option strong,
@@ -8553,6 +8577,32 @@ button:disabled,
     display: grid;
     grid-template-columns: minmax(180px, 0.35fr) minmax(220px, 1fr);
     gap: 12px;
+}
+
+.delivery-type-option-with-fields {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.delivery-type-item-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    border-top: 1px solid rgba(100, 116, 139, 0.16);
+    padding-top: 10px;
+    min-width: 0;
+}
+
+.delivery-type-item-fields[hidden] {
+    display: none;
+}
+
+.delivery-type-item-fields .field {
+    min-width: 0;
+}
+
+.delivery-type-item-fields input {
+    width: 100%;
+    min-width: 0;
 }
 
 .delivery-form-page {
@@ -11259,7 +11309,7 @@ button:disabled,
     }
 
     body.receipt-page {
-        width: 80mm !important;
+        width: 100% !important;
         min-width: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -12057,7 +12107,7 @@ button:disabled,
 
     .receipt-page,
     .receipt-main {
-        width: 80mm;
+        width: 100%;
         margin: 0;
         padding: 0;
         background: #ffffff;
@@ -12065,15 +12115,15 @@ button:disabled,
 
     .receipt-preview-shell {
         display: block;
-        width: 80mm;
-        margin: 0;
+        width: 100%;
+        margin: 0 auto;
         padding: 0;
     }
 
     .receipt-ticket {
         width: 72mm;
         max-width: 72mm;
-        margin: 0;
+        margin: 0 auto;
         border: 0;
         border-radius: 0;
         padding: 0;
@@ -12082,8 +12132,9 @@ button:disabled,
         box-shadow: none;
         break-inside: avoid;
         page-break-inside: avoid;
-        position: absolute;
-        inset: 0 auto auto 0;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     .receipt-paper-edge {

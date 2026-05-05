@@ -15,6 +15,11 @@
             class="secondary-button"
             data-family-receipt-share
         >Enviar para WhatsApp</button>
+        <form method="post" action="<?= h(url('/gestor/entregas/' . $entrega['id'] . '/comprovante/email')) ?>" class="inline-form js-prevent-double-submit">
+            <?= csrf_field() ?>
+            <?= idempotency_field('gestor.entregas.receipt.email.' . (int) $entrega['id']) ?>
+            <button type="submit" class="secondary-button" data-loading-text="Enviando...">Enviar por e-mail</button>
+        </form>
         <button type="button" class="primary-button" data-receipt-print>Imprimir ticket</button>
         <span class="receipt-share-status" data-family-receipt-share-status></span>
     </section>
@@ -110,17 +115,17 @@ $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante 
         <tbody>
             <?php foreach (($entrega['itens'] ?? []) as $item): ?>
                 <tr>
-                    <td><?= h($item['tipo_ajuda_nome']) ?></td>
+                    <td>
+                        <?= h($item['tipo_ajuda_nome']) ?>
+                        <?php if (!empty($item['observacao'])): ?>
+                            <small class="receipt-item-note">Obs.: <?= h($item['observacao']) ?></small>
+                        <?php endif; ?>
+                    </td>
                     <td><?= h(number_format((float) $item['quantidade'], 2, ',', '.')) ?> <?= h($item['unidade_medida']) ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
-
-    <?php if (!empty($entrega['observacao'])): ?>
-        <div class="receipt-separator"></div>
-        <p class="receipt-note"><?= h($entrega['observacao']) ?></p>
-    <?php endif; ?>
 
     <div class="receipt-separator"></div>
 

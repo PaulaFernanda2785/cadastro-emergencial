@@ -424,10 +424,10 @@
     function thermalPrintStyles() {
         return [
             '@page { size: 80mm auto; margin: 0; }',
-            'html, body { width: 80mm; margin: 0; padding: 0; background: #fff; color: #111; }',
+            'html, body { width: 100%; margin: 0; padding: 0; background: #fff; color: #111; }',
             'body { font-family: "Courier New", Courier, monospace; font-size: 9pt; line-height: 1.22; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
-            '.receipt-print-sheet { width: 72mm; margin: 0; padding: 3mm 4mm; background: #fff; }',
-            '.receipt-ticket { width: 72mm; max-width: 72mm; margin: 0; border: 0; border-radius: 0; padding: 0; background: #fff; color: #111; box-shadow: none; font-family: "Courier New", Courier, monospace; font-size: 9pt; line-height: 1.22; }',
+            '.receipt-print-sheet { width: 72mm; margin: 0 auto; padding: 3mm 0; background: #fff; }',
+            '.receipt-ticket { width: 72mm; max-width: 72mm; margin: 0 auto; border: 0; border-radius: 0; padding: 0; background: #fff; color: #111; box-shadow: none; font-family: "Courier New", Courier, monospace; font-size: 9pt; line-height: 1.22; }',
             '.receipt-paper-edge { display: none; }',
             '.receipt-header, .receipt-footer { display: grid; gap: 1.5mm; text-align: center; }',
             '.receipt-header strong { font-size: 11pt; text-transform: uppercase; }',
@@ -439,6 +439,7 @@
             '.receipt-items { width: 100%; border-collapse: collapse; }',
             '.receipt-items th, .receipt-items td { border-bottom: 1px dashed #999; padding: 1.5mm 0; text-align: left; vertical-align: top; }',
             '.receipt-items th:last-child, .receipt-items td:last-child { text-align: right; }',
+            '.receipt-item-note { display: block; margin-top: 1mm; color: #333; font-size: 8pt; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }',
             '.receipt-note { margin: 0; overflow-wrap: anywhere; word-break: break-word; }',
             '.receipt-qr { display: grid; justify-items: center; gap: 1.5mm; text-align: center; }',
             '.receipt-qr canvas, .receipt-qr img, .receipt-print-qr-image { width: 31mm; height: 31mm; }',

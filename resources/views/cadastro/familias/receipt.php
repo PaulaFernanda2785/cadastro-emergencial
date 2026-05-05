@@ -15,6 +15,11 @@
         class="secondary-button"
         data-family-receipt-share
     >Enviar para WhatsApp</button>
+    <form method="post" action="<?= h(url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familia['id'] . '/comprovante/email')) ?>" class="inline-form js-prevent-double-submit">
+        <?= csrf_field() ?>
+        <?= idempotency_field('cadastro.familia.receipt.email.' . (int) $familia['id']) ?>
+        <button type="submit" class="secondary-button" data-loading-text="Enviando...">Enviar por e-mail</button>
+    </form>
     <button type="button" class="primary-button" data-receipt-print>Imprimir ticket</button>
     <span class="receipt-share-status" data-family-receipt-share-status></span>
 </section>

@@ -47,6 +47,35 @@
         updateCounter();
     });
 
+    document.querySelectorAll('[data-delivery-items-form]').forEach(function (form) {
+        function applyTypeState(option) {
+            var toggle = option.querySelector('[data-delivery-type-toggle]');
+            var fields = option.querySelector('[data-delivery-type-fields]');
+            var inputs = option.querySelectorAll('[data-delivery-type-input]');
+            var enabled = !!(toggle && toggle.checked);
+
+            if (fields) {
+                fields.hidden = !enabled;
+            }
+
+            inputs.forEach(function (input) {
+                input.disabled = !enabled;
+            });
+        }
+
+        form.querySelectorAll('[data-delivery-type-option]').forEach(function (option) {
+            var toggle = option.querySelector('[data-delivery-type-toggle]');
+
+            if (toggle) {
+                toggle.addEventListener('change', function () {
+                    applyTypeState(option);
+                });
+            }
+
+            applyTypeState(option);
+        });
+    });
+
     document.querySelectorAll('[data-smart-search]').forEach(function (input) {
         var hidden = document.querySelector('[data-smart-hidden="' + input.dataset.smartTarget + '"]');
         var list = input.getAttribute('list') ? document.getElementById(input.getAttribute('list')) : null;

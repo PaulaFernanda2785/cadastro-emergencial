@@ -18,7 +18,7 @@ final class EntregaAjudaRepository
                     MAX(e.data_entrega) AS data_entrega,
                     MAX(e.observacao) AS observacao,
                     f.id AS familia_id, f.responsavel_nome, f.responsavel_cpf,
-                    GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 0, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
+                    GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 2, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
                     r.id AS residencia_id, r.protocolo, r.bairro_comunidade,
                     a.id AS acao_id, a.localidade, a.tipo_evento,
                     m.nome AS municipio_nome, m.uf,
@@ -57,7 +57,7 @@ final class EntregaAjudaRepository
                     MAX(e.data_entrega) AS data_entrega,
                     MAX(e.observacao) AS observacao,
                     f.id AS familia_id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg,
-                    f.telefone, f.representante_nome, f.representante_cpf, f.representante_telefone,
+                    f.telefone, f.email, f.representante_nome, f.representante_cpf, f.representante_telefone,
                     f.quantidade_integrantes,
                     MIN(t.nome) AS tipo_ajuda_nome, MIN(t.unidade_medida) AS unidade_medida,
                     r.id AS residencia_id, r.protocolo, r.bairro_comunidade, r.endereco, r.complemento,
@@ -79,7 +79,7 @@ final class EntregaAjudaRepository
                 AND r.deleted_at IS NULL
                 AND a.deleted_at IS NULL
              GROUP BY ' . self::GROUP_CODE_SQL . ',
-                    f.id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg, f.telefone,
+                    f.id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg, f.telefone, f.email,
                     f.representante_nome, f.representante_cpf, f.representante_telefone, f.quantidade_integrantes,
                     r.id, r.protocolo, r.bairro_comunidade, r.endereco, r.complemento, r.imovel, r.condicao_residencia,
                     a.localidade, a.tipo_evento, a.data_evento, m.nome, m.uf, u.nome, u.cpf
@@ -204,7 +204,7 @@ final class EntregaAjudaRepository
                     COUNT(*) AS total_itens,
                     MAX(e.data_entrega) AS data_entrega,
                     MAX(e.observacao) AS observacao,
-                    GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 0, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
+                    GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 2, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
                     u.nome AS entregue_por_nome
              FROM entregas_ajuda e
              INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
@@ -281,7 +281,7 @@ final class EntregaAjudaRepository
     {
         $familyWhere = $familiaId !== null ? ' AND e.familia_id = :familia_id' : '';
         $stmt = Database::connection()->prepare(
-            'SELECT e.id, e.quantidade, e.comprovante_codigo, t.nome AS tipo_ajuda_nome, t.unidade_medida
+            'SELECT e.id, e.quantidade, e.comprovante_codigo, e.observacao, t.nome AS tipo_ajuda_nome, t.unidade_medida
              FROM entregas_ajuda e
              INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
              WHERE ' . self::GROUP_CODE_SQL . ' = :codigo

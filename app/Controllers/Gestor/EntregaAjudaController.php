@@ -15,6 +15,8 @@ use App\Repositories\ResidenciaRepository;
 use App\Repositories\TipoAjudaRepository;
 use App\Services\AuditLogService;
 use App\Services\IdempotenciaService;
+use App\Services\TicketEmailService;
+use Throwable;
 
 final class EntregaAjudaController extends Controller
 {
@@ -92,7 +94,12 @@ final class EntregaAjudaController extends Controller
         }
 
         $itens = array_map(
-            static fn (array $item): string => '- ' . (string) $item['tipo_ajuda_nome'] . ': ' . number_format((float) $item['quantidade'], 2, ',', '.') . ' ' . (string) $item['unidade_medida'],
+            static function (array $item): string {
+                $line = '- ' . (string) $item['tipo_ajuda_nome'] . ': ' . number_format((float) $item['quantidade'], 2, ',', '.') . ' ' . (string) $item['unidade_medida'];
+                $observacao = trim((string) ($item['observacao'] ?? ''));
+
+                return $observacao !== '' ? $line . ' | Obs.: ' . $observacao : $line;
+            },
             $entrega['itens'] ?? []
         );
         $whatsappText = implode("\n", array_filter([
@@ -115,6 +122,35 @@ final class EntregaAjudaController extends Controller
             'whatsappText' => $whatsappText,
             'generatedAt' => new \DateTimeImmutable(),
         ]);
+    }
+
+    public function emailReceipt(string $id): void
+    {
+        $entrega = $this->entregas->find((int) $id);
+
+        if ($entrega === null) {
+            $this->abort(404);
+        }
+
+        $redirect = '/gestor/entregas/' . (int) $entrega['id'] . '/comprovante';
+        $this->guardPost('gestor.entregas.receipt.email.' . (int) $entrega['id'], $redirect);
+
+        try {
+            $result = (new TicketEmailService())->sendDeliveryReceipt($entrega, new \DateTimeImmutable());
+        } catch (Throwable $exception) {
+            error_log('Falha ao enviar comprovante de entrega por e-mail: ' . $exception->getMessage());
+            Session::flash('error', 'Nao foi possivel enviar o comprovante por e-mail.');
+            $this->redirect($redirect);
+        }
+
+        if ($result['ok']) {
+            (new AuditLogService())->record('enviou_comprovante_entrega_email', 'entregas_ajuda', (int) $entrega['id'], (string) $entrega['comprovante_codigo']);
+            Session::flash('success', $result['message']);
+        } else {
+            Session::flash('warning', $result['message']);
+        }
+
+        $this->redirect($redirect);
     }
 
     public function validateReceiptQuery(): void
@@ -174,8 +210,11 @@ final class EntregaAjudaController extends Controller
         $hasMultipleItems = count($data['tipo_ajuda_ids']) > 1;
 
         foreach ($data['tipo_ajuda_ids'] as $index => $tipoId) {
+            $item = $data['itens'][(int) $tipoId];
             $row = $data;
             $row['tipo_ajuda_id'] = (int) $tipoId;
+            $row['quantidade'] = $item['quantidade'];
+            $row['observacao'] = $item['observacao'];
             $row['grupo_comprovante_codigo'] = $groupCode;
             $row['comprovante_codigo'] = $hasMultipleItems ? $groupCode . '-ITEM-' . str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) : $groupCode;
 
@@ -195,19 +234,12 @@ final class EntregaAjudaController extends Controller
 
         $familiaIds = $this->integerList($_POST['familia_ids'] ?? []);
         $tipoIds = $this->integerList($_POST['tipo_ajuda_ids'] ?? []);
-        $quantidade = str_replace(',', '.', trim((string) ($_POST['quantidade'] ?? '1')));
-        $observacao = trim((string) ($_POST['observacao'] ?? ''));
-        $validator = (new Validator())
-            ->required('quantidade', $quantidade, 'Quantidade')
-            ->decimalRange('quantidade', $quantidade, 0.01, 999999.99, 'Quantidade')
-            ->max('observacao', $observacao, 500, 'Observação');
+        $itens = $this->deliveryItemsInput($tipoIds);
+        $validator = new Validator();
+        $this->validateDeliveryItems($validator, ['tipo_ajuda_ids' => $tipoIds, 'itens' => $itens]);
 
         if ($familiaIds === []) {
             $validator->add('familia_ids', 'Selecione pelo menos uma família para entrega em lote.');
-        }
-
-        if ($tipoIds === []) {
-            $validator->add('tipo_ajuda_ids', 'Selecione pelo menos um tipo de ajuda.');
         }
 
         foreach ($tipoIds as $tipoId) {
@@ -236,14 +268,15 @@ final class EntregaAjudaController extends Controller
             $hasMultipleItems = count($tipoIds) > 1;
 
             foreach ($tipoIds as $index => $tipoId) {
+                $item = $itens[$tipoId];
                 $data = [
                     'familia_id' => $familiaId,
                     'tipo_ajuda_id' => $tipoId,
-                    'quantidade' => $quantidade,
+                    'quantidade' => $item['quantidade'],
                     'entregue_por' => $userId,
                     'comprovante_codigo' => $hasMultipleItems ? $groupCode . '-ITEM-' . str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) : $groupCode,
                     'grupo_comprovante_codigo' => $groupCode,
-                    'observacao' => $observacao,
+                    'observacao' => $item['observacao'],
                 ];
                 $id = $this->entregas->create($data);
                 $created++;
@@ -283,32 +316,63 @@ final class EntregaAjudaController extends Controller
     {
         return [
             'tipo_ajuda_ids' => [],
-            'quantidade' => '1',
-            'observacao' => '',
+            'itens' => [],
         ];
     }
 
     private function input(): array
     {
+        $tipoIds = $this->integerList($_POST['tipo_ajuda_ids'] ?? []);
+
         return [
-            'tipo_ajuda_ids' => $this->integerList($_POST['tipo_ajuda_ids'] ?? []),
-            'quantidade' => str_replace(',', '.', trim((string) ($_POST['quantidade'] ?? '1'))),
-            'observacao' => trim((string) ($_POST['observacao'] ?? '')),
+            'tipo_ajuda_ids' => $tipoIds,
+            'itens' => $this->deliveryItemsInput($tipoIds),
         ];
     }
 
     private function validator(array $data): Validator
     {
-        $validator = (new Validator())
-            ->required('quantidade', $data['quantidade'], 'Quantidade')
-            ->decimalRange('quantidade', $data['quantidade'], 0.01, 999999.99, 'Quantidade')
-            ->max('observacao', $data['observacao'], 500, 'Observação');
-
-        if (($data['tipo_ajuda_ids'] ?? []) === []) {
-            $validator->add('tipo_ajuda_ids', 'Selecione pelo menos um tipo de ajuda.');
-        }
+        $validator = new Validator();
+        $this->validateDeliveryItems($validator, $data);
 
         return $validator;
+    }
+
+    private function deliveryItemsInput(array $tipoIds): array
+    {
+        $postedItems = is_array($_POST['itens'] ?? null) ? $_POST['itens'] : [];
+        $fallbackQuantity = str_replace(',', '.', trim((string) ($_POST['quantidade'] ?? '1')));
+        $fallbackObservation = trim((string) ($_POST['observacao'] ?? ''));
+        $items = [];
+
+        foreach ($tipoIds as $tipoId) {
+            $rawItem = is_array($postedItems[$tipoId] ?? null) ? $postedItems[$tipoId] : [];
+            $items[$tipoId] = [
+                'quantidade' => str_replace(',', '.', trim((string) ($rawItem['quantidade'] ?? $fallbackQuantity))),
+                'observacao' => trim((string) ($rawItem['observacao'] ?? $fallbackObservation)),
+            ];
+        }
+
+        return $items;
+    }
+
+    private function validateDeliveryItems(Validator $validator, array $data): void
+    {
+        $tipoIds = $data['tipo_ajuda_ids'] ?? [];
+        $items = $data['itens'] ?? [];
+
+        if ($tipoIds === []) {
+            $validator->add('tipo_ajuda_ids', 'Selecione pelo menos um tipo de ajuda.');
+            return;
+        }
+
+        foreach ($tipoIds as $tipoId) {
+            $item = $items[(int) $tipoId] ?? ['quantidade' => '', 'observacao' => ''];
+            $validator
+                ->required('item_quantidade_' . (int) $tipoId, $item['quantidade'], 'Quantidade do item #' . (int) $tipoId)
+                ->decimalRange('item_quantidade_' . (int) $tipoId, $item['quantidade'], 0.01, 999999.99, 'Quantidade do item #' . (int) $tipoId)
+                ->max('item_observacao_' . (int) $tipoId, $item['observacao'], 500, 'Observação do item #' . (int) $tipoId);
+        }
     }
 
     private function generateReceiptCode(): string

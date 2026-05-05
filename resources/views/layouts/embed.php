@@ -1,7 +1,7 @@
 <?php
 $app = require BASE_PATH . '/config/app.php';
 $pageTitle = $title ?? $app['name'];
-$assetVersion = '20260504-002';
+$assetVersion = '20260504-008';
 ?>
 <!doctype html>
 <html lang="pt-BR">

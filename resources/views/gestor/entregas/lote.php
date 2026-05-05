@@ -98,7 +98,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
 </section>
 
 <section class="delivery-batch-panel">
-    <form method="post" action="<?= h(url('/gestor/entregas/lote')) ?>" class="delivery-batch-form js-prevent-double-submit" data-delivery-batch-form>
+    <form method="post" action="<?= h(url('/gestor/entregas/lote')) ?>" class="delivery-batch-form js-prevent-double-submit" data-delivery-batch-form data-delivery-items-form>
         <?= csrf_field() ?>
         <?= idempotency_field('gestor.entregas.lote') ?>
 
@@ -112,25 +112,27 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
 
         <div class="delivery-type-grid">
             <?php foreach ($tipos ?? [] as $tipo): ?>
-                <label class="delivery-type-option">
-                    <input type="checkbox" name="tipo_ajuda_ids[]" value="<?= h($tipo['id']) ?>">
-                    <span>
-                        <strong><?= h($tipo['nome']) ?></strong>
-                        <small><?= h($tipo['unidade_medida']) ?></small>
-                    </span>
-                </label>
+                <?php $tipoId = (int) $tipo['id']; ?>
+                <div class="delivery-type-option delivery-type-option-with-fields" data-delivery-type-option>
+                    <label class="delivery-type-check">
+                        <input type="checkbox" name="tipo_ajuda_ids[]" value="<?= h($tipoId) ?>" data-delivery-type-toggle>
+                        <span>
+                            <strong><?= h($tipo['nome']) ?></strong>
+                            <small><?= h($tipo['unidade_medida']) ?></small>
+                        </span>
+                    </label>
+                    <div class="delivery-type-item-fields" data-delivery-type-fields hidden>
+                        <label class="field">
+                            <span>Quantidade</span>
+                            <input type="number" name="itens[<?= h($tipoId) ?>][quantidade]" value="1" min="0.01" step="0.01" disabled data-delivery-type-input>
+                        </label>
+                        <label class="field">
+                            <span>Observação do item</span>
+                            <input type="text" name="itens[<?= h($tipoId) ?>][observacao]" maxlength="500" placeholder="Opcional" disabled data-delivery-type-input>
+                        </label>
+                    </div>
+                </div>
             <?php endforeach; ?>
-        </div>
-
-        <div class="delivery-batch-inputs">
-            <label class="field">
-                <span>Quantidade por tipo/família</span>
-                <input type="number" name="quantidade" value="1" min="0.01" step="0.01" required>
-            </label>
-            <label class="field">
-                <span>Observação do lote</span>
-                <input type="text" name="observacao" maxlength="500" placeholder="Opcional">
-            </label>
         </div>
 
         <?php if ($batchHasFilters): ?>
