@@ -3,6 +3,22 @@
 
     var forms = document.querySelectorAll('[data-family-form]');
 
+    function openFilePicker(input) {
+        if (!input || input.disabled) {
+            return;
+        }
+
+        if (typeof input.showPicker === 'function') {
+            try {
+                input.showPicker();
+                return;
+            } catch (error) {
+            }
+        }
+
+        input.click();
+    }
+
     function setupRepresentative(form) {
         var toggle = form.querySelector('[data-representative-toggle]');
         var fields = form.querySelector('[data-representative-fields]');
@@ -263,8 +279,13 @@
         dropzone.addEventListener('keydown', function (event) {
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
-                input.click();
+                openFilePicker(input);
             }
+        });
+
+        dropzone.addEventListener('click', function (event) {
+            event.preventDefault();
+            openFilePicker(input);
         });
 
         ['dragenter', 'dragover'].forEach(function (eventName) {

@@ -151,7 +151,7 @@ $birthDateField = static function (
 
             <div class="family-doc-upload-grid family-doc-upload-grid-single">
                 <div class="family-doc-upload photo-upload" data-family-doc-upload data-doc-target="responsavel">
-                    <input class="file-input-native" id="documentos-responsavel" type="file" name="documentos[]" accept="image/jpeg,image/png,application/pdf,image/*" capture="environment" multiple data-family-doc-input>
+                    <input class="file-input-native" id="documentos-responsavel" type="file" name="documentos[]" accept="image/*,application/pdf" multiple data-family-doc-input>
                     <label class="photo-dropzone family-doc-dropzone" for="documentos-responsavel" tabindex="0" data-family-doc-dropzone>
                         <strong>Documentos do responsável</strong>
                         <span>Anexe ou fotografe RG, CPF ou documento equivalente.</span>
@@ -355,7 +355,7 @@ $birthDateField = static function (
 
             <div class="representative-fields" data-representative-fields <?= $hasRepresentante ? '' : 'hidden' ?>>
                 <div class="family-doc-upload photo-upload representative-doc-upload" data-family-doc-upload data-doc-target="representante">
-                    <input class="file-input-native" id="documentos-representante" type="file" name="documentos[]" accept="image/jpeg,image/png,application/pdf,image/*" capture="environment" multiple data-family-doc-input>
+                    <input class="file-input-native" id="documentos-representante" type="file" name="documentos[]" accept="image/*,application/pdf" multiple data-family-doc-input>
                     <label class="photo-dropzone family-doc-dropzone" for="documentos-representante" tabindex="0" data-family-doc-dropzone>
                         <strong>Documentos do representante</strong>
                         <span>Anexe RG, CPF ou documento equivalente.</span>

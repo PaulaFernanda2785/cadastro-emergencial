@@ -20,6 +20,22 @@
         }
     }
 
+    function openFilePicker(input) {
+        if (!input || input.disabled) {
+            return;
+        }
+
+        if (typeof input.showPicker === 'function') {
+            try {
+                input.showPicker();
+                return;
+            } catch (error) {
+            }
+        }
+
+        input.click();
+    }
+
     function setupCommunitySearch(form) {
         var input = form.querySelector('[data-community-input]');
         var list = form.querySelector('[data-community-suggestions]');
@@ -2215,7 +2231,7 @@
 
                 if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
-                    extraInput.click();
+                    openFilePicker(extraInput);
                 }
             });
 
@@ -2263,10 +2279,14 @@
             });
 
             extraDropzone.addEventListener('click', function (event) {
+                event.preventDefault();
+
                 if (!canAddMore()) {
-                    event.preventDefault();
                     setExtraStatus('Limite m\u00e1ximo de 3 fotos extras atingido.');
+                    return;
                 }
+
+                openFilePicker(extraInput);
             });
 
             form.addEventListener('formdata', function (event) {
@@ -2359,8 +2379,13 @@
         dropzone.addEventListener('keydown', function (event) {
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
-                input.click();
+                openFilePicker(input);
             }
+        });
+
+        dropzone.addEventListener('click', function (event) {
+            event.preventDefault();
+            openFilePicker(input);
         });
 
         ['dragenter', 'dragover'].forEach(function (eventName) {

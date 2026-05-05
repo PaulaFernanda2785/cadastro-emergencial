@@ -22,6 +22,7 @@ foreach ($documentos as $documento) {
 $fotoPrincipalUrl = $fotoPrincipal !== null
     ? url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $fotoPrincipal['id'])
     : null;
+$fotoPrincipalPreviewUrl = $fotoPrincipalUrl !== null ? $fotoPrincipalUrl . '?thumb=1' : null;
 $familiasCadastradas = count($familias);
 $familiasPrevistas = max(1, (int) ($residencia['quantidade_familias'] ?? 1));
 $familiasPercentual = min(100, (int) round(($familiasCadastradas / $familiasPrevistas) * 100));
@@ -138,7 +139,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             </div>
             <?php if ($fotoPrincipalUrl !== null): ?>
                 <button class="residence-photo-preview" type="button" data-residence-image-open data-image-src="<?= h($fotoPrincipalUrl) ?>" data-image-title="<?= h($fotoPrincipal['nome_original']) ?>">
-                    <img src="<?= h($fotoPrincipalUrl) ?>" alt="Foto georreferenciada da residência">
+                    <img src="<?= h($fotoPrincipalPreviewUrl) ?>" alt="Foto georreferenciada da residência" width="420" height="315" loading="lazy" decoding="async" fetchpriority="low">
                 </button>
                 <button class="primary-button residence-photo-button" type="button" data-residence-image-open data-image-src="<?= h($fotoPrincipalUrl) ?>" data-image-title="<?= h($fotoPrincipal['nome_original']) ?>">Visualizar imagem</button>
             <?php else: ?>
@@ -154,9 +155,12 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             <?php if ($fotosExtras !== []): ?>
                 <div class="residence-extra-photo-grid">
                     <?php foreach ($fotosExtras as $fotoExtra): ?>
-                        <?php $fotoExtraUrl = url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $fotoExtra['id']); ?>
+                        <?php
+                        $fotoExtraUrl = url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $fotoExtra['id']);
+                        $fotoExtraPreviewUrl = $fotoExtraUrl . '?thumb=1';
+                        ?>
                         <button class="residence-photo-preview" type="button" data-residence-image-open data-image-src="<?= h($fotoExtraUrl) ?>" data-image-title="<?= h($fotoExtra['nome_original']) ?>">
-                            <img src="<?= h($fotoExtraUrl) ?>" alt="Foto adicional da residência">
+                            <img src="<?= h($fotoExtraPreviewUrl) ?>" alt="Foto adicional da residência" width="420" height="315" loading="lazy" decoding="async" fetchpriority="low">
                         </button>
                     <?php endforeach; ?>
                 </div>

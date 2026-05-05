@@ -80,6 +80,7 @@ final class FamiliaController extends Controller
             'title' => 'Família ' . $familia['responsavel_nome'],
             'residencia' => $residencia,
             'familia' => $familia,
+            'documentos' => $this->documentos->byFamilia((int) $familiaId),
         ]);
     }
 
@@ -168,6 +169,12 @@ final class FamiliaController extends Controller
             $this->abort(404);
         }
 
+        if (isset($_GET['thumb']) && $_GET['thumb'] === '1' && str_starts_with($mimeType, 'image/')) {
+            if ($this->streamImageThumbnail($filePath, (int) $documentoId)) {
+                exit;
+            }
+        }
+
         $filename = str_replace(['"', "\r", "\n"], '', basename((string) $documento['nome_original']));
 
         header('Content-Type: ' . $mimeType);
@@ -176,6 +183,111 @@ final class FamiliaController extends Controller
         header('X-Content-Type-Options: nosniff');
         readfile($filePath);
         exit;
+    }
+
+    private function streamImageThumbnail(string $filePath, int $documentoId): bool
+    {
+        if (!function_exists('imagecreatetruecolor')) {
+            return false;
+        }
+
+        $imageSize = @getimagesize($filePath);
+        if (!is_array($imageSize) || empty($imageSize[0]) || empty($imageSize[1]) || empty($imageSize['mime'])) {
+            return false;
+        }
+
+        $mimeType = (string) $imageSize['mime'];
+        if (!in_array($mimeType, ['image/jpeg', 'image/png'], true)) {
+            return false;
+        }
+
+        $maxSize = 420;
+        $sourceWidth = (int) $imageSize[0];
+        $sourceHeight = (int) $imageSize[1];
+        $scale = min(1, $maxSize / max($sourceWidth, $sourceHeight));
+        $thumbWidth = max(1, (int) round($sourceWidth * $scale));
+        $thumbHeight = max(1, (int) round($sourceHeight * $scale));
+        $cachePath = $this->thumbnailCachePath($filePath, $documentoId, $maxSize);
+
+        if ($cachePath !== null && is_file($cachePath)) {
+            $this->streamThumbnailFile($cachePath, $documentoId);
+            return true;
+        }
+
+        $source = $mimeType === 'image/jpeg'
+            ? @imagecreatefromjpeg($filePath)
+            : @imagecreatefrompng($filePath);
+
+        if (!$source) {
+            return false;
+        }
+
+        $thumb = imagecreatetruecolor($thumbWidth, $thumbHeight);
+        if (!$thumb) {
+            return false;
+        }
+
+        $white = imagecolorallocate($thumb, 255, 255, 255);
+        imagefilledrectangle($thumb, 0, 0, $thumbWidth, $thumbHeight, $white);
+        imagecopyresampled($thumb, $source, 0, 0, 0, 0, $thumbWidth, $thumbHeight, $sourceWidth, $sourceHeight);
+
+        if ($cachePath !== null && @imagejpeg($thumb, $cachePath, 76)) {
+            $this->streamThumbnailFile($cachePath, $documentoId);
+            return true;
+        }
+
+        ob_start();
+        $ok = imagejpeg($thumb, null, 76);
+        $data = ob_get_clean();
+
+        if (!$ok || !is_string($data)) {
+            return false;
+        }
+
+        $this->streamThumbnailBytes($data, $documentoId);
+        return true;
+    }
+
+    private function thumbnailCachePath(string $filePath, int $documentoId, int $maxSize): ?string
+    {
+        $cacheDir = BASE_PATH . '/storage/cache/document-thumbnails';
+        if (!is_dir($cacheDir) && !@mkdir($cacheDir, 0775, true) && !is_dir($cacheDir)) {
+            return null;
+        }
+
+        if (!is_writable($cacheDir)) {
+            return null;
+        }
+
+        $key = hash('sha256', implode('|', [
+            (string) $documentoId,
+            str_replace('\\', '/', $filePath),
+            (string) filesize($filePath),
+            (string) filemtime($filePath),
+            (string) $maxSize,
+        ]));
+
+        return $cacheDir . '/' . $key . '.jpg';
+    }
+
+    private function streamThumbnailFile(string $cachePath, int $documentoId): void
+    {
+        header('Content-Type: image/jpeg');
+        header('Content-Length: ' . (string) filesize($cachePath));
+        header('Content-Disposition: inline; filename="documento-' . $documentoId . '-thumb.jpg"');
+        header('Cache-Control: private, max-age=86400');
+        header('X-Content-Type-Options: nosniff');
+        readfile($cachePath);
+    }
+
+    private function streamThumbnailBytes(string $data, int $documentoId): void
+    {
+        header('Content-Type: image/jpeg');
+        header('Content-Length: ' . (string) strlen($data));
+        header('Content-Disposition: inline; filename="documento-' . $documentoId . '-thumb.jpg"');
+        header('Cache-Control: private, max-age=3600');
+        header('X-Content-Type-Options: nosniff');
+        echo $data;
     }
 
     public function edit(string $residenciaId, string $familiaId): void

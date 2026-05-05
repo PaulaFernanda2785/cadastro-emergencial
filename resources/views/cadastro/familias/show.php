@@ -8,6 +8,8 @@ $vulnerabilidades = array_values(array_filter([
 $dataNascimento = !empty($familia['data_nascimento']) ? date('d/m/Y', strtotime((string) $familia['data_nascimento'])) : '-';
 $representanteNascimento = !empty($familia['representante_data_nascimento']) ? date('d/m/Y', strtotime((string) $familia['representante_data_nascimento'])) : '-';
 $camposPendentes = familia_campos_pendentes($familia);
+$documentos = $documentos ?? [];
+$familiaId = (int) ($familia['id'] ?? 0);
 ?>
 
 <section class="family-detail-page">
@@ -47,6 +49,41 @@ $camposPendentes = familia_campos_pendentes($familia);
     <section class="family-pending-fields family-detail-pending">
         <span>Campos pendentes</span>
         <strong><?= h(familia_campos_pendentes_resumo($familia, 8)) ?></strong>
+    </section>
+
+    <section class="family-detail-card family-detail-documents">
+        <div class="family-detail-card-heading">
+            <span>Arquivos</span>
+            <strong>Documentos anexados</strong>
+        </div>
+
+        <?php if ($documentos === []): ?>
+            <p class="family-detail-documents-empty">Nenhum documento anexado a esta família.</p>
+        <?php else: ?>
+            <div class="family-detail-doc-grid">
+                <?php foreach ($documentos as $documento): ?>
+                    <?php
+                    $documentoUrl = url('/cadastros/residencias/' . $residencia['id'] . '/familias/' . $familiaId . '/documentos/' . $documento['id']);
+                    $isImage = str_starts_with((string) ($documento['mime_type'] ?? ''), 'image/');
+                    $documentoPreviewUrl = $isImage ? $documentoUrl . '?thumb=1' : $documentoUrl;
+                    ?>
+                    <article class="family-detail-doc-item">
+                        <button class="family-detail-doc-preview" type="button" data-family-doc-open data-doc-src="<?= h($documentoUrl) ?>" data-doc-title="<?= h($documento['nome_original']) ?>" data-doc-kind="<?= $isImage ? 'image' : 'document' ?>">
+                            <?php if ($isImage): ?>
+                                <img src="<?= h($documentoPreviewUrl) ?>" alt="Documento <?= h($documento['nome_original']) ?>" width="420" height="315" loading="lazy" decoding="async" fetchpriority="low">
+                            <?php else: ?>
+                                <span class="family-doc-preview-icon"><?= h(strtoupper((string) ($documento['extensao'] ?? 'PDF'))) ?></span>
+                            <?php endif; ?>
+                        </button>
+                        <div class="family-doc-info">
+                            <span><?= h($documento['nome_original']) ?></span>
+                            <small><?= h(number_format(((int) $documento['tamanho_bytes']) / 1024, 1, ',', '.')) ?> KB - <?= h(date('d/m/Y H:i', strtotime((string) $documento['criado_em']))) ?></small>
+                        </div>
+                        <button class="family-doc-view-link" type="button" data-family-doc-open data-doc-src="<?= h($documentoUrl) ?>" data-doc-title="<?= h($documento['nome_original']) ?>" data-doc-kind="<?= $isImage ? 'image' : 'document' ?>">Visualizar</button>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </section>
 
     <section class="family-detail-grid">
@@ -118,4 +155,15 @@ $camposPendentes = familia_campos_pendentes($familia);
             </dl>
         </article>
     </section>
+
+    <dialog class="family-doc-modal" data-family-doc-modal aria-labelledby="family-doc-modal-title">
+        <form method="dialog" class="family-doc-modal-close-form">
+            <button type="submit" class="family-doc-modal-close" aria-label="Fechar documento">Fechar</button>
+        </form>
+        <div class="family-doc-modal-content">
+            <h2 id="family-doc-modal-title" data-family-doc-modal-title>Documento</h2>
+            <img alt="Documento ampliado" data-family-doc-modal-image hidden>
+            <iframe title="Documento anexado" data-family-doc-modal-frame hidden></iframe>
+        </div>
+    </dialog>
 </section>
