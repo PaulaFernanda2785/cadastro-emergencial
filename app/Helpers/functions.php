@@ -243,6 +243,7 @@ function familia_tem_representante(array $familia): bool
         'representante_data_nascimento',
         'representante_sexo',
         'representante_telefone',
+        'representante_email',
     ] as $field) {
         if (trim((string) ($familia[$field] ?? '')) !== '') {
             return true;
@@ -435,11 +436,13 @@ function familia_email_destinos(array $familia): array
         ];
     };
 
-    $add($familia['email'] ?? '', $familia['responsavel_nome'] ?? '', 'responsavel');
-
     if (familia_tem_representante($familia)) {
         $add($familia['representante_email'] ?? '', $familia['representante_nome'] ?? '', 'representante');
         $add($familia['email_representante'] ?? '', $familia['representante_nome'] ?? '', 'representante');
+    }
+
+    if ($destinos === []) {
+        $add($familia['email'] ?? '', $familia['responsavel_nome'] ?? '', 'responsavel');
     }
 
     return $destinos;

@@ -29,7 +29,8 @@ final class ResidenciaRepository
                 INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
                 INNER JOIN municipios m ON m.id = r.municipio_id
                 INNER JOIN usuarios u ON u.id = r.cadastrado_por
-                WHERE r.deleted_at IS NULL';
+                WHERE r.deleted_at IS NULL
+                  AND a.deleted_at IS NULL';
 
         if ($cadastradoPor !== null) {
             $sql .= ' AND r.cadastrado_por = :cadastrado_por';
@@ -123,7 +124,9 @@ final class ResidenciaRepository
              INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
              INNER JOIN municipios m ON m.id = r.municipio_id
              INNER JOIN usuarios u ON u.id = r.cadastrado_por
-             WHERE r.id = :id AND r.deleted_at IS NULL
+             WHERE r.id = :id
+               AND r.deleted_at IS NULL
+               AND a.deleted_at IS NULL
              LIMIT 1'
         );
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -276,7 +279,10 @@ final class ResidenciaRepository
 
     public function count(?int $cadastradoPor = null, ?string $activeActionToken = null): int
     {
-        $where = ['r.deleted_at IS NULL'];
+        $where = [
+            'r.deleted_at IS NULL',
+            'a.deleted_at IS NULL',
+        ];
         $params = [];
 
         if ($cadastradoPor !== null) {
@@ -307,7 +313,10 @@ final class ResidenciaRepository
 
     private function buildSearchWhere(?int $cadastradoPor, array $filters): array
     {
-        $where = ['r.deleted_at IS NULL'];
+        $where = [
+            'r.deleted_at IS NULL',
+            'a.deleted_at IS NULL',
+        ];
         $params = [];
 
         if ($cadastradoPor !== null) {

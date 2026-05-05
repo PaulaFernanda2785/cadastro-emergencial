@@ -6,7 +6,8 @@ $hasRepresentante = !empty($familia['registrar_representante'])
     || !empty($familia['representante_orgao_expedidor'])
     || !empty($familia['representante_data_nascimento'])
     || !empty($familia['representante_sexo'])
-    || !empty($familia['representante_telefone']);
+    || !empty($familia['representante_telefone'])
+    || !empty($familia['representante_email']);
 $hasBeneficio = !empty($familia['recebe_beneficio_social']);
 $documentos = $documentos ?? [];
 $familiaId = (int) ($familia['id'] ?? 0);
@@ -418,13 +419,22 @@ $birthDateField = static function (
                     </label>
                 </div>
 
-                <label class="field">
-                    <span>Telefone</span>
-                    <input type="tel" name="representante_telefone" value="<?= h($familia['representante_telefone'] ?? '') ?>" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="(85) 99999-9999" data-phone-input data-representative-input>
-                    <?php if (!empty($errors['representante_telefone'])): ?>
-                        <small class="field-error"><?= h($errors['representante_telefone'][0]) ?></small>
-                    <?php endif; ?>
-                </label>
+                <div class="form-grid two-columns">
+                    <label class="field">
+                        <span>Telefone</span>
+                        <input type="tel" name="representante_telefone" value="<?= h($familia['representante_telefone'] ?? '') ?>" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="(85) 99999-9999" data-phone-input data-representative-input>
+                        <?php if (!empty($errors['representante_telefone'])): ?>
+                            <small class="field-error"><?= h($errors['representante_telefone'][0]) ?></small>
+                        <?php endif; ?>
+                    </label>
+                    <label class="field">
+                        <span>E-mail</span>
+                        <input type="email" name="representante_email" value="<?= h($familia['representante_email'] ?? '') ?>" maxlength="180" autocomplete="email" data-representative-input>
+                        <?php if (!empty($errors['representante_email'])): ?>
+                            <small class="field-error"><?= h($errors['representante_email'][0]) ?></small>
+                        <?php endif; ?>
+                    </label>
+                </div>
             </div>
         </section>
 

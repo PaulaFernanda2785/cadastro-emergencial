@@ -62,7 +62,7 @@ final class FamiliaRepository
                     f.perdas_bens_moveis, f.cadastro_concluido, f.conclusao_observacoes,
                     f.representante_nome, f.representante_cpf, f.representante_rg,
                     f.representante_orgao_expedidor, f.representante_data_nascimento,
-                    f.representante_sexo, f.representante_telefone,
+                    f.representante_sexo, f.representante_telefone, f.representante_email,
                     f.criado_em,
                     r.protocolo, r.bairro_comunidade, r.endereco,
                     a.id AS acao_id, a.localidade, a.tipo_evento, a.status AS acao_status,
@@ -228,7 +228,7 @@ final class FamiliaRepository
                     f.cadastro_concluido, f.conclusao_observacoes,
                     f.representante_nome, f.representante_cpf, f.representante_rg,
                     f.representante_orgao_expedidor, f.representante_data_nascimento,
-                    f.representante_sexo, f.representante_telefone,
+                    f.representante_sexo, f.representante_telefone, f.representante_email,
                     f.criado_em,
                     r.protocolo, r.bairro_comunidade, r.endereco, r.complemento, r.imovel, r.condicao_residencia,
                     a.localidade, a.tipo_evento, a.data_evento, m.nome AS municipio_nome, m.uf
@@ -284,7 +284,7 @@ final class FamiliaRepository
                     f.cadastro_concluido, f.conclusao_observacoes,
                     f.representante_nome, f.representante_cpf, f.representante_rg,
                     f.representante_orgao_expedidor, f.representante_data_nascimento,
-                    f.representante_sexo, f.representante_telefone, f.criado_em,
+                    f.representante_sexo, f.representante_telefone, f.representante_email, f.criado_em,
                     (
                         SELECT COUNT(*)
                         FROM entregas_ajuda e
@@ -649,7 +649,7 @@ final class FamiliaRepository
                  perdas_bens_moveis, situacao_familia, recebe_beneficio_social, beneficio_social_nome,
                  cadastro_concluido, conclusao_observacoes,
                  representante_nome, representante_cpf, representante_rg, representante_orgao_expedidor,
-                 representante_data_nascimento, representante_sexo, representante_telefone)
+                 representante_data_nascimento, representante_sexo, representante_telefone, representante_email)
              VALUES
                 (:residencia_id, :responsavel_nome, :responsavel_cpf, :responsavel_rg, :responsavel_sexo,
                  :responsavel_orgao_expedidor, :data_nascimento, :telefone, :email, :quantidade_integrantes,
@@ -657,7 +657,7 @@ final class FamiliaRepository
                  :perdas_bens_moveis, :situacao_familia, :recebe_beneficio_social, :beneficio_social_nome,
                  :cadastro_concluido, :conclusao_observacoes,
                  :representante_nome, :representante_cpf, :representante_rg, :representante_orgao_expedidor,
-                 :representante_data_nascimento, :representante_sexo, :representante_telefone)'
+                 :representante_data_nascimento, :representante_sexo, :representante_telefone, :representante_email)'
         );
         $stmt->bindValue(':residencia_id', (int) $data['residencia_id'], PDO::PARAM_INT);
         $stmt->bindValue(':responsavel_nome', $data['responsavel_nome']);
@@ -687,6 +687,7 @@ final class FamiliaRepository
         $stmt->bindValue(':representante_data_nascimento', $data['representante_data_nascimento'] !== '' ? $data['representante_data_nascimento'] : null);
         $stmt->bindValue(':representante_sexo', $data['representante_sexo'] !== '' ? $data['representante_sexo'] : null);
         $stmt->bindValue(':representante_telefone', $data['representante_telefone'] !== '' ? $data['representante_telefone'] : null);
+        $stmt->bindValue(':representante_email', $data['representante_email'] !== '' ? $data['representante_email'] : null);
         $stmt->execute();
 
         return (int) Database::connection()->lastInsertId();
@@ -722,7 +723,8 @@ final class FamiliaRepository
                  representante_orgao_expedidor = :representante_orgao_expedidor,
                  representante_data_nascimento = :representante_data_nascimento,
                  representante_sexo = :representante_sexo,
-                 representante_telefone = :representante_telefone
+                 representante_telefone = :representante_telefone,
+                 representante_email = :representante_email
              WHERE id = :id AND deleted_at IS NULL'
         );
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -753,6 +755,7 @@ final class FamiliaRepository
         $stmt->bindValue(':representante_data_nascimento', $data['representante_data_nascimento'] !== '' ? $data['representante_data_nascimento'] : null);
         $stmt->bindValue(':representante_sexo', $data['representante_sexo'] !== '' ? $data['representante_sexo'] : null);
         $stmt->bindValue(':representante_telefone', $data['representante_telefone'] !== '' ? $data['representante_telefone'] : null);
+        $stmt->bindValue(':representante_email', $data['representante_email'] !== '' ? $data['representante_email'] : null);
         $stmt->execute();
     }
 

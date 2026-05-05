@@ -455,6 +455,7 @@ final class FamiliaController extends Controller
             'representante_data_nascimento' => '',
             'representante_sexo' => '',
             'representante_telefone' => '',
+            'representante_email' => '',
         ];
     }
 
@@ -489,6 +490,7 @@ final class FamiliaController extends Controller
             'representante_data_nascimento' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_data_nascimento'] ?? '')) : '',
             'representante_sexo' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_sexo'] ?? '')) : '',
             'representante_telefone' => isset($_POST['registrar_representante']) ? telefone_cadastro_format($_POST['representante_telefone'] ?? '') : '',
+            'representante_email' => isset($_POST['registrar_representante']) ? trim((string) ($_POST['representante_email'] ?? '')) : '',
         ];
     }
 
@@ -583,7 +585,9 @@ final class FamiliaController extends Controller
             ->max('representante_rg', $data['representante_rg'], 30, 'RG do representante')
             ->max('representante_orgao_expedidor', $data['representante_orgao_expedidor'], 30, 'Órgão expedidor do representante')
             ->date('representante_data_nascimento', $data['representante_data_nascimento'], 'Data de nascimento do representante')
-            ->max('representante_telefone', $data['representante_telefone'], 30, 'Telefone do representante');
+            ->max('representante_telefone', $data['representante_telefone'], 30, 'Telefone do representante')
+            ->email('representante_email', $data['representante_email'], 'E-mail do representante')
+            ->max('representante_email', $data['representante_email'], 180, 'E-mail do representante');
 
         $this->validateWhatsappPhone($validator, 'telefone', $data['telefone'], 'Telefone do responsável');
         $this->validateWhatsappPhone($validator, 'representante_telefone', $data['representante_telefone'], 'Telefone do representante');

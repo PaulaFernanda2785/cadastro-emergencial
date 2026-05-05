@@ -57,7 +57,7 @@ final class EntregaAjudaRepository
                     MAX(e.data_entrega) AS data_entrega,
                     MAX(e.observacao) AS observacao,
                     f.id AS familia_id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg,
-                    f.telefone, f.email, f.representante_nome, f.representante_cpf, f.representante_telefone,
+                    f.telefone, f.email, f.representante_nome, f.representante_cpf, f.representante_telefone, f.representante_email,
                     f.quantidade_integrantes,
                     MIN(t.nome) AS tipo_ajuda_nome, MIN(t.unidade_medida) AS unidade_medida,
                     r.id AS residencia_id, r.protocolo, r.bairro_comunidade, r.endereco, r.complemento,
@@ -80,7 +80,7 @@ final class EntregaAjudaRepository
                 AND a.deleted_at IS NULL
              GROUP BY ' . self::GROUP_CODE_SQL . ',
                     f.id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg, f.telefone, f.email,
-                    f.representante_nome, f.representante_cpf, f.representante_telefone, f.quantidade_integrantes,
+                    f.representante_nome, f.representante_cpf, f.representante_telefone, f.representante_email, f.quantidade_integrantes,
                     r.id, r.protocolo, r.bairro_comunidade, r.endereco, r.complemento, r.imovel, r.condicao_residencia,
                     a.localidade, a.tipo_evento, a.data_evento, m.nome, m.uf, u.nome, u.cpf
              LIMIT 1'

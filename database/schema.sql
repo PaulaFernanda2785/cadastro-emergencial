@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS familias (
     representante_data_nascimento DATE NULL,
     representante_sexo VARCHAR(20) NULL,
     representante_telefone VARCHAR(30) NULL,
+    representante_email VARCHAR(180) NULL,
     criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     atualizado_em DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME NULL,

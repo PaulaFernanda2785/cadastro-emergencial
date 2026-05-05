@@ -100,6 +100,7 @@ $camposPendentes = familia_campos_pendentes($familia);
                 <div><dt>Órgão exp.</dt><dd><?= h($familia['representante_orgao_expedidor'] ?: '-') ?></dd></div>
                 <div><dt>Nascimento</dt><dd><?= h($representanteNascimento) ?></dd></div>
                 <div><dt>Telefone</dt><dd><?= h($familia['representante_telefone'] ?: '-') ?></dd></div>
+                <div><dt>E-mail</dt><dd><?= h($familia['representante_email'] ?: '-') ?></dd></div>
             </dl>
         </article>
 
