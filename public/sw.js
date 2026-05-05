@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cadastro-emergencial-v20260504-008';
+const CACHE_NAME = 'cadastro-emergencial-v20260505-002';
 const CORE_ASSETS = [
     './manifest.webmanifest',
     './assets/css/app.css',
@@ -20,6 +20,8 @@ const CORE_ASSETS = [
     './assets/js/family-receipt.js',
     './assets/images/app-icon-192.png',
     './assets/images/app-icon-512.png',
+    './assets/images/app-icon-180.png',
+    './assets/images/app-icon-maskable-512.png',
     './assets/images/logo-cedec.png',
     './assets/images/logo-cadastro-emergencial-app.png',
     './assets/images/arrow-up.svg',

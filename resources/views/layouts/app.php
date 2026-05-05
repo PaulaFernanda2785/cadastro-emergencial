@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260504-008';
+$assetVersion = '20260505-002';
 $sessionTimeoutSeconds = 1800;
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
@@ -72,8 +72,15 @@ $menuItems = [
     </script>
     <link rel="icon" href="<?= h(asset('images/logo.cbmpa.ico') . '?v=' . $assetVersion) ?>" type="image/x-icon">
     <link rel="shortcut icon" href="<?= h(asset('images/logo.cbmpa.ico') . '?v=' . $assetVersion) ?>" type="image/x-icon">
+    <link rel="icon" href="<?= h(asset('images/app-icon-192.png') . '?v=' . $assetVersion) ?>" type="image/png" sizes="192x192">
+    <link rel="icon" href="<?= h(asset('images/app-icon-512.png') . '?v=' . $assetVersion) ?>" type="image/png" sizes="512x512">
     <link rel="manifest" href="<?= h(url('/manifest.webmanifest') . '?v=' . $assetVersion) ?>">
-    <link rel="apple-touch-icon" href="<?= h(asset('images/logo-cadastro-emergencial-app.png')) ?>">
+    <link rel="apple-touch-icon" href="<?= h(asset('images/app-icon-180.png') . '?v=' . $assetVersion) ?>" sizes="180x180">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="<?= h($app['name']) ?>">
+    <meta name="msapplication-TileColor" content="#155e75">
+    <meta name="msapplication-TileImage" content="<?= h(asset('images/app-icon-512.png') . '?v=' . $assetVersion) ?>">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="<?= h(asset('css/app.css') . '?v=' . $assetVersion) ?>">
     <script src="<?= h(asset('js/modals.js') . '?v=' . $assetVersion) ?>" defer></script>
