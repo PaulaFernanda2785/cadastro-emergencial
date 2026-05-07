@@ -9891,6 +9891,25 @@ button:disabled,
         grid-column: 1 / -1;
     }
 
+    .report-filter-modern-form.ops-filter-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ops-filter-form .report-filter-field,
+    .ops-filter-form .report-filter-field-wide,
+    .ops-filter-form .report-filter-field-medium,
+    .ops-filter-form .report-filter-field-compact,
+    .ops-filter-form .report-filter-field-date,
+    .ops-filter-form .ops-filter-actions {
+        grid-column: 1 / -1;
+        min-width: 0;
+    }
+
+    .ops-filter-form .report-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
+    }
+
     .accountability-filter-actions {
         display: grid;
         grid-template-columns: 1fr;
