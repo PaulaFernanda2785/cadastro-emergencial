@@ -2772,6 +2772,14 @@ button:disabled,
     box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.13);
 }
 
+.action-filter-field-date input[type="date"],
+.action-form-card input[type="date"] {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
 .action-search-field {
     min-width: 0;
 }
@@ -2919,6 +2927,7 @@ button:disabled,
 .action-card-actions {
     min-width: 0;
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 132px), 1fr));
     align-content: start;
     gap: 8px;
     border-left: 1px solid #eef3f7;
@@ -2927,7 +2936,9 @@ button:disabled,
 
 .action-card-button,
 .action-qr-button {
+    min-width: 0;
     width: 100%;
+    max-width: 100%;
     min-height: 40px;
     display: inline-flex;
     align-items: center;
@@ -2936,6 +2947,8 @@ button:disabled,
     padding: 9px 12px;
     font-weight: 800;
     text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .action-qr-button {
@@ -2944,7 +2957,9 @@ button:disabled,
 }
 
 .action-card-disabled {
+    min-width: 0;
     width: 100%;
+    max-width: 100%;
     min-height: 40px;
     display: inline-flex;
     align-items: center;
@@ -3587,6 +3602,12 @@ button:disabled,
     box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.13);
 }
 
+.cadastro-filter-field-date input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
 .records-search-field {
     min-width: 0;
 }
@@ -3607,6 +3628,14 @@ button:disabled,
     border-radius: 8px;
     font-weight: 800;
     text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.action-card-actions .inline-form {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
 }
 
 .records-active-filters {
@@ -3890,6 +3919,12 @@ button:disabled,
     box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.13);
 }
 
+.family-filter-field-date input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
 .family-search-field {
     grid-column: span 2;
     min-width: 0;
@@ -4113,6 +4148,26 @@ button:disabled,
 
 .residence-open-page {
     gap: 18px;
+}
+
+.residence-open-page,
+.residence-open-page .records-header,
+.residence-open-page .header-actions,
+.residence-open-page .records-summary-grid,
+.residence-open-page .records-summary-card,
+.residence-open-page .record-card,
+.residence-family-panel,
+.residence-family-list,
+.residence-family-card {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.residence-open-page .header-actions > * {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .residence-edit-page {
@@ -4644,8 +4699,7 @@ button:disabled,
 .family-edit-form select[name="responsavel_sexo"],
 .family-edit-form select[name="representante_sexo"],
 .family-edit-form select[name="renda_familiar"],
-.family-edit-form select[name="situacao_familia"],
-.family-edit-form .birth-date-picker select {
+.family-edit-form select[name="situacao_familia"] {
     appearance: none;
     min-height: 48px;
     border-color: #cbd8e3;
@@ -4672,7 +4726,6 @@ button:disabled,
 .family-edit-form select[name="representante_sexo"]:hover,
 .family-edit-form select[name="renda_familiar"]:hover,
 .family-edit-form select[name="situacao_familia"]:hover,
-.family-edit-form .birth-date-picker select:hover,
 .family-edit-form textarea[name="perdas_bens_moveis"]:hover,
 .family-edit-form textarea[name="conclusao_observacoes"]:hover,
 .completion-check:hover {
@@ -4955,21 +5008,6 @@ button:disabled,
     appearance: none;
     -webkit-appearance: none;
     box-sizing: border-box;
-}
-
-.birth-date-picker {
-    min-width: 0;
-}
-
-.birth-date-select-grid {
-    min-width: 0;
-    display: grid;
-    grid-template-columns: minmax(72px, 0.7fr) minmax(76px, 0.75fr) minmax(92px, 1fr);
-    gap: 8px;
-}
-
-.birth-date-picker select {
-    min-width: 0;
 }
 
 .family-doc-info {
@@ -5749,6 +5787,12 @@ button:disabled,
 .signatures-filter-form input,
 .signatures-filter-form select {
     min-width: 0;
+}
+
+.signatures-filter-field-date input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
 }
 
 .signatures-filter-actions {
@@ -6575,7 +6619,7 @@ button:disabled,
 
 .residence-family-card {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
     grid-template-areas:
         "main status"
         "meta meta"
@@ -6624,7 +6668,8 @@ button:disabled,
 
 .residence-family-status {
     grid-area: status;
-    min-width: 112px;
+    min-width: 0;
+    max-width: 100%;
     display: grid;
     justify-items: center;
     gap: 2px;
@@ -6654,12 +6699,13 @@ button:disabled,
 .residence-family-meta {
     grid-area: meta;
     display: grid;
-    grid-template-columns: minmax(130px, 0.75fr) minmax(110px, 0.45fr) minmax(220px, 1fr);
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 0.45fr) minmax(0, 1fr);
     gap: 10px;
 }
 
 .residence-family-pending {
     grid-area: pending;
+    max-width: 100%;
 }
 
 .residence-family-meta span {
@@ -6687,7 +6733,7 @@ button:disabled,
 .residence-family-actions {
     grid-area: actions;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
     gap: 8px;
 }
 
@@ -6695,7 +6741,11 @@ button:disabled,
 .residence-family-actions .primary-link-button,
 .residence-family-actions .danger-button,
 .residence-family-actions .inline-form {
+    min-width: 0;
     width: 100%;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .table-action-link {
@@ -7008,6 +7058,12 @@ button:disabled,
 .report-filter-field select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.13);
+}
+
+.report-filter-field-date input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
 }
 
 .report-document {
@@ -7988,6 +8044,12 @@ button:disabled,
     box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.13);
 }
 
+.prestacao-filter-field-date input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
 .prestacao-filter-side {
     border-color: rgba(21, 94, 117, 0.14);
     background: #ffffff;
@@ -8059,6 +8121,12 @@ button:disabled,
 .recomecar-filter-field select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.13);
+}
+
+.recomecar-filter-field-date input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
 }
 
 .recomecar-filter-side {
@@ -8374,6 +8442,12 @@ button:disabled,
     box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.13);
 }
 
+.delivery-history-filter-field-date input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
 .delivery-history-filter-actions {
     grid-column: 1 / -1;
     display: flex;
@@ -8472,6 +8546,12 @@ button:disabled,
 .delivery-batch-filter-field select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.13);
+}
+
+.delivery-batch-filter-field-date input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
 }
 
 .delivery-batch-filter-actions {
@@ -9065,6 +9145,12 @@ button:disabled,
         grid-column: 1 / -1;
     }
 
+    .cadastro-filter-field-date,
+    .cadastro-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
+    }
+
     .report-filter-modern-form {
         grid-template-columns: repeat(6, minmax(0, 1fr));
     }
@@ -9077,6 +9163,12 @@ button:disabled,
     .report-filter-field-compact,
     .report-filter-field-date {
         grid-column: span 3;
+    }
+
+    .report-filter-field-date,
+    .report-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
     }
 
     .ops-filter-form .report-filter-field-wide,
@@ -9141,6 +9233,12 @@ button:disabled,
         grid-column: 1 / -1;
     }
 
+    .delivery-history-filter-field-date,
+    .delivery-history-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
+    }
+
     .delivery-batch-filter-grid {
         grid-template-columns: repeat(6, minmax(0, 1fr));
     }
@@ -9163,6 +9261,12 @@ button:disabled,
     .action-filter-field-compact,
     .action-filter-field-date {
         grid-column: span 3;
+    }
+
+    .action-filter-field-date,
+    .action-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
     }
 
     .action-filter-field-wide,
@@ -9225,6 +9329,12 @@ button:disabled,
         grid-column: 1 / -1;
     }
 
+    .signatures-filter-field-date,
+    .signatures-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
+    }
+
     .signature-list-card {
         grid-template-columns: 1fr;
     }
@@ -9266,15 +9376,29 @@ button:disabled,
 
     .prestacao-filter-field,
     .prestacao-filter-field-wide,
-    .prestacao-filter-field-medium {
+    .prestacao-filter-field-medium,
+    .prestacao-filter-field-date {
         grid-column: 1 / -1;
+    }
+
+    .prestacao-filter-field-date,
+    .prestacao-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
     }
 
     .recomecar-filter-field,
     .recomecar-filter-field-wide,
     .recomecar-filter-field-medium,
-    .recomecar-filter-field-compact {
+    .recomecar-filter-field-compact,
+    .recomecar-filter-field-date {
         grid-column: 1 / -1;
+    }
+
+    .recomecar-filter-field-date,
+    .recomecar-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
     }
 
     .accountability-filter-side {
@@ -9302,6 +9426,10 @@ button:disabled,
     .cadastro-filter-modern-form .records-search-field,
     .cadastro-filter-modern-form .cadastro-filter-actions {
         grid-column: 1 / -1;
+    }
+
+    .cadastro-filter-modern-form {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .action-filter-actions {
@@ -9351,6 +9479,12 @@ button:disabled,
         grid-column: 1 / -1;
     }
 
+    .family-filter-field-date,
+    .family-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
+    }
+
     .delivery-history-filter-actions {
         grid-column: 1 / -1;
     }
@@ -9388,6 +9522,7 @@ button:disabled,
     .action-card-actions {
         border-top: 1px solid #eef3f7;
         border-left: 0;
+        grid-template-columns: minmax(0, 1fr);
         padding-top: 14px;
         padding-left: 0;
     }
@@ -9686,6 +9821,8 @@ button:disabled,
     .residence-open-page .header-actions .primary-link-button,
     .residence-open-page .header-actions .secondary-button,
     .residence-open-page .header-actions .limit-reached-pill {
+        min-width: 0;
+        max-width: 100%;
         width: 100%;
         justify-content: center;
         text-align: center;
@@ -9694,7 +9831,7 @@ button:disabled,
     .residence-open-page .records-summary-grid,
     .residence-open-card .record-card-meta,
     .residence-media-grid .residence-extra-photo-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .residence-open-card {
@@ -9873,7 +10010,7 @@ button:disabled,
 
     .accountability-filter-main,
     .accountability-filter-side {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .prestacao-filter-field,
@@ -9889,6 +10026,12 @@ button:disabled,
     .recomecar-filter-field-compact,
     .recomecar-filter-field-date {
         grid-column: 1 / -1;
+    }
+
+    .recomecar-filter-field-date,
+    .recomecar-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
     }
 
     .report-filter-modern-form.ops-filter-form {
@@ -9977,10 +10120,20 @@ button:disabled,
     }
 
     .delivery-section-nav {
-        margin-left: -4px;
-        margin-right: -4px;
-        padding-left: 4px;
-        padding-right: 4px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+        overflow-x: visible;
+    }
+
+    .delivery-section-nav a {
+        width: 100%;
+        min-width: 0;
+        white-space: normal;
+        text-align: center;
     }
 
     .delivery-filter-form,
@@ -9988,7 +10141,7 @@ button:disabled,
     .delivery-batch-filter-grid,
     .delivery-batch-inputs,
     .delivery-type-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .delivery-batch-filter-actions {
@@ -10010,12 +10163,22 @@ button:disabled,
         grid-column: 1 / -1;
     }
 
+    .delivery-batch-filter-field-date,
+    .delivery-batch-filter-field-date input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
+    }
+
     .delivery-history-filter-field,
     .delivery-history-filter-field-wide,
     .delivery-history-filter-field-medium,
     .delivery-history-filter-field-compact,
     .delivery-history-filter-field-date {
         grid-column: 1 / -1;
+    }
+
+    .delivery-history-filter-form {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .delivery-history-filter-actions {
@@ -10125,7 +10288,7 @@ button:disabled,
     .signature-context-grid,
     .signature-data-grid,
     .signature-signer-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .signatures-filter-field,
@@ -10178,6 +10341,10 @@ button:disabled,
         grid-column: 1 / -1;
     }
 
+    .report-filter-modern-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .report-kpi-grid,
     .report-insight-grid,
     .report-panel-grid,
@@ -10189,6 +10356,74 @@ button:disabled,
     .report-insight-card,
     .report-metric-panel {
         padding: 13px;
+    }
+
+    .report-section {
+        overflow: visible;
+        padding: 13px;
+    }
+
+    .report-section .table-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .report-data-table,
+    .report-data-table tbody,
+    .report-data-table tr,
+    .report-data-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .report-data-table {
+        min-width: 0;
+        table-layout: auto;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .report-data-table thead {
+        display: none;
+    }
+
+    .report-data-table tr {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        background: #ffffff;
+    }
+
+    .report-data-table tr:last-child {
+        margin-bottom: 0;
+    }
+
+    .report-data-table td {
+        min-width: 0;
+        border: 0;
+        padding: 7px 0;
+        overflow-wrap: anywhere;
+    }
+
+    .report-data-table td:not(.empty-state)::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 2px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .report-data-table td.empty-state {
+        padding: 4px 0;
+        white-space: normal;
+    }
+
+    .report-mini-tables {
+        gap: 12px;
     }
 
     .report-meter-row {
@@ -10324,10 +10559,12 @@ button:disabled,
             "main"
             "status"
             "meta"
+            "pending"
             "actions";
     }
 
     .residence-family-status {
+        min-width: 0;
         width: 100%;
         justify-items: start;
         text-align: left;
@@ -10690,6 +10927,10 @@ button:disabled,
         grid-column: 1 / -1;
     }
 
+    .family-filter-modern-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .record-card {
         grid-template-columns: 1fr;
     }
@@ -10830,10 +11071,6 @@ button:disabled,
         max-width: 100%;
     }
 
-    .birth-date-select-grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
     .action-form-actions {
         position: static;
         margin: 0 -14px -14px;
@@ -10847,8 +11084,13 @@ button:disabled,
         grid-template-columns: 1fr;
     }
 
-    .action-card-actions {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .actions-page .action-card-actions,
+    .action-record-card .action-card-actions {
+        border-top: 1px solid #eef3f7;
+        border-left: 0;
+        grid-template-columns: minmax(0, 1fr);
+        padding-top: 14px;
+        padding-left: 0;
     }
 
     .residence-summary-grid,
@@ -11226,6 +11468,17 @@ button:disabled,
         grid-column: 1 / -1;
     }
 
+    .action-filter-modern-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .action-filter-field-date,
+    .action-filter-field-date input[type="date"],
+    .action-form-card input[type="date"] {
+        max-width: 100%;
+        min-width: 0;
+    }
+
     .cadastro-filter-field,
     .cadastro-filter-field-wide,
     .cadastro-filter-field-compact,
@@ -11283,9 +11536,26 @@ button:disabled,
     .residence-open-page .record-card,
     .residence-open-page .records-summary-card,
     .residence-open-page .residence-photo-panel,
-    .residence-open-page .table-panel {
+    .residence-open-page .table-panel,
+    .residence-family-card,
+    .residence-family-meta,
+    .residence-family-actions {
+        min-width: 0;
         max-width: 100%;
         overflow-wrap: anywhere;
+    }
+
+    .residence-family-card,
+    .residence-family-meta,
+    .residence-family-actions {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .residence-open-page .records-summary-card strong,
+    .residence-family-main strong,
+    .residence-family-meta strong,
+    .family-pending-fields strong {
+        word-break: break-word;
     }
 
     .residence-record-table .empty-state {
@@ -12009,12 +12279,14 @@ button:disabled,
     .report-page,
     .report-document {
         display: block;
-        width: 100%;
+        width: auto;
+        min-width: 0;
         max-width: none;
         margin: 0;
         padding: 0;
         background: #ffffff;
         color: #111111;
+        overflow: visible;
     }
 
     .report-page {
@@ -12022,33 +12294,38 @@ button:disabled,
     }
 
     .report-document {
-        font-size: 9.5pt;
-        line-height: 1.25;
+        box-sizing: border-box;
+        font-size: 8.6pt;
+        line-height: 1.2;
+    }
+
+    .report-document * {
+        box-sizing: border-box;
     }
 
     .print-heading {
         border-bottom: 2px solid #155e75;
-        margin: 0 0 8mm;
-        padding: 0 0 4mm;
+        margin: 0 0 5mm;
+        padding: 0 0 3mm;
     }
 
     .print-heading .eyebrow {
         color: #155e75;
-        font-size: 8pt;
+        font-size: 7.2pt;
         letter-spacing: 0;
     }
 
     .print-heading h1 {
-        margin: 2mm 0 1mm;
+        margin: 1.5mm 0 1mm;
         color: #111111;
-        font-size: 17pt;
-        line-height: 1.1;
+        font-size: 15pt;
+        line-height: 1.08;
     }
 
     .print-heading p {
         margin: 0;
         color: #333333;
-        font-size: 9pt;
+        font-size: 8pt;
     }
 
     .report-kpi-grid {
@@ -12058,59 +12335,94 @@ button:disabled,
         margin: 0 0 5mm;
     }
 
-    .report-kpi-card,
-    .report-metric-panel,
-    .report-insight-card,
-    .report-section {
-        border: 1px solid #b8c4cf;
-        border-radius: 0;
-        background: #ffffff !important;
-        box-shadow: none !important;
-        break-inside: avoid;
-    }
-
-    .report-kpi-card {
-        gap: 1mm;
-        padding: 3mm;
-    }
-
-    .report-kpi-card span,
-    .report-insight-card span {
-        color: #333333;
-        font-size: 7.5pt;
-    }
-
-    .report-kpi-card strong {
-        color: #111111;
-        font-size: 15pt;
-    }
-
-    .report-kpi-card small,
-    .report-insight-card small {
-        color: #333333;
-        font-size: 8pt;
-    }
-
     .report-panel-grid,
     .report-card-grid {
-        display: block;
-        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+        gap: 5mm;
+        margin: 0 0 6mm;
+    }
+
+    .report-mini-tables {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4mm;
     }
 
     .report-insight-grid {
         display: none;
     }
 
+    .report-kpi-card,
+    .report-metric-panel,
+    .report-section {
+        min-width: 0;
+        border: 1px solid #b5c1cc;
+        border-radius: 0;
+        background: #ffffff !important;
+        box-shadow: none !important;
+        overflow: visible;
+    }
+
+    .report-kpi-card,
+    .report-metric-panel {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .report-section {
+        break-inside: auto;
+        page-break-inside: auto;
+    }
+
+    .report-kpi-card {
+        gap: 0.8mm;
+        padding: 2.4mm;
+    }
+
+    .report-kpi-card span {
+        color: #333333;
+        font-size: 7pt;
+    }
+
+    .report-kpi-card strong {
+        color: #111111;
+        font-size: 13.2pt;
+        line-height: 1.05;
+    }
+
+    .report-kpi-card small {
+        color: #333333;
+        font-size: 7.2pt;
+        line-height: 1.18;
+    }
+
     .report-section,
     .report-metric-panel {
-        margin: 0 0 5mm;
+        margin: 0;
         padding: 0;
+    }
+
+    .report-document > .report-section {
+        margin: 0 0 6mm;
+    }
+
+    .report-document > .report-section:last-child,
+    .report-document > .report-panel-grid:last-child,
+    .report-document > .report-card-grid:last-child {
+        margin-bottom: 0;
+    }
+
+    .report-panel-grid .report-section,
+    .report-card-grid .report-metric-panel {
+        margin: 0;
     }
 
     .report-section .table-heading,
     .report-metric-panel h2 {
-        border-bottom: 1px solid #b8c4cf;
-        padding: 2.5mm 3mm;
+        border-bottom: 1px solid #b5c1cc;
+        padding: 2mm 2.4mm;
         margin: 0;
         background: #eef4f7 !important;
     }
@@ -12118,47 +12430,75 @@ button:disabled,
     .report-section .table-heading h2,
     .report-metric-panel h2 {
         color: #111111;
-        font-size: 10pt;
-        line-height: 1.2;
+        font-size: 9pt;
+        line-height: 1.15;
     }
 
     .report-section .table-heading span {
         color: #333333;
-        font-size: 8pt;
-    }
-
-    .report-mini-tables,
-    .report-card-grid {
-        display: block;
+        font-size: 7.2pt;
     }
 
     .report-data-table {
+        display: table;
         width: 100%;
         min-width: 0;
         border-collapse: collapse;
         table-layout: fixed;
-        font-size: 8.4pt;
+        font-size: 7.2pt;
+    }
+
+    .report-data-table thead {
+        display: table-header-group;
+    }
+
+    .report-data-table tbody {
+        display: table-row-group;
+    }
+
+    .report-data-table tr {
+        display: table-row;
     }
 
     .report-data-table th,
     .report-data-table td {
-        border: 1px solid #b8c4cf;
-        padding: 2mm;
+        display: table-cell;
+        border: 1px solid #b5c1cc;
+        padding: 1.4mm;
+        color: #111111;
         overflow-wrap: break-word;
+        word-break: normal;
         vertical-align: top;
+        white-space: normal;
     }
 
     .report-data-table th {
         background: #f2f5f7 !important;
-        color: #111111;
-        font-size: 7.8pt;
+        font-size: 6.8pt;
+        font-weight: 800;
+    }
+
+    .report-data-table small,
+    .report-data-table a,
+    .report-meter-row span,
+    .report-meter-row strong,
+    .report-meter-row small,
+    .report-kpi-card small {
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
 
     .report-meter-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(14mm, 26mm);
+        align-items: start;
+        gap: 1.6mm;
+        width: 100%;
+        min-width: 0;
         border: 0;
         border-bottom: 1px solid #d4dce4;
         border-radius: 0;
-        padding: 2.2mm 3mm;
+        padding: 1.8mm 2.4mm;
         background: #ffffff !important;
     }
 
@@ -12167,9 +12507,39 @@ button:disabled,
     }
 
     .report-meter-row span,
-    .report-meter-row strong {
+    .report-meter-row strong,
+    .report-meter-row small {
+        min-width: 0;
         color: #111111;
-        font-size: 8.4pt;
+        font-size: 7.4pt;
+        line-height: 1.18;
+        white-space: normal;
+    }
+
+    .report-meter-row span {
+        font-weight: 700;
+    }
+
+    .report-meter-row strong {
+        justify-self: end;
+        width: 100%;
+        text-align: right;
+    }
+
+    .report-meter-row small {
+        display: block;
+        color: #333333;
+        font-size: 6.6pt;
+        text-align: inherit;
+    }
+
+    .report-metric-panel .empty-state {
+        margin: 0;
+        border: 0;
+        padding: 3mm;
+        color: #333333;
+        background: #ffffff !important;
+        font-size: 7.4pt;
     }
 
     .status {

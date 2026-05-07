@@ -16,55 +16,24 @@ $optionSelected = static function (array $familia, string $field, string $value)
     return (string) ($familia[$field] ?? '') === $value ? 'selected' : '';
 };
 
-$birthDateParts = static function (mixed $value): array {
-    $value = (string) $value;
-
-    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $matches) !== 1) {
-        return ['year' => '', 'month' => '', 'day' => ''];
-    }
-
-    return [
-        'year' => $matches[1],
-        'month' => $matches[2],
-        'day' => $matches[3],
-    ];
-};
-
 $birthDateField = static function (
     string $name,
     mixed $value,
     bool $representative = false
-) use ($birthDateParts): void {
-    $parts = $birthDateParts($value);
+): void {
     $currentYear = (int) date('Y');
-    $minYear = $currentYear - 120;
+    $minDate = ($currentYear - 120) . '-01-01';
+    $maxDate = date('Y-m-d');
     $extraAttributes = $representative ? ' data-representative-input' : '';
     ?>
-    <div class="birth-date-picker" data-birth-date-picker>
-        <input type="hidden" name="<?= h($name) ?>" value="<?= h((string) $value) ?>" data-birth-date-value<?= $extraAttributes ?>>
-        <div class="birth-date-select-grid">
-            <select aria-label="Dia" data-birth-date-day required<?= $extraAttributes ?>>
-                <option value="">Dia</option>
-                <?php for ($day = 1; $day <= 31; $day++): ?>
-                    <?php $dayValue = str_pad((string) $day, 2, '0', STR_PAD_LEFT); ?>
-                    <option value="<?= h($dayValue) ?>" <?= $parts['day'] === $dayValue ? 'selected' : '' ?>><?= h($dayValue) ?></option>
-                <?php endfor; ?>
-            </select>
-            <select aria-label="Mês" data-birth-date-month required<?= $extraAttributes ?>>
-                <option value="">Mês</option>
-                <?php for ($month = 1; $month <= 12; $month++): ?>
-                    <?php $monthValue = str_pad((string) $month, 2, '0', STR_PAD_LEFT); ?>
-                    <option value="<?= h($monthValue) ?>" <?= $parts['month'] === $monthValue ? 'selected' : '' ?>><?= h($monthValue) ?></option>
-                <?php endfor; ?>
-            </select>
-            <select aria-label="Ano" data-birth-date-year required<?= $extraAttributes ?>>
-                <option value="">Ano</option>
-                <?php for ($year = $currentYear; $year >= $minYear; $year--): ?>
-                    <option value="<?= h((string) $year) ?>" <?= $parts['year'] === (string) $year ? 'selected' : '' ?>><?= h((string) $year) ?></option>
-                <?php endfor; ?>
-            </select>
-        </div>
-    </div>
+    <input
+        type="date"
+        name="<?= h($name) ?>"
+        value="<?= h((string) $value) ?>"
+        min="<?= h($minDate) ?>"
+        max="<?= h($maxDate) ?>"
+        required<?= $extraAttributes ?>
+    >
     <?php
 };
 ?>
