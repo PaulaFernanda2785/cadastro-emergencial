@@ -8569,6 +8569,41 @@ button:disabled,
     min-width: 150px;
 }
 
+[class*="-filter-panel"],
+[class*="-filter-panel"] *,
+[class*="-filter-form"],
+[class*="-filter-grid"],
+[class*="-filter-field"] {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+[class*="-filter-panel"],
+[class*="-filter-form"],
+[class*="-filter-grid"],
+[class*="-filter-field"],
+[class*="-filter-field"] input,
+[class*="-filter-field"] select {
+    max-width: 100%;
+}
+
+[class*="-filter-panel"] input[type="date"],
+[class*="-filter-field"] input[type="date"] {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+}
+
+[class*="-filter-panel"] input[type="date"]::-webkit-date-and-time-value,
+[class*="-filter-field"] input[type="date"]::-webkit-date-and-time-value {
+    min-width: 0;
+    text-align: left;
+}
+
 .delivery-batch-form {
     display: grid;
     gap: 14px;
@@ -9989,6 +10024,32 @@ button:disabled,
 }
 
 @media (max-width: 760px) {
+    [class*="-filter-panel"] [class*="-filter-form"],
+    [class*="-filter-panel"] [class*="-filter-grid"],
+    [class*="-filter-form"],
+    [class*="-filter-grid"] {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    [class*="-filter-panel"] .field,
+    [class*="-filter-panel"] [class*="-filter-field"],
+    [class*="-filter-panel"] [class*="-filter-actions"],
+    [class*="-filter-field"],
+    [class*="-filter-actions"] {
+        grid-column: 1 / -1 !important;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    [class*="-filter-panel"] input[type="date"],
+    [class*="-filter-field"] input[type="date"] {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        font-size: 16px;
+    }
+
     .accountability-header {
         align-items: flex-start;
         flex-direction: column;
