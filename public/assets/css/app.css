@@ -7791,6 +7791,7 @@ button:disabled,
 .dti-photo-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
     gap: 12px;
 }
 
@@ -7802,12 +7803,27 @@ button:disabled,
     break-inside: avoid;
 }
 
-.dti-photo-grid img {
+.dti-photo-frame {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #e5ebf0;
+}
+
+.dti-photo-grid .dti-photo-image {
     display: block;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    height: 100%;
+    max-height: none;
     object-fit: cover;
     background: #e5ebf0;
+}
+
+.dti-residence-photo-grid .dti-photo-image {
+    object-fit: contain;
+    object-position: center;
 }
 
 .dti-photo-grid figcaption {
@@ -12330,6 +12346,12 @@ button:disabled,
 
     .dti-photo-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dti-photo-frame {
+        overflow: hidden;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
 
     .indicator,

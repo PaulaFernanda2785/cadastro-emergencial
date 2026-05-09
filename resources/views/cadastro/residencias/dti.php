@@ -425,6 +425,7 @@ $pageNumber = 1;
         <?php
         $isLastPhotoPage = $photoBlockIndex === count($photoBlocks) - 1;
         $fotosPagina = $photoBlock['photos'];
+        $isResidencePhotoBlock = (int) $photoBlock['section'] === 1;
         ?>
         <article class="dti-page dti-photo-page">
             <header class="dti-page-heading">
@@ -437,11 +438,15 @@ $pageNumber = 1;
                 <?php if ($fotosPagina === []): ?>
                     <div class="dti-empty"><?= h($photoBlock['empty']) ?></div>
                 <?php else: ?>
-                    <div class="dti-photo-grid">
+                    <div class="dti-photo-grid <?= $isResidencePhotoBlock ? 'dti-residence-photo-grid' : '' ?>">
                         <?php foreach ($fotosPagina as $foto): ?>
-                            <?php $fotoUrl = url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $foto['id']); ?>
-                            <figure>
-                                <img src="<?= h($fotoUrl) ?>" alt="<?= h($foto['nome_original']) ?>">
+                            <?php
+                            $fotoUrl = url('/cadastros/residencias/' . $residencia['id'] . '/documentos/' . $foto['id']);
+                            ?>
+                            <figure class="<?= $isResidencePhotoBlock ? 'dti-residence-photo-figure' : '' ?>">
+                                <div class="dti-photo-frame">
+                                    <img class="dti-photo-image" src="<?= h($fotoUrl) ?>" alt="<?= h($foto['nome_original']) ?>">
+                                </div>
                                 <figcaption>
                                     <strong><?= h($foto['nome_original']) ?></strong>
                                     <span><?= h($foto['responsavel_nome'] ?? 'Residência') ?> - <?= h($formatDateTime($foto['criado_em'] ?? '')) ?></span>
