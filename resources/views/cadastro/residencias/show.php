@@ -30,6 +30,7 @@ $podeCadastrarFamilia = $familiasCadastradas < $familiasPrevistas;
 $condicao = (string) ($residencia['condicao_residencia'] ?? '');
 $condicaoClass = $condicao !== '' ? preg_replace('/[^a-z0-9_-]+/i', '-', $condicao) : 'sem-condicao';
 $dataCadastro = strtotime((string) ($residencia['data_cadastro'] ?? ''));
+$dtiAssinada = (string) ($residencia['dti_ultima_acao'] ?? '') === 'assinou_dti';
 $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['gestor', 'administrador'], true);
 ?>
 
@@ -74,6 +75,11 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             <span>Cadastro</span>
             <strong><?= $dataCadastro !== false ? h(date('d/m/Y', $dataCadastro)) : '-' ?></strong>
             <small><?= $dataCadastro !== false ? h(date('H:i', $dataCadastro)) : 'Sem data registrada' ?></small>
+        </article>
+        <article class="records-summary-card">
+            <span>DTI</span>
+            <strong><?= $dtiAssinada ? 'Assinada' : 'Nao assinada' ?></strong>
+            <small>Status da assinatura principal do documento.</small>
         </article>
     </section>
 
@@ -127,6 +133,11 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             <div class="record-card-date">
                 <span>Geolocalização</span>
                 <strong><?= h($residencia['latitude'] ?: '-') ?> / <?= h($residencia['longitude'] ?: '-') ?></strong>
+            </div>
+
+            <div class="record-card-date">
+                <span>DTI</span>
+                <strong><?= $dtiAssinada ? 'Assinada' : 'Nao assinada' ?></strong>
             </div>
         </aside>
     </article>

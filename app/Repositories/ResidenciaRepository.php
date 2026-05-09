@@ -14,6 +14,15 @@ final class ResidenciaRepository
         FROM familias f
         WHERE f.residencia_id = r.id AND f.deleted_at IS NULL
     )';
+    private const DTI_STATUS_SQL = '(
+        SELECT l.acao
+        FROM logs_sistema l
+        WHERE l.entidade = "residencias"
+          AND l.entidade_id = r.id
+          AND l.acao IN ("assinou_dti", "removeu_assinatura_dti")
+        ORDER BY l.criado_em DESC, l.id DESC
+        LIMIT 1
+    )';
 
     public function all(?int $cadastradoPor = null): array
     {
@@ -24,7 +33,8 @@ final class ResidenciaRepository
                            SELECT COUNT(*)
                            FROM familias f
                            WHERE f.residencia_id = r.id AND f.deleted_at IS NULL
-                       ) AS familias_cadastradas
+                       ) AS familias_cadastradas,
+                       ' . self::DTI_STATUS_SQL . ' AS dti_ultima_acao
                 FROM residencias r
                 INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
                 INNER JOIN municipios m ON m.id = r.municipio_id
@@ -55,7 +65,8 @@ final class ResidenciaRepository
         $sql = 'SELECT r.id, r.protocolo, r.bairro_comunidade, r.endereco, r.imovel, r.condicao_residencia,
                        r.quantidade_familias, r.data_cadastro, a.localidade, a.tipo_evento, a.status AS acao_status,
                        m.nome AS municipio_nome, m.uf, u.nome AS cadastrador_nome,
-                       ' . self::FAMILIAS_COUNT_SQL . ' AS familias_cadastradas
+                       ' . self::FAMILIAS_COUNT_SQL . ' AS familias_cadastradas,
+                       ' . self::DTI_STATUS_SQL . ' AS dti_ultima_acao
                 FROM residencias r
                 INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
                 INNER JOIN municipios m ON m.id = r.municipio_id
@@ -119,7 +130,8 @@ final class ResidenciaRepository
     {
         $stmt = Database::connection()->prepare(
             'SELECT r.*, a.localidade, a.tipo_evento, a.token_publico, a.status AS acao_status,
-                    m.nome AS municipio_nome, m.uf, u.nome AS cadastrador_nome
+                    m.nome AS municipio_nome, m.uf, u.nome AS cadastrador_nome,
+                    ' . self::DTI_STATUS_SQL . ' AS dti_ultima_acao
              FROM residencias r
              INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
              INNER JOIN municipios m ON m.id = r.municipio_id

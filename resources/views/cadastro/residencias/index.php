@@ -203,6 +203,7 @@ $filterAction = url('/cadastros/residencias');
                 $condicao = (string) ($residencia['condicao_residencia'] ?? '');
                 $condicaoClass = $condicao !== '' ? preg_replace('/[^a-z0-9_-]+/i', '-', $condicao) : 'sem-condicao';
                 $dataCadastro = strtotime((string) ($residencia['data_cadastro'] ?? ''));
+                $dtiAssinada = (string) ($residencia['dti_ultima_acao'] ?? '') === 'assinou_dti';
                 ?>
                 <article class="record-card">
                     <div class="record-card-main">
@@ -246,6 +247,11 @@ $filterAction = url('/cadastros/residencias');
                         <div class="record-card-date">
                             <span>Cadastrado em</span>
                             <strong><?= $dataCadastro !== false ? h(date('d/m/Y H:i', $dataCadastro)) : '-' ?></strong>
+                        </div>
+
+                        <div class="record-card-date">
+                            <span>DTI</span>
+                            <strong><?= $dtiAssinada ? 'Assinada' : 'Nao assinada' ?></strong>
                         </div>
 
                         <a class="primary-link-button record-open-button" href="<?= h(url('/cadastros/residencias/' . $residencia['id'])) ?>">Abrir cadastro</a>
