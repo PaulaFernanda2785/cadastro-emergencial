@@ -52,6 +52,29 @@ final class AcaoEmergencialRepository
                           AND r.deleted_at IS NULL
                           AND f.deleted_at IS NULL
                           AND e.deleted_at IS NULL
+                          AND COALESCE(e.status_operacional, "entregue") = "registrado"
+                    ) AS familias_registradas,
+                    (
+                        SELECT COUNT(DISTINCT e.familia_id)
+                        FROM entregas_ajuda e
+                        INNER JOIN familias f ON f.id = e.familia_id
+                        INNER JOIN residencias r ON r.id = f.residencia_id
+                        WHERE r.acao_id = a.id
+                          AND r.deleted_at IS NULL
+                          AND f.deleted_at IS NULL
+                          AND e.deleted_at IS NULL
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                    ) AS familias_entregues,
+                    (
+                        SELECT COUNT(DISTINCT e.familia_id)
+                        FROM entregas_ajuda e
+                        INNER JOIN familias f ON f.id = e.familia_id
+                        INNER JOIN residencias r ON r.id = f.residencia_id
+                        WHERE r.acao_id = a.id
+                          AND r.deleted_at IS NULL
+                          AND f.deleted_at IS NULL
+                          AND e.deleted_at IS NULL
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
                     ) AS familias_atendidas
              FROM acoes_emergenciais a
              INNER JOIN municipios m ON m.id = a.municipio_id
@@ -106,6 +129,28 @@ final class AcaoEmergencialRepository
                           AND r.deleted_at IS NULL
                           AND f.deleted_at IS NULL
                     )), 0) AS familias_cadastradas,
+                    COALESCE(SUM((
+                        SELECT COUNT(DISTINCT e.familia_id)
+                        FROM entregas_ajuda e
+                        INNER JOIN familias f ON f.id = e.familia_id
+                        INNER JOIN residencias r ON r.id = f.residencia_id
+                        WHERE r.acao_id = a.id
+                          AND r.deleted_at IS NULL
+                          AND f.deleted_at IS NULL
+                          AND e.deleted_at IS NULL
+                          AND COALESCE(e.status_operacional, 'entregue') = 'registrado'
+                    )), 0) AS familias_registradas,
+                    COALESCE(SUM((
+                        SELECT COUNT(DISTINCT e.familia_id)
+                        FROM entregas_ajuda e
+                        INNER JOIN familias f ON f.id = e.familia_id
+                        INNER JOIN residencias r ON r.id = f.residencia_id
+                        WHERE r.acao_id = a.id
+                          AND r.deleted_at IS NULL
+                          AND f.deleted_at IS NULL
+                          AND e.deleted_at IS NULL
+                          AND COALESCE(e.status_operacional, 'entregue') = 'entregue'
+                    )), 0) AS familias_entregues,
                     MAX(a.criado_em) AS ultima_atualizacao
              FROM acoes_emergenciais a
              INNER JOIN municipios m ON m.id = a.municipio_id

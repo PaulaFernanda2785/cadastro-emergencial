@@ -28,6 +28,8 @@ $totalEncerradas = (int) ($summary['encerradas'] ?? 0);
 $totalCanceladas = (int) ($summary['canceladas'] ?? 0);
 $totalResidencias = (int) ($summary['residencias_cadastradas'] ?? 0);
 $totalFamilias = (int) ($summary['familias_cadastradas'] ?? 0);
+$totalFamiliasRegistradas = (int) ($summary['familias_registradas'] ?? 0);
+$totalFamiliasEntregues = (int) ($summary['familias_entregues'] ?? 0);
 $ultimaAtualizacao = !empty($summary['ultima_atualizacao'])
     ? strtotime((string) $summary['ultima_atualizacao'])
     : null;
@@ -101,6 +103,11 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
             <span>Cadastros</span>
             <strong><?= h($totalResidencias) ?> / <?= h($totalFamilias) ?></strong>
             <small>Residências / famílias vinculadas.</small>
+        </article>
+        <article class="records-summary-card">
+            <span>Entregas</span>
+            <strong><?= h($totalFamiliasRegistradas) ?> / <?= h($totalFamiliasEntregues) ?></strong>
+            <small>Registradas / entregues.</small>
         </article>
         <article class="records-summary-card">
             <span>Última ação</span>
@@ -212,8 +219,9 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                 $dataEvento = strtotime((string) ($acao['data_evento'] ?? ''));
                 $dataCriacao = strtotime((string) ($acao['criado_em'] ?? ''));
                 $familias = (int) ($acao['familias_cadastradas'] ?? 0);
-                $familiasAtendidas = (int) ($acao['familias_atendidas'] ?? 0);
-                $atendimentoPercentual = $familias > 0 ? min(100, (int) round(($familiasAtendidas / $familias) * 100)) : 0;
+                $familiasRegistradas = (int) ($acao['familias_registradas'] ?? 0);
+                $familiasEntregues = (int) ($acao['familias_entregues'] ?? $acao['familias_atendidas'] ?? 0);
+                $atendimentoPercentual = $familias > 0 ? min(100, (int) round(($familiasEntregues / $familias) * 100)) : 0;
                 ?>
                 <article class="action-card action-record-card">
                     <div class="action-card-main">
@@ -245,8 +253,12 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
                                 <dd><?= h($familias) ?></dd>
                             </div>
                             <div>
-                                <dt>Atendidas</dt>
-                                <dd><?= h($familiasAtendidas) ?></dd>
+                                <dt>Registradas</dt>
+                                <dd><?= h($familiasRegistradas) ?></dd>
+                            </div>
+                            <div>
+                                <dt>Entregues</dt>
+                                <dd><?= h($familiasEntregues) ?></dd>
                             </div>
                         </dl>
 
