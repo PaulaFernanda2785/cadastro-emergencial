@@ -5,7 +5,7 @@ $pageTitle = $title ?? 'Comprovante';
 $success = flash('success');
 $warning = flash('warning');
 $error = flash('error');
-$assetVersion = '20260507-017';
+$assetVersion = '20260509-018';
 ?>
 <!doctype html>
 <html lang="pt-BR">

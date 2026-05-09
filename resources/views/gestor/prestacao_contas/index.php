@@ -3,6 +3,8 @@ $summary = $indicators ?? [];
 $filters = $filters ?? [];
 $hasAppliedFilters = (bool) ($hasAppliedFilters ?? false);
 $pagination = $pagination ?? ['page' => 1, 'pages' => 1, 'total' => count($details ?? []), 'per_page' => 10];
+$pagedDetails = $details ?? [];
+$documentDetails = $documentDetails ?? $pagedDetails;
 $documentContext = $documentContext ?? [];
 $generatedAtText = $generatedAt instanceof DateTimeInterface ? $generatedAt->format('d/m/Y H:i') : date('d/m/Y H:i');
 $documentDate = $generatedAt instanceof DateTimeInterface ? $generatedAt->format('d/m/Y') : date('d/m/Y');
@@ -38,6 +40,9 @@ $perPage = max(1, (int) ($pagination['per_page'] ?? 10));
 $firstRecord = (int) (($page - 1) * $perPage) + 1;
 $totalRecords = (int) ($pagination['total'] ?? count($details ?? []));
 $lastRecord = min($totalRecords, $page * $perPage);
+$documentTotalRecords = count($documentDetails);
+$documentFirstRecord = $documentTotalRecords > 0 ? 1 : 0;
+$documentLastRecord = $documentTotalRecords;
 $periodo = 'Todo o período';
 
 if (($filters['data_inicio'] ?? '') !== '' || ($filters['data_fim'] ?? '') !== '') {
@@ -114,6 +119,18 @@ $pageUrl = static function (int $targetPage) use ($filters): string {
     return url('/gestor/prestacao-contas') . '?' . http_build_query($params);
 };
 
+$printDocumentUrl = static function (bool $autoPrint = true) use ($filters): string {
+    $params = array_filter($filters, static fn (mixed $value): bool => (string) $value !== '');
+    $params['assinatura'] = '1';
+    $params['embed_document'] = '1';
+
+    if ($autoPrint) {
+        $params['print'] = '1';
+    }
+
+    return url('/gestor/prestacao-contas') . '?' . http_build_query($params);
+};
+
 $materialLabel = $valueOrDash($documentContext['tipos_materiais'] ?? '');
 $municipioLabel = $valueOrDash($documentContext['municipios'] ?? '');
 $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (($documentContext['bairros'] ?? '') !== '' ? ' / ' . $documentContext['bairros'] : '')));
@@ -156,7 +173,7 @@ $renderFilterFields = static function (array $filters): void {
                 <a class="danger-button" href="#prestacao-signature-removal">Gerenciar assinaturas</a>
             <?php endif; ?>
             <?php if ($printReady): ?>
-                <button type="button" class="primary-button" onclick="window.print()">Imprimir documento</button>
+                <a class="primary-link-button" href="<?= h($printDocumentUrl(true)) ?>" target="_blank" rel="noopener" data-prestacao-print-url="<?= h($printDocumentUrl(false)) ?>">Imprimir documento</a>
             <?php else: ?>
                 <span class="limit-reached-pill">Impressão bloqueada</span>
             <?php endif; ?>
@@ -239,7 +256,7 @@ $renderFilterFields = static function (array $filters): void {
                     <span>Buscar</span>
                     <input type="search" name="q" value="<?= h($filters['q'] ?? '') ?>" list="prestacao-busca-list" placeholder="Nome, CPF, comprovante ou protocolo">
                     <datalist id="prestacao-busca-list">
-                        <?php foreach ($details ?? [] as $item): ?>
+                        <?php foreach ($documentDetails as $item): ?>
                             <option value="<?= h($item['beneficiario_nome'] ?? '') ?>"></option>
                             <option value="<?= h($item['beneficiario_cpf'] ?? '') ?>"></option>
                             <option value="<?= h($item['protocolo'] ?? '') ?>"></option>
@@ -451,9 +468,9 @@ $renderFilterFields = static function (array $filters): void {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($details ?? [] as $index => $item): ?>
+                        <?php foreach ($documentDetails as $index => $item): ?>
                             <tr>
-                                <td><?= h(str_pad((string) ($firstRecord + $index), 2, '0', STR_PAD_LEFT)) ?></td>
+                                <td><?= h(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?></td>
                                 <td><?= h($valueOrDash($item['beneficiario_nome'] ?? '')) ?></td>
                                 <td><?= h($valueOrDash($item['beneficiario_cpf'] ?? '')) ?></td>
                                 <td><?= h($formatQuantity($item['quantidade_total'] ?? 0)) ?> <?= h($item['unidade_medida'] ?? '') ?></td>
@@ -461,7 +478,7 @@ $renderFilterFields = static function (array $filters): void {
                             </tr>
                         <?php endforeach; ?>
 
-                        <?php if (($details ?? []) === []): ?>
+                        <?php if ($documentDetails === []): ?>
                             <tr>
                                 <td colspan="5" class="dti-empty">Nenhuma entrega encontrada para os filtros informados.</td>
                             </tr>
@@ -473,7 +490,7 @@ $renderFilterFields = static function (array $filters): void {
 
             <footer class="dti-page-footer">
                 <span><?= h($documentCode) ?></span>
-                <span>Folha 1 de 2 | Registros <?= h($totalRecords > 0 ? $firstRecord . '-' . $lastRecord : '0') ?> de <?= h($totalRecords) ?></span>
+                <span>Relação nominal | Registros <?= h($documentTotalRecords > 0 ? $documentFirstRecord . '-' . $documentLastRecord : '0') ?> de <?= h($documentTotalRecords) ?></span>
             </footer>
         </article>
 
@@ -552,7 +569,7 @@ $renderFilterFields = static function (array $filters): void {
     </section>
     <?php endif; ?>
 
-    <?php if ($hasAppliedFilters && $totalPages > 1 && !$embedDocument): ?>
+    <?php if ($hasAppliedFilters && $totalPages > 1 && !$embedDocument && $documentTotalRecords < $totalRecords): ?>
         <nav class="records-pagination delivery-pagination no-print" aria-label="Paginação da prestação de contas">
             <a class="secondary-button <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(max(1, $page - 1))) ?>">Anterior</a>
             <div class="pagination-pages">
@@ -580,3 +597,59 @@ $renderFilterFields = static function (array $filters): void {
         </nav>
     <?php endif; ?>
 </section>
+
+<?php if (!$embedDocument): ?>
+<script>
+    (function () {
+        function isMobilePrintContext() {
+            return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+        }
+
+        function fallbackToPrintPage(link) {
+            var opened = window.open(link.href, '_blank', 'noopener');
+
+            if (!opened) {
+                window.location.href = link.href;
+            }
+        }
+
+        document.querySelectorAll('[data-prestacao-print-url]').forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                var documentUrl = link.getAttribute('data-prestacao-print-url') || '';
+
+                if (!documentUrl || isMobilePrintContext()) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                var frame = document.querySelector('[data-prestacao-print-frame]');
+                if (!frame) {
+                    frame = document.createElement('iframe');
+                    frame.setAttribute('data-prestacao-print-frame', '1');
+                    frame.setAttribute('aria-hidden', 'true');
+                    frame.style.position = 'fixed';
+                    frame.style.right = '0';
+                    frame.style.bottom = '0';
+                    frame.style.width = '0';
+                    frame.style.height = '0';
+                    frame.style.border = '0';
+                    frame.style.opacity = '0';
+                    document.body.appendChild(frame);
+                }
+
+                frame.onload = function () {
+                    try {
+                        frame.contentWindow.focus();
+                        frame.contentWindow.print();
+                    } catch (error) {
+                        fallbackToPrintPage(link);
+                    }
+                };
+
+                frame.src = documentUrl;
+            });
+        });
+    })();
+</script>
+<?php endif; ?>

@@ -33,17 +33,22 @@ final class PrestacaoContasController extends Controller
         $filters = $this->filters();
         $embedDocument = (string) ($_GET['embed_document'] ?? '') === '1';
         $hasAppliedFilters = $this->hasAppliedFilters($filters);
+        $documentDetails = $hasAppliedFilters ? $this->prestacao->details($filters) : [];
+        $summary = $hasAppliedFilters ? $this->prestacao->indicators($filters) : $this->emptyIndicators();
+        $totalsByType = $hasAppliedFilters ? $this->prestacao->totalsByType($filters) : [];
+        $documentContext = $hasAppliedFilters ? $this->prestacao->documentContext($filters) : [];
         $page = max(1, (int) ($_GET['pagina'] ?? 1));
-        $total = $hasAppliedFilters ? $this->prestacao->countDetails($filters) : 0;
+        $total = count($documentDetails);
         $totalPages = max(1, (int) ceil($total / self::PER_PAGE));
         $page = min($page, $totalPages);
         $generatedAt = new \DateTimeImmutable();
         $currentUser = $this->currentUserRecord();
-        $documentIdentity = $hasAppliedFilters ? $this->documentIdentity($filters) : null;
+        $documentIdentity = $hasAppliedFilters ? $this->documentIdentity($filters, $documentDetails, $summary) : null;
         $showSignature = $hasAppliedFilters && (string) ($_GET['assinatura'] ?? '') === '1';
         $signature = ($documentIdentity !== null && $showSignature) ? $this->latestSignature($documentIdentity) : null;
         $coSignatureStatus = $documentIdentity !== null ? (new CoassinaturaRepository())->statusSummary('prestacao_contas', (string) $documentIdentity['document_key']) : $this->emptyCoSignatureStatus();
         $this->guardRestrictedProfileDocumentAccess($hasAppliedFilters, $showSignature, $documentIdentity);
+        $pagedDetails = array_slice($documentDetails, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
 
         $this->view('gestor.prestacao_contas.index', [
             'title' => 'Prestação de contas',
@@ -52,10 +57,11 @@ final class PrestacaoContasController extends Controller
             'tipos' => $this->tipos->all(),
             'signatureUsers' => $this->usuarios->activeExcept((int) ($currentUser['id'] ?? 0)),
             'hasAppliedFilters' => $hasAppliedFilters,
-            'indicators' => $hasAppliedFilters ? $this->prestacao->indicators($filters) : $this->emptyIndicators(),
-            'totalsByType' => $hasAppliedFilters ? $this->prestacao->totalsByType($filters) : [],
-            'details' => $hasAppliedFilters ? $this->prestacao->details($filters, self::PER_PAGE, ($page - 1) * self::PER_PAGE) : [],
-            'documentContext' => $hasAppliedFilters ? $this->prestacao->documentContext($filters) : [],
+            'indicators' => $summary,
+            'totalsByType' => $totalsByType,
+            'details' => $pagedDetails,
+            'documentDetails' => $documentDetails,
+            'documentContext' => $documentContext,
             'currentUser' => $currentUser,
             'signature' => $signature,
             'coSignatureStatus' => $coSignatureStatus,
@@ -329,10 +335,10 @@ final class PrestacaoContasController extends Controller
         }
     }
 
-    private function documentIdentity(array $filters): array
+    private function documentIdentity(array $filters, ?array $details = null, ?array $summary = null): array
     {
-        $details = $this->prestacao->details($filters);
-        $summary = $this->prestacao->indicators($filters);
+        $details ??= $this->prestacao->details($filters);
+        $summary ??= $this->prestacao->indicators($filters);
         $payload = [
             'filters' => $filters,
             'summary' => $summary,

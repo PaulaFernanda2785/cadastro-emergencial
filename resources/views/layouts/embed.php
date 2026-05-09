@@ -1,7 +1,8 @@
 <?php
 $app = require BASE_PATH . '/config/app.php';
 $pageTitle = $title ?? $app['name'];
-$assetVersion = '20260507-017';
+$assetVersion = '20260509-018';
+$showPrintToolbar = (string) ($_GET['print'] ?? '') === '1';
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -15,12 +16,20 @@ $assetVersion = '20260507-017';
     <link rel="stylesheet" href="<?= h(asset('css/app.css') . '?v=' . $assetVersion) ?>">
 </head>
 <body class="document-embed-body">
+    <?php if ($showPrintToolbar): ?>
+        <div class="document-print-toolbar no-print" role="region" aria-label="Acoes de impressao">
+            <span>Pagina de impressao do documento</span>
+            <button type="button" class="primary-button" data-document-print>Imprimir / baixar PDF</button>
+            <button type="button" class="secondary-button" data-document-close>Fechar</button>
+        </div>
+    <?php endif; ?>
     <?= $content ?>
     <script>
         (function () {
             var target = null;
             var baseWidth = 794;
             var printing = false;
+            var autoPrint = <?= $showPrintToolbar ? 'true' : 'false' ?>;
 
             function visibleHeight(scale, usesZoom) {
                 if (!target) {
@@ -103,6 +112,18 @@ $assetVersion = '20260507-017';
             window.addEventListener('beforeprint', preparePrint);
             window.addEventListener('afterprint', restoreScreen);
 
+            document.querySelectorAll('[data-document-print]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    window.print();
+                });
+            });
+
+            document.querySelectorAll('[data-document-close]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    window.close();
+                });
+            });
+
             if (document.fonts && document.fonts.ready) {
                 document.fonts.ready.then(resize).catch(function () {});
             }
@@ -117,6 +138,15 @@ $assetVersion = '20260507-017';
             setTimeout(resize, 250);
             setTimeout(resize, 700);
             setTimeout(resize, 1400);
+
+            if (autoPrint) {
+                window.addEventListener('load', function () {
+                    setTimeout(function () {
+                        window.focus();
+                        window.print();
+                    }, 500);
+                });
+            }
         })();
     </script>
 </body>

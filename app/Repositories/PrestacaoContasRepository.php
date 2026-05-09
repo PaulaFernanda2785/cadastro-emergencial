@@ -62,28 +62,6 @@ final class PrestacaoContasRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function countDetails(array $filters): int
-    {
-        [$where, $params] = $this->buildWhere($filters);
-        $stmt = Database::connection()->prepare(
-            "SELECT COUNT(*) FROM (
-                SELECT f.id AS familia_id, t.id AS tipo_ajuda_id
-                FROM entregas_ajuda e
-                INNER JOIN familias f ON f.id = e.familia_id
-                INNER JOIN residencias r ON r.id = f.residencia_id
-                INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
-                INNER JOIN municipios m ON m.id = r.municipio_id
-                INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
-                {$where}
-                GROUP BY f.id, t.id
-            ) grouped"
-        );
-        $this->bind($stmt, $params);
-        $stmt->execute();
-
-        return (int) $stmt->fetchColumn();
-    }
-
     public function details(array $filters, ?int $limit = null, int $offset = 0): array
     {
         [$where, $params] = $this->buildWhere($filters);

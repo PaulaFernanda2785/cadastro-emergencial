@@ -6482,6 +6482,36 @@ button:disabled,
     justify-items: center;
 }
 
+.document-print-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    background: #ffffff;
+    border-bottom: 1px solid #c8d6e4;
+    box-shadow: 0 8px 20px rgba(28, 39, 51, 0.12);
+}
+
+.document-print-toolbar span {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.document-print-toolbar .primary-button,
+.document-print-toolbar .secondary-button {
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
 .document-embed-body .records-page {
     width: 100%;
     max-width: none;
