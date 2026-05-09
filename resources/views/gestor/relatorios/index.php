@@ -7,7 +7,7 @@ if (($filters['data_inicio'] ?? '') !== '' || ($filters['data_fim'] ?? '') !== '
 }
 
 $statusAcaoLabels = ['aberta' => 'Aberta', 'encerrada' => 'Encerrada', 'cancelada' => 'Cancelada'];
-$entregaLabels = ['com_entrega' => 'Com entrega', 'sem_entrega' => 'Sem entrega'];
+$entregaLabels = ['com_entrega' => 'Entregue', 'sem_entrega' => 'Sem entrega final'];
 $cadastroLabels = ['concluido' => 'Concluído', 'pendente' => 'Pendente'];
 $groupLabels = [
     'criancas' => 'Crianças',

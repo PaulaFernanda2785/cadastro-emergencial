@@ -161,7 +161,7 @@ $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante 
     <div class="receipt-qr">
         <canvas data-family-receipt-qr data-qr-value="<?= h($validationUrl) ?>" aria-label="QR Code de validação do cadastro familiar"></canvas>
         <strong><?= h($receiptCode) ?></strong>
-        <span>Leia este QR na página de entregas para validar o cadastro e registrar a baixa.</span>
+        <span>Leia este QR na pagina Registrar para registrar os itens antes da entrega.</span>
     </div>
 
     <div class="receipt-separator"></div>
@@ -175,7 +175,7 @@ $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante 
 
     <footer class="receipt-footer">
         <span>Documento gerado pelo sistema Cadastro Emergencial.</span>
-        <span>Apresente este comprovante na retirada da ajuda humanitária.</span>
+        <span>Apresente este comprovante para registro e conferencia da ajuda humanitaria.</span>
     </footer>
 </article>
 </section>

@@ -23,6 +23,8 @@ $residenciaSelecionada = '';
 $totalFamilias = (int) ($summary['total_familias'] ?? $pagination['total'] ?? 0);
 $totalIntegrantes = (int) ($summary['total_integrantes'] ?? 0);
 $comEntrega = (int) ($summary['com_entrega'] ?? 0);
+$comRegistro = (int) ($summary['com_registro'] ?? 0);
+$semRegistro = (int) ($summary['sem_registro'] ?? 0);
 $semEntrega = max(0, $totalFamilias - $comEntrega);
 $cadastroConcluido = (int) ($summary['cadastro_concluido'] ?? 0);
 $cadastroPendente = max(0, $totalFamilias - $cadastroConcluido);
@@ -41,8 +43,10 @@ $situacaoOptions = [
     'permanece_residencia' => 'Permanece na residência',
 ];
 $entregaOptions = [
-    'com_entrega' => 'Com entrega',
-    'sem_entrega' => 'Sem entrega',
+    'registrado' => 'Registrado',
+    'entregue' => 'Entregue',
+    'sem_registro' => 'Sem registro',
+    'sem_entrega' => 'Sem entrega final',
 ];
 $cadastroOptions = [
     'concluido' => 'Concluído',
@@ -126,9 +130,9 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             <small>Pessoas informadas nos cadastros filtrados.</small>
         </article>
         <article class="records-summary-card">
-            <span>Entregas</span>
-            <strong><?= h($comEntrega) ?> / <?= h($semEntrega) ?></strong>
-            <small>Com entrega / sem entrega registrada.</small>
+            <span>Registro / entrega</span>
+            <strong><?= h($comRegistro) ?> / <?= h($comEntrega) ?></strong>
+            <small>Registradas pendentes / entregues.</small>
         </article>
         <article class="records-summary-card">
             <span>Revisão</span>
@@ -250,10 +254,12 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
             <?php foreach ($familias as $familia): ?>
                 <?php
                 $entregasRegistradas = (int) ($familia['entregas_registradas'] ?? 0);
+                $registrosPendentes = (int) ($familia['registros_pendentes'] ?? 0);
                 $cadastroOk = (int) ($familia['cadastro_concluido'] ?? 0) === 1;
                 $camposPendentes = familia_campos_pendentes($familia);
                 $situacaoKey = (string) ($familia['situacao_familia'] ?? '');
                 $situacaoClass = $situacaoKey !== '' ? preg_replace('/[^a-z0-9_-]+/i', '-', $situacaoKey) : 'sem-situacao';
+                $dtiAssinada = (string) ($familia['dti_ultima_acao'] ?? '') === 'assinou_dti';
                 $dataCadastro = strtotime((string) ($familia['criado_em'] ?? ''));
                 ?>
                 <article class="family-index-card">
@@ -265,8 +271,14 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                         </div>
 
                         <div class="family-index-statuses" aria-label="Status da família">
-                            <span class="family-status-pill family-status-<?= $entregasRegistradas > 0 ? 'delivered' : 'pending' ?>">
-                                <?= $entregasRegistradas > 0 ? h($entregasRegistradas . ' entrega(s)') : 'Sem entrega' ?>
+                            <span class="family-status-pill family-status-<?= $registrosPendentes > 0 ? 'open' : ($entregasRegistradas > 0 ? 'delivered' : 'pending') ?>">
+                                <?php if ($registrosPendentes > 0): ?>
+                                    <?= h($registrosPendentes . ' registro(s)') ?>
+                                <?php elseif ($entregasRegistradas > 0): ?>
+                                    <?= h($entregasRegistradas . ' entrega(s)') ?>
+                                <?php else: ?>
+                                    Sem registro
+                                <?php endif; ?>
                             </span>
                             <span class="family-status-pill family-status-<?= $cadastroOk ? 'reviewed' : 'open' ?>">
                                 <?= $cadastroOk ? 'Cadastro concluído' : 'Revisão pendente' ?>
@@ -276,6 +288,9 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                             </span>
                             <span class="family-status-pill family-status-situacao family-status-<?= h($situacaoClass) ?>">
                                 <?= h(familia_situacao_label($familia['situacao_familia'] ?? null)) ?>
+                            </span>
+                            <span class="family-status-pill family-status-<?= $dtiAssinada ? 'reviewed' : 'open' ?>">
+                                <?= $dtiAssinada ? 'DTI assinada' : 'DTI nao assinada' ?>
                             </span>
                         </div>
 
@@ -306,7 +321,15 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                             </div>
                         </dl>
 
-                        <?php if ($entregasRegistradas > 0): ?>
+                        <?php if ($registrosPendentes > 0): ?>
+                            <div class="family-delivery-summary">
+                                <span>Itens registrados pendentes</span>
+                                <strong><?= h($familia['registros_itens_resumo'] ?: 'Registro pendente') ?></strong>
+                                <?php if (!empty($familia['ultimo_registro'])): ?>
+                                    <small>Ultimo registro em <?= h(date('d/m/Y H:i', strtotime((string) $familia['ultimo_registro']))) ?></small>
+                                <?php endif; ?>
+                            </div>
+                        <?php elseif ($entregasRegistradas > 0): ?>
                             <div class="family-delivery-summary">
                                 <span>Itens já entregues</span>
                                 <strong><?= h($familia['entregas_itens_resumo'] ?: 'Entrega registrada') ?></strong>

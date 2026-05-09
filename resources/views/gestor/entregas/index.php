@@ -2,6 +2,7 @@
 $summary = $summary ?? [];
 $filters = $filters ?? [];
 $pagination = $pagination ?? ['page' => 1, 'pages' => 1, 'total' => 0];
+$isAdmin = (string) (current_user()['perfil'] ?? '') === 'administrador';
 $acaoSelecionada = '';
 $residenciaSelecionada = '';
 $familiaSelecionada = '';
@@ -46,29 +47,29 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
 <section class="dashboard-header deliveries-header">
     <div>
         <span class="eyebrow">Gestão operacional</span>
-        <h1>Histórico de entregas</h1>
-        <p>Consulte entregas registradas por família, ação, residência, tipo de ajuda e período.</p>
+        <h1>Historico de registros e entregas</h1>
+        <p>Consulte itens registrados e entregas confirmadas por familia, acao, residencia, tipo de ajuda e periodo.</p>
     </div>
 </section>
 
 <section class="records-summary-grid delivery-summary-grid">
     <article class="records-summary-card">
-        <span>Entregas filtradas</span>
+        <span>Registros filtrados</span>
         <strong><?= h($summary['total_entregas'] ?? 0) ?></strong>
-        <small>Registros encontrados.</small>
+        <small>Comprovantes encontrados.</small>
     </article>
     <article class="records-summary-card">
-        <span>Famílias atendidas</span>
+        <span>Registrados / entregues</span>
+        <strong><?= h($summary['total_registrados'] ?? 0) ?> / <?= h($summary['total_entregues'] ?? 0) ?></strong>
+        <small>Status operacional dos comprovantes.</small>
+    </article>
+    <article class="records-summary-card">
+        <span>Familias entregues</span>
         <strong><?= h($summary['familias_atendidas'] ?? 0) ?></strong>
-        <small>Famílias únicas no filtro.</small>
+        <small>Familias com entrega confirmada.</small>
     </article>
     <article class="records-summary-card">
-        <span>Quantidade total</span>
-        <strong><?= h(number_format((float) ($summary['total_quantidade'] ?? 0), 0, ',', '.')) ?></strong>
-        <small>Soma das quantidades.</small>
-    </article>
-    <article class="records-summary-card">
-        <span>Última entrega</span>
+        <span>Ultima entrega</span>
         <strong><?= !empty($summary['ultima_entrega']) ? h(date('d/m/Y', strtotime((string) $summary['ultima_entrega']))) : '-' ?></strong>
         <small><?= !empty($summary['ultima_entrega']) ? h(date('H:i', strtotime((string) $summary['ultima_entrega']))) : 'Sem registro' ?></small>
     </article>
@@ -204,6 +205,13 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                         </span>
                     </div>
                     <span class="limit-reached-pill"><?= $statusOperacional === 'registrado' ? 'Registrado' : 'Entregue' ?></span>
+                    <?php if ($isAdmin && $statusOperacional === 'entregue'): ?>
+                        <form method="post" action="<?= h(url('/gestor/entregas/' . $entrega['id'] . '/nao-entregue')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Retornar esta entrega para registrado?">
+                            <?= csrf_field() ?>
+                            <?= idempotency_field('gestor.entregas.nao_entregue.' . (int) $entrega['id']) ?>
+                            <button type="submit" class="danger-button" data-loading-text="Retornando...">Nao entregue</button>
+                        </form>
+                    <?php endif; ?>
                     <a class="secondary-button delivery-record-action" href="<?= h(url('/gestor/entregas/' . $entrega['id'] . '/comprovante')) ?>">Comprovante</a>
                 </article>
             <?php endforeach; ?>

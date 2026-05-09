@@ -128,8 +128,8 @@ $semGeo = (int) ($indicators['sem_georreferencia'] ?? 0);
                 <span>Entrega</span>
                 <select name="entregas">
                     <option value="">Todas</option>
-                    <option value="com_entrega" <?= ($filters['entregas'] ?? '') === 'com_entrega' ? 'selected' : '' ?>>Com entrega</option>
-                    <option value="sem_entrega" <?= ($filters['entregas'] ?? '') === 'sem_entrega' ? 'selected' : '' ?>>Sem entrega</option>
+                    <option value="com_entrega" <?= ($filters['entregas'] ?? '') === 'com_entrega' ? 'selected' : '' ?>>Entregue</option>
+                    <option value="sem_entrega" <?= ($filters['entregas'] ?? '') === 'sem_entrega' ? 'selected' : '' ?>>Sem entrega final</option>
                 </select>
             </label>
 

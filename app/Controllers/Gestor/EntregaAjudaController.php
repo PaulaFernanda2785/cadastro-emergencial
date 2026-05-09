@@ -85,13 +85,14 @@ final class EntregaAjudaController extends Controller
     public function batch(): void
     {
         $batchFilters = $this->batchFilters();
+        $batchHasFilters = $this->hasBatchFilters($batchFilters, false);
         $batchFilters['status_entrega'] = 'registrado';
 
         $this->view('gestor.entregas.lote', [
             'title' => 'Entrega em lote',
             'batchFilters' => $batchFilters,
-            'batchHasFilters' => $this->hasBatchFilters($batchFilters),
-            'batchFamilies' => $this->hasBatchFilters($batchFilters) ? $this->familias->deliveryCandidates($batchFilters) : [],
+            'batchHasFilters' => $batchHasFilters,
+            'batchFamilies' => $batchHasFilters ? $this->familias->deliveryCandidates($batchFilters) : [],
             'acoes' => $this->acoes->all(),
             'residencias' => $this->residencias->optionsByOpenActions(),
             'tipos' => $this->tipos->active(),
@@ -151,6 +152,8 @@ final class EntregaAjudaController extends Controller
             $this->abort(404);
         }
 
+        $isRegisteredReceipt = (string) ($entrega['status_operacional'] ?? 'entregue') === 'registrado';
+        $receiptLabel = $isRegisteredReceipt ? 'Comprovante de registro' : 'Comprovante de entrega';
         $itens = array_map(
             static function (array $item): string {
                 $line = '- ' . (string) $item['tipo_ajuda_nome'] . ': ' . number_format((float) $item['quantidade'], 2, ',', '.') . ' ' . (string) $item['unidade_medida'];
@@ -161,7 +164,7 @@ final class EntregaAjudaController extends Controller
             $entrega['itens'] ?? []
         );
         $whatsappText = implode("\n", array_filter([
-            'Comprovante de entrega - Cadastro Emergencial',
+            $receiptLabel . ' - Cadastro Emergencial',
             'Responsavel: ' . (string) $entrega['responsavel_nome'],
             'CPF: ' . (string) $entrega['responsavel_cpf'],
             'Codigo: ' . (string) $entrega['comprovante_codigo'],
@@ -196,7 +199,7 @@ final class EntregaAjudaController extends Controller
         try {
             $result = (new TicketEmailService())->sendDeliveryReceipt($entrega, new \DateTimeImmutable());
         } catch (Throwable $exception) {
-            error_log('Falha ao enviar comprovante de entrega por e-mail: ' . $exception->getMessage());
+            error_log('Falha ao enviar comprovante de registro/entrega por e-mail: ' . $exception->getMessage());
             Session::flash('error', 'Nao foi possivel enviar o comprovante por e-mail.');
             $this->redirect($redirect);
         }
@@ -403,6 +406,43 @@ final class EntregaAjudaController extends Controller
         Session::flash('success', $updated . ' item(ns) registrado(s) confirmado(s) como entregue.');
         $this->redirect('/gestor/entregas');
     }
+
+    public function markNotDelivered(string $id): void
+    {
+        $redirect = '/gestor/entregas';
+        $entregaId = max(0, (int) $id);
+
+        if ((string) (current_user()['perfil'] ?? '') !== 'administrador') {
+            $this->abort(403);
+        }
+
+        if ($entregaId <= 0) {
+            $this->abort(404);
+        }
+
+        $this->guardPost('gestor.entregas.nao_entregue.' . $entregaId, $redirect);
+        $result = $this->entregas->returnGroupToRegistered($entregaId);
+
+        if ($result === null) {
+            $this->abort(404);
+        }
+
+        if ((int) ($result['updated'] ?? 0) <= 0) {
+            Session::flash('warning', 'Nenhum item entregue foi encontrado para retornar ao status registrado.');
+            $this->redirect($redirect);
+        }
+
+        (new AuditLogService())->record(
+            'retornou_entrega_para_registrado',
+            'entregas_ajuda',
+            $entregaId,
+            'codigo=' . (string) ($result['codigo'] ?? '') . ';itens=' . (int) ($result['updated'] ?? 0)
+        );
+
+        Session::flash('success', 'Entrega retornada para registrado.');
+        $this->redirect($redirect);
+    }
+
     private function findFamilia(int $id): array
     {
         $familia = $this->familias->find($id);
@@ -542,9 +582,15 @@ final class EntregaAjudaController extends Controller
         ];
     }
 
-    private function hasBatchFilters(array $filters): bool
+    private function hasBatchFilters(array $filters, bool $includeStatus = true): bool
     {
-        foreach (['q', 'acao_id', 'acao_busca', 'residencia_id', 'residencia_busca', 'status_entrega', 'data_inicio', 'data_fim'] as $key) {
+        $keys = ['q', 'acao_id', 'acao_busca', 'residencia_id', 'residencia_busca', 'data_inicio', 'data_fim'];
+
+        if ($includeStatus) {
+            $keys[] = 'status_entrega';
+        }
+
+        foreach ($keys as $key) {
             if (($filters[$key] ?? '') !== '') {
                 return true;
             }

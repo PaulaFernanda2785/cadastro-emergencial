@@ -187,9 +187,9 @@ final class EntregaAjudaRepository
             'SELECT COUNT(DISTINCT CONCAT(' . self::GROUP_CODE_SQL . ', "#", e.familia_id)) AS total_entregas,
                     COUNT(DISTINCT CASE WHEN ' . self::STATUS_SQL . ' = "registrado" THEN CONCAT(' . self::GROUP_CODE_SQL . ', "#", e.familia_id) END) AS total_registrados,
                     COUNT(DISTINCT CASE WHEN ' . self::STATUS_SQL . ' = "entregue" THEN CONCAT(' . self::GROUP_CODE_SQL . ', "#", e.familia_id) END) AS total_entregues,
-                    COUNT(DISTINCT e.familia_id) AS familias_atendidas,
+                    COUNT(DISTINCT CASE WHEN ' . self::STATUS_SQL . ' = "entregue" THEN e.familia_id END) AS familias_atendidas,
                     COALESCE(SUM(e.quantidade), 0) AS total_quantidade,
-                    COALESCE(MAX(e.entregue_em), MAX(e.data_entrega)) AS ultima_entrega
+                    MAX(CASE WHEN ' . self::STATUS_SQL . ' = "entregue" THEN COALESCE(e.entregue_em, e.data_entrega) END) AS ultima_entrega
              FROM entregas_ajuda e
              INNER JOIN familias f ON f.id = e.familia_id
              INNER JOIN residencias r ON r.id = f.residencia_id
@@ -329,6 +329,43 @@ final class EntregaAjudaRepository
         $stmt->execute();
 
         return $stmt->rowCount();
+    }
+
+    public function returnGroupToRegistered(int $id): ?array
+    {
+        $groupStmt = Database::connection()->prepare(
+            'SELECT COALESCE(grupo_comprovante_codigo, comprovante_codigo) AS codigo, familia_id
+             FROM entregas_ajuda
+             WHERE id = :id AND deleted_at IS NULL
+             LIMIT 1'
+        );
+        $groupStmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $groupStmt->execute();
+        $group = $groupStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!is_array($group) || (string) ($group['codigo'] ?? '') === '' || (int) ($group['familia_id'] ?? 0) <= 0) {
+            return null;
+        }
+
+        $stmt = Database::connection()->prepare(
+            'UPDATE entregas_ajuda
+             SET status_operacional = "registrado",
+                 data_entrega = COALESCE(registrado_em, data_entrega),
+                 entregue_em = NULL
+             WHERE deleted_at IS NULL
+                AND COALESCE(status_operacional, "entregue") = "entregue"
+                AND COALESCE(grupo_comprovante_codigo, comprovante_codigo) = :codigo
+                AND familia_id = :familia_id'
+        );
+        $stmt->bindValue(':codigo', (string) $group['codigo']);
+        $stmt->bindValue(':familia_id', (int) $group['familia_id'], PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'codigo' => (string) $group['codigo'],
+            'familia_id' => (int) $group['familia_id'],
+            'updated' => $stmt->rowCount(),
+        ];
     }
 
     public function count(?int $cadastradoPor = null, ?string $activeActionToken = null): int

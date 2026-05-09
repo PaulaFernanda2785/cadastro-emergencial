@@ -121,6 +121,7 @@ $router->get('/gestor/entregas/validar', [EntregaAjudaController::class, 'valida
 $router->get('/gestor/entregas/validar/{codigo}', [EntregaAjudaController::class, 'validateReceipt'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/entregas/{id}/comprovante', [EntregaAjudaController::class, 'receipt'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/entregas/{id}/comprovante/email', [EntregaAjudaController::class, 'emailReceipt'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/entregas/{id}/nao-entregue', [EntregaAjudaController::class, 'markNotDelivered'], ['auth', 'role:administrador']);
 $router->get('/gestor/familias/{id}/entregas/novo', [EntregaAjudaController::class, 'create'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/familias/{id}/entregas', [EntregaAjudaController::class, 'store'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/familias/{id}/entregas/confirmar', [EntregaAjudaController::class, 'confirm'], ['auth', 'role:gestor,administrador']);

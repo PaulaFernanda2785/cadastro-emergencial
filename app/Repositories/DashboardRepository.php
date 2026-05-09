@@ -73,6 +73,7 @@ final class DashboardRepository
              INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
              INNER JOIN municipios m ON m.id = r.municipio_id
              WHERE e.deleted_at IS NULL
+               AND COALESCE(e.status_operacional, "entregue") = "entregue"
                AND f.deleted_at IS NULL
                AND ' . $where,
             $params
@@ -150,6 +151,7 @@ final class DashboardRepository
                         WHERE f_count.residencia_id = r.id
                           AND f_count.deleted_at IS NULL
                           AND e_count.deleted_at IS NULL
+                          AND COALESCE(e_count.status_operacional, "entregue") = "entregue"
                     ) AS familias_atendidas
              FROM residencias r
              INNER JOIN acoes_emergenciais a ON a.id = r.acao_id
@@ -329,6 +331,7 @@ final class DashboardRepository
             WHERE f_delivery.residencia_id = r.id
               AND f_delivery.deleted_at IS NULL
               AND e_delivery.deleted_at IS NULL
+              AND COALESCE(e_delivery.status_operacional, "entregue") = "entregue"
         )';
     }
 

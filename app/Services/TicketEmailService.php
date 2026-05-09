@@ -63,9 +63,12 @@ final class TicketEmailService
     {
         $code = (string) ($entrega['comprovante_codigo'] ?? '');
         $items = $this->deliveryItemLines($entrega['itens'] ?? []);
-        $subject = 'Comprovante de entrega - ' . $code;
+        $isRegistered = (string) ($entrega['status_operacional'] ?? 'entregue') === 'registrado';
+        $receiptLabel = $isRegistered ? 'Comprovante de registro' : 'Comprovante de entrega';
+        $receiptTitle = $isRegistered ? 'Comprovante de Registro' : 'Comprovante de Entrega';
+        $subject = $receiptLabel . ' - ' . $code;
         $lines = array_filter([
-            'Comprovante de entrega',
+            $receiptLabel,
             'Responsavel: ' . (string) ($entrega['responsavel_nome'] ?? '-'),
             'CPF: ' . ((string) ($entrega['responsavel_cpf'] ?? '') !== '' ? (string) $entrega['responsavel_cpf'] : '-'),
             'Codigo: ' . $code,
@@ -79,7 +82,7 @@ final class TicketEmailService
             familia_email_destinos($entrega),
             $subject,
             $this->htmlDocument(
-                'Comprovante de Entrega',
+                $receiptTitle,
                 $this->deliveryTicketHtml($entrega, $generatedAt)
             ),
             implode("\n", $lines)
@@ -120,9 +123,14 @@ final class TicketEmailService
 
     private function deliveryTicketHtml(array $entrega, DateTimeInterface $generatedAt): string
     {
+        $isRegistered = (string) ($entrega['status_operacional'] ?? 'entregue') === 'registrado';
+        $receiptTitle = $isRegistered ? 'Comprovante de Registro' : 'Comprovante de Entrega';
+        $dateValue = $isRegistered
+            ? ($entrega['registrado_em'] ?? $entrega['data_entrega'] ?? 'now')
+            : ($entrega['entregue_em'] ?? $entrega['data_entrega'] ?? 'now');
         $rows = [
             ['label' => 'Codigo', 'value' => (string) ($entrega['comprovante_codigo'] ?? '-')],
-            ['label' => 'Data', 'value' => $this->dateTimeValue($entrega['data_entrega'] ?? 'now')],
+            ['label' => $isRegistered ? 'Registro' : 'Entrega', 'value' => $this->dateTimeValue($dateValue)],
             ['label' => 'Protocolo', 'value' => (string) ($entrega['protocolo'] ?? '-')],
             ['label' => 'Municipio', 'value' => (string) ($entrega['municipio_nome'] ?? '-') . '/' . (string) ($entrega['uf'] ?? '-')],
             ['label' => 'Localidade', 'value' => (string) (($entrega['localidade'] ?? '') ?: '-')],
@@ -133,11 +141,11 @@ final class TicketEmailService
             ['label' => 'Endereco', 'value' => $this->addressValue($entrega)],
             ['label' => 'Bairro', 'value' => (string) (($entrega['bairro_comunidade'] ?? '') ?: '-')],
             ['label' => 'Itens', 'value' => implode("\n", $this->deliveryItemLines($entrega['itens'] ?? [])) ?: '-'],
-            ['label' => 'Entregue por', 'value' => (string) ($entrega['entregue_por_nome'] ?? '-')],
+            ['label' => $isRegistered ? 'Registrado por' : 'Entregue por', 'value' => (string) ($entrega['entregue_por_nome'] ?? '-')],
             ['label' => 'Emitido em', 'value' => $generatedAt->format('d/m/Y H:i')],
         ];
 
-        return $this->ticketHtml('Cadastro Emergencial', 'Comprovante de Entrega', $rows, (string) ($entrega['comprovante_codigo'] ?? ''), '', true);
+        return $this->ticketHtml('Cadastro Emergencial', $receiptTitle, $rows, (string) ($entrega['comprovante_codigo'] ?? ''), '', true);
     }
 
     /**
@@ -195,8 +203,8 @@ final class TicketEmailService
 
         $qrHtml = $qrCid !== ''
             ? '<div style="text-align:center;border-top:1px dashed #9ca3af;margin-top:12px;padding-top:12px;">'
-                . '<img src="cid:' . h($qrCid) . '" alt="QR Code de validacao do cadastro familiar" width="180" height="180" style="display:block;width:180px;height:180px;margin:0 auto;">'
-                . '<span style="display:block;font-size:11px;color:#374151;margin-top:6px;">Leia este QR Code para validar o cadastro familiar.</span>'
+                . '<img src="cid:' . h($qrCid) . '" alt="QR Code para registrar itens da familia" width="180" height="180" style="display:block;width:180px;height:180px;margin:0 auto;">'
+                . '<span style="display:block;font-size:11px;color:#374151;margin-top:6px;">Leia este QR Code na pagina Registrar para registrar os itens.</span>'
                 . '</div>'
             : '';
         $signatureHtml = $signature

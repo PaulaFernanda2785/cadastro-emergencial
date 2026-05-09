@@ -11,7 +11,7 @@ O Cadastro Emergencial centraliza informações operacionais de campo para apoia
 - Painel situacional com indicadores operacionais e mapa georreferenciado.
 - Ações emergenciais com link e QR Code personalizados.
 - Cadastro de residências, famílias e documentos anexos.
-- Entregas individuais, histórico e entregas em lote.
+- Registro de itens, confirmacao de entrega, historico e operacao em lote.
 - Prestação de contas com filtros, documento gerado e fluxo de coassinatura.
 - Programa Recomeçar para análise de famílias aptas ao benefício.
 - DTI e documentos institucionais com assinatura principal e coautores.

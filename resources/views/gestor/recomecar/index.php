@@ -42,10 +42,10 @@ $firstRecord = (int) (($page - 1) * $perPage) + 1;
 $totalRecords = (int) ($pagination['total'] ?? count($details ?? []));
 $lastRecord = min($totalRecords, $page * $perPage);
 $documentTotalRecords = count($documentDetails);
-$periodo = 'Todo o perÃƒÆ’Ã‚Â­odo';
+$periodo = 'Todo o periodo';
 
 if (($filters['data_inicio'] ?? '') !== '' || ($filters['data_fim'] ?? '') !== '') {
-    $periodo = ($filters['data_inicio'] ?: 'inÃƒÆ’Ã‚Â­cio') . ' a ' . ($filters['data_fim'] ?: 'hoje');
+    $periodo = ($filters['data_inicio'] ?: 'inicio') . ' a ' . ($filters['data_fim'] ?: 'hoje');
 }
 
 $valueOrDash = static function (mixed $value): string {
@@ -85,7 +85,7 @@ $sexLabel = static function (mixed $value): string {
         'feminino' => 'Feminino',
         'masculino' => 'Masculino',
         'outro' => 'Outro',
-        'nao_informado' => 'NÃƒÆ’Ã‚Â£o informado',
+        'nao_informado' => 'Nao informado',
     ][(string) $value] ?? '-';
 };
 
@@ -94,7 +94,7 @@ $actionOptionLabel = static function (array $acao): string {
         (string) ($acao['municipio_nome'] ?? '') . '/' . (string) ($acao['uf'] ?? '')
         . ' - ' . (string) ($acao['localidade'] ?? '')
         . ' - ' . (string) ($acao['tipo_evento'] ?? '')
-        . ' - AÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o #' . (string) ($acao['id'] ?? '')
+        . ' - Acao #' . (string) ($acao['id'] ?? '')
     );
 };
 $selectedActionLabel = '';
@@ -109,11 +109,11 @@ $activeFilters = array_filter($filters, static fn (mixed $value): bool => (strin
 unset($activeFilters['acao_id']);
 $filterLabels = [
     'q' => 'Busca',
-    'acao_busca' => 'AÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o',
+    'acao_busca' => 'Acao',
     'localidade_busca' => 'Localidade/bairro',
-    'aptidao' => 'SituaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o',
+    'aptidao' => 'Situacao',
     'status_entrega' => 'Etapa Recomecar',
-    'data_inicio' => 'InÃƒÆ’Ã‚Â­cio',
+    'data_inicio' => 'Inicio',
     'data_fim' => 'Fim',
 ];
 
@@ -152,9 +152,9 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
     <?php if (!$embedDocument): ?>
     <header class="dashboard-header deliveries-header accountability-header no-print">
         <div>
-            <span class="eyebrow">GestÃƒÆ’Ã‚Â£o operacional</span>
-            <h1>Programa RecomeÃƒÆ’Ã‚Â§ar</h1>
-            <p>Gere o documento nominal de famÃƒÆ’Ã‚Â­lias aptas ao pagamento de um salÃƒÆ’Ã‚Â¡rio mÃƒÆ’Ã‚Â­nimo por famÃƒÆ’Ã‚Â­lia.</p>
+            <span class="eyebrow">Gestao operacional</span>
+            <h1>Programa Recomecar</h1>
+            <p>Gere o documento nominal de familias aptas ao pagamento de um salario minimo por familia.</p>
         </div>
         <?php if ($hasAppliedFilters && $signature === null && $canSignPaymentDocument): ?>
             <form method="post" action="<?= h(url('/gestor/recomecar/assinar')) ?>" class="inline-form js-prevent-double-submit">
@@ -167,9 +167,9 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
         <?php elseif ($hasAppliedFilters && $signature === null): ?>
             <span class="limit-reached-pill">Consulta sem assinatura</span>
         <?php elseif ($hasAppliedFilters): ?>
-            <span class="limit-reached-pill"><?= $printReady ? 'Documento assinado' : 'Aguardando conferÃƒÆ’Ã‚Âªncia' ?></span>
+            <span class="limit-reached-pill"><?= $printReady ? 'Documento assinado' : 'Aguardando conferencia' ?></span>
             <?php if ($canManageSignature): ?>
-                <form method="post" action="<?= h(url('/gestor/recomecar/remover-assinatura')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Confirmar a remoÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o da assinatura deste documento?">
+                <form method="post" action="<?= h(url('/gestor/recomecar/remover-assinatura')) ?>" class="inline-form js-prevent-double-submit" data-confirm="Confirmar a remocao da assinatura deste documento?">
                     <?= csrf_field() ?>
                     <?= idempotency_field('gestor.recomecar.remove_signature.' . (int) ($documentIdentity['entity_id'] ?? 0)) ?>
                     <?php $renderFilterFields($filters); ?>
@@ -179,38 +179,38 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
             <?php if ($printReady): ?>
                 <button type="button" class="primary-button" onclick="window.print()">Imprimir documento</button>
             <?php else: ?>
-                <span class="limit-reached-pill">ImpressÃƒÆ’Ã‚Â£o bloqueada</span>
+                <span class="limit-reached-pill">Impressao bloqueada</span>
             <?php endif; ?>
         <?php endif; ?>
     </header>
 
     <section class="records-summary-grid delivery-summary-grid no-print">
         <article class="records-summary-card">
-            <span>FamÃƒÆ’Ã‚Â­lias no recorte</span>
+            <span>Familias no recorte</span>
             <strong><?= h($summary['total_familias'] ?? 0) ?></strong>
             <small>Cadastros considerados pelos filtros.</small>
         </article>
         <article class="records-summary-card">
             <span>Aptas</span>
             <strong><?= h($summary['familias_aptas'] ?? 0) ?></strong>
-            <small>Recebem 1 salÃƒÆ’Ã‚Â¡rio mÃƒÆ’Ã‚Â­nimo vigente.</small>
+            <small>Recebem 1 salario minimo vigente.</small>
         </article>
         <article class="records-summary-card">
             <span>Inaptas</span>
             <strong><?= h($summary['familias_inaptas'] ?? 0) ?></strong>
-            <small>ImÃƒÆ’Ã‚Â³vel nÃƒÆ’Ã‚Â£o atingido ou renda acima de 3 salÃƒÆ’Ã‚Â¡rios.</small>
+            <small>Imovel nao atingido ou renda acima de 3 salarios.</small>
         </article>
         <article class="records-summary-card">
-            <span>BenefÃƒÆ’Ã‚Â­cios previstos</span>
+            <span>Beneficios previstos</span>
             <strong><?= h($summary['familias_aptas'] ?? 0) ?></strong>
-            <small>Quantidade de salÃƒÆ’Ã‚Â¡rios mÃƒÆ’Ã‚Â­nimos.</small>
+            <small>Quantidade de salarios minimos.</small>
         </article>
     </section>
 
     <section class="records-filter-panel delivery-filter-panel accountability-filter-panel recomecar-filter-panel no-print">
         <div class="table-heading">
             <h2>Filtros inteligentes</h2>
-            <span>Combine aÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o, localidade, perÃƒÆ’Ã‚Â­odo, busca textual e situaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o no programa.</span>
+            <span>Combine acao, localidade, periodo, busca textual e situacao no programa.</span>
         </div>
         <form method="get" action="<?= h(url('/gestor/recomecar')) ?>" class="accountability-filter-form recomecar-filter-form">
             <div class="accountability-filter-main recomecar-filter-main">
@@ -220,8 +220,8 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                 </label>
 
                 <label class="field styled-field smart-search-field recomecar-filter-field recomecar-filter-field-wide">
-                    <span>AÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</span>
-                    <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="recomecar-acoes-list" placeholder="Digite para buscar a aÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o" data-smart-search data-smart-target="recomecar_acao_id" autocomplete="off">
+                    <span>Acao</span>
+                    <input type="search" name="acao_busca" value="<?= h(($filters['acao_busca'] ?? '') !== '' ? $filters['acao_busca'] : $selectedActionLabel) ?>" list="recomecar-acoes-list" placeholder="Digite para buscar a acao" data-smart-search data-smart-target="recomecar_acao_id" autocomplete="off">
                     <input type="hidden" name="acao_id" value="<?= h($filters['acao_id'] ?? '') ?>" data-smart-hidden="recomecar_acao_id">
                     <datalist id="recomecar-acoes-list">
                         <?php foreach ($acoes ?? [] as $acao): ?>
@@ -236,7 +236,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                 </label>
 
                 <label class="field styled-field recomecar-filter-field recomecar-filter-field-compact">
-                    <span>SituaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o no programa</span>
+                    <span>Situacao no programa</span>
                     <select name="aptidao">
                         <option value="apta" <?= ($filters['aptidao'] ?? 'apta') === 'apta' ? 'selected' : '' ?>>Aptas para pagamento</option>
                         <option value="inapta" <?= ($filters['aptidao'] ?? '') === 'inapta' ? 'selected' : '' ?>>Inaptas</option>
@@ -257,7 +257,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
             <div class="accountability-filter-side recomecar-filter-side">
                 <div class="accountability-date-range">
                     <label class="field styled-field recomecar-filter-field recomecar-filter-field-date">
-                        <span>InÃƒÆ’Ã‚Â­cio do cadastro</span>
+                        <span>Inicio do cadastro</span>
                         <input type="date" name="data_inicio" value="<?= h($filters['data_inicio'] ?? '') ?>">
                     </label>
 
@@ -287,15 +287,15 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
     <?php if (!$hasAppliedFilters && !$embedDocument): ?>
         <section class="action-empty-panel records-empty-panel no-print">
             <h2>Aplique um filtro para gerar o documento</h2>
-            <p>Use pelo menos um filtro operacional. Por seguranÃƒÆ’Ã‚Â§a, o documento do Programa RecomeÃƒÆ’Ã‚Â§ar nÃƒÆ’Ã‚Â£o carrega automaticamente sem recorte.</p>
+            <p>Use pelo menos um filtro operacional. Por seguranca, o documento do Programa Recomecar nao carrega automaticamente sem recorte.</p>
         </section>
     <?php else: ?>
         <?php if ($signature !== null && !$printReady && !$embedDocument): ?>
             <section class="signature-flow-panel no-print">
                 <div>
                     <span class="eyebrow">Fluxo de coassinatura</span>
-                    <h2>ImpressÃƒÆ’Ã‚Â£o aguardando autorizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</h2>
-                    <p><?= h((int) ($coSignatureStatus['pendentes'] ?? 0)) ?> pendente(s), <?= h((int) ($coSignatureStatus['autorizados'] ?? 0)) ?> autorizado(s), <?= h((int) ($coSignatureStatus['negados'] ?? 0)) ?> nÃƒÆ’Ã‚Â£o autorizado(s).</p>
+                    <h2>Impressao aguardando autorizacao</h2>
+                    <p><?= h((int) ($coSignatureStatus['pendentes'] ?? 0)) ?> pendente(s), <?= h((int) ($coSignatureStatus['autorizados'] ?? 0)) ?> autorizado(s), <?= h((int) ($coSignatureStatus['negados'] ?? 0)) ?> nao autorizado(s).</p>
                 </div>
                 <a class="secondary-button signature-flow-action" href="<?= h(url('/assinaturas')) ?>">Acompanhar assinaturas</a>
             </section>
@@ -305,8 +305,8 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
             <section class="signature-flow-panel no-print">
                 <div>
                     <span class="eyebrow">Regra de pagamento</span>
-                    <h2>Assinatura disponÃƒÆ’Ã‚Â­vel apenas para famÃƒÆ’Ã‚Â­lias aptas</h2>
-                    <p>Altere o filtro "SituaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o no programa" para "Aptas para pagamento" antes de assinar o documento.</p>
+                    <h2>Assinatura disponivel apenas para familias aptas</h2>
+                    <p>Altere o filtro "Situacao no programa" para "Aptas para pagamento" antes de assinar o documento.</p>
                 </div>
             </section>
         <?php endif; ?>
@@ -316,7 +316,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                 <div>
                     <span class="eyebrow">Assinatura digital conjunta</span>
                     <h2>Assinar documento</h2>
-                    <p>O usuÃƒÆ’Ã‚Â¡rio logado assina primeiro. ResponsÃƒÆ’Ã‚Â¡veis pela conferÃƒÆ’Ã‚Âªncia sÃƒÆ’Ã‚Â£o opcionais e devem ser gestor ou administrador.</p>
+                    <p>O usuario logado assina primeiro. Responsaveis pela conferencia sao opcionais e devem ser gestor ou administrador.</p>
                 </div>
                 <form method="post" action="<?= h(url('/gestor/recomecar/assinar')) ?>" class="js-prevent-double-submit">
                     <?= csrf_field() ?>
@@ -324,23 +324,23 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                     <?php $renderFilterFields($filters); ?>
                     <div class="dti-primary-signer">
                         <span>1. Assinante principal</span>
-                        <strong><?= h(current_user()['nome'] ?? 'UsuÃƒÆ’Ã‚Â¡rio logado') ?></strong>
+                        <strong><?= h(current_user()['nome'] ?? 'Usuario logado') ?></strong>
                         <small><?= h(current_user()['cpf'] ?? '') ?><?= !empty(current_user()['graduacao']) ? ' - ' . h(current_user()['graduacao']) : '' ?><?= !empty(current_user()['nome_guerra']) ? ' ' . h(current_user()['nome_guerra']) : '' ?><?= !empty(current_user()['matricula_funcional']) ? ' | MF ' . h(current_user()['matricula_funcional']) : '' ?></small>
                     </div>
                     <div class="dti-cosigner-panel">
-                        <span>2. ResponsÃƒÆ’Ã‚Â¡veis pela conferÃƒÆ’Ã‚Âªncia</span>
+                        <span>2. Responsaveis pela conferencia</span>
                         <?php if (($signatureUsers ?? []) === []): ?>
-                            <div class="dti-empty">Nenhum gestor ou administrador ativo disponÃƒÆ’Ã‚Â­vel para coassinar.</div>
+                            <div class="dti-empty">Nenhum gestor ou administrador ativo disponivel para coassinar.</div>
                         <?php else: ?>
                             <div class="dti-cosigner-picker" data-dti-cosigner-picker>
                                 <label class="field smart-search-field">
-                                    <span>Buscar usuÃƒÆ’Ã‚Â¡rio</span>
-                                    <input type="search" placeholder="Digite nome, CPF, MF, graduaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o ou nome de guerra" autocomplete="off" data-dti-cosigner-search>
+                                    <span>Buscar usuario</span>
+                                    <input type="search" placeholder="Digite nome, CPF, MF, graduacao ou nome de guerra" autocomplete="off" data-dti-cosigner-search>
                                 </label>
                                 <div class="dti-cosigner-selected" data-dti-cosigner-selected aria-live="polite">
-                                    <span>Nenhum responsÃƒÆ’Ã‚Â¡vel pela conferÃƒÆ’Ã‚Âªncia selecionado.</span>
+                                    <span>Nenhum responsavel pela conferencia selecionado.</span>
                                 </div>
-                                <div class="dti-cosigner-hint" data-dti-cosigner-status>Digite para buscar usuÃƒÆ’Ã‚Â¡rios do sistema.</div>
+                                <div class="dti-cosigner-hint" data-dti-cosigner-status>Digite para buscar usuarios do sistema.</div>
                                 <div class="dti-cosigner-options" data-dti-cosigner-options>
                                 <?php foreach ($signatureUsers ?? [] as $usuarioAssinante): ?>
                                     <?php
@@ -365,14 +365,14 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
         <?php endif; ?>
 
     <div class="recomecar-document-viewport" data-recomecar-document-viewport>
-    <section class="accountability-document dti-document recomecar-document" aria-label="Documento do Programa RecomeÃƒÆ’Ã‚Â§ar" data-recomecar-document>
+    <section class="accountability-document dti-document recomecar-document" aria-label="Documento do Programa Recomecar" data-recomecar-document>
         <article class="dti-page accountability-page-sheet">
             <header class="dti-institutional-header">
                 <img src="<?= h(asset('images/logo-cedec.png')) ?>" alt="CEDEC-PA">
                 <div>
-                    <strong>Corpo de Bombeiros Militar do ParÃƒÆ’Ã‚Â¡</strong>
-                    <span>Coordenadoria Estadual de ProteÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o e Defesa Civil</span>
-                    <h2>Programa RecomeÃƒÆ’Ã‚Â§ar - relaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de famÃƒÆ’Ã‚Â­lias aptas</h2>
+                    <strong>Corpo de Bombeiros Militar do Para</strong>
+                    <span>Coordenadoria Estadual de Protecao e Defesa Civil</span>
+                    <h2>Programa Recomecar - relacao de familias aptas</h2>
                 </div>
             </header>
 
@@ -382,13 +382,13 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                 <table class="dti-table accountability-info-table">
                     <tbody>
                         <tr>
-                            <th>MunicÃƒÆ’Ã‚Â­pio</th>
+                            <th>Municipio</th>
                             <td class="accountability-info-value accountability-long-value"><?= $softBreak($municipioLabel) ?></td>
                             <th>Data do documento</th>
                             <td class="accountability-info-value"><?= h($documentDate) ?></td>
                         </tr>
                         <tr>
-                            <th>ResponsÃƒÆ’Ã‚Â¡vel pela geraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</th>
+                            <th>Responsavel pela geracao</th>
                             <td class="accountability-info-value accountability-long-value"><?= $softBreak($currentUser['nome'] ?? '') ?></td>
                             <th>Telefone</th>
                             <td class="accountability-info-value"><?= h($valueOrDash($currentUser['telefone'] ?? '')) ?></td>
@@ -396,19 +396,19 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                         <tr>
                             <th>E-mail</th>
                             <td class="accountability-info-value accountability-email-value"><?= $softBreak($currentUser['email'] ?? '') ?></td>
-                            <th>BenefÃƒÆ’Ã‚Â­cio</th>
-                            <td class="accountability-info-value accountability-long-value">1 salÃƒÆ’Ã‚Â¡rio mÃƒÆ’Ã‚Â­nimo vigente por famÃƒÆ’Ã‚Â­lia apta</td>
+                            <th>Beneficio</th>
+                            <td class="accountability-info-value accountability-long-value">1 salario minimo vigente por familia apta</td>
                         </tr>
                         <tr>
-                            <th>Total de famÃƒÆ’Ã‚Â­lias aptas</th>
+                            <th>Total de familias aptas</th>
                             <td class="accountability-info-value"><?= h((int) ($documentContext['familias_aptas'] ?? $totalRecords)) ?></td>
                             <th>Localidade, bairro ou comunidade</th>
                             <td class="accountability-info-value accountability-long-value"><?= $softBreak($localidadeLabel) ?></td>
                         </tr>
                         <tr>
-                            <th>PerÃƒÆ’Ã‚Â­odo filtrado</th>
+                            <th>Periodo filtrado</th>
                             <td class="accountability-info-value"><?= h($periodo) ?></td>
-                            <th>CÃƒÆ’Ã‚Â³digo do documento</th>
+                            <th>Codigo do documento</th>
                             <td class="accountability-info-value accountability-code-value"><?= $softBreak($documentCode) ?></td>
                         </tr>
                     </tbody>
@@ -417,7 +417,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
             </section>
 
             <section class="dti-section accountability-section">
-                <h3>2. FamÃƒÆ’Ã‚Â­lias para pagamento</h3>
+                <h3>2. Familias para pagamento</h3>
                 <div class="accountability-table-wrap">
                 <table class="dti-table accountability-list-table recomecar-list-table">
                     <colgroup>
@@ -435,12 +435,12 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                         <tr>
                             <th>N.</th>
                             <th>Protocolo</th>
-                            <th>Nome do beneficiÃƒÆ’Ã‚Â¡rio</th>
+                            <th>Nome do beneficiario</th>
                             <th>Sexo</th>
                             <th>Nascimento</th>
                             <th>CPF</th>
                             <th>RG</th>
-                            <th>ÃƒÆ’Ã¢â‚¬Å“rgÃƒÆ’Ã‚Â£o exp.</th>
+                            <th>Orgao exp.</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -466,7 +466,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
 
                         <?php if ($documentDetails === []): ?>
                             <tr>
-                                <td colspan="9" class="dti-empty">Nenhuma famÃƒÆ’Ã‚Â­lia encontrada para os filtros informados.</td>
+                                <td colspan="9" class="dti-empty">Nenhuma familia encontrada para os filtros informados.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -482,7 +482,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
 
         <article class="dti-page accountability-page-sheet accountability-signature-sheet">
             <header class="dti-page-heading">
-                <strong>Programa RecomeÃƒÆ’Ã‚Â§ar</strong>
+                <strong>Programa Recomecar</strong>
                 <span><?= h($documentCode) ?></span>
             </header>
 
@@ -490,13 +490,13 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                 <h3>3. Assinaturas</h3>
                 <?php if ($signature === null): ?>
                     <div class="dti-signature-pending">
-                        Documento ainda nÃƒÆ’Ã‚Â£o assinado. Use a aÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o "Assinar documento" antes da impressÃƒÆ’Ã‚Â£o oficial.
+                        Documento ainda nao assinado. Use a acao "Assinar documento" antes da impressao oficial.
                     </div>
                 <?php else: ?>
                     <div class="dti-signature-card">
                         <img class="dti-signature-logo" src="<?= h(asset('images/logo-cedec.png')) ?>" alt="CEDEC-PA">
                         <div>
-                            <span>Visto do responsÃƒÆ’Ã‚Â¡vel pela geraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</span>
+                            <span>Visto do responsavel pela geracao</span>
                             <strong><?= h($valueOrDash($primarySigner['nome'] ?? ($signature['nome'] ?? ''))) ?></strong>
                             <p>
                                 <?= h($valueOrDash($primarySigner['graduacao'] ?? ($signature['graduacao'] ?? ''))) ?>
@@ -513,7 +513,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                     </div>
                     <?php if (count($signatureSigners) > 1): ?>
                         <div class="dti-cosigner-list">
-                            <span>ResponsÃƒÆ’Ã‚Â¡veis pela conferÃƒÆ’Ã‚Âªncia</span>
+                            <span>Responsaveis pela conferencia</span>
                             <?php foreach (array_slice($signatureSigners, 1) as $assinante): ?>
                                 <div>
                                     <strong><?= h($valueOrDash($assinante['nome'] ?? '')) ?></strong>
@@ -524,11 +524,11 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
                     <?php endif; ?>
                     <?php if ($coSignatureRequests !== [] && !$printReady): ?>
                         <div class="dti-cosigner-list no-print">
-                            <span>Status dos responsÃƒÆ’Ã‚Â¡veis pela conferÃƒÆ’Ã‚Âªncia</span>
+                            <span>Status dos responsaveis pela conferencia</span>
                             <?php foreach ($coSignatureRequests as $solicitacao): ?>
                                 <div>
                                     <strong><?= h($valueOrDash($solicitacao['coautor_nome'] ?? '')) ?></strong>
-                                    <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'NÃƒÆ’Ã‚Â£o autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>
+                                    <p><?= h(['pendente' => 'Pendente', 'autorizado' => 'Autorizado', 'negado' => 'Nao autorizado'][$solicitacao['status'] ?? ''] ?? '-') ?></p>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -539,7 +539,7 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
             <section class="dti-section">
                 <h3>4. Regra de elegibilidade</h3>
                 <div class="dti-signature-pending">
-                    FamÃƒÆ’Ã‚Â­lia inapta quando o imÃƒÆ’Ã‚Â³vel estiver marcado como nÃƒÆ’Ã‚Â£o atingido ou quando a renda familiar estiver acima de 3 salÃƒÆ’Ã‚Â¡rios.
+                    Familia inapta quando o imovel estiver marcado como nao atingido ou quando a renda familiar estiver acima de 3 salarios.
                 </div>
             </section>
 
@@ -553,14 +553,14 @@ $localidadeLabel = $valueOrDash(trim(($documentContext['localidades'] ?? '') . (
     <?php endif; ?>
 
     <?php if ($hasAppliedFilters && $totalPages > 1 && !$embedDocument): ?>
-        <nav class="records-pagination delivery-pagination no-print" aria-label="PaginaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o do Programa RecomeÃƒÆ’Ã‚Â§ar">
+        <nav class="records-pagination delivery-pagination no-print" aria-label="Paginacao do Programa Recomecar">
             <a class="secondary-button <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(max(1, $page - 1))) ?>">Anterior</a>
             <div class="pagination-pages">
                 <?php for ($itemPage = 1; $itemPage <= $totalPages; $itemPage++): ?>
                     <a class="<?= $itemPage === $page ? 'is-active' : '' ?>" href="<?= h($pageUrl($itemPage)) ?>"><?= h($itemPage) ?></a>
                 <?php endfor; ?>
             </div>
-            <a class="secondary-button <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(min($totalPages, $page + 1))) ?>">PrÃƒÆ’Ã‚Â³xima</a>
+            <a class="secondary-button <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= h($pageUrl(min($totalPages, $page + 1))) ?>">Proxima</a>
         </nav>
     <?php endif; ?>
 </section>

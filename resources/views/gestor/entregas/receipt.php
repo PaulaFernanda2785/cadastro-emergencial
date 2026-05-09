@@ -1,6 +1,15 @@
+<?php
+$statusOperacional = (string) ($entrega['status_operacional'] ?? 'entregue');
+$isRegisteredReceipt = $statusOperacional === 'registrado';
+$receiptLabel = $isRegisteredReceipt ? 'Comprovante de registro' : 'Comprovante de entrega';
+$receiptTitle = $isRegisteredReceipt ? 'Comprovante de Registro' : 'Comprovante de Entrega';
+$receiptDate = $isRegisteredReceipt
+    ? (string) ($entrega['registrado_em'] ?? $entrega['data_entrega'] ?? '')
+    : (string) ($entrega['entregue_em'] ?? $entrega['data_entrega'] ?? '');
+?>
 <section class="dashboard-header no-print receipt-preview-header">
     <div>
-        <span class="eyebrow">Comprovante de entrega</span>
+        <span class="eyebrow"><?= h($receiptLabel) ?></span>
         <h1>Pré-visualização do ticket</h1>
         <p><?= h($entrega['responsavel_nome']) ?> - <?= h($entrega['comprovante_codigo']) ?></p>
     </div>
@@ -33,7 +42,7 @@ $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante 
     class="receipt-ticket family-receipt-ticket"
     data-family-receipt-ticket
     data-receipt-code="<?= h($entrega['comprovante_codigo']) ?>"
-    data-share-title="Comprovante de entrega"
+    data-share-title="<?= h($receiptLabel) ?>"
     data-whatsapp-app-url="<?= h($whatsappAppUrl ?? '') ?>"
     data-whatsapp-url="<?= h($whatsappUrl ?? '') ?>"
     data-whatsapp-target-label="<?= h($whatsappTargetLabel) ?>"
@@ -46,7 +55,7 @@ $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante 
     <header class="receipt-header">
         <strong>Cadastro Emergencial</strong>
         <span>CEDEC-PA</span>
-        <span>Comprovante de Entrega</span>
+        <span><?= h($receiptTitle) ?></span>
     </header>
 
     <div class="receipt-separator"></div>
@@ -57,8 +66,8 @@ $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante 
             <dd><?= h($entrega['comprovante_codigo']) ?></dd>
         </div>
         <div>
-            <dt>Data</dt>
-            <dd><?= h(date('d/m/Y H:i', strtotime((string) $entrega['data_entrega']))) ?></dd>
+            <dt><?= $isRegisteredReceipt ? 'Registro' : 'Entrega' ?></dt>
+            <dd><?= h(strtotime($receiptDate) !== false ? date('d/m/Y H:i', strtotime($receiptDate)) : '-') ?></dd>
         </div>
         <div>
             <dt>Protocolo</dt>
@@ -131,7 +140,7 @@ $whatsappTargetLabel = $whatsappTargetType === 'representante' ? 'representante 
 
     <dl class="receipt-lines">
         <div>
-            <dt>Entregue por</dt>
+            <dt><?= $isRegisteredReceipt ? 'Registrado por' : 'Entregue por' ?></dt>
             <dd><?= h($entrega['entregue_por_nome']) ?></dd>
         </div>
         <div>

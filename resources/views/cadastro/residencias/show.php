@@ -188,9 +188,10 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                         (int) ($familia['possui_gestantes'] ?? 0) === 1 ? 'Gestantes' : '',
                     ]));
                     $entregasRegistradas = (int) ($familia['entregas_registradas'] ?? 0);
+                    $registrosPendentes = (int) ($familia['registros_pendentes'] ?? 0);
                     $camposPendentes = familia_campos_pendentes($familia);
                     ?>
-                    <article class="residence-family-card <?= $entregasRegistradas > 0 ? 'has-delivery' : 'without-delivery' ?>">
+                    <article class="residence-family-card <?= $entregasRegistradas > 0 ? 'has-delivery' : ($registrosPendentes > 0 ? 'has-registration' : 'without-delivery') ?>">
                         <div class="residence-family-main">
                             <span class="eyebrow">Responsável familiar</span>
                             <strong><?= h($familia['responsavel_nome']) ?></strong>
@@ -198,8 +199,16 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                         </div>
 
                         <div class="residence-family-status">
-                            <span><?= $entregasRegistradas > 0 ? 'Com entrega' : 'Sem entrega' ?></span>
-                            <strong><?= h($entregasRegistradas) ?></strong>
+                            <?php if ($registrosPendentes > 0): ?>
+                                <span>Registrado</span>
+                                <strong><?= h($registrosPendentes) ?></strong>
+                            <?php elseif ($entregasRegistradas > 0): ?>
+                                <span>Entregue</span>
+                                <strong><?= h($entregasRegistradas) ?></strong>
+                            <?php else: ?>
+                                <span>Sem registro</span>
+                                <strong>0</strong>
+                            <?php endif; ?>
                         </div>
 
                         <div class="residence-family-meta">
@@ -221,6 +230,13 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                             <div class="family-pending-fields residence-family-pending">
                                 <span>Campos pendentes</span>
                                 <strong><?= h(familia_campos_pendentes_resumo($familia)) ?></strong>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($registrosPendentes > 0 || $entregasRegistradas > 0): ?>
+                            <div class="family-pending-fields residence-family-pending">
+                                <span><?= $registrosPendentes > 0 ? 'Itens registrados pendentes' : 'Itens entregues' ?></span>
+                                <strong><?= h($registrosPendentes > 0 ? ($familia['registros_itens_resumo'] ?: 'Registro pendente') : ($familia['entregas_itens_resumo'] ?: 'Entrega registrada')) ?></strong>
                             </div>
                         <?php endif; ?>
 

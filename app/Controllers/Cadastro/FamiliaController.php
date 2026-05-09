@@ -22,7 +22,7 @@ final class FamiliaController extends Controller
 {
     private const INDEX_PER_PAGE = 10;
     private const SITUACAO_OPTIONS = ['desabrigado', 'desalojado', 'aluguel_social', 'permanece_residencia'];
-    private const ENTREGA_FILTERS = ['com_entrega', 'sem_entrega'];
+    private const ENTREGA_FILTERS = ['registrado', 'entregue', 'sem_registro', 'com_entrega', 'sem_entrega'];
     private const CADASTRO_FILTERS = ['concluido', 'pendente'];
 
     public function __construct(
@@ -89,13 +89,13 @@ final class FamiliaController extends Controller
         $residencia = $this->findResidencia((int) $residenciaId);
         $familia = $this->findFamiliaForResidencia((int) $familiaId, (int) $residenciaId);
         $receiptCode = familia_comprovante_codigo($familia);
-        $validationUrl = public_url('/gestor/entregas/validar/' . rawurlencode($receiptCode));
+        $validationUrl = public_url('/gestor/entregas/registrar/validar/' . rawurlencode($receiptCode));
         $whatsappText = implode("\n", [
             'Comprovante de cadastro familiar - Cadastro Emergencial',
             'Responsável: ' . (string) $familia['responsavel_nome'],
             'CPF: ' . (string) $familia['responsavel_cpf'],
             'Codigo: ' . $receiptCode,
-            'Validação: ' . $validationUrl,
+            'Registro: ' . $validationUrl,
         ]);
         $whatsappDestino = familia_whatsapp_destino($familia);
 
@@ -123,7 +123,7 @@ final class FamiliaController extends Controller
         $this->guardPost('cadastro.familia.receipt.email.' . (int) $familiaId, $redirect);
 
         $receiptCode = familia_comprovante_codigo($familia);
-        $validationUrl = public_url('/gestor/entregas/validar/' . rawurlencode($receiptCode));
+        $validationUrl = public_url('/gestor/entregas/registrar/validar/' . rawurlencode($receiptCode));
 
         try {
             $result = (new TicketEmailService())->sendFamilyReceipt($familia, $receiptCode, $validationUrl, new \DateTimeImmutable());

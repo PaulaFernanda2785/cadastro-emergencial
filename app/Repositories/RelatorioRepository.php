@@ -49,7 +49,9 @@ final class RelatorioRepository
                 AND NOT EXISTS (
                     SELECT 1
                     FROM entregas_ajuda e
-                    WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                    WHERE e.familia_id = f.id
+                      AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                      AND e.deleted_at IS NULL
                 )',
             $this->cadastroParams($filters)
         );
@@ -326,7 +328,9 @@ final class RelatorioRepository
                 AND NOT EXISTS (
                     SELECT 1
                     FROM entregas_ajuda e
-                    WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                    WHERE e.familia_id = f.id
+                      AND COALESCE(e.status_operacional, 'entregue') = 'entregue'
+                      AND e.deleted_at IS NULL
                 )
              ORDER BY r.data_cadastro DESC, f.criado_em DESC
              LIMIT {$limit}"
@@ -350,8 +354,17 @@ final class RelatorioRepository
                         WHEN EXISTS (
                             SELECT 1
                             FROM entregas_ajuda e
-                            WHERE e.familia_id = f.id AND e.deleted_at IS NULL
-                        ) THEN 'Atendida'
+                            WHERE e.familia_id = f.id
+                              AND COALESCE(e.status_operacional, 'entregue') = 'entregue'
+                              AND e.deleted_at IS NULL
+                        ) THEN 'Entregue'
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM entregas_ajuda e
+                            WHERE e.familia_id = f.id
+                              AND COALESCE(e.status_operacional, 'entregue') = 'registrado'
+                              AND e.deleted_at IS NULL
+                        ) THEN 'Registrado'
                         ELSE 'Pendente'
                     END AS status_entrega
              FROM residencias r
@@ -433,6 +446,7 @@ final class RelatorioRepository
                 SELECT 1
                 FROM entregas_ajuda e_status
                 WHERE e_status.familia_id = {$familiaAlias}.id
+                  AND COALESCE(e_status.status_operacional, 'entregue') = 'entregue'
                   AND e_status.deleted_at IS NULL
             )";
             $conditions[] = $filters['entregas'] === 'com_entrega' ? $exists : 'NOT ' . $exists;
@@ -444,6 +458,7 @@ final class RelatorioRepository
                 FROM entregas_ajuda e_tipo
                 WHERE e_tipo.familia_id = {$familiaAlias}.id
                   AND e_tipo.tipo_ajuda_id = :tipo_ajuda_id
+                  AND COALESCE(e_tipo.status_operacional, 'entregue') = 'entregue'
                   AND e_tipo.deleted_at IS NULL
             )";
         }
@@ -463,6 +478,7 @@ final class RelatorioRepository
     {
         $conditions = [
             'e.deleted_at IS NULL',
+            'COALESCE(e.status_operacional, "entregue") = "entregue"',
             'f.deleted_at IS NULL',
             'r.deleted_at IS NULL',
             'a.deleted_at IS NULL',

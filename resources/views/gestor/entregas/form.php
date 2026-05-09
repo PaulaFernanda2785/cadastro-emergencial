@@ -1,7 +1,11 @@
 <?php
 $selectedTipos = array_map('strval', $entrega['tipo_ajuda_ids'] ?? []);
 $historico = $historico ?? [];
-$hasPreviousDeliveries = $historico !== [];
+$historicoRegistrado = array_values(array_filter($historico, static fn (array $item): bool => (string) ($item['status_operacional'] ?? 'entregue') === 'registrado'));
+$historicoEntregue = array_values(array_filter($historico, static fn (array $item): bool => (string) ($item['status_operacional'] ?? 'entregue') === 'entregue'));
+$hasRegisteredItems = $historicoRegistrado !== [];
+$hasDeliveredItems = $historicoEntregue !== [];
+$hasPreviousDeliveries = $hasRegisteredItems || $hasDeliveredItems;
 $recentHistory = array_slice($historico, 0, 4);
 $itemInput = static function (array $entrega, mixed $tipoId, string $field, string $default = ''): string {
     $tipoId = (int) $tipoId;
@@ -42,30 +46,48 @@ $itemInput = static function (array $entrega, mixed $tipoId, string $field, stri
         </article>
     </section>
 
-    <section class="delivery-family-alert <?= $hasPreviousDeliveries ? 'is-delivered' : 'is-clear' ?>">
+    <section class="delivery-family-alert <?= $hasRegisteredItems ? 'is-pending' : ($hasDeliveredItems ? 'is-delivered' : 'is-clear') ?>">
         <div class="delivery-family-alert-heading">
             <div>
-                <span class="eyebrow">Situação de entrega</span>
-                <h2><?= $hasPreviousDeliveries ? 'Família já teve entrega registrada' : 'Sem entrega anterior registrada' ?></h2>
+                <span class="eyebrow">Situacao operacional</span>
+                <h2>
+                    <?php if ($hasRegisteredItems): ?>
+                        Familia com itens registrados
+                    <?php elseif ($hasDeliveredItems): ?>
+                        Familia ja teve entrega confirmada
+                    <?php else: ?>
+                        Sem registro anterior
+                    <?php endif; ?>
+                </h2>
                 <p>
-                    <?= $hasPreviousDeliveries
-                        ? 'Confira os itens já entregues antes de registrar uma nova baixa para esta família.'
-                        : 'Nenhum comprovante de entrega foi localizado para esta família.' ?>
+                    <?php if ($hasRegisteredItems): ?>
+                        Existem itens registrados pendentes. A entrega so fica disponivel apos esse registro.
+                    <?php elseif ($hasDeliveredItems): ?>
+                        Confira os itens ja entregues antes de registrar novos itens para esta familia.
+                    <?php else: ?>
+                        Nenhum registro ou entrega foi localizado para esta familia.
+                    <?php endif; ?>
                 </p>
             </div>
             <strong class="delivery-family-alert-status">
-                <?= $hasPreviousDeliveries ? h(count($historico)) . ' comprovante(s)' : 'Pendente' ?>
+                <?= $hasPreviousDeliveries ? h(count($historicoRegistrado) . ' registrado(s) / ' . count($historicoEntregue) . ' entregue(s)') : 'Sem registro' ?>
             </strong>
         </div>
 
         <?php if ($hasPreviousDeliveries): ?>
             <div class="delivery-family-alert-list">
                 <?php foreach ($recentHistory as $item): ?>
+                    <?php
+                    $itemStatus = (string) ($item['status_operacional'] ?? 'entregue');
+                    $itemDate = $itemStatus === 'registrado'
+                        ? (string) ($item['registrado_em'] ?? $item['data_entrega'] ?? '')
+                        : (string) ($item['entregue_em'] ?? $item['data_entrega'] ?? '');
+                    ?>
                     <article>
                         <strong><?= h($item['itens_resumo'] ?? $item['tipo_ajuda_nome'] ?? '-') ?></strong>
                         <span>
-                            <?= h(date('d/m/Y H:i', strtotime((string) $item['data_entrega']))) ?>
-                            - comprovante <?= h($item['comprovante_codigo']) ?>
+                            <?= h(strtotime($itemDate) !== false ? date('d/m/Y H:i', strtotime($itemDate)) : '-') ?>
+                            - <?= $itemStatus === 'registrado' ? 'registro' : 'entrega' ?> <?= h($item['comprovante_codigo']) ?>
                         </span>
                     </article>
                 <?php endforeach; ?>
@@ -142,20 +164,26 @@ $itemInput = static function (array $entrega, mixed $tipoId, string $field, stri
 <section class="table-panel delivery-table-panel delivery-family-history-panel">
     <div class="table-heading">
         <h2>Histórico da família</h2>
-        <span><?= h(count($historico)) ?> entrega(s)</span>
+        <span><?= h(count($historicoRegistrado)) ?> registrado(s) / <?= h(count($historicoEntregue)) ?> entregue(s)</span>
     </div>
     <?php if ($historico === []): ?>
-        <div class="empty-state">Nenhuma entrega anterior para esta família.</div>
+        <div class="empty-state">Nenhum registro anterior para esta familia.</div>
     <?php else: ?>
         <div class="delivery-family-history-list">
             <?php foreach ($historico as $item): ?>
+                <?php
+                $itemStatus = (string) ($item['status_operacional'] ?? 'entregue');
+                $itemDate = $itemStatus === 'registrado'
+                    ? (string) ($item['registrado_em'] ?? $item['data_entrega'] ?? '')
+                    : (string) ($item['entregue_em'] ?? $item['data_entrega'] ?? '');
+                ?>
                 <article class="delivery-family-history-card">
                     <div class="delivery-family-history-main">
                         <span class="eyebrow">Comprovante</span>
                         <strong><?= h($item['comprovante_codigo']) ?></strong>
                     </div>
                     <div class="delivery-family-history-items">
-                        <span class="eyebrow">Ajuda entregue</span>
+                        <span class="eyebrow"><?= $itemStatus === 'registrado' ? 'Ajuda registrada' : 'Ajuda entregue' ?></span>
                         <p><?= h($item['itens_resumo'] ?? $item['tipo_ajuda_nome'] ?? '-') ?></p>
                     </div>
                     <div class="delivery-family-history-meta">
@@ -165,10 +193,10 @@ $itemInput = static function (array $entrega, mixed $tipoId, string $field, stri
                         </span>
                         <span>
                             <small>Data</small>
-                            <strong><?= h(date('d/m/Y H:i', strtotime((string) $item['data_entrega']))) ?></strong>
+                            <strong><?= h(strtotime($itemDate) !== false ? date('d/m/Y H:i', strtotime($itemDate)) : '-') ?></strong>
                         </span>
                         <span>
-                            <small>Responsável</small>
+                            <small><?= $itemStatus === 'registrado' ? 'Registrado por' : 'Entregue por' ?></small>
                             <strong><?= h($item['entregue_por_nome']) ?></strong>
                         </span>
                     </div>
