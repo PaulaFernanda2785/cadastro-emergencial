@@ -5,7 +5,20 @@ DirectoryIndex front.php
     Require all granted
 </IfModule>
 
+<FilesMatch "^(\.env(?:\..*)?|\.git|\.gitattributes|\.gitignore|composer\.(?:json|lock)|package(?:-lock)?\.json|README\.md|LICENSE)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
 <IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Cross-Origin-Resource-Policy "same-origin"
     Header unset Permissions-Policy
     Header always unset Permissions-Policy
     Header set Permissions-Policy "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()"
@@ -16,6 +29,7 @@ DirectoryIndex front.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteRule ^(?:\.env(?:\..*)?|\.git|\.gitattributes|\.gitignore|composer\.(?:json|lock)|package(?:-lock)?\.json|README\.md|LICENSE)$ - [F,L]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ front.php [L]

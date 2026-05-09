@@ -22,14 +22,18 @@ storage/*
 !storage/logs/.gitkeep
 !storage/cache/
 !storage/cache/.gitkeep
+!storage/cache/.htaccess
 !storage/private_uploads/
 !storage/private_uploads/.gitkeep
+!storage/private_uploads/.htaccess
 storage/logs/*
 !storage/logs/.gitkeep
 storage/cache/*
 !storage/cache/.gitkeep
+!storage/cache/.htaccess
 storage/private_uploads/*
 !storage/private_uploads/.gitkeep
+!storage/private_uploads/.htaccess
 public/uploads/
 public/assets/uploads/
 

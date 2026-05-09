@@ -133,6 +133,7 @@ function send_security_headers(): void
     header('X-Frame-Options: SAMEORIGIN');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Cross-Origin-Resource-Policy: same-origin');
     header('Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()');
     header('Feature-Policy: geolocation \'self\'; camera \'self\'; microphone \'none\'; payment \'none\'; usb \'none\'');
 

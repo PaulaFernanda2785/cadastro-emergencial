@@ -13,6 +13,7 @@ use App\Repositories\UsuarioRepository;
 use App\Services\AuditLogService;
 use App\Services\AuthService;
 use App\Services\IdempotenciaService;
+use App\Services\LoginThrottleService;
 
 final class AuthController extends Controller
 {
@@ -61,14 +62,29 @@ final class AuthController extends Controller
             return;
         }
 
-        $user = (new AuthService())->attempt($email, $password);
+        $throttle = new LoginThrottleService();
+        $status = $throttle->status($email);
 
-        if ($user === null) {
-            (new AuditLogService())->record('login_falhou', 'usuarios', null, 'Tentativa de login para ' . $email);
-            Session::flash('error', 'Credenciais invalidas ou usuario inativo.');
+        if ($status['blocked']) {
+            Session::flash('error', 'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.');
             $this->redirect('/login');
         }
 
+        $user = (new AuthService())->attempt($email, $password);
+
+        if ($user === null) {
+            $status = $throttle->recordFailure($email);
+            (new AuditLogService())->record('login_falhou', 'usuarios', null, 'Tentativa de login para ' . $email);
+            Session::flash(
+                'error',
+                $status['blocked']
+                    ? 'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.'
+                    : 'Credenciais invalidas ou usuario inativo.'
+            );
+            $this->redirect('/login');
+        }
+
+        $throttle->clear($email);
         Session::regenerate();
         Session::put('user', $user);
         Session::put('last_activity_at', time());

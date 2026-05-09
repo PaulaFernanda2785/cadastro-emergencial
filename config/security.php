@@ -9,4 +9,7 @@ return [
     'session_same_site' => Env::get('SESSION_SAME_SITE', 'Lax'),
     'session_idle_timeout_seconds' => (int) Env::get('SESSION_IDLE_TIMEOUT_SECONDS', 1800),
     'idempotency_window_seconds' => (int) Env::get('IDEMPOTENCY_WINDOW_SECONDS', 5),
+    'login_max_attempts' => (int) Env::get('LOGIN_MAX_ATTEMPTS', 5),
+    'login_attempt_window_seconds' => (int) Env::get('LOGIN_ATTEMPT_WINDOW_SECONDS', 900),
+    'login_lock_seconds' => (int) Env::get('LOGIN_LOCK_SECONDS', 300),
 ];

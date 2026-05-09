@@ -32,7 +32,9 @@ O Cadastro Emergencial centraliza informações operacionais de campo para apoia
 - Coassinaturas só liberam impressão quando todos os coautores autorizam.
 - Negativa de coassinatura exige motivo.
 - Sessão possui encerramento por inatividade.
+- Login possui limitacao de tentativas por e-mail e IP, com bloqueio temporario configuravel em `config/security.php`.
 - Uploads ficam em diretório privado fora da pasta pública.
+- Pastas internas e arquivos sensiveis possuem bloqueio por `.htaccess` e cabecalhos de seguranca no PHP/Apache.
 
 ## Tecnologia
 
