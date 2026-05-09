@@ -13,7 +13,7 @@ $itemInput = static function (array $entrega, mixed $tipoId, string $field, stri
 <section class="delivery-form-page">
     <section class="dashboard-header">
         <div>
-            <span class="eyebrow">Entrega de ajuda</span>
+            <span class="eyebrow">Registro de itens</span>
             <h1><?= h($title) ?></h1>
             <p><?= h($familia['responsavel_nome']) ?> - residência <?= h($familia['protocolo']) ?></p>
         </div>
@@ -82,7 +82,7 @@ $itemInput = static function (array $entrega, mixed $tipoId, string $field, stri
 
         <div class="table-heading">
             <div>
-                <span class="eyebrow">Itens da entrega</span>
+                <span class="eyebrow">Itens para prestacao</span>
                 <h2>Selecione um ou mais tipos de ajuda</h2>
             </div>
             <span><?= h(count($tipos)) ?> tipo(s) ativo(s)</span>
@@ -127,12 +127,12 @@ $itemInput = static function (array $entrega, mixed $tipoId, string $field, stri
         </div>
 
         <?php if ($tipos === []): ?>
-            <div class="alert alert-warning" role="alert">Cadastre e ative pelo menos um tipo de ajuda antes de registrar entregas.</div>
+            <div class="alert alert-warning" role="alert">Cadastre e ative pelo menos um tipo de ajuda antes de registrar itens.</div>
         <?php endif; ?>
 
         <div class="form-actions">
             <button type="submit" class="primary-button" data-loading-text="Registrando..." <?= $tipos === [] ? 'disabled' : '' ?>>
-                <span class="button-label">Registrar entrega</span>
+                <span class="button-label">Registrar itens</span>
                 <span class="button-spinner" aria-hidden="true"></span>
             </button>
         </div>

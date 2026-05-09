@@ -58,14 +58,34 @@ final class EntregaAjudaController extends Controller
     public function validationPage(): void
     {
         $this->view('gestor.entregas.validacao', [
-            'title' => 'Validar comprovante',
+            'title' => 'Validar QR para entrega',
             'activeDeliveryPage' => 'validacao',
+            'validationMode' => 'entregar',
+        ]);
+    }
+
+    public function registerBatch(): void
+    {
+        $batchFilters = $this->batchFilters();
+
+        $this->view('gestor.entregas.lote', [
+            'title' => 'Registrar em lote',
+            'batchFilters' => $batchFilters,
+            'batchHasFilters' => $this->hasBatchFilters($batchFilters),
+            'batchFamilies' => $this->hasBatchFilters($batchFilters) ? $this->familias->deliveryCandidates($batchFilters) : [],
+            'acoes' => $this->acoes->all(),
+            'residencias' => $this->residencias->optionsByOpenActions(),
+            'tipos' => $this->tipos->active(),
+            'activeDeliveryPage' => 'registrar',
+            'deliveryMode' => 'registrar',
+            'formAction' => '/gestor/entregas/registrar/lote',
         ]);
     }
 
     public function batch(): void
     {
         $batchFilters = $this->batchFilters();
+        $batchFilters['status_entrega'] = 'registrado';
 
         $this->view('gestor.entregas.lote', [
             'title' => 'Entrega em lote',
@@ -76,6 +96,8 @@ final class EntregaAjudaController extends Controller
             'residencias' => $this->residencias->optionsByOpenActions(),
             'tipos' => $this->tipos->active(),
             'activeDeliveryPage' => 'lote',
+            'deliveryMode' => 'entregar',
+            'formAction' => '/gestor/entregas/lote',
         ]);
     }
 
@@ -83,6 +105,42 @@ final class EntregaAjudaController extends Controller
     {
         $familia = $this->findFamilia((int) $familiaId);
         $this->form($familia, $this->emptyInput(), []);
+    }
+
+    public function confirm(string $familiaId): void
+    {
+        $familia = $this->findFamilia((int) $familiaId);
+        $pending = $this->entregas->pendingRegistrationsByFamilia((int) $familia['id']);
+
+        if ($pending === []) {
+            Session::flash('warning', 'Esta familia nao possui itens registrados pendentes de entrega.');
+            $this->redirect('/gestor/entregas/validacao');
+        }
+
+        $this->view('gestor.entregas.confirmar', [
+            'title' => 'Confirmar entrega',
+            'familia' => $familia,
+            'registros' => $pending,
+            'action' => '/gestor/familias/' . (int) $familia['id'] . '/entregas/confirmar',
+            'activeDeliveryPage' => 'validacao',
+        ]);
+    }
+
+    public function confirmStore(string $familiaId): void
+    {
+        $familia = $this->findFamilia((int) $familiaId);
+        $this->guardPost('gestor.entregas.confirmar.' . (int) $familiaId, '/gestor/familias/' . (int) $familiaId . '/entregas/confirmar');
+
+        $updated = $this->entregas->deliverRegisteredForFamily((int) $familia['id'], (int) (current_user()['id'] ?? 0));
+
+        if ($updated <= 0) {
+            Session::flash('warning', 'Nenhum item registrado pendente foi encontrado para esta familia.');
+            $this->redirect('/gestor/entregas/validacao');
+        }
+
+        (new AuditLogService())->record('confirmou_entrega_registrada', 'familias', (int) $familia['id'], 'itens=' . $updated);
+        Session::flash('success', 'Entrega confirmada com ' . $updated . ' item(ns) registrado(s).');
+        $this->redirect('/gestor/entregas');
     }
 
     public function receipt(string $id): void
@@ -165,6 +223,18 @@ final class EntregaAjudaController extends Controller
         $this->validateReceipt($code);
     }
 
+    public function validateRegistrationReceiptQuery(): void
+    {
+        $code = $this->extractReceiptCode(trim((string) ($_GET['codigo'] ?? '')));
+
+        if ($code === '') {
+            Session::flash('warning', 'Informe ou leia o codigo do comprovante de cadastro familiar.');
+            $this->redirect('/gestor/entregas/registrar');
+        }
+
+        $this->validateRegistrationReceipt($code);
+    }
+
     public function validateReceipt(string $codigo): void
     {
         $code = $this->extractReceiptCode($codigo);
@@ -175,8 +245,31 @@ final class EntregaAjudaController extends Controller
             $this->redirect('/gestor/entregas/validacao');
         }
 
-        (new AuditLogService())->record('validou_comprovante_familia', 'familias', (int) $familia['id'], $code);
-        Session::flash('success', 'Cadastro familiar validado pelo QR. Confira os dados e registre a entrega.');
+        $pending = $this->entregas->pendingRegistrationsByFamilia((int) $familia['id']);
+
+        if ($pending === []) {
+            Session::flash('warning', 'Esta familia ainda nao possui itens registrados para entrega.');
+            $this->redirect('/gestor/entregas/validacao');
+        }
+
+        (new AuditLogService())->record('validou_qr_entrega', 'familias', (int) $familia['id'], $code);
+        Session::flash('success', 'QR validado. Confira os itens registrados antes de confirmar a entrega.');
+
+        $this->redirect('/gestor/familias/' . (int) $familia['id'] . '/entregas/confirmar');
+    }
+
+    public function validateRegistrationReceipt(string $codigo): void
+    {
+        $code = $this->extractReceiptCode($codigo);
+        $familia = $this->familias->findByReceiptCode($code);
+
+        if ($familia === null) {
+            Session::flash('error', 'Comprovante de cadastro familiar invalido ou nao localizado.');
+            $this->redirect('/gestor/entregas/registrar');
+        }
+
+        (new AuditLogService())->record('validou_qr_registro_entrega', 'familias', (int) $familia['id'], $code);
+        Session::flash('success', 'Cadastro familiar validado. Registre os itens previstos para esta familia.');
 
         $this->redirect('/gestor/familias/' . (int) $familia['id'] . '/entregas/novo');
     }
@@ -205,7 +298,7 @@ final class EntregaAjudaController extends Controller
 
         $data['familia_id'] = (int) $familiaId;
         $data['entregue_por'] = (int) (current_user()['id'] ?? 0);
-        $createdIds = [];
+        $data['status_operacional'] = 'registrado';
         $groupCode = $this->generateReceiptCode();
         $hasMultipleItems = count($data['tipo_ajuda_ids']) > 1;
 
@@ -219,18 +312,17 @@ final class EntregaAjudaController extends Controller
             $row['comprovante_codigo'] = $hasMultipleItems ? $groupCode . '-ITEM-' . str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) : $groupCode;
 
             $id = $this->entregas->create($row);
-            $createdIds[] = $id;
-            (new AuditLogService())->record('registrou_entrega', 'entregas_ajuda', $id, $groupCode);
+            (new AuditLogService())->record('registrou_itens_entrega', 'entregas_ajuda', $id, $groupCode);
         }
 
-        Session::flash('success', 'Entrega registrada com comprovante ' . $groupCode . '.');
+        Session::flash('success', 'Itens registrados com codigo ' . $groupCode . '. A entrega fica disponivel apos este registro.');
 
-        $this->redirect('/gestor/entregas/' . (int) $createdIds[0] . '/comprovante');
+        $this->redirect('/gestor/entregas');
     }
 
-    public function batchStore(): void
+    public function registerBatchStore(): void
     {
-        $this->guardPost('gestor.entregas.lote', '/gestor/entregas/lote');
+        $this->guardPost('gestor.entregas.registrar.lote', '/gestor/entregas/registrar');
 
         $familiaIds = $this->integerList($_POST['familia_ids'] ?? []);
         $tipoIds = $this->integerList($_POST['tipo_ajuda_ids'] ?? []);
@@ -239,7 +331,7 @@ final class EntregaAjudaController extends Controller
         $this->validateDeliveryItems($validator, ['tipo_ajuda_ids' => $tipoIds, 'itens' => $itens]);
 
         if ($familiaIds === []) {
-            $validator->add('familia_ids', 'Selecione pelo menos uma família para entrega em lote.');
+            $validator->add('familia_ids', 'Selecione pelo menos uma familia para registro em lote.');
         }
 
         foreach ($tipoIds as $tipoId) {
@@ -253,7 +345,7 @@ final class EntregaAjudaController extends Controller
 
         if ($validator->fails()) {
             Session::flash('error', implode(' ', array_map(static fn (array $messages): string => $messages[0] ?? '', $validator->errors())));
-            $this->redirect('/gestor/entregas/lote');
+            $this->redirect('/gestor/entregas/registrar');
         }
 
         $created = 0;
@@ -273,6 +365,7 @@ final class EntregaAjudaController extends Controller
                     'familia_id' => $familiaId,
                     'tipo_ajuda_id' => $tipoId,
                     'quantidade' => $item['quantidade'],
+                    'status_operacional' => 'registrado',
                     'entregue_por' => $userId,
                     'comprovante_codigo' => $hasMultipleItems ? $groupCode . '-ITEM-' . str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) : $groupCode,
                     'grupo_comprovante_codigo' => $groupCode,
@@ -280,14 +373,36 @@ final class EntregaAjudaController extends Controller
                 ];
                 $id = $this->entregas->create($data);
                 $created++;
-                (new AuditLogService())->record('registrou_entrega_lote', 'entregas_ajuda', $id, $groupCode);
+                (new AuditLogService())->record('registrou_itens_lote', 'entregas_ajuda', $id, $groupCode);
             }
         }
 
-        Session::flash('success', $created . ' item(ns) registrado(s) em lote, agrupados por família no histórico.');
+        Session::flash('success', $created . ' item(ns) registrado(s) em lote para entrega posterior.');
         $this->redirect('/gestor/entregas');
     }
 
+    public function batchStore(): void
+    {
+        $this->guardPost('gestor.entregas.lote', '/gestor/entregas/lote');
+
+        $familiaIds = $this->integerList($_POST['familia_ids'] ?? []);
+
+        if ($familiaIds === []) {
+            Session::flash('error', 'Selecione pelo menos uma familia com registro pendente.');
+            $this->redirect('/gestor/entregas/lote');
+        }
+
+        $updated = $this->entregas->deliverRegisteredForFamilies($familiaIds, (int) (current_user()['id'] ?? 0));
+
+        if ($updated <= 0) {
+            Session::flash('warning', 'Nenhum item registrado pendente foi encontrado para entrega em lote.');
+            $this->redirect('/gestor/entregas/lote');
+        }
+
+        (new AuditLogService())->record('confirmou_entrega_lote', 'entregas_ajuda', null, 'familias=' . count($familiaIds) . ';itens=' . $updated);
+        Session::flash('success', $updated . ' item(ns) registrado(s) confirmado(s) como entregue.');
+        $this->redirect('/gestor/entregas');
+    }
     private function findFamilia(int $id): array
     {
         $familia = $this->familias->find($id);
@@ -302,7 +417,7 @@ final class EntregaAjudaController extends Controller
     private function form(array $familia, array $entrega, array $errors): void
     {
         $this->view('gestor.entregas.form', [
-            'title' => 'Registrar entrega',
+            'title' => 'Registrar itens',
             'familia' => $familia,
             'entrega' => $entrega,
             'tipos' => $this->tipos->active(),
@@ -442,7 +557,7 @@ final class EntregaAjudaController extends Controller
     {
         $status = trim((string) $value);
 
-        return in_array($status, ['entregue', 'nao_entregue'], true) ? $status : '';
+        return in_array($status, ['registrado', 'entregue', 'nao_entregue'], true) ? $status : '';
     }
 
     private function integerList(mixed $value): array
@@ -476,7 +591,7 @@ final class EntregaAjudaController extends Controller
         if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
             $path = parse_url($value, PHP_URL_PATH);
 
-            if (is_string($path) && preg_match('#/gestor/entregas/validar/([^/]+)$#', $path, $matches) === 1) {
+            if (is_string($path) && preg_match('#/gestor/entregas/(?:registrar/)?validar/([^/]+)$#', $path, $matches) === 1) {
                 return strtoupper(rawurldecode($matches[1]));
             }
         }

@@ -22,7 +22,9 @@ final class FamiliaRepository
                        (
                            SELECT COUNT(*)
                            FROM entregas_ajuda e
-                           WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                           WHERE e.familia_id = f.id
+                             AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                             AND e.deleted_at IS NULL
                        ) AS entregas_registradas
                 FROM familias f
                 INNER JOIN residencias r ON r.id = f.residencia_id
@@ -70,18 +72,24 @@ final class FamiliaRepository
                     (
                         SELECT COUNT(*)
                         FROM entregas_ajuda e
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) AS entregas_registradas,
                     (
                         SELECT GROUP_CONCAT(DISTINCT t.nome ORDER BY t.nome SEPARATOR ", ")
                         FROM entregas_ajuda e
                         INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) AS entregas_itens_resumo,
                     (
                         SELECT MAX(e.data_entrega)
                         FROM entregas_ajuda e
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) AS ultima_entrega
              FROM familias f
              INNER JOIN residencias r ON r.id = f.residencia_id
@@ -129,7 +137,9 @@ final class FamiliaRepository
                     COALESCE(SUM(CASE WHEN (
                         SELECT COUNT(*)
                         FROM entregas_ajuda e
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) > 0 THEN 1 ELSE 0 END), 0) AS com_entrega,
                     MAX(f.criado_em) AS ultima_atualizacao
              FROM familias f
@@ -288,18 +298,24 @@ final class FamiliaRepository
                     (
                         SELECT COUNT(*)
                         FROM entregas_ajuda e
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) AS entregas_registradas,
                     (
                         SELECT GROUP_CONCAT(DISTINCT t.nome ORDER BY t.nome SEPARATOR ", ")
                         FROM entregas_ajuda e
                         INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) AS entregas_itens_resumo,
                     (
-                        SELECT MAX(e.data_entrega)
+                        SELECT MAX(COALESCE(e.entregue_em, e.data_entrega))
                         FROM entregas_ajuda e
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) AS ultima_entrega
              FROM familias f
              WHERE f.residencia_id = :residencia_id AND f.deleted_at IS NULL
@@ -355,11 +371,21 @@ final class FamiliaRepository
             $params['residencia_busca_endereco'] = $residenceSearch;
         }
 
-        if (($filters['status_entrega'] ?? '') === 'entregue') {
+        if (($filters['status_entrega'] ?? '') === 'registrado') {
             $where[] = 'EXISTS (
                 SELECT 1
                 FROM entregas_ajuda e_status
-                WHERE e_status.familia_id = f.id AND e_status.deleted_at IS NULL
+                WHERE e_status.familia_id = f.id
+                  AND COALESCE(e_status.status_operacional, "entregue") = "registrado"
+                  AND e_status.deleted_at IS NULL
+            )';
+        } elseif (($filters['status_entrega'] ?? '') === 'entregue') {
+            $where[] = 'EXISTS (
+                SELECT 1
+                FROM entregas_ajuda e_status
+                WHERE e_status.familia_id = f.id
+                  AND COALESCE(e_status.status_operacional, "entregue") = "entregue"
+                  AND e_status.deleted_at IS NULL
             )';
         } elseif (($filters['status_entrega'] ?? '') === 'nao_entregue') {
             $where[] = 'NOT EXISTS (
@@ -402,18 +428,39 @@ final class FamiliaRepository
                     (
                         SELECT COUNT(*)
                         FROM entregas_ajuda e
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) AS entregas_registradas,
+                    (
+                        SELECT COUNT(*)
+                        FROM entregas_ajuda e
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "registrado"
+                          AND e.deleted_at IS NULL
+                    ) AS registros_pendentes,
                     (
                         SELECT GROUP_CONCAT(DISTINCT t.nome ORDER BY t.nome SEPARATOR ", ")
                         FROM entregas_ajuda e
                         INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) AS entregas_itens_resumo,
                     (
-                        SELECT MAX(e.data_entrega)
+                        SELECT GROUP_CONCAT(DISTINCT t.nome ORDER BY t.nome SEPARATOR ", ")
                         FROM entregas_ajuda e
-                        WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                        INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "registrado"
+                          AND e.deleted_at IS NULL
+                    ) AS registros_itens_resumo,
+                    (
+                        SELECT MAX(COALESCE(e.entregue_em, e.data_entrega))
+                        FROM entregas_ajuda e
+                        WHERE e.familia_id = f.id
+                          AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                          AND e.deleted_at IS NULL
                     ) AS ultima_entrega
              FROM familias f
              INNER JOIN residencias r ON r.id = f.residencia_id
@@ -603,13 +650,17 @@ final class FamiliaRepository
             $where[] = '(
                 SELECT COUNT(*)
                 FROM entregas_ajuda e
-                WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                WHERE e.familia_id = f.id
+                  AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                  AND e.deleted_at IS NULL
             ) > 0';
         } elseif (($filters['entregas'] ?? '') === 'sem_entrega') {
             $where[] = '(
                 SELECT COUNT(*)
                 FROM entregas_ajuda e
-                WHERE e.familia_id = f.id AND e.deleted_at IS NULL
+                WHERE e.familia_id = f.id
+                  AND COALESCE(e.status_operacional, "entregue") = "entregue"
+                  AND e.deleted_at IS NULL
             ) = 0';
         }
 

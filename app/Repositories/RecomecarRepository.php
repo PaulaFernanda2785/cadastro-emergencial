@@ -93,14 +93,11 @@ final class RecomecarRepository
                           AND e.deleted_at IS NULL
                           AND " . $this->recomecarTypeSql('t') . "
                     ) AS ultima_entrega,
-                    CASE WHEN EXISTS (
-                        SELECT 1
-                        FROM entregas_ajuda e
-                        INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
-                        WHERE e.familia_id = f.id
-                          AND e.deleted_at IS NULL
-                          AND " . $this->recomecarTypeSql('t') . "
-                    ) THEN 'entregue' ELSE 'nao_entregue' END AS status_entrega,
+                    CASE
+                        WHEN " . $this->recomecarDeliveredExistsSql() . " THEN 'entregue'
+                        WHEN " . $this->recomecarRegisteredExistsSql() . " THEN 'registrado'
+                        ELSE 'nao_entregue'
+                    END AS status_entrega,
                     CASE WHEN " . $this->eligibleSql() . " THEN 'apta' ELSE 'inapta' END AS aptidao,
                     CASE
                         WHEN r.condicao_residencia = 'nao_atingida' THEN 'Imóvel não atingido'
@@ -204,7 +201,11 @@ final class RecomecarRepository
             $params['data_fim'] = $filters['data_fim'] . ' 23:59:59';
         }
 
-        if (($filters['status_entrega'] ?? '') === 'nao_entregue') {
+        if (($filters['status_entrega'] ?? '') === 'registrado') {
+            $conditions[] = $this->recomecarRegisteredExistsSql();
+        } elseif (($filters['status_entrega'] ?? '') === 'entregue') {
+            $conditions[] = $this->recomecarDeliveredExistsSql();
+        } elseif (($filters['status_entrega'] ?? '') === 'nao_entregue') {
             $conditions[] = 'NOT (' . $this->recomecarDeliveryExistsSql() . ')';
         }
 
@@ -234,6 +235,32 @@ final class RecomecarRepository
             WHERE e_recomecar.familia_id = f.id
               AND e_recomecar.deleted_at IS NULL
               AND ' . $this->recomecarTypeSql('t_recomecar') . '
+        )';
+    }
+
+    private function recomecarDeliveredExistsSql(): string
+    {
+        return 'EXISTS (
+            SELECT 1
+            FROM entregas_ajuda e_recomecar_entregue
+            INNER JOIN tipos_ajuda t_recomecar_entregue ON t_recomecar_entregue.id = e_recomecar_entregue.tipo_ajuda_id
+            WHERE e_recomecar_entregue.familia_id = f.id
+              AND e_recomecar_entregue.deleted_at IS NULL
+              AND COALESCE(e_recomecar_entregue.status_operacional, "entregue") = "entregue"
+              AND ' . $this->recomecarTypeSql('t_recomecar_entregue') . '
+        )';
+    }
+
+    private function recomecarRegisteredExistsSql(): string
+    {
+        return 'EXISTS (
+            SELECT 1
+            FROM entregas_ajuda e_recomecar_registrado
+            INNER JOIN tipos_ajuda t_recomecar_registrado ON t_recomecar_registrado.id = e_recomecar_registrado.tipo_ajuda_id
+            WHERE e_recomecar_registrado.familia_id = f.id
+              AND e_recomecar_registrado.deleted_at IS NULL
+              AND COALESCE(e_recomecar_registrado.status_operacional, "entregue") = "registrado"
+              AND ' . $this->recomecarTypeSql('t_recomecar_registrado') . '
         )';
     }
 

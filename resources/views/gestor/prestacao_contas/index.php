@@ -108,6 +108,7 @@ $filterLabels = [
     'acao_busca' => 'Ação',
     'tipo_ajuda_busca' => 'Tipo de material',
     'localidade_busca' => 'Localidade/bairro',
+    'status_operacional' => 'Etapa',
     'data_inicio' => 'Início',
     'data_fim' => 'Fim',
 ];
@@ -290,6 +291,15 @@ $renderFilterFields = static function (array $filters): void {
                     <span>Localidade, bairro ou comunidade</span>
                     <input type="search" name="localidade_busca" value="<?= h($filters['localidade_busca'] ?? '') ?>" placeholder="Digite localidade, bairro ou comunidade">
                 </label>
+
+                <label class="field styled-field prestacao-filter-field prestacao-filter-field-medium">
+                    <span>Etapa do documento</span>
+                    <select name="status_operacional">
+                        <option value="" <?= ($filters['status_operacional'] ?? '') === '' ? 'selected' : '' ?>>Registradas e entregues</option>
+                        <option value="registrado" <?= ($filters['status_operacional'] ?? '') === 'registrado' ? 'selected' : '' ?>>Registradas</option>
+                        <option value="entregue" <?= ($filters['status_operacional'] ?? '') === 'entregue' ? 'selected' : '' ?>>Entregues</option>
+                    </select>
+                </label>
             </div>
 
             <div class="accountability-filter-side prestacao-filter-side">
@@ -463,6 +473,7 @@ $renderFilterFields = static function (array $filters): void {
                             <th>N.</th>
                             <th>Nome do beneficiário</th>
                             <th>CPF</th>
+                            <th>Etapa</th>
                             <th>Quantidade recebida</th>
                             <th>Assinatura</th>
                         </tr>
@@ -473,6 +484,7 @@ $renderFilterFields = static function (array $filters): void {
                                 <td><?= h(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?></td>
                                 <td><?= h($valueOrDash($item['beneficiario_nome'] ?? '')) ?></td>
                                 <td><?= h($valueOrDash($item['beneficiario_cpf'] ?? '')) ?></td>
+                                <td><?= ((string) ($item['status_operacional'] ?? 'entregue')) === 'registrado' ? 'Registrada' : 'Entregue' ?></td>
                                 <td><?= h($formatQuantity($item['quantidade_total'] ?? 0)) ?> <?= h($item['unidade_medida'] ?? '') ?></td>
                                 <td class="manual-signature-cell"></td>
                             </tr>
@@ -480,7 +492,7 @@ $renderFilterFields = static function (array $filters): void {
 
                         <?php if ($documentDetails === []): ?>
                             <tr>
-                                <td colspan="5" class="dti-empty">Nenhuma entrega encontrada para os filtros informados.</td>
+                                <td colspan="6" class="dti-empty">Nenhuma entrega encontrada para os filtros informados.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>

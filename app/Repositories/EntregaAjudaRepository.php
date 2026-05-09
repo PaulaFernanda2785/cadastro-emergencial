@@ -10,12 +10,17 @@ use PDO;
 final class EntregaAjudaRepository
 {
     private const GROUP_CODE_SQL = 'COALESCE(e.grupo_comprovante_codigo, e.comprovante_codigo)';
+    private const STATUS_SQL = "COALESCE(e.status_operacional, 'entregue')";
+    private const GROUP_STATUS_SQL = 'CASE WHEN SUM(CASE WHEN ' . self::STATUS_SQL . " = 'registrado' THEN 1 ELSE 0 END) > 0 THEN 'registrado' ELSE 'entregue' END";
 
     private const BASE_GROUP_SELECT = 'SELECT MIN(e.id) AS id,
                     ' . self::GROUP_CODE_SQL . ' AS comprovante_codigo,
+                    ' . self::GROUP_STATUS_SQL . ' AS status_operacional,
                     COUNT(*) AS total_itens,
                     COALESCE(SUM(e.quantidade), 0) AS quantidade_total,
-                    MAX(e.data_entrega) AS data_entrega,
+                    COALESCE(MAX(e.entregue_em), MAX(e.data_entrega)) AS data_entrega,
+                    MAX(e.registrado_em) AS registrado_em,
+                    MAX(e.entregue_em) AS entregue_em,
                     MAX(e.observacao) AS observacao,
                     f.id AS familia_id, f.responsavel_nome, f.responsavel_cpf,
                     GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 2, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
@@ -52,9 +57,12 @@ final class EntregaAjudaRepository
         $stmt = Database::connection()->prepare(
             'SELECT MIN(e.id) AS id,
                     ' . self::GROUP_CODE_SQL . ' AS comprovante_codigo,
+                    ' . self::GROUP_STATUS_SQL . ' AS status_operacional,
                     COALESCE(SUM(e.quantidade), 0) AS quantidade_total,
                     COUNT(*) AS total_itens,
-                    MAX(e.data_entrega) AS data_entrega,
+                    COALESCE(MAX(e.entregue_em), MAX(e.data_entrega)) AS data_entrega,
+                    MAX(e.registrado_em) AS registrado_em,
+                    MAX(e.entregue_em) AS entregue_em,
                     MAX(e.observacao) AS observacao,
                     f.id AS familia_id, f.responsavel_nome, f.responsavel_cpf, f.responsavel_rg,
                     f.telefone, f.email, f.representante_nome, f.representante_cpf, f.representante_telefone, f.representante_email,
@@ -102,7 +110,9 @@ final class EntregaAjudaRepository
     {
         return Database::connection()
             ->query(
-                'SELECT e.id, e.quantidade, e.data_entrega, e.comprovante_codigo, e.observacao,
+                'SELECT e.id, e.quantidade, e.data_entrega, e.registrado_em, e.entregue_em,
+                        COALESCE(e.status_operacional, "entregue") AS status_operacional,
+                        e.comprovante_codigo, e.observacao,
                         f.responsavel_nome, f.responsavel_cpf,
                         t.nome AS tipo_ajuda_nome, t.unidade_medida,
                         r.id AS residencia_id, r.protocolo, r.bairro_comunidade,
@@ -175,9 +185,11 @@ final class EntregaAjudaRepository
         [$where, $params] = $this->buildSearchWhere($filters);
         $stmt = Database::connection()->prepare(
             'SELECT COUNT(DISTINCT CONCAT(' . self::GROUP_CODE_SQL . ', "#", e.familia_id)) AS total_entregas,
+                    COUNT(DISTINCT CASE WHEN ' . self::STATUS_SQL . ' = "registrado" THEN CONCAT(' . self::GROUP_CODE_SQL . ', "#", e.familia_id) END) AS total_registrados,
+                    COUNT(DISTINCT CASE WHEN ' . self::STATUS_SQL . ' = "entregue" THEN CONCAT(' . self::GROUP_CODE_SQL . ', "#", e.familia_id) END) AS total_entregues,
                     COUNT(DISTINCT e.familia_id) AS familias_atendidas,
                     COALESCE(SUM(e.quantidade), 0) AS total_quantidade,
-                    MAX(e.data_entrega) AS ultima_entrega
+                    COALESCE(MAX(e.entregue_em), MAX(e.data_entrega)) AS ultima_entrega
              FROM entregas_ajuda e
              INNER JOIN familias f ON f.id = e.familia_id
              INNER JOIN residencias r ON r.id = f.residencia_id
@@ -200,9 +212,12 @@ final class EntregaAjudaRepository
         $stmt = Database::connection()->prepare(
             'SELECT MIN(e.id) AS id,
                     ' . self::GROUP_CODE_SQL . ' AS comprovante_codigo,
+                    ' . self::GROUP_STATUS_SQL . ' AS status_operacional,
                     COALESCE(SUM(e.quantidade), 0) AS quantidade_total,
                     COUNT(*) AS total_itens,
-                    MAX(e.data_entrega) AS data_entrega,
+                    COALESCE(MAX(e.entregue_em), MAX(e.data_entrega)) AS data_entrega,
+                    MAX(e.registrado_em) AS registrado_em,
+                    MAX(e.entregue_em) AS entregue_em,
                     MAX(e.observacao) AS observacao,
                     GROUP_CONCAT(CONCAT(t.nome, " (", FORMAT(e.quantidade, 2, "de_DE"), " ", t.unidade_medida, ")") ORDER BY t.nome SEPARATOR " | ") AS itens_resumo,
                     u.nome AS entregue_por_nome
@@ -221,15 +236,25 @@ final class EntregaAjudaRepository
 
     public function create(array $data): int
     {
+        $status = in_array((string) ($data['status_operacional'] ?? 'registrado'), ['registrado', 'entregue'], true)
+            ? (string) $data['status_operacional']
+            : 'registrado';
+
         $stmt = Database::connection()->prepare(
             'INSERT INTO entregas_ajuda
-                (familia_id, tipo_ajuda_id, quantidade, entregue_por, comprovante_codigo, grupo_comprovante_codigo, observacao)
+                (familia_id, tipo_ajuda_id, quantidade, status_operacional, registrado_em, data_entrega, entregue_em, entregue_por, comprovante_codigo, grupo_comprovante_codigo, observacao)
              VALUES
-                (:familia_id, :tipo_ajuda_id, :quantidade, :entregue_por, :comprovante_codigo, :grupo_comprovante_codigo, :observacao)'
+                (:familia_id, :tipo_ajuda_id, :quantidade, :status_operacional, NOW(), NOW(), :entregue_em, :entregue_por, :comprovante_codigo, :grupo_comprovante_codigo, :observacao)'
         );
         $stmt->bindValue(':familia_id', (int) $data['familia_id'], PDO::PARAM_INT);
         $stmt->bindValue(':tipo_ajuda_id', (int) $data['tipo_ajuda_id'], PDO::PARAM_INT);
         $stmt->bindValue(':quantidade', number_format((float) $data['quantidade'], 2, '.', ''));
+        $stmt->bindValue(':status_operacional', $status);
+        if ($status === 'entregue') {
+            $stmt->bindValue(':entregue_em', date('Y-m-d H:i:s'));
+        } else {
+            $stmt->bindValue(':entregue_em', null, PDO::PARAM_NULL);
+        }
         $stmt->bindValue(':entregue_por', (int) $data['entregue_por'], PDO::PARAM_INT);
         $stmt->bindValue(':comprovante_codigo', $data['comprovante_codigo']);
         $stmt->bindValue(':grupo_comprovante_codigo', $data['grupo_comprovante_codigo'] ?? $data['comprovante_codigo']);
@@ -237,6 +262,73 @@ final class EntregaAjudaRepository
         $stmt->execute();
 
         return (int) Database::connection()->lastInsertId();
+    }
+
+    public function pendingRegistrationsByFamilia(int $familiaId): array
+    {
+        $stmt = Database::connection()->prepare(
+            self::BASE_GROUP_SELECT . '
+             WHERE e.familia_id = :familia_id
+                AND ' . self::STATUS_SQL . ' = "registrado"
+                AND e.deleted_at IS NULL
+                AND f.deleted_at IS NULL
+                AND r.deleted_at IS NULL
+                AND a.deleted_at IS NULL
+             GROUP BY ' . self::GROUP_CODE_SQL . ',
+                    f.id, f.responsavel_nome, f.responsavel_cpf,
+                    r.id, r.protocolo, r.bairro_comunidade,
+                    a.id, a.localidade, a.tipo_evento,
+                    m.nome, m.uf, u.nome
+             ORDER BY MAX(e.registrado_em) DESC, MIN(e.id) DESC'
+        );
+        $stmt->bindValue(':familia_id', $familiaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function deliverRegisteredForFamily(int $familiaId, int $userId): int
+    {
+        return $this->deliverRegisteredForFamilies([$familiaId], $userId);
+    }
+
+    public function deliverRegisteredForFamilies(array $familiaIds, int $userId): int
+    {
+        $familiaIds = array_values(array_unique(array_filter(array_map('intval', $familiaIds))));
+
+        if ($familiaIds === [] || $userId <= 0) {
+            return 0;
+        }
+
+        $placeholders = [];
+        $params = [
+            'user_id' => $userId,
+        ];
+
+        foreach ($familiaIds as $index => $familiaId) {
+            $key = 'familia_id_' . $index;
+            $placeholders[] = ':' . $key;
+            $params[$key] = $familiaId;
+        }
+
+        $stmt = Database::connection()->prepare(
+            'UPDATE entregas_ajuda
+             SET status_operacional = "entregue",
+                 entregue_por = :user_id,
+                 data_entrega = NOW(),
+                 entregue_em = NOW()
+             WHERE deleted_at IS NULL
+                AND status_operacional = "registrado"
+                AND familia_id IN (' . implode(', ', $placeholders) . ')'
+        );
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+
+        return $stmt->rowCount();
     }
 
     public function count(?int $cadastradoPor = null, ?string $activeActionToken = null): int
@@ -281,7 +373,10 @@ final class EntregaAjudaRepository
     {
         $familyWhere = $familiaId !== null ? ' AND e.familia_id = :familia_id' : '';
         $stmt = Database::connection()->prepare(
-            'SELECT e.id, e.quantidade, e.comprovante_codigo, e.observacao, t.nome AS tipo_ajuda_nome, t.unidade_medida
+            'SELECT e.id, e.quantidade, e.comprovante_codigo, e.observacao,
+                    COALESCE(e.status_operacional, "entregue") AS status_operacional,
+                    e.registrado_em, e.entregue_em,
+                    t.nome AS tipo_ajuda_nome, t.unidade_medida
              FROM entregas_ajuda e
              INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
              WHERE ' . self::GROUP_CODE_SQL . ' = :codigo
@@ -374,7 +469,11 @@ final class EntregaAjudaRepository
             $params['tipo_ajuda_id'] = (int) $filters['tipo_ajuda_id'];
         }
 
-        if (($filters['status_entrega'] ?? '') === 'nao_entregue') {
+        if (($filters['status_entrega'] ?? '') === 'registrado') {
+            $where[] = self::STATUS_SQL . ' = "registrado"';
+        } elseif (($filters['status_entrega'] ?? '') === 'entregue') {
+            $where[] = self::STATUS_SQL . ' = "entregue"';
+        } elseif (($filters['status_entrega'] ?? '') === 'nao_entregue') {
             $where[] = '1 = 0';
         }
 

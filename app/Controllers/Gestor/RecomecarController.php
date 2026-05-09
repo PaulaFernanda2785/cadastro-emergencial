@@ -32,13 +32,14 @@ final class RecomecarController extends Controller
         $filters = $this->filters();
         $embedDocument = (string) ($_GET['embed_document'] ?? '') === '1';
         $hasAppliedFilters = $this->hasAppliedFilters($filters);
+        $documentDetails = $hasAppliedFilters ? $this->recomecar->details($filters) : [];
         $page = max(1, (int) ($_GET['pagina'] ?? 1));
-        $total = $hasAppliedFilters ? $this->recomecar->countDetails($filters) : 0;
+        $total = count($documentDetails);
         $totalPages = max(1, (int) ceil($total / self::PER_PAGE));
         $page = min($page, $totalPages);
         $generatedAt = new \DateTimeImmutable();
         $currentUser = $this->currentUserRecord();
-        $documentIdentity = $hasAppliedFilters ? $this->documentIdentity($filters) : null;
+        $documentIdentity = $hasAppliedFilters ? $this->documentIdentity($filters, $documentDetails) : null;
         $showSignature = $hasAppliedFilters && (string) ($_GET['assinatura'] ?? '') === '1';
         $signature = ($documentIdentity !== null && $showSignature) ? $this->latestSignature($documentIdentity) : null;
         $coSignatureStatus = $documentIdentity !== null
@@ -52,7 +53,8 @@ final class RecomecarController extends Controller
             'signatureUsers' => $this->signatureUsers((int) ($currentUser['id'] ?? 0)),
             'hasAppliedFilters' => $hasAppliedFilters,
             'indicators' => $hasAppliedFilters ? $this->recomecar->indicators($filters) : $this->emptyIndicators(),
-            'details' => $hasAppliedFilters ? $this->recomecar->details($filters, self::PER_PAGE, ($page - 1) * self::PER_PAGE) : [],
+            'details' => array_slice($documentDetails, ($page - 1) * self::PER_PAGE, self::PER_PAGE),
+            'documentDetails' => $documentDetails,
             'documentContext' => $hasAppliedFilters ? $this->recomecar->documentContext($filters) : [],
             'currentUser' => $currentUser,
             'signature' => $signature,
@@ -162,7 +164,7 @@ final class RecomecarController extends Controller
         }
 
         $statusEntrega = (string) ($source['status_entrega'] ?? '');
-        if (!in_array($statusEntrega, ['', 'entregue', 'nao_entregue'], true)) {
+        if (!in_array($statusEntrega, ['', 'registrado', 'entregue', 'nao_entregue'], true)) {
             $statusEntrega = '';
         }
 
@@ -214,10 +216,10 @@ final class RecomecarController extends Controller
         ];
     }
 
-    private function documentIdentity(array $filters): array
+    private function documentIdentity(array $filters, ?array $details = null, ?array $summary = null): array
     {
-        $details = $this->recomecar->details($filters);
-        $summary = $this->recomecar->indicators($filters);
+        $details = $details ?? $this->recomecar->details($filters);
+        $summary = $summary ?? $this->recomecar->indicators($filters);
         $payload = [
             'filters' => $filters,
             'summary' => $summary,

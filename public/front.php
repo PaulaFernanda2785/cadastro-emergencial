@@ -110,6 +110,10 @@ $router->get('/cadastros/residencias/{id}/familias/{familiaId}/editar', [Familia
 $router->post('/cadastros/residencias/{id}/familias/{familiaId}', [FamiliaController::class, 'update'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/cadastros/residencias/{id}/familias/{familiaId}/excluir', [FamiliaController::class, 'delete'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->get('/gestor/entregas', [EntregaAjudaController::class, 'index'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/entregas/registrar', [EntregaAjudaController::class, 'registerBatch'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/entregas/registrar/lote', [EntregaAjudaController::class, 'registerBatchStore'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/entregas/registrar/validar', [EntregaAjudaController::class, 'validateRegistrationReceiptQuery'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/entregas/registrar/validar/{codigo}', [EntregaAjudaController::class, 'validateRegistrationReceipt'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/entregas/validacao', [EntregaAjudaController::class, 'validationPage'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/entregas/lote', [EntregaAjudaController::class, 'batch'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/entregas/lote', [EntregaAjudaController::class, 'batchStore'], ['auth', 'role:gestor,administrador']);
@@ -119,6 +123,8 @@ $router->get('/gestor/entregas/{id}/comprovante', [EntregaAjudaController::class
 $router->post('/gestor/entregas/{id}/comprovante/email', [EntregaAjudaController::class, 'emailReceipt'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/familias/{id}/entregas/novo', [EntregaAjudaController::class, 'create'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/familias/{id}/entregas', [EntregaAjudaController::class, 'store'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/familias/{id}/entregas/confirmar', [EntregaAjudaController::class, 'confirm'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/familias/{id}/entregas/confirmar', [EntregaAjudaController::class, 'confirmStore'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/prestacao-contas', [PrestacaoContasController::class, 'index'], ['auth', 'role:cadastrador,gestor,administrador']);
 $router->post('/gestor/prestacao-contas/assinar', [PrestacaoContasController::class, 'sign'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/prestacao-contas/remover-assinatura', [PrestacaoContasController::class, 'removeSignature'], ['auth', 'role:gestor,administrador']);

@@ -23,7 +23,9 @@
         if (selectAll) {
             selectAll.addEventListener('click', function () {
                 boxes().forEach(function (box) {
-                    box.checked = true;
+                    if (!box.disabled) {
+                        box.checked = true;
+                    }
                 });
                 updateCounter();
             });

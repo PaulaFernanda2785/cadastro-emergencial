@@ -72,9 +72,10 @@ final class PrestacaoContasRepository
                     COALESCE(NULLIF(f.representante_cpf, ''), f.responsavel_cpf) AS beneficiario_cpf,
                     f.responsavel_nome, f.responsavel_cpf, f.representante_nome, f.representante_cpf,
                     t.id AS tipo_ajuda_id, t.nome AS tipo_ajuda_nome, t.unidade_medida,
+                    COALESCE(e.status_operacional, 'entregue') AS status_operacional,
                     COALESCE(SUM(e.quantidade), 0) AS quantidade_total,
                     COUNT(*) AS total_entregas,
-                    MAX(e.data_entrega) AS ultima_entrega,
+                    COALESCE(MAX(e.entregue_em), MAX(e.data_entrega)) AS ultima_entrega,
                     r.id AS residencia_id, r.protocolo, r.bairro_comunidade,
                     a.id AS acao_id, a.localidade, a.tipo_evento,
                     m.nome AS municipio_nome, m.uf,
@@ -87,7 +88,7 @@ final class PrestacaoContasRepository
              INNER JOIN tipos_ajuda t ON t.id = e.tipo_ajuda_id
              {$where}
              GROUP BY f.id, f.responsavel_nome, f.responsavel_cpf, f.representante_nome, f.representante_cpf,
-                    t.id, t.nome, t.unidade_medida,
+                    t.id, t.nome, t.unidade_medida, COALESCE(e.status_operacional, 'entregue'),
                     r.id, r.protocolo, r.bairro_comunidade,
                     a.id, a.localidade, a.tipo_evento, m.nome, m.uf
              ORDER BY beneficiario_nome ASC, t.nome ASC, MIN(e.id) ASC{$limitSql}"
@@ -168,6 +169,11 @@ final class PrestacaoContasRepository
             $locationSearch = '%' . $filters['localidade_busca'] . '%';
             $params['localidade_busca_acao'] = $locationSearch;
             $params['localidade_busca_bairro'] = $locationSearch;
+        }
+
+        if (!empty($filters['status_operacional'])) {
+            $conditions[] = "COALESCE(e.status_operacional, 'entregue') = :status_operacional";
+            $params['status_operacional'] = (string) $filters['status_operacional'];
         }
 
         if (!empty($filters['q'])) {

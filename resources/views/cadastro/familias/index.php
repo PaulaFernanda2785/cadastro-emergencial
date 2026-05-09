@@ -328,7 +328,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                         <a class="primary-link-button" href="<?= h(url('/cadastros/residencias/' . $familia['residencia_id'] . '/familias/' . $familia['id'])) ?>">Ver detalhe</a>
                         <a class="secondary-button" href="<?= h(url('/cadastros/residencias/' . $familia['residencia_id'] . '/familias/' . $familia['id'] . '/comprovante')) ?>">Comprovante</a>
                         <?php if ($canRegisterDelivery): ?>
-                            <a class="secondary-button" href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Entrega</a>
+                            <a class="secondary-button" href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Registrar</a>
                         <?php endif; ?>
                     </aside>
                 </article>

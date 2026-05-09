@@ -57,6 +57,19 @@
         stopScanner();
 
         if (/^https?:\/\//i.test(rawValue)) {
+            try {
+                var url = new URL(rawValue);
+                var match = url.pathname.match(/\/gestor\/entregas\/(?:registrar\/)?validar\/([^/]+)$/);
+
+                if (match && validateBase) {
+                    window.location.href = validateBase + '/' + encodeURIComponent(decodeURIComponent(match[1]));
+                    return;
+                }
+            } catch (error) {
+                window.location.href = rawValue;
+                return;
+            }
+
             window.location.href = rawValue;
             return;
         }

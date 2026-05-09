@@ -236,7 +236,7 @@ $canRegisterDelivery = in_array((string) (current_user()['perfil'] ?? ''), ['ges
                                 </form>
                             <?php endif; ?>
                             <?php if ($canRegisterDelivery): ?>
-                                <a class="primary-link-button" href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Entrega</a>
+                                <a class="primary-link-button" href="<?= h(url('/gestor/familias/' . $familia['id'] . '/entregas/novo')) ?>">Registrar</a>
                             <?php endif; ?>
                         </div>
                     </article>

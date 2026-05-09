@@ -165,7 +165,10 @@ CREATE TABLE IF NOT EXISTS entregas_ajuda (
     familia_id BIGINT UNSIGNED NOT NULL,
     tipo_ajuda_id BIGINT UNSIGNED NOT NULL,
     quantidade DECIMAL(10,2) NOT NULL DEFAULT 1.00,
+    status_operacional ENUM('registrado', 'entregue') NOT NULL DEFAULT 'entregue',
+    registrado_em DATETIME NULL,
     data_entrega DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    entregue_em DATETIME NULL,
     entregue_por BIGINT UNSIGNED NOT NULL,
     comprovante_codigo VARCHAR(80) NOT NULL,
     grupo_comprovante_codigo VARCHAR(80) NULL,
@@ -177,6 +180,7 @@ CREATE TABLE IF NOT EXISTS entregas_ajuda (
     CONSTRAINT fk_entregas_usuario FOREIGN KEY (entregue_por) REFERENCES usuarios(id),
     UNIQUE KEY uk_entregas_comprovante (comprovante_codigo),
     KEY idx_entregas_grupo_comprovante (grupo_comprovante_codigo),
+    KEY idx_entregas_status_operacional (status_operacional),
     KEY idx_entregas_tipo_data (tipo_ajuda_id, data_entrega),
     KEY idx_entregas_familia (familia_id),
     KEY idx_entregas_deleted (deleted_at)

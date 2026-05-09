@@ -1,7 +1,7 @@
 <?php
 $app = require BASE_PATH . '/config/app.php';
 $pageTitle = $title ?? $app['name'];
-$assetVersion = '20260509-018';
+$assetVersion = '20260509-019';
 $showPrintToolbar = (string) ($_GET['print'] ?? '') === '1';
 ?>
 <!doctype html>

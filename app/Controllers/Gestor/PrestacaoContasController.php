@@ -215,6 +215,7 @@ final class PrestacaoContasController extends Controller
             'tipo_ajuda_id' => $this->positiveInt($source['tipo_ajuda_id'] ?? null),
             'tipo_ajuda_busca' => mb_substr(trim((string) ($source['tipo_ajuda_busca'] ?? '')), 0, 120),
             'localidade_busca' => mb_substr(trim((string) ($source['localidade_busca'] ?? '')), 0, 120),
+            'status_operacional' => $this->deliveryStatus($source['status_operacional'] ?? ''),
             'data_inicio' => $this->date($source['data_inicio'] ?? null),
             'data_fim' => $this->date($source['data_fim'] ?? null),
         ];
@@ -233,7 +234,7 @@ final class PrestacaoContasController extends Controller
 
     private function hasAppliedFilters(array $filters): bool
     {
-        foreach (['q', 'acao_id', 'acao_busca', 'tipo_ajuda_id', 'tipo_ajuda_busca', 'localidade_busca', 'data_inicio', 'data_fim'] as $key) {
+        foreach (['q', 'acao_id', 'acao_busca', 'tipo_ajuda_id', 'tipo_ajuda_busca', 'localidade_busca', 'status_operacional', 'data_inicio', 'data_fim'] as $key) {
             if ((string) ($filters[$key] ?? '') !== '') {
                 return true;
             }
@@ -514,6 +515,13 @@ final class PrestacaoContasController extends Controller
         $value = trim((string) $value);
 
         return filter_var($value, FILTER_VALIDATE_INT) !== false && (int) $value > 0 ? $value : '';
+    }
+
+    private function deliveryStatus(mixed $value): string
+    {
+        $status = trim((string) $value);
+
+        return in_array($status, ['registrado', 'entregue'], true) ? $status : '';
     }
 
     private function date(mixed $value): string

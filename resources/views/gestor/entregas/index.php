@@ -142,8 +142,9 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
             <span>Status da entrega</span>
             <select name="status_entrega">
                 <option value="">Todos</option>
-                <option value="entregue" <?= ($filters['status_entrega'] ?? '') === 'entregue' ? 'selected' : '' ?>>Com entrega</option>
-                <option value="nao_entregue" <?= ($filters['status_entrega'] ?? '') === 'nao_entregue' ? 'selected' : '' ?>>Sem entrega</option>
+                <option value="registrado" <?= ($filters['status_entrega'] ?? '') === 'registrado' ? 'selected' : '' ?>>Registrado</option>
+                <option value="entregue" <?= ($filters['status_entrega'] ?? '') === 'entregue' ? 'selected' : '' ?>>Entregue</option>
+                <option value="nao_entregue" <?= ($filters['status_entrega'] ?? '') === 'nao_entregue' ? 'selected' : '' ?>>Sem registro</option>
             </select>
         </label>
         <label class="field styled-field delivery-history-filter-field delivery-history-filter-field-date">
@@ -171,6 +172,7 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
     <?php else: ?>
         <div class="delivery-record-list">
             <?php foreach ($entregas as $entrega): ?>
+                <?php $statusOperacional = (string) ($entrega['status_operacional'] ?? 'entregue'); ?>
                 <article class="delivery-record-card">
                     <div class="delivery-record-code">
                         <span class="eyebrow">Comprovante</span>
@@ -196,11 +198,12 @@ require BASE_PATH . '/resources/views/gestor/entregas/_nav.php';
                             <em><?= h($entrega['bairro_comunidade']) ?> - <?= h($entrega['municipio_nome']) ?>/<?= h($entrega['uf']) ?></em>
                         </span>
                         <span>
-                            <small>Entrega</small>
+                            <small><?= $statusOperacional === 'registrado' ? 'Registro' : 'Entrega' ?></small>
                             <strong><?= h(date('d/m/Y H:i', strtotime((string) $entrega['data_entrega']))) ?></strong>
                             <em><?= h($entrega['entregue_por_nome']) ?></em>
                         </span>
                     </div>
+                    <span class="limit-reached-pill"><?= $statusOperacional === 'registrado' ? 'Registrado' : 'Entregue' ?></span>
                     <a class="secondary-button delivery-record-action" href="<?= h(url('/gestor/entregas/' . $entrega['id'] . '/comprovante')) ?>">Comprovante</a>
                 </article>
             <?php endforeach; ?>
