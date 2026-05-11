@@ -132,6 +132,12 @@ $router->post('/gestor/prestacao-contas/remover-assinatura', [PrestacaoContasCon
 $router->get('/gestor/relatorios', [RelatorioController::class, 'index'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/relatorios/exportar', [RelatorioController::class, 'export'], ['auth', 'role:gestor,administrador']);
 $router->get('/gestor/recomecar', [RecomecarController::class, 'index'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/recomecar/analise', [RecomecarController::class, 'analysis'], ['auth', 'role:gestor,administrador']);
+$router->get('/gestor/recomecar/analise/distribuicao-preview', [RecomecarController::class, 'previewAnalysisDistribution'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/recomecar/analise/distribuir', [RecomecarController::class, 'distributeAnalysisRecords'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/recomecar/analise/concluir-fila', [RecomecarController::class, 'completeAnalysisQueue'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/recomecar/analise/{familiaId}', [RecomecarController::class, 'updateAnalysisRecord'], ['auth', 'role:gestor,administrador']);
+$router->post('/gestor/recomecar/analise/{familiaId}/analisado', [RecomecarController::class, 'markAnalysisRecord'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/recomecar/assinar', [RecomecarController::class, 'sign'], ['auth', 'role:gestor,administrador']);
 $router->post('/gestor/recomecar/remover-assinatura', [RecomecarController::class, 'removeSignature'], ['auth', 'role:gestor,administrador']);
 $router->get('/acao/{token}/residencias/novo', [ResidenciaController::class, 'createFromAction'], ['auth', 'role:cadastrador,gestor,administrador']);

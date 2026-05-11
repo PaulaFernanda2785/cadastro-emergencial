@@ -208,7 +208,7 @@ final class ResidenciaController extends Controller
         $documento = $this->documentos->findForResidencia((int) $documentoId, (int) $id);
 
         $mimeType = (string) ($documento['mime_type'] ?? '');
-        if ($documento === null || !in_array($mimeType, ['image/jpeg', 'image/png'], true)) {
+        if ($documento === null || !in_array($mimeType, ['image/jpeg', 'image/png', 'application/pdf'], true)) {
             $this->abort(404);
         }
 
@@ -223,7 +223,7 @@ final class ResidenciaController extends Controller
             $this->abort(404);
         }
 
-        if (isset($_GET['thumb']) && $_GET['thumb'] === '1') {
+        if (isset($_GET['thumb']) && $_GET['thumb'] === '1' && str_starts_with($mimeType, 'image/')) {
             if ($this->streamImageThumbnail($filePath, (int) $documentoId)) {
                 exit;
             }

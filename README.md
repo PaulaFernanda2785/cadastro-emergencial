@@ -13,7 +13,7 @@ O Cadastro Emergencial centraliza informações operacionais de campo para apoia
 - Cadastro de residências, famílias e documentos anexos.
 - Registro de itens, confirmacao de entrega, historico e operacao em lote.
 - Prestação de contas com filtros, documento gerado e fluxo de coassinatura.
-- Programa Recomeçar para análise de famílias aptas ao benefício.
+- Programa Recomeçar com documento oficial, tela de análise, filtros inteligentes, distribuição de registros por analista, histórico de alterações e painel lateral de documentos.
 - DTI e documentos institucionais com assinatura principal e coautores.
 - Central de assinaturas para pendências, histórico, autorização, negativa e impressão.
 - Relatórios operacionais com filtros inteligentes e exportação.

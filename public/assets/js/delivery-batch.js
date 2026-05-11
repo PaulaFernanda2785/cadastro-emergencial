@@ -106,6 +106,11 @@
             Array.prototype.slice.call(list.options || []).some(function (option) {
                 var optionId = option.dataset.id || '';
                 var normalizedOption = normalize(option.value);
+                var normalizedSearch = normalize([
+                    option.value,
+                    option.label || '',
+                    option.dataset.search || ''
+                ].join(' '));
 
                 if (idMatch && optionId === idMatch[1]) {
                     match = option;
@@ -118,7 +123,7 @@
                 }
 
                 if (!partialMatch && normalizedValue !== '' && (
-                    normalizedOption.indexOf(normalizedValue) !== -1 ||
+                    normalizedSearch.indexOf(normalizedValue) !== -1 ||
                     normalizedValue.indexOf(normalizedOption) !== -1
                 )) {
                     partialMatch = option;

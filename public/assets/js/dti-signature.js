@@ -6,7 +6,20 @@
         var selectedBox = picker.querySelector('[data-dti-cosigner-selected]');
         var status = picker.querySelector('[data-dti-cosigner-status]');
         var options = Array.prototype.slice.call(picker.querySelectorAll('[data-dti-cosigner-option]'));
+        var inputName = picker.getAttribute('data-dti-cosigner-name') || 'assinantes_usuarios[]';
+        var emptyText = picker.getAttribute('data-dti-cosigner-empty') || 'Nenhum coassinante selecionado.';
+        var searchText = picker.getAttribute('data-dti-cosigner-search-text') || 'Digite para buscar usuarios do sistema.';
         var selected = new Map();
+
+        function notifySelectedChange() {
+            picker.dispatchEvent(new CustomEvent('dti-cosigner-change', {
+                bubbles: true,
+                detail: {
+                    count: selected.size,
+                    inputName: inputName
+                }
+            }));
+        }
 
         function normalize(value) {
             return (value || '')
@@ -25,8 +38,9 @@
 
             if (selected.size === 0) {
                 var empty = document.createElement('span');
-                empty.textContent = 'Nenhum coassinante selecionado.';
+                empty.textContent = emptyText;
                 selectedBox.appendChild(empty);
+                notifySelectedChange();
                 return;
             }
 
@@ -38,7 +52,7 @@
 
                 chip.className = 'dti-cosigner-chip';
                 hidden.type = 'hidden';
-                hidden.name = 'assinantes_usuarios[]';
+                hidden.name = inputName;
                 hidden.value = id;
                 text.textContent = item.label;
                 remove.type = 'button';
@@ -54,6 +68,8 @@
                 chip.appendChild(remove);
                 selectedBox.appendChild(chip);
             });
+
+            notifySelectedChange();
         }
 
         function renderOptions() {
@@ -61,7 +77,7 @@
             var visibleCount = 0;
 
             if (status && term === '') {
-                status.textContent = 'Digite para buscar usuários do sistema.';
+                status.textContent = searchText;
             }
 
             options.forEach(function (button) {

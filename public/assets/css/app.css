@@ -548,18 +548,22 @@ a:focus {
 }
 
 .main {
-    width: min(1120px, calc(100% - 32px));
+    width: min(1880px, calc(100% - 36px));
     margin: 28px auto;
     flex: 1;
 }
 
 .main:has(.ops-dashboard-page) {
-    width: min(1760px, calc(100% - 36px));
+    width: min(1880px, calc(100% - 36px));
     margin: 22px auto 28px;
 }
 
 .main:has(.report-page) {
-    width: min(1460px, calc(100% - 36px));
+    width: min(1880px, calc(100% - 36px));
+}
+
+.main:has(.recomecar-analysis-page) {
+    width: min(1880px, calc(100% - 36px));
 }
 
 .main:has(.auth-login-page) {
@@ -568,7 +572,7 @@ a:focus {
 }
 
 .app-footer {
-    width: min(1120px, calc(100% - 32px));
+    width: min(1880px, calc(100% - 36px));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -6440,6 +6444,1942 @@ button:disabled,
     font-size: 8.5px;
 }
 
+.recomecar-analysis-page {
+    position: relative;
+}
+
+.recomecar-analysis-page:has(.recomecar-docs-drawer[open]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 520px);
+    gap: 18px;
+    align-items: start;
+}
+
+.recomecar-analysis-page:has(.recomecar-docs-drawer[open]) > :not(.recomecar-docs-drawer) {
+    grid-column: 1;
+}
+
+.recomecar-analysis-section {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.recomecar-analysis-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.recomecar-analysis-table-wrap {
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.recomecar-analysis-table {
+    display: block;
+    min-width: 0;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.recomecar-analysis-table thead {
+    display: none;
+}
+
+.recomecar-analysis-table tbody {
+    display: grid;
+    gap: 12px;
+}
+
+.recomecar-analysis-table tr.recomecar-analysis-card-row {
+    display: block;
+}
+
+.recomecar-analysis-table tr.recomecar-analysis-edit-row {
+    display: block;
+    margin-top: -8px;
+}
+
+.recomecar-analysis-table tr.recomecar-docs-inline-row {
+    display: block;
+}
+
+.recomecar-analysis-table tr.recomecar-docs-inline-row[hidden] {
+    display: none;
+}
+
+.recomecar-analysis-table tr.recomecar-analysis-edit-row > td,
+.recomecar-analysis-table tr.recomecar-analysis-card-row > td,
+.recomecar-analysis-table tr.recomecar-docs-inline-row > td {
+    display: block;
+    width: 100%;
+}
+
+.recomecar-analysis-table th,
+.recomecar-analysis-table td {
+    display: block;
+    border: 0;
+    padding: 0;
+    vertical-align: top;
+}
+
+.recomecar-family-card {
+    position: relative;
+    display: grid;
+    gap: 14px;
+    border: 1px solid #dbe6ef;
+    border-left: 5px solid #0284c7;
+    border-radius: 8px;
+    padding: 16px;
+    background: #ffffff;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.07);
+}
+
+.recomecar-analysis-card-row.is-apta .recomecar-family-card {
+    border-left-color: #16a34a;
+}
+
+.recomecar-analysis-card-row.is-inapta .recomecar-family-card {
+    border-left-color: #d97706;
+}
+
+.recomecar-analysis-card-row.is-analysis-done .recomecar-family-card {
+    border-color: #bbf7d0;
+    border-left-color: #16a34a;
+    background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.recomecar-family-card-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: start;
+}
+
+.recomecar-family-card-title {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+}
+
+.recomecar-family-card-id {
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    padding: 0;
+    border-radius: 8px;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+}
+
+.recomecar-family-card-id-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    text-align: center;
+}
+
+.recomecar-family-card-title strong,
+.recomecar-family-card-title span,
+.recomecar-family-card-info strong,
+.recomecar-family-card-info span,
+.recomecar-family-card-info small {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.recomecar-family-card-title strong {
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1.25;
+}
+
+.recomecar-family-card-title span {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.recomecar-family-card-title .recomecar-family-card-id-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+    color: #0369a1;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+}
+
+.recomecar-family-card-status {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.recomecar-family-card-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.1fr) minmax(220px, 1.05fr) minmax(200px, 0.95fr) minmax(220px, 1fr);
+    gap: 10px;
+}
+
+.recomecar-family-card-info {
+    min-width: 0;
+    border: 1px solid #e5edf5;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8fafc;
+}
+
+.recomecar-family-card-info > span {
+    margin-bottom: 6px;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.recomecar-family-card-info strong {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+.recomecar-family-card-info small {
+    margin-top: 5px;
+    color: var(--muted);
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.recomecar-family-pending-panel {
+    display: grid;
+    gap: 8px;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff7ed;
+}
+
+.recomecar-family-pending-panel strong {
+    color: #9a3412;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.recomecar-family-pending-panel div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.recomecar-family-pending-panel span {
+    display: inline-flex;
+    border: 1px solid #fdba74;
+    border-radius: 999px;
+    padding: 5px 9px;
+    background: #ffffff;
+    color: #9a3412;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.recomecar-family-pending-panel.is-clear {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+.recomecar-family-pending-panel.is-clear strong,
+.recomecar-family-pending-panel.is-clear span {
+    color: #166534;
+}
+
+.recomecar-family-pending-panel.is-clear span {
+    border-color: #86efac;
+}
+
+.recomecar-analysis-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    min-width: 0;
+}
+
+.recomecar-analysis-actions .secondary-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    justify-content: center;
+    padding-inline: 10px;
+}
+
+.recomecar-analysis-actions .secondary-button.is-active {
+    border-color: #0f766e;
+    color: #ffffff;
+    background: #0f766e;
+}
+
+.recomecar-analysis-edit-row > td {
+    padding: 0;
+    background: transparent;
+}
+
+.recomecar-analysis-edit-panel[hidden] {
+    display: none;
+}
+
+.recomecar-analysis-edit-panel {
+    border: 1px solid #d8e2ec;
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
+    background: #f8fafc;
+    box-shadow: 0 14px 24px rgba(15, 23, 42, 0.05);
+}
+
+.recomecar-analysis-form,
+.recomecar-analysis-mark-form {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+}
+
+.recomecar-analysis-form {
+    border-bottom: 1px solid var(--line);
+}
+
+.recomecar-analysis-edit-sections {
+    display: grid;
+    gap: 14px;
+}
+
+.recomecar-analysis-edit-section {
+    display: grid;
+    gap: 14px;
+    border: 1px solid #dbe6ef;
+    border-radius: 8px;
+    padding: 14px;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.recomecar-analysis-edit-section > header {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    border-bottom: 1px solid #eef3f7;
+    padding-bottom: 12px;
+}
+
+.recomecar-analysis-edit-section > header > span {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.recomecar-analysis-edit-section h3,
+.recomecar-analysis-edit-section p {
+    margin: 0;
+}
+
+.recomecar-analysis-edit-section h3 {
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.3;
+}
+
+.recomecar-analysis-edit-section p {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.recomecar-section-toggle {
+    min-height: 36px;
+    padding: 8px 12px;
+    white-space: nowrap;
+}
+
+.recomecar-representative-section [data-analysis-representative-panel][hidden] {
+    display: none;
+}
+
+.recomecar-analysis-edit-section .field {
+    border: 1px solid #e5edf5;
+    border-radius: 8px;
+    padding: 10px;
+    background: #f8fafc;
+}
+
+.recomecar-analysis-edit-section .field.is-analysis-pending-field,
+.recomecar-analysis-map-card.is-analysis-pending-field {
+    border-color: #fb923c;
+    background: #fff7ed;
+    box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12);
+}
+
+.recomecar-analysis-edit-section .field.is-analysis-pending-field > span::after {
+    content: "Pendente";
+    display: inline-flex;
+    margin-left: 8px;
+    border-radius: 999px;
+    padding: 2px 6px;
+    background: #fed7aa;
+    color: #9a3412;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.recomecar-analysis-edit-section .field > span {
+    color: #475569;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+.recomecar-analysis-edit-section input,
+.recomecar-analysis-edit-section select,
+.recomecar-analysis-edit-section textarea {
+    margin-top: 6px;
+    background: #ffffff;
+}
+
+.recomecar-analysis-locked {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.recomecar-analysis-locked span {
+    display: inline-flex;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 5px 10px;
+    background: #ffffff;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.recomecar-analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.recomecar-analysis-grid .field,
+.recomecar-analysis-mark-form .field {
+    min-width: 0;
+}
+
+.recomecar-analysis-grid input,
+.recomecar-analysis-grid select,
+.recomecar-analysis-grid textarea,
+.recomecar-analysis-mark-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.recomecar-analysis-wide {
+    grid-column: span 2;
+}
+
+.recomecar-analysis-map-card {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 10px;
+    border: 1px solid #cfe0ef;
+    border-radius: 8px;
+    padding: 12px;
+    background: #ffffff;
+}
+
+.recomecar-analysis-map-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.recomecar-analysis-map-head strong,
+.recomecar-analysis-map-head span {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.recomecar-analysis-map-head strong {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+.recomecar-analysis-map-head span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.recomecar-analysis-map-head > span {
+    border: 1px solid #bae6fd;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #f0f9ff;
+    color: #0369a1;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.recomecar-analysis-map {
+    width: 100%;
+    min-height: 320px;
+    border: 1px solid #dbe6ef;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #eef6fb;
+}
+
+.recomecar-analysis-map.leaflet-container {
+    font: inherit;
+}
+
+.recomecar-analysis-map .leaflet-control-zoom a {
+    color: #0f172a;
+}
+
+.recomecar-analysis-textarea-section {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: start;
+}
+
+.recomecar-analysis-textarea-field {
+    min-width: 0;
+    align-self: start;
+}
+
+.recomecar-analysis-textarea-field textarea {
+    display: block;
+    width: 100%;
+    min-height: 150px;
+    max-height: 420px;
+    resize: vertical;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+.recomecar-analysis-grid-flags {
+    grid-template-columns: repeat(6, minmax(120px, 1fr));
+    align-items: end;
+}
+
+.recomecar-analysis-benefit-section {
+    display: grid;
+    gap: 10px;
+}
+
+.recomecar-benefit-toggle-card {
+    border-color: #bae6fd;
+    background: #f0f9ff;
+}
+
+.recomecar-benefit-toggle-card input:checked + span {
+    color: #0369a1;
+}
+
+.recomecar-benefit-panel[hidden] {
+    display: none;
+}
+
+.recomecar-benefit-panel {
+    display: grid;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+}
+
+.recomecar-benefit-panel .field {
+    background: #ffffff;
+}
+
+.checkbox-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #ffffff;
+    color: var(--text);
+    font-weight: 800;
+}
+
+.checkbox-card input {
+    width: 16px;
+    height: 16px;
+}
+
+.recomecar-analysis-form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.recomecar-analysis-mark-form {
+    display: block;
+    padding-top: 0;
+}
+
+.recomecar-analysis-mark-card {
+    display: grid;
+    gap: 12px;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 14px;
+    background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.recomecar-analysis-mark-head {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.recomecar-analysis-mark-head strong,
+.recomecar-analysis-mark-head small,
+.recomecar-analysis-mark-actions small {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.recomecar-analysis-mark-head strong {
+    color: var(--text);
+    font-size: 17px;
+    line-height: 1.3;
+}
+
+.recomecar-analysis-mark-head small,
+.recomecar-analysis-mark-actions small {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.recomecar-analysis-mark-card .field {
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 10px;
+    background: #ffffff;
+}
+
+.recomecar-analysis-mark-card textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.recomecar-analysis-mark-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid #bbf7d0;
+    padding-top: 12px;
+}
+
+.recomecar-analysis-mark-actions .primary-button {
+    min-width: 220px;
+}
+
+.recomecar-assignment-panel,
+.recomecar-assignment-notice {
+    display: grid;
+    gap: 14px;
+    margin-top: 18px;
+    border: 1px solid #dbe6ef;
+    border-radius: 8px;
+    padding: 16px;
+    background: #ffffff;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.recomecar-user-queue-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr) minmax(220px, auto);
+    gap: 14px;
+    align-items: center;
+    margin-top: 18px;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 16px;
+    background: #f0fdf4;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.recomecar-user-queue-panel h2,
+.recomecar-user-queue-panel p {
+    margin: 0;
+}
+
+.recomecar-user-queue-panel h2 {
+    color: var(--text);
+    font-size: 18px;
+}
+
+.recomecar-user-queue-panel p,
+.recomecar-user-queue-action small {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.recomecar-user-queue-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.recomecar-user-queue-metrics span {
+    display: grid;
+    gap: 2px;
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    padding: 10px;
+    background: #ffffff;
+    color: #166534;
+    font-size: 12px;
+    font-weight: 900;
+    text-align: center;
+}
+
+.recomecar-user-queue-metrics strong {
+    color: #14532d;
+    font-size: 20px;
+}
+
+.recomecar-user-queue-action {
+    display: grid;
+    gap: 8px;
+    justify-items: end;
+}
+
+.recomecar-assignment-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: start;
+}
+
+.recomecar-assignment-head h2,
+.recomecar-assignment-head p,
+.recomecar-assignment-notice strong,
+.recomecar-assignment-notice span {
+    margin: 0;
+}
+
+.recomecar-assignment-head h2 {
+    color: var(--text);
+    font-size: 18px;
+}
+
+.recomecar-assignment-head p,
+.recomecar-assignment-notice span,
+.recomecar-assignment-actions small {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.recomecar-assignment-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.recomecar-assignment-metrics span {
+    display: inline-flex;
+    border: 1px solid #bae6fd;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #f0f9ff;
+    color: #0369a1;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.recomecar-assignment-form {
+    display: grid;
+    gap: 12px;
+}
+
+.recomecar-managed-queue {
+    display: grid;
+    gap: 10px;
+    border: 1px solid #dbe7ef;
+    border-radius: 8px;
+    padding: 12px;
+    background: #ffffff;
+}
+
+.recomecar-managed-queue-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.recomecar-managed-queue-head strong {
+    color: var(--text);
+    font-size: 14px;
+}
+
+.recomecar-managed-queue-head span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.recomecar-assignment-history-action {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.recomecar-assignment-history-action span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.recomecar-managed-queue-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+}
+
+.recomecar-managed-queue-item {
+    display: grid;
+    gap: 10px;
+    border: 1px solid #dbe7ef;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8fafc;
+}
+
+.recomecar-managed-queue-item.is-done {
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+.recomecar-managed-queue-item header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.recomecar-managed-queue-item strong {
+    color: var(--text);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.recomecar-managed-queue-item p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.recomecar-managed-queue-item header span {
+    border-radius: 999px;
+    padding: 4px 8px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.recomecar-managed-queue-item.is-done header span {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.recomecar-managed-queue-item div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.recomecar-managed-queue-item small {
+    border-radius: 999px;
+    padding: 4px 8px;
+    background: #ffffff;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.recomecar-assignment-config {
+    display: grid;
+    gap: 12px;
+    border: 1px solid #dbe7ef;
+    border-radius: 8px;
+    padding: 12px;
+    background: #ffffff;
+}
+
+.recomecar-assignment-strategy {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+    gap: 12px;
+    align-items: end;
+}
+
+.recomecar-assignment-scope {
+    display: grid;
+    grid-template-columns: minmax(260px, 1.2fr) minmax(220px, 0.8fr);
+    gap: 12px;
+    align-items: end;
+}
+
+.recomecar-assignment-period-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.recomecar-assignment-rule-note {
+    min-height: 46px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 12px;
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.4;
+}
+
+.recomecar-assignment-preview {
+    display: grid;
+    gap: 10px;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8fafc;
+}
+
+.recomecar-assignment-preview-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.recomecar-assignment-preview-head strong {
+    color: var(--text);
+    font-size: 14px;
+}
+
+.recomecar-assignment-preview-head span {
+    color: #1e3a8a;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.recomecar-assignment-preview-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+}
+
+.recomecar-assignment-preview-item {
+    display: grid;
+    gap: 4px;
+    border: 1px solid #dbe7ef;
+    border-radius: 8px;
+    padding: 10px;
+    background: #ffffff;
+}
+
+.recomecar-assignment-preview-item strong {
+    color: var(--text);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.recomecar-assignment-preview-item span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.recomecar-assignment-picker {
+    border: 1px solid #dbe7ef;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8fbfd;
+}
+
+.recomecar-assignment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.recomecar-docs-inline-host {
+    display: grid;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0 0 12px;
+}
+
+.recomecar-docs-inline-host .recomecar-docs-drawer {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.recomecar-docs-drawer {
+    position: sticky;
+    top: 16px;
+    z-index: 20;
+    grid-column: 2;
+    grid-row: 1 / span 20;
+    display: grid;
+    grid-template-rows: auto auto minmax(150px, 28vh) minmax(0, 1fr);
+    width: 100%;
+    height: calc(100vh - 32px);
+    max-height: calc(100vh - 32px);
+    min-height: 620px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
+}
+
+.recomecar-docs-drawer[hidden] {
+    display: none;
+}
+
+.recomecar-docs-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 18px 14px;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.recomecar-docs-drawer-header h2 {
+    margin: 4px 0 0;
+    color: var(--text);
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.recomecar-docs-close {
+    min-height: 38px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.recomecar-docs-close:hover,
+.recomecar-docs-close:focus {
+    border-color: #0284c7;
+    color: #075985;
+    background: #f0f9ff;
+}
+
+.recomecar-docs-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 18px;
+    background: #ffffff;
+}
+
+.recomecar-docs-toolbar span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.recomecar-docs-external {
+    min-height: 34px;
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+.recomecar-docs-drawer-body {
+    min-height: 0;
+    overflow: auto;
+    border-bottom: 1px solid var(--line);
+    padding: 12px 18px;
+    background: #f8fafc;
+}
+
+.recomecar-docs-list {
+    display: grid;
+    gap: 8px;
+}
+
+.recomecar-docs-list a {
+    display: grid;
+    gap: 5px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 12px;
+    background: #ffffff;
+    color: var(--text);
+    text-decoration: none;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.recomecar-docs-list a.is-active,
+.recomecar-docs-list a:focus,
+.recomecar-docs-list a:hover {
+    border-color: #0284c7;
+    background: #f0f9ff;
+    box-shadow: 0 10px 24px rgba(2, 132, 199, 0.14);
+    outline: 0;
+}
+
+.recomecar-docs-list strong {
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    line-height: 1.25;
+}
+
+.recomecar-docs-list span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.recomecar-docs-preview {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    background: #e5edf5;
+}
+
+.recomecar-docs-drawer iframe,
+.recomecar-docs-drawer img[data-recomecar-docs-image] {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #f8fafc;
+}
+
+.recomecar-docs-drawer img[data-recomecar-docs-image] {
+    display: block;
+    object-fit: contain;
+    object-position: center center;
+    padding: 10px;
+    box-sizing: border-box;
+    background: #e5edf5;
+}
+
+.recomecar-docs-drawer iframe[hidden] {
+    display: none;
+}
+
+.recomecar-docs-drawer img[data-recomecar-docs-image][hidden] {
+    display: none;
+}
+
+.recomecar-docs-placeholder {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 8px;
+    min-height: 100%;
+    padding: 28px;
+    text-align: center;
+    color: var(--muted);
+}
+
+.recomecar-docs-placeholder[hidden] {
+    display: none;
+}
+
+.recomecar-docs-placeholder strong {
+    color: var(--text);
+    font-size: 16px;
+}
+
+.recomecar-docs-placeholder span {
+    max-width: 300px;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.recomecar-analysis-modal {
+    width: min(820px, 94vw);
+    max-height: 92vh;
+    border: 0;
+    border-radius: 8px;
+    padding: 0;
+    overflow: hidden;
+    color: var(--text);
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+}
+
+.recomecar-analysis-modal[open] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.recomecar-analysis-modal::backdrop {
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(3px);
+}
+
+.recomecar-history-modal {
+    width: min(920px, 94vw);
+}
+
+.recomecar-distribution-history-modal {
+    width: min(1080px, 96vw);
+}
+
+.recomecar-validation-modal {
+    width: min(660px, 94vw);
+}
+
+.recomecar-analysis-modal-header {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 14px;
+    border-bottom: 1px solid #e5edf5;
+    padding: 18px 20px;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.recomecar-analysis-modal-header .eyebrow {
+    margin-bottom: 4px;
+    color: #0369a1;
+}
+
+.recomecar-analysis-modal-header h3,
+.recomecar-analysis-modal-header p {
+    margin: 0;
+}
+
+.recomecar-analysis-modal-header h3 {
+    font-size: 20px;
+    line-height: 1.25;
+}
+
+.recomecar-analysis-modal-header p {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.recomecar-analysis-modal-icon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 0;
+    border-radius: 8px;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+}
+
+.recomecar-history-modal .recomecar-analysis-modal-icon {
+    font-size: 0;
+}
+
+.recomecar-history-modal .recomecar-analysis-modal-icon::before {
+    content: "H";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0369a1;
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+}
+
+.recomecar-analysis-modal-icon-warning {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.recomecar-analysis-modal-close {
+    min-height: 36px;
+    border: 1px solid #dbe6ef;
+    border-radius: 8px;
+    padding: 0 12px;
+    background: #ffffff;
+    color: var(--text);
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.recomecar-analysis-modal-close:hover {
+    border-color: #0284c7;
+    background: #0284c7;
+    color: #ffffff;
+}
+
+.recomecar-analysis-modal-close:focus {
+    border-color: #0284c7;
+    background: #ffffff;
+    color: var(--text);
+    outline: none;
+}
+
+.recomecar-analysis-modal-close:focus-visible {
+    border-color: #0284c7;
+    background: #ffffff;
+    color: var(--text);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18);
+    outline: none;
+}
+
+.recomecar-analysis-modal-body {
+    min-height: 0;
+    overflow: auto;
+    padding: 18px 20px;
+    background: #f8fafc;
+}
+
+.recomecar-analysis-modal-empty {
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 18px;
+    background: #ffffff;
+    color: var(--muted);
+    font-weight: 800;
+    text-align: center;
+}
+
+.recomecar-distribution-history-filters {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(160px, 0.35fr) minmax(190px, 0.45fr);
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.recomecar-distribution-history-list {
+    display: grid;
+    gap: 12px;
+}
+
+.recomecar-distribution-history-item {
+    display: grid;
+    gap: 12px;
+    border: 1px solid #dbe7ef;
+    border-radius: 8px;
+    padding: 14px;
+    background: #ffffff;
+}
+
+.recomecar-distribution-history-item[hidden] {
+    display: none;
+}
+
+.recomecar-distribution-history-item header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.recomecar-distribution-history-item header div {
+    display: grid;
+    gap: 4px;
+}
+
+.recomecar-distribution-history-item header strong {
+    color: var(--text);
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.recomecar-distribution-history-item header span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.recomecar-distribution-history-item header em {
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.recomecar-distribution-history-item header em.is-open {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.recomecar-distribution-history-item header em.is-done {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.recomecar-distribution-history-metrics,
+.recomecar-distribution-history-analysts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.recomecar-distribution-history-metrics span {
+    border-radius: 999px;
+    padding: 5px 9px;
+    background: #f1f5f9;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.recomecar-distribution-history-analysts div {
+    display: grid;
+    gap: 3px;
+    min-width: 190px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+    background: #f8fafc;
+}
+
+.recomecar-distribution-history-analysts strong {
+    color: var(--text);
+    font-size: 12px;
+}
+
+.recomecar-distribution-history-analysts span,
+.recomecar-distribution-history-analysts small {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.recomecar-validation-modal-body {
+    display: grid;
+    gap: 14px;
+}
+
+.recomecar-validation-modal-body p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.recomecar-validation-modal-body ul {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.recomecar-validation-modal-body li {
+    position: relative;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 11px 12px 11px 38px;
+    background: #fff7f7;
+    color: #991b1b;
+    font-weight: 900;
+    line-height: 1.35;
+}
+
+.recomecar-validation-modal-body li::before {
+    content: "!";
+    position: absolute;
+    left: 12px;
+    top: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.recomecar-analysis-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    border-top: 1px solid #e5edf5;
+    padding: 14px 20px;
+    background: #ffffff;
+}
+
+.recomecar-analysis-modal-footer span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.recomecar-history-list {
+    position: relative;
+    display: grid;
+    gap: 12px;
+}
+
+.recomecar-history-list article {
+    position: relative;
+    display: grid;
+    gap: 12px;
+    border: 1px solid #e5edf5;
+    border-radius: 8px;
+    padding: 14px 14px 14px 18px;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.recomecar-history-list article::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 4px;
+    border-radius: 999px;
+    background: #0284c7;
+}
+
+.recomecar-history-list header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
+    align-items: start;
+    gap: 12px;
+}
+
+.recomecar-history-list header strong {
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.3;
+}
+
+.recomecar-history-list header span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.35;
+    text-align: right;
+}
+
+.recomecar-history-list p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.recomecar-history-list ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.recomecar-history-list li {
+    display: grid;
+    grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    border: 1px solid #e5edf5;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    color: var(--muted);
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.recomecar-history-list li strong {
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.recomecar-history-list li span {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+    .recomecar-analysis-modal {
+        width: 96vw;
+        max-height: 94vh;
+    }
+
+    .recomecar-analysis-modal-header {
+        grid-template-columns: 38px minmax(0, 1fr);
+        padding: 14px;
+    }
+
+    .recomecar-analysis-modal-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+    }
+
+    .recomecar-analysis-modal-close {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .recomecar-analysis-modal-body {
+        padding: 14px;
+    }
+
+    .recomecar-distribution-history-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-distribution-history-item header {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-distribution-history-analysts div {
+        min-width: 100%;
+    }
+
+    .recomecar-analysis-modal-footer {
+        display: grid;
+        grid-template-columns: 1fr;
+        padding: 12px 14px;
+    }
+
+    .recomecar-analysis-modal-footer span {
+        text-align: center;
+    }
+
+    .recomecar-analysis-modal-footer .primary-button,
+    .recomecar-analysis-modal-footer .secondary-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .recomecar-history-list header,
+    .recomecar-history-list li {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-history-list header span {
+        text-align: left;
+    }
+}
+
+@media (max-width: 1460px) {
+    .recomecar-family-card-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 1180px) {
+    .recomecar-analysis-page:has(.recomecar-docs-drawer[open]) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .recomecar-analysis-page:has(.recomecar-docs-drawer[open]) > .recomecar-docs-drawer {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .recomecar-docs-drawer {
+        position: static;
+        scroll-margin-top: 16px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        grid-template-rows: auto auto minmax(110px, 170px) minmax(220px, 1fr);
+        height: min(72vh, 620px);
+        min-height: 420px;
+        max-height: none;
+        margin-top: -6px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+
+    .recomecar-docs-drawer-body {
+        max-height: 170px;
+    }
+}
+
+@media (max-width: 900px) {
+    .recomecar-family-card-main,
+    .recomecar-family-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-family-card-status {
+        justify-content: flex-start;
+    }
+
+    .recomecar-analysis-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-analysis-grid,
+    .recomecar-analysis-grid-flags,
+    .recomecar-analysis-textarea-section {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-analysis-wide {
+        grid-column: auto;
+    }
+
+    .recomecar-analysis-mark-form {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-analysis-mark-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-analysis-mark-actions .primary-button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .recomecar-assignment-head {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-user-queue-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-user-queue-action {
+        justify-items: stretch;
+    }
+
+    .recomecar-user-queue-action .primary-button {
+        width: 100%;
+    }
+
+    .recomecar-assignment-metrics {
+        justify-content: flex-start;
+    }
+
+    .recomecar-assignment-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-assignment-strategy {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-assignment-scope {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-assignment-period-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .recomecar-assignment-actions .primary-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .recomecar-family-card {
+        padding: 12px;
+    }
+
+    .recomecar-family-card-title {
+        grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .recomecar-family-card-id {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+    }
+
+    .recomecar-analysis-edit-section {
+        padding: 12px;
+    }
+
+    .recomecar-analysis-edit-section > header {
+        grid-template-columns: 36px minmax(0, 1fr);
+    }
+
+    .recomecar-analysis-edit-section > header > span {
+        width: 36px;
+        height: 36px;
+    }
+
+    .recomecar-section-toggle {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .recomecar-analysis-map {
+        min-height: 260px;
+    }
+
+    .recomecar-docs-drawer {
+        grid-template-rows: auto auto minmax(96px, 138px) minmax(190px, 1fr);
+        height: min(74vh, 520px);
+        min-height: 360px;
+        max-height: none;
+    }
+
+    .recomecar-docs-drawer-header,
+    .recomecar-docs-toolbar,
+    .recomecar-docs-drawer-body {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .recomecar-docs-drawer-header {
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .recomecar-docs-drawer-header h2 {
+        font-size: 17px;
+    }
+
+    .recomecar-docs-drawer-body {
+        max-height: 138px;
+    }
+
+    .recomecar-docs-toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .recomecar-docs-external {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .recomecar-docs-close {
+        min-width: 76px;
+        min-height: 34px;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .recomecar-docs-list a {
+        padding: 9px 10px;
+    }
+
+    .recomecar-docs-drawer img[data-recomecar-docs-image] {
+        padding: 6px;
+    }
+
+}
+
 .signature-document-stage iframe {
     width: 100%;
     min-height: 1120px;
@@ -7630,12 +9570,14 @@ button:disabled,
 }
 
 .dti-cosigner-options strong,
-.dti-cosigner-options small {
+.dti-cosigner-options small,
+.dti-cosigner-options span {
     display: block;
     overflow-wrap: anywhere;
 }
 
-.dti-cosigner-options small {
+.dti-cosigner-options small,
+.dti-cosigner-options span {
     margin-top: 2px;
     color: var(--muted);
     font-size: 11px;
@@ -8114,6 +10056,35 @@ button:disabled,
 
 .recomecar-filter-main {
     grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.recomecar-page .recomecar-filter-main,
+.recomecar-analysis-page .recomecar-filter-main {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+}
+
+.recomecar-filter-group {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px;
+    min-width: 0;
+}
+
+.recomecar-filter-group-search .recomecar-filter-field-query {
+    grid-column: span 3;
+}
+
+.recomecar-filter-group-search .recomecar-filter-field-action {
+    grid-column: span 5;
+}
+
+.recomecar-filter-group-search .recomecar-filter-field-location {
+    grid-column: span 4;
+}
+
+.recomecar-filter-group-status .recomecar-filter-field-status {
+    grid-column: span 4;
 }
 
 .recomecar-filter-field {
@@ -9455,6 +11426,25 @@ button:disabled,
         grid-template-columns: repeat(6, minmax(0, 1fr));
     }
 
+    .recomecar-page .recomecar-filter-main,
+    .recomecar-analysis-page .recomecar-filter-main {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .recomecar-filter-group {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .recomecar-filter-group-search .recomecar-filter-field-query,
+    .recomecar-filter-group-search .recomecar-filter-field-location {
+        grid-column: span 3;
+    }
+
+    .recomecar-filter-group-search .recomecar-filter-field-action,
+    .recomecar-filter-group-status .recomecar-filter-field-status {
+        grid-column: 1 / -1;
+    }
+
     .prestacao-filter-field,
     .prestacao-filter-field-wide,
     .prestacao-filter-field-medium,
@@ -10118,6 +12108,19 @@ button:disabled,
     .accountability-filter-main,
     .accountability-filter-side {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .recomecar-page .recomecar-filter-main,
+    .recomecar-analysis-page .recomecar-filter-main,
+    .recomecar-filter-group {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .recomecar-filter-group-search .recomecar-filter-field-query,
+    .recomecar-filter-group-search .recomecar-filter-field-action,
+    .recomecar-filter-group-search .recomecar-filter-field-location,
+    .recomecar-filter-group-status .recomecar-filter-field-status {
+        grid-column: 1 / -1;
     }
 
     .prestacao-filter-field,
@@ -10844,17 +12847,22 @@ button:disabled,
     }
 
     .main {
-        width: min(100% - 24px, 1120px);
+        width: min(100% - 18px, 1880px);
         margin: 18px auto;
     }
 
     .main:has(.ops-dashboard-page) {
-        width: min(100% - 18px, 1760px);
+        width: min(100% - 18px, 1880px);
         margin: 12px auto 18px;
     }
 
     .main:has(.report-page) {
-        width: min(100% - 18px, 1460px);
+        width: min(100% - 18px, 1880px);
+        margin: 12px auto 18px;
+    }
+
+    .main:has(.recomecar-analysis-page) {
+        width: min(100% - 18px, 1880px);
         margin: 12px auto 18px;
     }
 
@@ -10864,7 +12872,7 @@ button:disabled,
     }
 
     .app-footer {
-        width: min(100% - 24px, 1120px);
+        width: min(100% - 18px, 1880px);
         align-items: center;
     }
 

@@ -16,7 +16,7 @@ $activeActionToken = App\Core\Session::get('active_action_token');
 $activeActionUrl = is_string($activeActionToken) && $activeActionToken !== ''
     ? '/acao/' . rawurlencode($activeActionToken) . '/residencias/novo'
     : null;
-$assetVersion = '20260509-019';
+$assetVersion = '20260511-037';
 $sessionTimeoutSeconds = 1800;
 $signaturePendingCount = 0;
 $signatureRequesterNoticeCount = 0;
@@ -101,6 +101,7 @@ $menuItems = [
     <script src="<?= h(asset('js/delivery-batch.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/family-receipt.js') . '?v=' . $assetVersion) ?>" defer></script>
     <script src="<?= h(asset('js/dti-signature.js') . '?v=' . $assetVersion) ?>" defer></script>
+    <script src="<?= h(asset('js/recomecar-analysis.js') . '?v=' . $assetVersion) ?>" defer></script>
 </head>
 <body
     data-session-timeout-seconds="<?= $user !== null ? h($sessionTimeoutSeconds) : '0' ?>"
