@@ -736,6 +736,7 @@ final class RecomecarController extends Controller
             'hash' => strtoupper(hash('sha256', (string) $base)),
             'documento' => 'Programa Recomeçar',
             'document_key' => $identity['document_key'],
+            'filters' => $filters,
             'assinantes' => $signers,
             'coassinantes_solicitados' => array_map(
                 fn (array $coSigner): array => $this->signatureUserPayload($coSigner, 'responsavel_conferencia'),

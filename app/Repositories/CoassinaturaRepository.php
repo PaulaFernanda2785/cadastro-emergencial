@@ -186,6 +186,7 @@ final class CoassinaturaRepository
              WHERE c.documento_tipo = :documento_tipo
                AND c.documento_chave = :documento_chave
                AND c.status IN (\'pendente\', \'autorizado\', \'negado\')
+               AND ' . $this->activeActionDocumentCondition('c') . '
              ORDER BY c.id ASC'
         );
         $stmt->bindValue(':documento_tipo', $documentType);
@@ -213,6 +214,7 @@ final class CoassinaturaRepository
              JOIN usuarios u ON u.id = c.coautor_usuario_id
              WHERE c.solicitante_usuario_id = :usuario_id
                AND c.status IN (\'pendente\', \'autorizado\', \'negado\')
+               AND ' . $this->activeActionDocumentCondition('c') . '
              ORDER BY c.atualizado_em DESC, c.solicitado_em DESC, c.id DESC
              LIMIT 80'
         );
@@ -270,11 +272,12 @@ final class CoassinaturaRepository
             $stmt = Database::connection()->query(
                 "SELECT
                     COUNT(*) AS total_sistema,
-                    SUM(CASE WHEN status = 'pendente' THEN 1 ELSE 0 END) AS pendentes_sistema,
-                    SUM(CASE WHEN status = 'autorizado' THEN 1 ELSE 0 END) AS autorizadas,
-                    SUM(CASE WHEN status = 'negado' THEN 1 ELSE 0 END) AS negadas
-                 FROM coassinaturas_documentos
-                 WHERE status IN ('pendente', 'autorizado', 'negado')"
+                    SUM(CASE WHEN c.status = 'pendente' THEN 1 ELSE 0 END) AS pendentes_sistema,
+                    SUM(CASE WHEN c.status = 'autorizado' THEN 1 ELSE 0 END) AS autorizadas,
+                    SUM(CASE WHEN c.status = 'negado' THEN 1 ELSE 0 END) AS negadas
+                 FROM coassinaturas_documentos c
+                 WHERE c.status IN ('pendente', 'autorizado', 'negado')
+                   AND " . $this->activeActionDocumentCondition('c')
             );
             $summary = $stmt !== false ? ($stmt->fetch(PDO::FETCH_ASSOC) ?: []) : [];
 
@@ -292,15 +295,16 @@ final class CoassinaturaRepository
 
         $stmt = Database::connection()->prepare(
             "SELECT
-                SUM(CASE WHEN coautor_usuario_id = :coautor_total_id AND coautor_usuario_id <> solicitante_usuario_id THEN 1 ELSE 0 END) AS para_mim_total,
-                SUM(CASE WHEN coautor_usuario_id = :coautor_pendente_id AND coautor_usuario_id <> solicitante_usuario_id AND status = 'pendente' THEN 1 ELSE 0 END) AS para_mim_pendentes,
-                SUM(CASE WHEN solicitante_usuario_id = :solicitante_total_id THEN 1 ELSE 0 END) AS solicitadas_total,
-                SUM(CASE WHEN solicitante_usuario_id = :solicitante_pendente_id AND status = 'pendente' THEN 1 ELSE 0 END) AS solicitadas_pendentes,
-                SUM(CASE WHEN (coautor_usuario_id = :coautor_autorizado_id OR solicitante_usuario_id = :solicitante_autorizado_id) AND status = 'autorizado' THEN 1 ELSE 0 END) AS autorizadas,
-                SUM(CASE WHEN (coautor_usuario_id = :coautor_negado_id OR solicitante_usuario_id = :solicitante_negado_id) AND status = 'negado' THEN 1 ELSE 0 END) AS negadas
-             FROM coassinaturas_documentos
-             WHERE status IN ('pendente', 'autorizado', 'negado')
-               AND (coautor_usuario_id = :coautor_scope_id OR solicitante_usuario_id = :solicitante_scope_id)"
+                SUM(CASE WHEN c.coautor_usuario_id = :coautor_total_id AND c.coautor_usuario_id <> c.solicitante_usuario_id THEN 1 ELSE 0 END) AS para_mim_total,
+                SUM(CASE WHEN c.coautor_usuario_id = :coautor_pendente_id AND c.coautor_usuario_id <> c.solicitante_usuario_id AND c.status = 'pendente' THEN 1 ELSE 0 END) AS para_mim_pendentes,
+                SUM(CASE WHEN c.solicitante_usuario_id = :solicitante_total_id THEN 1 ELSE 0 END) AS solicitadas_total,
+                SUM(CASE WHEN c.solicitante_usuario_id = :solicitante_pendente_id AND c.status = 'pendente' THEN 1 ELSE 0 END) AS solicitadas_pendentes,
+                SUM(CASE WHEN (c.coautor_usuario_id = :coautor_autorizado_id OR c.solicitante_usuario_id = :solicitante_autorizado_id) AND c.status = 'autorizado' THEN 1 ELSE 0 END) AS autorizadas,
+                SUM(CASE WHEN (c.coautor_usuario_id = :coautor_negado_id OR c.solicitante_usuario_id = :solicitante_negado_id) AND c.status = 'negado' THEN 1 ELSE 0 END) AS negadas
+             FROM coassinaturas_documentos c
+             WHERE c.status IN ('pendente', 'autorizado', 'negado')
+               AND (c.coautor_usuario_id = :coautor_scope_id OR c.solicitante_usuario_id = :solicitante_scope_id)
+               AND " . $this->activeActionDocumentCondition('c')
         );
         foreach ([
             ':coautor_total_id',
@@ -457,8 +461,9 @@ final class CoassinaturaRepository
              JOIN usuarios u ON u.id = c.coautor_usuario_id
              JOIN usuarios s ON s.id = c.solicitante_usuario_id
              WHERE c.id = :id
-               ' . $accessSql . '
-             LIMIT 1'
+                ' . $accessSql . '
+               AND ' . $this->activeActionDocumentCondition('c') . '
+              LIMIT 1'
         );
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         if (!$includeAll) {
@@ -480,11 +485,12 @@ final class CoassinaturaRepository
 
         $stmt = Database::connection()->prepare(
             "SELECT COUNT(*)
-             FROM coassinaturas_documentos
-             WHERE documento_tipo = :documento_tipo
-               AND documento_chave = :documento_chave
-               AND status IN ('pendente', 'autorizado', 'negado')
-               AND (coautor_usuario_id = :coautor_usuario_id OR solicitante_usuario_id = :solicitante_usuario_id)"
+             FROM coassinaturas_documentos c
+             WHERE c.documento_tipo = :documento_tipo
+               AND c.documento_chave = :documento_chave
+               AND c.status IN ('pendente', 'autorizado', 'negado')
+               AND (c.coautor_usuario_id = :coautor_usuario_id OR c.solicitante_usuario_id = :solicitante_usuario_id)
+               AND " . $this->activeActionDocumentCondition('c')
         );
         $stmt->bindValue(':documento_tipo', $documentType);
         $stmt->bindValue(':documento_chave', $documentKey);
@@ -563,9 +569,10 @@ final class CoassinaturaRepository
     {
         $stmt = Database::connection()->prepare(
             "SELECT COUNT(*)
-             FROM coassinaturas_documentos
-             WHERE coautor_usuario_id = :usuario_id
-               AND status = 'pendente'"
+             FROM coassinaturas_documentos c
+             WHERE c.coautor_usuario_id = :usuario_id
+               AND c.status = 'pendente'
+               AND " . $this->activeActionDocumentCondition('c')
         );
         $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
@@ -577,11 +584,12 @@ final class CoassinaturaRepository
     {
         $stmt = Database::connection()->prepare(
             "SELECT COUNT(*)
-             FROM coassinaturas_documentos
-             WHERE solicitante_usuario_id = :usuario_id
-               AND status IN ('autorizado', 'negado')
-               AND solicitante_notificado_em IS NULL
-               AND coautor_usuario_id <> solicitante_usuario_id"
+             FROM coassinaturas_documentos c
+             WHERE c.solicitante_usuario_id = :usuario_id
+               AND c.status IN ('autorizado', 'negado')
+               AND c.solicitante_notificado_em IS NULL
+               AND c.coautor_usuario_id <> c.solicitante_usuario_id
+               AND " . $this->activeActionDocumentCondition('c')
         );
         $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
@@ -593,9 +601,10 @@ final class CoassinaturaRepository
     {
         $stmt = Database::connection()->prepare(
             "SELECT COUNT(*)
-             FROM coassinaturas_documentos
-             WHERE solicitante_usuario_id = :usuario_id
-               AND status = 'pendente'"
+             FROM coassinaturas_documentos c
+             WHERE c.solicitante_usuario_id = :usuario_id
+               AND c.status = 'pendente'
+               AND " . $this->activeActionDocumentCondition('c')
         );
         $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
@@ -611,7 +620,8 @@ final class CoassinaturaRepository
              WHERE solicitante_usuario_id = :usuario_id
                AND status IN ('autorizado', 'negado')
                AND solicitante_notificado_em IS NULL
-               AND coautor_usuario_id <> solicitante_usuario_id"
+               AND coautor_usuario_id <> solicitante_usuario_id
+               AND " . $this->activeActionDocumentCondition('coassinaturas_documentos')
         );
         $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
@@ -689,6 +699,7 @@ final class CoassinaturaRepository
              JOIN usuarios s ON s.id = c.solicitante_usuario_id
              WHERE c.coautor_usuario_id = :usuario_id
                AND c.status IN (' . implode(', ', $placeholders) . ')
+               AND ' . $this->activeActionDocumentCondition('c') . '
              ORDER BY c.solicitado_em DESC, c.id DESC'
         );
         $stmt->bindValue(':usuario_id', $userId, PDO::PARAM_INT);
@@ -706,6 +717,7 @@ final class CoassinaturaRepository
     {
         $where = [
             "c.status IN ('pendente', 'autorizado', 'negado')",
+            $this->activeActionDocumentCondition('c'),
         ];
         $params = [];
 
@@ -763,6 +775,46 @@ final class CoassinaturaRepository
         foreach ($params as $name => [$value, $type]) {
             $stmt->bindValue($name, $value, $type);
         }
+    }
+
+    private function activeActionDocumentCondition(string $alias): string
+    {
+        $jsonActionId = "(CASE
+            WHEN {$alias}.payload_json IS NOT NULL AND JSON_VALID({$alias}.payload_json) THEN NULLIF(JSON_UNQUOTE(JSON_EXTRACT({$alias}.payload_json, '$.filters.acao_id')), '')
+            ELSE NULL
+        END)";
+        $urlActionId = "(CASE
+            WHEN LOCATE('?acao_id=', {$alias}.url_documento) > 0 THEN NULLIF(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING({$alias}.url_documento, LOCATE('?acao_id=', {$alias}.url_documento) + 9), '&', 1), '#', 1), '')
+            WHEN LOCATE('&acao_id=', {$alias}.url_documento) > 0 THEN NULLIF(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING({$alias}.url_documento, LOCATE('&acao_id=', {$alias}.url_documento) + 9), '&', 1), '#', 1), '')
+            ELSE NULL
+        END)";
+        $documentActionId = "COALESCE({$jsonActionId}, {$urlActionId})";
+
+        return "(
+            (
+                {$alias}.documento_tipo = 'dti'
+                AND EXISTS (
+                    SELECT 1
+                    FROM residencias assinatura_residencia
+                    INNER JOIN acoes_emergenciais assinatura_acao
+                        ON assinatura_acao.id = assinatura_residencia.acao_id
+                    WHERE assinatura_residencia.id = {$alias}.entidade_id
+                      AND assinatura_residencia.deleted_at IS NULL
+                      AND assinatura_acao.deleted_at IS NULL
+                )
+            )
+            OR (
+                {$alias}.documento_tipo IN ('prestacao_contas', 'recomecar')
+                AND {$documentActionId} IS NOT NULL
+                AND EXISTS (
+                    SELECT 1
+                    FROM acoes_emergenciais assinatura_acao
+                    WHERE assinatura_acao.id = CAST({$documentActionId} AS UNSIGNED)
+                      AND assinatura_acao.deleted_at IS NULL
+                )
+            )
+            OR {$alias}.documento_tipo NOT IN ('dti', 'prestacao_contas', 'recomecar')
+        )";
     }
 
     private function repairPrincipalHistoryFromLog(array $log): void

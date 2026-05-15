@@ -407,6 +407,7 @@ final class PrestacaoContasController extends Controller
             'hash' => strtoupper(hash('sha256', (string) $base)),
             'documento' => 'Prestação de contas de ajuda humanitária',
             'document_key' => $identity['document_key'],
+            'filters' => $filters,
             'assinantes' => $signers,
             'coassinantes_solicitados' => array_map(
                 fn (array $coSigner): array => $this->signatureUserPayload($coSigner, 'responsavel_conferencia'),
